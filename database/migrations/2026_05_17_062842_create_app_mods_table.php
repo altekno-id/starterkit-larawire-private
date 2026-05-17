@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\StarterApp;
+use App\Models\Starter\App;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,14 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('starter_mods', function (Blueprint $table) {
+        Schema::create('app_mods', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(StarterApp::class)->constrained();
             $table->string('code');
             $table->string('name');
-            $table->text('desc');
+            $table->text('desc')->nullable();
+            $table->foreignIdFor(App::class)->constrained();
+            $table->timestamps();
 
-            $table->unique(['starter_app_id', 'code']);
+            $table->unique(['app_id', 'code']);
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('starter_mods');
+        Schema::dropIfExists('app_mods');
     }
 };

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Starter\User;
+use App\Models\Starter\AppMod;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,15 +12,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_roles', function (Blueprint $table) {
+        Schema::create('app_routes', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
             $table->string('name');
-            $table->text('desc')->nullable();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->string('uri');
+            $table->string('method', 10);
+            $table->foreignIdFor(AppMod::class)->constrained();
             $table->timestamps();
 
-            $table->unique(['user_id', 'code']);
+            $table->unique(['app_mod_id', 'name']);
+            $table->unique(['app_mod_id', 'method', 'uri']);
         });
     }
 
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_roles');
+        Schema::dropIfExists('app_routes');
     }
 };

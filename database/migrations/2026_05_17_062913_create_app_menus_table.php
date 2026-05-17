@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\StarterMenu;
-use App\Models\StarterMod;
-use App\Models\StarterRoute;
+use App\Models\Starter\AppMenu;
+use App\Models\Starter\AppMod;
+use App\Models\Starter\AppRoute;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,14 +14,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('starter_menus', function (Blueprint $table) {
+        Schema::create('app_menus', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(StarterMod::class)->constrained();
-            $table->foreignIdFor(StarterRoute::class)->nullable()->constrained();
-            $table->foreignIdFor(StarterMenu::class, 'parent_id')->nullable()->constrained('starter_menus');
             $table->string('label');
             $table->string('icon')->nullable();
             $table->unsignedTinyInteger('order')->default(1);
+            $table->foreignIdFor(AppMod::class)->constrained();
+            $table->foreignIdFor(AppRoute::class)->nullable()->constrained();
+            $table->foreignIdFor(AppMenu::class, 'parent_id')->nullable()->constrained('app_menus');
+            $table->timestamps();
+
+            $table->index(['app_mod_id', 'parent_id']);
         });
     }
 
@@ -30,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('starter_menus');
+        Schema::dropIfExists('app_menus');
     }
 };

@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('x_activity_logs', function (Blueprint $table) {
+        Schema::create('log_changes', function (Blueprint $table) {
             $table->id();
             $table->string('event', 120);
             $table->string('action', 50);
@@ -43,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('x_activity_logs');
+        Schema::dropIfExists('log_changes');
     }
 };

@@ -2,8 +2,8 @@
 
 namespace App\Models\Starter\Concerns;
 
+use App\Models\Starter\LogChange;
 use App\Models\Starter\UserLogin;
-use App\Models\Starter\XActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
@@ -74,7 +74,7 @@ trait HasActivityLog
         }
 
         try {
-            XActivityLog::query()->create([
+            LogChange::query()->create([
                 'event' => $this->activityLogEvent($action),
                 'action' => $action,
                 'description' => $this->activityLogDescription($action),
@@ -103,7 +103,7 @@ trait HasActivityLog
     protected function canWriteActivityLog(): bool
     {
         try {
-            return Schema::hasTable('x_activity_logs');
+            return Schema::hasTable('log_changes');
         } catch (Throwable) {
             return false;
         }

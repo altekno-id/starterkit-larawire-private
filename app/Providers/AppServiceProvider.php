@@ -32,8 +32,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer([
             'layouts::app',
             'templates.layouts.app',
-            'apps.dashboard',
-            'apps.starter.placeholder',
+            'apps.*',
         ], function ($view): void {
             $view->with(app(StarterContextService::class)->data());
         });

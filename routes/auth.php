@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Starter\Auth\LogoutController;
 use App\Livewire\Starter\Auth\Login;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Http\Request;
@@ -19,4 +20,8 @@ Route::name('auth.')->group(function () {
     Route::livewire('/login', Login::class)
         ->middleware('guest')
         ->name('login');
+
+    Route::post('/logout', LogoutController::class)
+        ->middleware('auth:web')
+        ->name('logout');
 });

@@ -15,8 +15,8 @@
 
     <div class="card">
         <div class="card-body">
-            <h4 class="card-title">Route Livewire Starter</h4>
-            <p class="text-muted mb-2">Halaman ini placeholder untuk membuktikan menu database, authorize, dan wire:navigate sudah terhubung.</p>
+            <h4 class="card-title">Module 1 Show</h4>
+            <p class="text-muted mb-2">Halaman detail untuk Module 1.</p>
             <div class="alert alert-info mb-0">
                 Route aktif: <strong>{{ $routeName }}</strong>
                 @if ($id)

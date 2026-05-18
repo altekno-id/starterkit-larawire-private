@@ -1,7 +1,10 @@
 <?php
 
-use App\Livewire\Apps\Dashboard;
-use App\Livewire\Apps\Starter\Placeholder;
+use App\Livewire\Apps\Subdomain2\Dashboard\Subdomain2DashboardIndex;
+use App\Livewire\Apps\Subdomain2\Module1\Subdomain2Module1Create;
+use App\Livewire\Apps\Subdomain2\Module1\Subdomain2Module1Edit;
+use App\Livewire\Apps\Subdomain2\Module1\Subdomain2Module1Index;
+use App\Livewire\Apps\Subdomain2\Module1\Subdomain2Module1Show;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Support\Facades\Route;
 
@@ -12,17 +15,21 @@ Route::get('/login', function () {
 });
 
 Route::name('subdomain2.')->group(function () {
-    Route::middleware(['auth:web', 'starter.authorize'])->group(function () {
-        Route::livewire('/', Dashboard::class)->name('dashboard');
+    Route::middleware('auth:web')->group(function () {
+        Route::get('/', fn () => redirect()->route('subdomain2.dashboard'))->name('anchor');
 
-        Route::prefix('module-1')->name('module1.')->group(function () {
-            Route::livewire('/', Placeholder::class)->name('index');
+        Route::middleware('starter.authorize')->group(function () {
+            Route::livewire('/dashboard/index', Subdomain2DashboardIndex::class)->name('dashboard');
 
-            Route::livewire('/create', Placeholder::class)->name('create');
+            Route::prefix('module-1')->name('module1.')->group(function () {
+                Route::livewire('/data', Subdomain2Module1Index::class)->name('index');
 
-            Route::livewire('/{id}', Placeholder::class)->name('show');
+                Route::livewire('/create', Subdomain2Module1Create::class)->name('create');
 
-            Route::livewire('/{id}/edit', Placeholder::class)->name('edit');
+                Route::livewire('/{id}', Subdomain2Module1Show::class)->name('show');
+
+                Route::livewire('/{id}/edit', Subdomain2Module1Edit::class)->name('edit');
+            });
         });
     });
 });

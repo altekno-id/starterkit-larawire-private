@@ -101,7 +101,13 @@
                                 {{ $loginEmail }}
                             </span>
                             <div class="dropdown-divider"></div>
-                            <livewire:starter.logout />
+                            <form method="POST" action="{{ route('auth.logout') }}">
+                                @csrf
+                                <input type="hidden" name="redirect" value="{{ url()->current() }}">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="ri-shut-down-line align-middle mr-1 text-danger"></i> Logout
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

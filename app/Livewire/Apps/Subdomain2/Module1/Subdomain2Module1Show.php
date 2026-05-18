@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Livewire\Apps\Starter;
+namespace App\Livewire\Apps\Subdomain2\Module1;
 
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('layouts::app')]
-class Placeholder extends Component
+class Subdomain2Module1Show extends Component
 {
     public ?string $id = null;
 
@@ -18,11 +18,11 @@ class Placeholder extends Component
     {
         $this->id = $id;
         $this->routeName = request()->route()?->getName() ?? 'Page';
-        $this->pageTitle = str($this->routeName)->after('.')->replace('.', ' / ')->headline()->toString();
+        $this->pageTitle = 'Module 1 Show';
     }
 
     public function render()
     {
-        return view('apps.starter.placeholder')->title($this->pageTitle);
+        return view('apps.subdomain2.module1.subdomain2-module1-show')->title($this->pageTitle);
     }
 }

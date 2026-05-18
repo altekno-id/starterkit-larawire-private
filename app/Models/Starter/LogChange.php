@@ -2,38 +2,33 @@
 
 namespace App\Models\Starter;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+#[Fillable([
+    'event',
+    'action',
+    'description',
+    'loggable_type',
+    'loggable_id',
+    'before',
+    'after',
+    'payload',
+    'ip_address',
+    'user_agent',
+    'device',
+    'url',
+    'method',
+    'user_id',
+    'user_login_id',
+    'created_at',
+])]
+#[WithoutTimestamps]
 class LogChange extends Model
 {
-    public $timestamps = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'event',
-        'action',
-        'description',
-        'loggable_type',
-        'loggable_id',
-        'before',
-        'after',
-        'payload',
-        'ip_address',
-        'user_agent',
-        'device',
-        'url',
-        'method',
-        'user_id',
-        'user_login_id',
-        'created_at',
-    ];
-
     /**
      * The attributes that should be cast.
      *

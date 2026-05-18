@@ -3,27 +3,15 @@
 namespace App\Models\Starter;
 
 use App\Models\Starter\Concerns\HasActivityLog;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable(['label', 'icon', 'order', 'app_mod_id', 'app_route_id', 'parent_id'])]
 class AppMenu extends Model
 {
     use HasActivityLog;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'label',
-        'icon',
-        'order',
-        'app_mod_id',
-        'app_route_id',
-        'parent_id',
-    ];
 
     /**
      * Get the module that owns this menu.
@@ -55,5 +43,15 @@ class AppMenu extends Model
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
+    }
+
+    /**
+     * Get this menu children recursively.
+     */
+    public function childrenRecursive(): HasMany
+    {
+        return $this->children()
+            ->with(['route', 'childrenRecursive.route'])
+            ->orderBy('order');
     }
 }

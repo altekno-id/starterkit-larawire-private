@@ -1,39 +1,28 @@
 <?php
 
+use App\Livewire\Apps\Dashboard;
+use App\Livewire\Apps\Starter\Placeholder;
+use App\Support\Starter\StarterNavigation;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/login', function () {
+    $redirect = request()->query('redirect', url('/'));
+
+    return redirect(StarterNavigation::authLoginUrl(StarterNavigation::isSafeRedirect($redirect) ? $redirect : url('/')));
+});
+
 Route::name('web.')->group(function () {
-    Route::get('/', function () {
-        return 'Web - Dashboard';
-    })->name('dashboard');
+    Route::middleware(['auth:web', 'starter.authorize'])->group(function () {
+        Route::livewire('/', Dashboard::class)->name('dashboard');
 
-    Route::prefix('module-1')->name('module1.')->group(function () {
-        Route::get('/', function () {
-            return 'Web - Modul 1 Data';
-        })->name('index');
+        Route::prefix('module-1')->name('module1.')->group(function () {
+            Route::livewire('/', Placeholder::class)->name('index');
 
-        Route::get('/create', function () {
-            return 'Web - Modul 1 Form';
-        })->name('create');
+            Route::livewire('/create', Placeholder::class)->name('create');
 
-        Route::post('/', function () {
-            return 'Web - Modul 1 Store';
-        })->name('store');
+            Route::livewire('/{id}', Placeholder::class)->name('show');
 
-        Route::get('/{id}', function (string $id) {
-            return "Web - Modul 1 Show {$id}";
-        })->name('show');
-
-        Route::get('/{id}/edit', function (string $id) {
-            return "Web - Modul 1 Edit {$id}";
-        })->name('edit');
-
-        Route::put('/{id}', function (string $id) {
-            return "Web - Modul 1 Update {$id}";
-        })->name('update');
-
-        Route::delete('/{id}', function (string $id) {
-            return "Web - Modul 1 Delete {$id}";
-        })->name('destroy');
+            Route::livewire('/{id}/edit', Placeholder::class)->name('edit');
+        });
     });
 });

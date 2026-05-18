@@ -2,7 +2,14 @@
 
 namespace App\Providers;
 
+use App\Contracts\Starter\UserLoginInterface;
+use App\Http\Middleware\StarterAuthorize;
+use App\Repositories\Starter\UserLoginRepository;
+use App\Services\Starter\StarterContextService;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +18,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(UserLoginInterface::class, UserLoginRepository::class);
+        $this->app->scoped(StarterContextService::class);
     }
 
     /**
@@ -19,6 +27,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Model::preventSilentlyDiscardingAttributes($this->app->isLocal());
+
+        View::composer([
+            'layouts::app',
+            'templates.layouts.app',
+            'apps.dashboard',
+            'apps.starter.placeholder',
+        ], function ($view): void {
+            $view->with(app(StarterContextService::class)->data());
+        });
+
+        Livewire::addPersistentMiddleware([
+            StarterAuthorize::class,
+        ]);
     }
 }

@@ -3,35 +3,30 @@
 namespace App\Models\Starter;
 
 use App\Models\Starter\Concerns\HasActivityLog;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[Fillable([
+    'name',
+    'email',
+    'phone',
+    'pic_name',
+    'logo',
+    'account_status',
+    'approved_at',
+    'subscription_status',
+    'payment_method',
+    'payment_reference',
+    'trial_ends_at',
+    'subscribed_at',
+    'subscription_ends_at',
+    'payment_approved_at',
+])]
 class User extends Model
 {
     use HasActivityLog, SoftDeletes;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'pic_name',
-        'logo',
-        'account_status',
-        'approved_at',
-        'subscription_status',
-        'payment_method',
-        'payment_reference',
-        'trial_ends_at',
-        'subscribed_at',
-        'subscription_ends_at',
-        'payment_approved_at',
-    ];
 
     /**
      * The attributes that should be cast.

@@ -3,26 +3,16 @@
 namespace App\Models\Starter;
 
 use App\Models\Starter\Concerns\HasActivityLog;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable(['code', 'name', 'desc', 'app_id'])]
 class AppMod extends Model
 {
     use HasActivityLog;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'code',
-        'name',
-        'desc',
-        'app_id',
-    ];
 
     /**
      * Get the app that owns this module.

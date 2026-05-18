@@ -156,7 +156,7 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => env('SESSION_DOMAIN') ?: (env('APP_DOMAIN', 'localhost') === 'localhost' ? null : '.'.env('APP_DOMAIN')),
 
     /*
     |--------------------------------------------------------------------------

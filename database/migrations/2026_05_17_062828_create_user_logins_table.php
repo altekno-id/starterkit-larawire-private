@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('user_logins', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('username');
+            $table->string('username')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
@@ -31,7 +31,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['user_id', 'user_role_id']);
-            $table->unique(['user_id', 'username']);
         });
     }
 

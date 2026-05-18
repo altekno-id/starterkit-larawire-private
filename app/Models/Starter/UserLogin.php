@@ -3,44 +3,31 @@
 namespace App\Models\Starter;
 
 use App\Models\Starter\Concerns\HasActivityLog;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+#[Fillable([
+    'user_id',
+    'user_role_id',
+    'name',
+    'username',
+    'email',
+    'email_verified_at',
+    'password',
+    'google_id',
+    'google_avatar',
+    'last_login_at',
+    'last_login_ip',
+    'last_login_provider',
+    'remember_token',
+])]
+#[Hidden(['password', 'remember_token'])]
 class UserLogin extends Authenticatable
 {
     use HasActivityLog, Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'user_id',
-        'user_role_id',
-        'name',
-        'username',
-        'email',
-        'email_verified_at',
-        'password',
-        'google_id',
-        'google_avatar',
-        'last_login_at',
-        'last_login_ip',
-        'last_login_provider',
-        'remember_token',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
 
     /**
      * The attributes that should be cast.

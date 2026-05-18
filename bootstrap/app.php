@@ -1,53 +1,23 @@
 <?php
 
+use App\Http\Middleware\StarterAuthorize;
+use App\Support\Starter\StarterAppRegistry;
+use App\Support\Starter\StarterNavigation;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
-
-if (! function_exists('starterAppKeys')) {
-    /**
-     * Discover runnable starter apps from config/apps/*.php.
-     *
-     * A file is runnable only when the filename is domain-safe, the route file
-     * exists, and at least one module is configured.
-     *
-     * @return array<int, string>
-     */
-    function starterAppKeys(): array
-    {
-        return collect(glob(config_path('apps/*.php')) ?: [])
-            ->map(function (string $path): string {
-                return pathinfo($path, PATHINFO_FILENAME);
-            })
-            ->filter(function (string $key): bool {
-                if (preg_match('/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/', $key) !== 1) {
-                    return false;
-                }
-
-                if (! is_file(base_path("routes/{$key}.php"))) {
-                    return false;
-                }
-
-                $config = require config_path("apps/{$key}.php");
-
-                return is_array($config)
-                    && ! empty($config['mods'])
-                    && is_array($config['mods']);
-            })
-            ->sort()
-            ->values()
-            ->all();
-    }
-}
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         using: function () {
+            Route::middleware('web')
+                ->domain('auth.'.config('app.domain'))
+                ->group(base_path('routes/auth.php'));
 
-            foreach (starterAppKeys() as $appKey) {
+            foreach (StarterAppRegistry::keys() as $appKey) {
                 if ($appKey === 'web') {
                     Route::middleware('web')
                         ->domain(config('app.domain'))
@@ -63,7 +33,14 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'starter.authorize' => StarterAuthorize::class,
+        ]);
+
+        $middleware->redirectGuestsTo(fn ($request) => StarterNavigation::authLoginUrl($request->fullUrl()));
+        $middleware->redirectUsersTo(fn ($request) => StarterNavigation::isSafeRedirect($request->query('redirect'))
+            ? $request->query('redirect')
+            : route('web.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

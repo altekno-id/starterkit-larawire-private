@@ -1,7 +1,7 @@
 <?php
 
-test('the application returns a successful response', function () {
+test('guests are redirected to login', function () {
     $response = $this->get('/');
 
-    $response->assertStatus(200);
+    $response->assertRedirect('http://auth.13-starterpack.test/login?redirect=http%3A%2F%2F13-starterpack.test');
 });

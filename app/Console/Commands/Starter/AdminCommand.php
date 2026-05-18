@@ -134,14 +134,14 @@ class AdminCommand extends Command
             DB::table('rel_user_roles_app_mods')->where('user_role_id', $role->id)->delete();
 
             $login = UserLogin::query()->firstOrNew([
-                'user_id' => $client->id,
-                'username' => 'admin',
+                'email' => $this->adminEmail($client),
             ]);
 
             $login->fill([
+                'user_id' => $client->id,
                 'user_role_id' => $role->id,
                 'name' => $login->name ?: 'Admin',
-                'email' => $login->email ?: $this->adminEmail($client),
+                'username' => $this->adminUsername($client),
                 'email_verified_at' => $login->email_verified_at ?: now(),
                 'last_login_provider' => $login->last_login_provider ?: 'username',
             ]);
@@ -160,6 +160,14 @@ class AdminCommand extends Command
     private function adminEmail(User $client): string
     {
         return "admin+client{$client->id}@".config('app.domain');
+    }
+
+    /**
+     * Build a unique admin username for one client.
+     */
+    private function adminUsername(User $client): string
+    {
+        return "admin{$client->id}";
     }
 
     /**

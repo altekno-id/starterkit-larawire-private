@@ -3,26 +3,16 @@
 namespace App\Models\Starter;
 
 use App\Models\Starter\Concerns\HasActivityLog;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable(['user_id', 'code', 'name', 'desc'])]
 class UserRole extends Model
 {
     use HasActivityLog;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'user_id',
-        'code',
-        'name',
-        'desc',
-    ];
 
     /**
      * Get the client that owns this role.

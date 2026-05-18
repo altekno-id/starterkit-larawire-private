@@ -2,13 +2,14 @@
 
 namespace App\Models\Starter;
 
+use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Model
 {
-    use SoftDeletes;
+    use HasActivityLog, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

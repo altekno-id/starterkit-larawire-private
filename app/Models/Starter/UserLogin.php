@@ -2,13 +2,14 @@
 
 namespace App\Models\Starter;
 
+use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class UserLogin extends Authenticatable
 {
-    use Notifiable;
+    use HasActivityLog, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -69,5 +70,21 @@ class UserLogin extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(UserRole::class, 'user_role_id');
+    }
+
+    /**
+     * Determine if this login can access a module.
+     */
+    public function canAccessMod(AppMod|string|int $mod): bool
+    {
+        return $this->role?->canAccessMod($mod) ?? false;
+    }
+
+    /**
+     * Determine if this login can access a named route.
+     */
+    public function canAccessRoute(AppRoute|string $route): bool
+    {
+        return $this->role?->canAccessRoute($route) ?? false;
     }
 }

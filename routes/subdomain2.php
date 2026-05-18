@@ -2,38 +2,38 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::name('web.')->group(function () {
+Route::name('subdomain2.')->group(function () {
     Route::get('/', function () {
-        return 'Web - Dashboard';
+        return 'Subdomain 2 - Dashboard';
     })->name('dashboard');
 
     Route::prefix('module-1')->name('module1.')->group(function () {
         Route::get('/', function () {
-            return 'Web - Modul 1 Data';
+            return 'Subdomain 2 - Modul 1 Data';
         })->name('index');
 
         Route::get('/create', function () {
-            return 'Web - Modul 1 Form';
+            return 'Subdomain 2 - Modul 1 Form';
         })->name('create');
 
         Route::post('/', function () {
-            return 'Web - Modul 1 Store';
+            return 'Subdomain 2 - Modul 1 Store';
         })->name('store');
 
         Route::get('/{id}', function (string $id) {
-            return "Web - Modul 1 Show {$id}";
+            return "Subdomain 2 - Modul 1 Show {$id}";
         })->name('show');
 
         Route::get('/{id}/edit', function (string $id) {
-            return "Web - Modul 1 Edit {$id}";
+            return "Subdomain 2 - Modul 1 Edit {$id}";
         })->name('edit');
 
         Route::put('/{id}', function (string $id) {
-            return "Web - Modul 1 Update {$id}";
+            return "Subdomain 2 - Modul 1 Update {$id}";
         })->name('update');
 
         Route::delete('/{id}', function (string $id) {
-            return "Web - Modul 1 Delete {$id}";
+            return "Subdomain 2 - Modul 1 Delete {$id}";
         })->name('destroy');
     });
 });

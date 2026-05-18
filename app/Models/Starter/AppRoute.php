@@ -2,12 +2,15 @@
 
 namespace App\Models\Starter;
 
+use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AppRoute extends Model
 {
+    use HasActivityLog;
+
     /**
      * The attributes that are mass assignable.
      *

@@ -2,6 +2,7 @@
 
 namespace App\Models\Starter;
 
+use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AppMod extends Model
 {
+    use HasActivityLog;
+
     /**
      * The attributes that are mass assignable.
      *

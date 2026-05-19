@@ -6,6 +6,7 @@ use App\Models\Starter\UserLogin;
 use App\Services\Starter\UserManagement\RoleService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -14,16 +15,15 @@ class Roles extends Component
 {
     public ?int $selectedRoleId = null;
 
-    public string $code = '';
-
-    public string $name = '';
-
-    public string $desc = '';
-
     /**
-     * @var array<int, string>
+     * @var array{code: string, name: string, desc: string, module_ids: array<int, string>}
      */
-    public array $moduleIds = [];
+    public array $roleForm = [
+        'code' => '',
+        'name' => '',
+        'desc' => '',
+        'module_ids' => [],
+    ];
 
     public function mount(): void
     {
@@ -32,7 +32,7 @@ class Roles extends Component
 
     public function newRole(): void
     {
-        $this->reset(['selectedRoleId', 'code', 'name', 'desc', 'moduleIds']);
+        $this->reset(['selectedRoleId', 'roleForm']);
         $this->resetValidation();
     }
 
@@ -41,16 +41,18 @@ class Roles extends Component
         $role = $this->roles()->findRole($this->login(), $id);
 
         $this->selectedRoleId = $role->id;
-        $this->code = $role->code;
-        $this->name = $role->name;
-        $this->desc = (string) $role->desc;
-        $this->moduleIds = $role->mods->pluck('id')->map(fn (int $id): string => (string) $id)->values()->all();
+        $this->roleForm = [
+            'code' => $role->code,
+            'name' => $role->name,
+            'desc' => (string) $role->desc,
+            'module_ids' => $role->mods->pluck('id')->map(fn (int $id): string => (string) $id)->values()->all(),
+        ];
         $this->resetValidation();
     }
 
-    public function updatedCode(): void
+    public function updatedRoleFormCode(string $value): void
     {
-        $this->code = Str::of($this->code)->lower()->slug('_')->toString();
+        $this->roleForm['code'] = Str::of($value)->lower()->slug('_')->toString();
     }
 
     public function save(): void
@@ -58,7 +60,7 @@ class Roles extends Component
         $clientId = $this->login()->user_id;
 
         $validated = $this->validate([
-            'code' => [
+            'roleForm.code' => [
                 'required',
                 'string',
                 'max:255',
@@ -67,26 +69,39 @@ class Roles extends Component
                     ->where(fn ($query) => $query->where('user_id', $clientId))
                     ->ignore($this->selectedRoleId),
             ],
-            'name' => ['required', 'string', 'max:255'],
-            'desc' => ['nullable', 'string', 'max:2000'],
-            'moduleIds' => ['array'],
-            'moduleIds.*' => ['integer', 'exists:app_mods,id'],
-        ]);
+            'roleForm.name' => ['required', 'string', 'max:255'],
+            'roleForm.desc' => ['nullable', 'string', 'max:2000'],
+            'roleForm.module_ids' => ['array'],
+            'roleForm.module_ids.*' => ['integer', 'exists:app_mods,id'],
+        ], [], [
+            'roleForm.code' => 'kode',
+            'roleForm.name' => 'nama',
+            'roleForm.desc' => 'deskripsi',
+            'roleForm.module_ids' => 'module access',
+            'roleForm.module_ids.*' => 'module access',
+        ])['roleForm'];
 
-        $role = $this->roles()->saveRole($this->login(), $this->selectedRoleId, $validated, $this->moduleIds);
+        $role = $this->roles()->saveRole($this->login(), $this->selectedRoleId, $validated, $validated['module_ids']);
 
         $this->selectedRoleId = $role->id;
-        $this->moduleIds = $role->mods->pluck('id')->map(fn (int $id): string => (string) $id)->values()->all();
+        $this->roleForm['module_ids'] = $role->mods->pluck('id')->map(fn (int $id): string => (string) $id)->values()->all();
 
-        session()->flash('status', 'Role berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Role berhasil disimpan.');
     }
 
     public function deleteRole(int $id): void
     {
-        $this->roles()->deleteRole($this->login(), $id);
+        try {
+            $this->roles()->deleteRole($this->login(), $id);
+        } catch (ValidationException $exception) {
+            $this->dispatch('starter-toast', type: 'danger', message: $this->firstValidationMessage($exception));
+
+            return;
+        }
+
         $this->newRole();
 
-        session()->flash('status', 'Role berhasil dihapus.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Role berhasil dihapus.');
     }
 
     public function render()
@@ -113,5 +128,10 @@ class Roles extends Component
         abort_unless($login instanceof UserLogin, 403);
 
         return $login->loadMissing('user');
+    }
+
+    private function firstValidationMessage(ValidationException $exception): string
+    {
+        return collect($exception->errors())->flatten()->first() ?? 'Data tidak valid.';
     }
 }

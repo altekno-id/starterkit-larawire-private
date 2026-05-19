@@ -15,11 +15,6 @@
         </div>
     </div>
 
-    @if (session('status'))
-        @include('templates.components.alert', ['type' => 'success', 'message' => session('status')])
-    @endif
-    @error('role') @include('templates.components.alert', ['type' => 'danger', 'message' => $message]) @enderror
-
     <div class="row row-cards">
         <div class="col-xl-5">
             <div class="card">
@@ -71,24 +66,24 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label">Kode</label>
-                            <input type="text" class="form-control @error('code') is-invalid @enderror" wire:model.live="code">
-                            @error('code') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" class="form-control @error('roleForm.code') is-invalid @enderror" wire:model.live="roleForm.code">
+                            @error('roleForm.code') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nama</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" wire:model="name">
-                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" class="form-control @error('roleForm.name') is-invalid @enderror" wire:model="roleForm.name">
+                            @error('roleForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Deskripsi</label>
-                            <input type="text" class="form-control @error('desc') is-invalid @enderror" wire:model="desc">
-                            @error('desc') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" class="form-control @error('roleForm.desc') is-invalid @enderror" wire:model="roleForm.desc">
+                            @error('roleForm.desc') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
                 </div>
                 <div class="card-footer d-flex">
                     @if ($selectedRoleId)
-                        <button type="button" class="btn btn-outline-danger" wire:click="deleteRole({{ $selectedRoleId }})" @disabled($code === 'admin')>
+                        <button type="button" class="btn btn-outline-danger" wire:click="deleteRole({{ $selectedRoleId }})" @disabled($roleForm['code'] === 'admin')>
                             Hapus
                         </button>
                     @else
@@ -104,7 +99,7 @@
                         <h3 class="card-title">Module Access</h3>
                         <p class="card-subtitle">Centang module yang boleh dibuka role ini.</p>
                     </div>
-                    @if ($code === 'admin')
+                    @if ($roleForm['code'] === 'admin')
                         <div class="card-actions">
                             <span class="badge bg-success-lt">Admin full access</span>
                         </div>
@@ -117,7 +112,7 @@
                                 <div class="text-secondary text-uppercase small fw-bold mb-2">{{ $appName }}</div>
                                 @foreach ($appModules as $module)
                                     <label class="form-check mb-2">
-                                        <input type="checkbox" class="form-check-input" id="module-{{ $module->id }}" value="{{ $module->id }}" wire:model="moduleIds" @disabled($code === 'admin')>
+                                        <input type="checkbox" class="form-check-input" id="module-{{ $module->id }}" value="{{ $module->id }}" wire:model="roleForm.module_ids" @disabled($roleForm['code'] === 'admin')>
                                         <span class="form-check-label">
                                             {{ $module->name }}
                                             <span class="text-secondary small">({{ $module->code }})</span>
@@ -128,7 +123,7 @@
                         @endforeach
                     </div>
 
-                    @error('moduleIds.*') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
+                    @error('roleForm.module_ids.*') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
                 </div>
             </div>
         </div>

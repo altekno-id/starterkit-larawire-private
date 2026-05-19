@@ -500,6 +500,7 @@
     @endphp
 
     <div class="starter-navigate-loader" aria-label="Memuat halaman" role="status"></div>
+    @include('templates.components.toast')
 
     <div class="page">
         <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">

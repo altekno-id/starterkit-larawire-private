@@ -15,11 +15,6 @@
         </div>
     </div>
 
-    @if (session('status'))
-        @include('templates.components.alert', ['type' => 'success', 'message' => session('status')])
-    @endif
-    @error('user') @include('templates.components.alert', ['type' => 'danger', 'message' => $message]) @enderror
-
     <div class="row row-cards">
         <div class="col-xl-7">
             <div class="card">
@@ -71,44 +66,44 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">Nama</label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" wire:model="name">
-                        @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <input type="text" class="form-control @error('userForm.name') is-invalid @enderror" wire:model="userForm.name">
+                        @error('userForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Username</label>
-                            <input type="text" class="form-control @error('username') is-invalid @enderror" wire:model="username">
-                            @error('username') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" class="form-control @error('userForm.username') is-invalid @enderror" wire:model="userForm.username">
+                            @error('userForm.username') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" wire:model="email">
-                            @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="email" class="form-control @error('userForm.email') is-invalid @enderror" wire:model="userForm.email">
+                            @error('userForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
                     <div class="mt-3">
                         <label class="form-label">Role</label>
-                        <select wire:key="user-role-select-{{ $selectedUserId ?: 'new' }}" class="form-select @error('roleId') is-invalid @enderror" wire:model="roleId">
+                        <select wire:key="user-role-select-{{ $selectedUserId ?: 'new' }}" class="form-select @error('userForm.role_id') is-invalid @enderror" wire:model="userForm.role_id">
                             <option value="">Pilih role</option>
                             @foreach ($roles as $role)
                                 <option value="{{ $role->id }}">{{ $role->name }} ({{ $role->code }})</option>
                             @endforeach
                         </select>
-                        @error('roleId') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        @error('userForm.role_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="row g-3 mt-0">
                         <div class="col-md-6">
                             <label class="form-label">Password</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" wire:model="password">
-                            @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="password" class="form-control @error('userForm.password') is-invalid @enderror" wire:model="userForm.password">
+                            @error('userForm.password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Konfirmasi</label>
-                            <input type="password" class="form-control @error('passwordConfirmation') is-invalid @enderror" wire:model="passwordConfirmation">
-                            @error('passwordConfirmation') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="password" class="form-control @error('userForm.password_confirmation') is-invalid @enderror" wire:model="userForm.password_confirmation">
+                            @error('userForm.password_confirmation') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
                 </div>

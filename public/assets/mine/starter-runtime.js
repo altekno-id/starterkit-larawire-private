@@ -150,6 +150,105 @@ window.StarterTemplate = window.StarterTemplate || {
             }
         });
     },
+    toastStack() {
+        let stack = document.querySelector('[data-starter-toast-stack]');
+
+        if (! stack) {
+            stack = document.createElement('div');
+            stack.className = 'starter-toast-stack';
+            stack.setAttribute('data-starter-toast-stack', '');
+            stack.setAttribute('aria-live', 'polite');
+            stack.setAttribute('aria-atomic', 'false');
+            document.body.appendChild(stack);
+        }
+
+        return stack;
+    },
+    normalizeToastType(type) {
+        return ['success', 'info', 'warning', 'danger', 'error'].includes(type) ? (type === 'error' ? 'danger' : type) : 'info';
+    },
+    toastIcon(type) {
+        const icons = {
+            success: '<path d="M5 12l5 5l10 -10"></path>',
+            info: '<path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path><path d="M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0 -18"></path>',
+            warning: '<path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86l-8.09 14a2 2 0 0 0 1.71 3h16.18a2 2 0 0 0 1.71 -3l-8.09 -14a2 2 0 0 0 -3.42 0z"></path>',
+            danger: '<path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path><path d="M10 10l4 4m0 -4l-4 4"></path>',
+        };
+
+        return `<svg xmlns="http://www.w3.org/2000/svg" class="icon m-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[type]}</svg>`;
+    },
+    toast(detail = {}) {
+        const payload = typeof detail === 'string' ? { message: detail } : (detail || {});
+        const type = this.normalizeToastType(String(payload.type || payload.status || 'info'));
+        const title = payload.title || {
+            success: 'Berhasil',
+            info: 'Informasi',
+            warning: 'Perhatian',
+            danger: 'Gagal',
+        }[type];
+        const message = payload.message || payload.text || '';
+        const duration = Number(payload.duration ?? payload.timeout ?? 4500);
+        const stack = this.toastStack();
+        const toast = document.createElement('div');
+
+        toast.className = `starter-toast starter-toast-${type}`;
+        toast.setAttribute('data-starter-toast', '');
+        toast.setAttribute('role', ['danger', 'warning'].includes(type) ? 'alert' : 'status');
+        toast.style.setProperty('--starter-toast-duration', `${Math.max(duration, 1)}ms`);
+
+        const icon = document.createElement('span');
+        icon.className = 'starter-toast-icon';
+        icon.innerHTML = this.toastIcon(type);
+
+        const body = document.createElement('div');
+        body.className = 'starter-toast-body';
+
+        if (title) {
+            const titleElement = document.createElement('div');
+            titleElement.className = 'starter-toast-title';
+            titleElement.textContent = title;
+            body.appendChild(titleElement);
+        }
+
+        if (message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'starter-toast-message';
+            messageElement.textContent = message;
+            body.appendChild(messageElement);
+        }
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'btn-close starter-toast-close';
+        close.setAttribute('aria-label', 'Close');
+        close.setAttribute('data-starter-toast-dismiss', '');
+
+        toast.append(icon, body, close);
+
+        if (duration > 0) {
+            const progress = document.createElement('div');
+            progress.className = 'starter-toast-progress';
+            toast.appendChild(progress);
+        }
+
+        stack.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('is-visible'));
+
+        if (duration > 0) {
+            toast.starterToastTimer = setTimeout(() => this.removeToast(toast), duration);
+        }
+
+        return toast;
+    },
+    removeToast(toast) {
+        if (! toast) return;
+
+        clearTimeout(toast.starterToastTimer);
+        toast.classList.add('is-leaving');
+        toast.classList.remove('is-visible');
+        setTimeout(() => toast.remove(), 180);
+    },
     bind() {
         if (this.bound) return;
 
@@ -163,6 +262,13 @@ window.StarterTemplate = window.StarterTemplate || {
         });
 
         document.addEventListener('click', (event) => {
+            const toastDismiss = event.target.closest('[data-starter-toast-dismiss]');
+
+            if (toastDismiss) {
+                this.removeToast(toastDismiss.closest('[data-starter-toast]'));
+                return;
+            }
+
             const alertDismiss = event.target.closest('[data-starter-alert-dismiss]');
 
             if (alertDismiss) {
@@ -189,6 +295,10 @@ window.StarterTemplate = window.StarterTemplate || {
 
         document.addEventListener('starter-account-updated', (event) => {
             this.updateAccountSummary(event.detail || {});
+        });
+
+        ['starter-toast', 'toast', 'notify'].forEach((name) => {
+            window.addEventListener(name, (event) => this.toast(event.detail || {}));
         });
 
         window.addEventListener('unhandledrejection', (event) => {

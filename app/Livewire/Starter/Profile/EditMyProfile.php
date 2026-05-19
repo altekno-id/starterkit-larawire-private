@@ -7,51 +7,56 @@ use App\Models\Starter\UserLogin;
 use App\Services\Starter\Profile\ProfileService;
 use App\Services\Starter\StarterContextService;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('layouts::app')]
 class EditMyProfile extends Component
 {
-    public string $name = '';
+    /**
+     * @var array{name: string, username: string, email: string}
+     */
+    public array $accountForm = [
+        'name' => '',
+        'username' => '',
+        'email' => '',
+    ];
 
-    public string $username = '';
+    /**
+     * @var array{name: string, email: string, phone: string, pic_name: string, logo: string}
+     */
+    public array $clientForm = [
+        'name' => '',
+        'email' => '',
+        'phone' => '',
+        'pic_name' => '',
+        'logo' => '',
+    ];
 
-    public string $email = '';
+    /**
+     * @var array{account_status: string, approved_at: string, subscription_status: string, payment_method: string, payment_reference: string, trial_ends_at: string, subscribed_at: string, subscription_ends_at: string, payment_approved_at: string}
+     */
+    public array $adminForm = [
+        'account_status' => 'pending',
+        'approved_at' => '',
+        'subscription_status' => 'none',
+        'payment_method' => '',
+        'payment_reference' => '',
+        'trial_ends_at' => '',
+        'subscribed_at' => '',
+        'subscription_ends_at' => '',
+        'payment_approved_at' => '',
+    ];
 
-    public string $clientName = '';
-
-    public string $clientEmail = '';
-
-    public string $clientPhone = '';
-
-    public string $clientPicName = '';
-
-    public string $clientLogo = '';
-
-    public string $accountStatus = 'pending';
-
-    public string $approvedAt = '';
-
-    public string $subscriptionStatus = 'none';
-
-    public string $paymentMethod = '';
-
-    public string $paymentReference = '';
-
-    public string $trialEndsAt = '';
-
-    public string $subscribedAt = '';
-
-    public string $subscriptionEndsAt = '';
-
-    public string $paymentApprovedAt = '';
-
-    public string $currentPassword = '';
-
-    public string $password = '';
-
-    public string $passwordConfirmation = '';
+    /**
+     * @var array{current_password: string, password: string, password_confirmation: string}
+     */
+    public array $passwordForm = [
+        'current_password' => '',
+        'password' => '',
+        'password_confirmation' => '',
+    ];
 
     public function mount(): void
     {
@@ -63,21 +68,25 @@ class EditMyProfile extends Component
         $login = $this->login();
 
         $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'username' => [
+            'accountForm.name' => ['required', 'string', 'max:255'],
+            'accountForm.username' => [
                 'required',
                 'string',
                 'max:255',
                 'regex:/^[A-Za-z0-9_-]+$/',
                 Rule::unique('user_logins', 'username')->ignore($login->id),
             ],
-            'email' => [
+            'accountForm.email' => [
                 'required',
                 'email',
                 'max:255',
                 Rule::unique('user_logins', 'email')->ignore($login->id),
             ],
-        ]);
+        ], [], [
+            'accountForm.name' => 'nama login',
+            'accountForm.username' => 'username',
+            'accountForm.email' => 'email login',
+        ])['accountForm'];
 
         $updatedLogin = app(ProfileService::class)
             ->updateProfile($login, $validated)
@@ -90,7 +99,7 @@ class EditMyProfile extends Component
             roleName: $updatedLogin->role?->name ?? 'Role',
         );
 
-        session()->flash('status', 'Profile berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Profile berhasil disimpan.');
     }
 
     public function saveClientProfile(): void
@@ -98,23 +107,29 @@ class EditMyProfile extends Component
         $this->authorizeClientManagement();
 
         $validated = $this->validate([
-            'clientName' => ['required', 'string', 'max:255'],
-            'clientEmail' => ['nullable', 'email', 'max:255'],
-            'clientPhone' => ['nullable', 'string', 'max:255'],
-            'clientPicName' => ['nullable', 'string', 'max:255'],
-            'clientLogo' => ['nullable', 'string', 'max:255'],
-        ]);
+            'clientForm.name' => ['required', 'string', 'max:255'],
+            'clientForm.email' => ['nullable', 'email', 'max:255'],
+            'clientForm.phone' => ['nullable', 'string', 'max:255'],
+            'clientForm.pic_name' => ['nullable', 'string', 'max:255'],
+            'clientForm.logo' => ['nullable', 'string', 'max:255'],
+        ], [], [
+            'clientForm.name' => 'nama client',
+            'clientForm.email' => 'email client',
+            'clientForm.phone' => 'phone',
+            'clientForm.pic_name' => 'PIC name',
+            'clientForm.logo' => 'logo',
+        ])['clientForm'];
 
         app(ProfileService::class)->updateClientProfile($this->login(), [
-            'name' => $validated['clientName'],
-            'email' => $validated['clientEmail'] ?? null,
-            'phone' => $validated['clientPhone'] ?? null,
-            'pic_name' => $validated['clientPicName'] ?? null,
-            'logo' => $validated['clientLogo'] ?? null,
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'pic_name' => $validated['pic_name'] ?? null,
+            'logo' => $validated['logo'] ?? null,
         ]);
 
         $this->fillFromLogin($this->login()->fresh()->loadMissing('user'));
-        session()->flash('status', 'Client profile berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Client profile berhasil disimpan.');
     }
 
     public function saveAdminControls(): void
@@ -122,49 +137,73 @@ class EditMyProfile extends Component
         $this->authorizeClientManagement();
 
         $validated = $this->validate([
-            'accountStatus' => ['required', Rule::in(array_keys($this->accountStatusOptions()))],
-            'approvedAt' => ['nullable', 'date'],
-            'subscriptionStatus' => ['required', Rule::in(array_keys($this->subscriptionStatusOptions()))],
-            'paymentMethod' => ['nullable', 'string', 'max:30'],
-            'paymentReference' => ['nullable', 'string', 'max:255'],
-            'trialEndsAt' => ['nullable', 'date'],
-            'subscribedAt' => ['nullable', 'date'],
-            'subscriptionEndsAt' => ['nullable', 'date'],
-            'paymentApprovedAt' => ['nullable', 'date'],
-        ]);
+            'adminForm.account_status' => ['required', Rule::in(array_keys($this->accountStatusOptions()))],
+            'adminForm.approved_at' => ['nullable', 'date'],
+            'adminForm.subscription_status' => ['required', Rule::in(array_keys($this->subscriptionStatusOptions()))],
+            'adminForm.payment_method' => ['nullable', 'string', 'max:30'],
+            'adminForm.payment_reference' => ['nullable', 'string', 'max:255'],
+            'adminForm.trial_ends_at' => ['nullable', 'date'],
+            'adminForm.subscribed_at' => ['nullable', 'date'],
+            'adminForm.subscription_ends_at' => ['nullable', 'date'],
+            'adminForm.payment_approved_at' => ['nullable', 'date'],
+        ], [], [
+            'adminForm.account_status' => 'account status',
+            'adminForm.approved_at' => 'approved at',
+            'adminForm.subscription_status' => 'subscription status',
+            'adminForm.payment_method' => 'payment method',
+            'adminForm.payment_reference' => 'payment reference',
+            'adminForm.trial_ends_at' => 'trial ends at',
+            'adminForm.subscribed_at' => 'subscribed at',
+            'adminForm.subscription_ends_at' => 'subscription ends at',
+            'adminForm.payment_approved_at' => 'payment approved at',
+        ])['adminForm'];
 
         app(ProfileService::class)->updateAdminControls($this->login(), [
-            'account_status' => $validated['accountStatus'],
-            'approved_at' => $validated['approvedAt'] ?? null,
-            'subscription_status' => $validated['subscriptionStatus'],
-            'payment_method' => $validated['paymentMethod'] ?? null,
-            'payment_reference' => $validated['paymentReference'] ?? null,
-            'trial_ends_at' => $validated['trialEndsAt'] ?? null,
-            'subscribed_at' => $validated['subscribedAt'] ?? null,
-            'subscription_ends_at' => $validated['subscriptionEndsAt'] ?? null,
-            'payment_approved_at' => $validated['paymentApprovedAt'] ?? null,
+            'account_status' => $validated['account_status'],
+            'approved_at' => $validated['approved_at'] ?? null,
+            'subscription_status' => $validated['subscription_status'],
+            'payment_method' => $validated['payment_method'] ?? null,
+            'payment_reference' => $validated['payment_reference'] ?? null,
+            'trial_ends_at' => $validated['trial_ends_at'] ?? null,
+            'subscribed_at' => $validated['subscribed_at'] ?? null,
+            'subscription_ends_at' => $validated['subscription_ends_at'] ?? null,
+            'payment_approved_at' => $validated['payment_approved_at'] ?? null,
         ]);
 
         $this->fillFromLogin($this->login()->fresh()->loadMissing('user'));
-        session()->flash('status', 'Kontrol admin berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Kontrol admin berhasil disimpan.');
     }
 
     public function changePassword(): void
     {
         $validated = $this->validate([
-            'currentPassword' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:5', 'same:passwordConfirmation'],
-            'passwordConfirmation' => ['required', 'string'],
-        ]);
+            'passwordForm.current_password' => ['required', 'string'],
+            'passwordForm.password' => ['required', 'string', 'min:5', 'same:passwordForm.password_confirmation'],
+            'passwordForm.password_confirmation' => ['required', 'string'],
+        ], [], [
+            'passwordForm.current_password' => 'password saat ini',
+            'passwordForm.password' => 'password baru',
+            'passwordForm.password_confirmation' => 'konfirmasi password',
+        ])['passwordForm'];
 
-        app(ProfileService::class)->changePassword(
-            $this->login(),
-            $validated['currentPassword'],
-            $validated['password'],
-        );
+        try {
+            app(ProfileService::class)->changePassword(
+                $this->login(),
+                $validated['current_password'],
+                $validated['password'],
+            );
+        } catch (ValidationException $exception) {
+            foreach ($exception->errors()['current_password'] ?? [] as $message) {
+                $this->addError('passwordForm.current_password', $message);
+            }
 
-        $this->reset(['currentPassword', 'password', 'passwordConfirmation']);
-        session()->flash('status', 'Password berhasil diganti.');
+            $this->dispatch('starter-toast', type: 'danger', message: $this->firstValidationMessage($exception));
+
+            return;
+        }
+
+        $this->reset('passwordForm');
+        $this->dispatch('starter-toast', type: 'success', message: 'Password berhasil diganti.');
     }
 
     public function render()
@@ -189,11 +228,18 @@ class EditMyProfile extends Component
         return $login;
     }
 
+    private function firstValidationMessage(ValidationException $exception): string
+    {
+        return collect($exception->errors())->flatten()->first() ?? 'Data tidak valid.';
+    }
+
     private function fillFromLogin(UserLogin $login): void
     {
-        $this->name = (string) $login->name;
-        $this->username = (string) $login->username;
-        $this->email = (string) $login->email;
+        $this->accountForm = [
+            'name' => (string) $login->name,
+            'username' => (string) $login->username,
+            'email' => (string) $login->email,
+        ];
 
         $client = $login->user;
 
@@ -201,20 +247,25 @@ class EditMyProfile extends Component
             return;
         }
 
-        $this->clientName = (string) $client->name;
-        $this->clientEmail = (string) $client->email;
-        $this->clientPhone = (string) $client->phone;
-        $this->clientPicName = (string) $client->pic_name;
-        $this->clientLogo = (string) $client->logo;
-        $this->accountStatus = (string) $client->account_status;
-        $this->approvedAt = $this->dateInputValue($client->approved_at);
-        $this->subscriptionStatus = (string) $client->subscription_status;
-        $this->paymentMethod = (string) $client->payment_method;
-        $this->paymentReference = (string) $client->payment_reference;
-        $this->trialEndsAt = $this->dateInputValue($client->trial_ends_at);
-        $this->subscribedAt = $this->dateInputValue($client->subscribed_at);
-        $this->subscriptionEndsAt = $this->dateInputValue($client->subscription_ends_at);
-        $this->paymentApprovedAt = $this->dateInputValue($client->payment_approved_at);
+        $this->clientForm = [
+            'name' => (string) $client->name,
+            'email' => (string) $client->email,
+            'phone' => (string) $client->phone,
+            'pic_name' => (string) $client->pic_name,
+            'logo' => (string) $client->logo,
+        ];
+
+        $this->adminForm = [
+            'account_status' => (string) $client->account_status,
+            'approved_at' => $this->dateInputValue($client->approved_at),
+            'subscription_status' => (string) $client->subscription_status,
+            'payment_method' => (string) $client->payment_method,
+            'payment_reference' => (string) $client->payment_reference,
+            'trial_ends_at' => $this->dateInputValue($client->trial_ends_at),
+            'subscribed_at' => $this->dateInputValue($client->subscribed_at),
+            'subscription_ends_at' => $this->dateInputValue($client->subscription_ends_at),
+            'payment_approved_at' => $this->dateInputValue($client->payment_approved_at),
+        ];
     }
 
     private function authorizeClientManagement(): void

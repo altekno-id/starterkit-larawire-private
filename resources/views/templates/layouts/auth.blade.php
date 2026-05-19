@@ -28,6 +28,7 @@
 
 <body class="d-flex flex-column bg-body-tertiary">
     <script src="{{ asset('assets/tabler/dist/js/tabler-theme.min.js') }}"></script>
+    @include('templates.components.toast')
 
     <div class="page page-center">
         <div class="container container-tight py-4">

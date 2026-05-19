@@ -6,9 +6,11 @@ use App\Models\Starter\UserLogin;
 use App\Services\Starter\Navigation\AuthorizedRedirectService;
 use App\Support\Starter\StarterAppRegistry;
 use App\Support\Starter\StarterNavigation;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -55,5 +57,22 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (AuthenticationException $exception, Request $request) {
+            $loginUrl = StarterNavigation::authLoginUrl($request->fullUrl());
+
+            if ($request->headers->get('X-Livewire-Navigate') === '1') {
+                return response()
+                    ->view('templates.session-expired', ['loginUrl' => $loginUrl])
+                    ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+            }
+
+            if ($request->headers->get('X-Livewire') === '1') {
+                return response()->json([
+                    'message' => $exception->getMessage(),
+                    'redirect' => $loginUrl,
+                ], 401);
+            }
+
+            return null;
+        });
     })->create();

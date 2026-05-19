@@ -24,6 +24,29 @@ window.StarterTemplate = window.StarterTemplate || {
             }
         }, 140);
     },
+    authLoginUrl(redirect = window.location.href) {
+        const configured = document.querySelector('meta[name="starter-auth-login-url"]')?.content;
+        const fallback = `${window.location.protocol}//auth.${window.location.hostname.replace(/^auth\./, '')}/login`;
+        const url = new URL(configured || fallback, window.location.href);
+
+        if (redirect) {
+            url.searchParams.set('redirect', redirect);
+        }
+
+        return url.href;
+    },
+    redirectToLogin(redirect = window.location.href) {
+        window.location.assign(this.authLoginUrl(redirect));
+    },
+    extractRedirectUrl(body) {
+        try {
+            const parsed = JSON.parse(body);
+
+            return parsed?.redirect || null;
+        } catch (error) {
+            return null;
+        }
+    },
     navigate(url) {
         if (! url) return;
 
@@ -168,15 +191,46 @@ window.StarterTemplate = window.StarterTemplate || {
             this.updateAccountSummary(event.detail || {});
         });
 
+        window.addEventListener('unhandledrejection', (event) => {
+            const message = String(event.reason?.message || event.reason || '');
+
+            if (! this.navigating || ! /NetworkError|Failed to fetch|Load failed/i.test(message)) {
+                return;
+            }
+
+            event.preventDefault();
+            this.redirectToLogin();
+        });
+
         this.bound = true;
+    },
+    bindLivewire() {
+        if (this.livewireBound || ! window.Livewire?.interceptRequest) return;
+
+        window.Livewire.interceptRequest(({ onError }) => {
+            onError(({ response, body, preventDefault }) => {
+                if (![401, 419].includes(response.status)) {
+                    return;
+                }
+
+                const redirect = this.extractRedirectUrl(body) || this.authLoginUrl();
+
+                preventDefault();
+                window.location.assign(redirect);
+            });
+        });
+
+        this.livewireBound = true;
     },
     init() {
         this.bind();
+        this.bindLivewire();
         this.activateSidebar();
     },
 };
 
 document.addEventListener('DOMContentLoaded', () => window.StarterTemplate.init());
+document.addEventListener('livewire:initialized', () => window.StarterTemplate.bindLivewire());
 document.addEventListener('livewire:navigate', () => window.StarterTemplate.showNavigateLoader());
 document.addEventListener('livewire:navigating', () => window.StarterTemplate.disposeBootstrap());
 document.addEventListener('livewire:navigated', () => {

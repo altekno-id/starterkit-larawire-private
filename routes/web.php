@@ -5,6 +5,8 @@ use App\Livewire\Apps\Web\Module1\WebModule1Create;
 use App\Livewire\Apps\Web\Module1\WebModule1Edit;
 use App\Livewire\Apps\Web\Module1\WebModule1Index;
 use App\Livewire\Apps\Web\Module1\WebModule1Show;
+use App\Models\Starter\UserLogin;
+use App\Services\Starter\Navigation\AuthorizedRedirectService;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +18,13 @@ Route::get('/login', function () {
 
 Route::name('web.')->group(function () {
     Route::middleware('auth:web')->group(function () {
-        Route::get('/', fn () => redirect()->route('web.dashboard'))->name('anchor');
+        Route::get('/', function (AuthorizedRedirectService $redirects) {
+            $login = auth()->user();
+
+            return $login instanceof UserLogin
+                ? redirect($redirects->forAppAnchor($login, 'web'))
+                : redirect()->route('auth.login');
+        })->name('anchor');
 
         Route::middleware('starter.authorize')->group(function () {
             Route::livewire('/dashboard/index', WebDashboardIndex::class)->name('dashboard');

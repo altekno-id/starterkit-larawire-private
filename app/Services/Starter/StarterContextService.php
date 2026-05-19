@@ -38,6 +38,8 @@ class StarterContextService
         $currentApp = $this->currentApp($currentAppKey);
         $accessibleApps = $this->accessibleApps($login);
         $sidebarMods = $this->sidebarMods($login, $currentApp);
+        $sidebarPayload = $this->sidebarPayload($sidebarMods);
+        $starterSidebarMods = $this->starterSidebarMods($login);
 
         return [
             'login' => $login,
@@ -49,16 +51,21 @@ class StarterContextService
             'currentAppName' => $currentApp?->name,
             'currentAppIcon' => $currentApp?->icon,
             'currentDashboardUrl' => $this->dashboardUrl($currentAppKey),
+            'currentProfileUrl' => $this->profileUrl(),
             'appOptions' => $this->appOptions($accessibleApps, $currentApp),
-            'sidebarMods' => $this->sidebarPayload($sidebarMods),
+            'sidebarMods' => $sidebarPayload->merge($starterSidebarMods)->values(),
             'accessibleAppCount' => $accessibleApps->count(),
-            'sidebarModCount' => $sidebarMods->count(),
+            'sidebarModCount' => $sidebarMods->count() + $starterSidebarMods->count(),
         ];
     }
 
     private function currentAppKey(): string
     {
         $routeName = request()->route()?->getName();
+
+        if ($routeName && str_starts_with($routeName, 'starter.')) {
+            return 'web';
+        }
 
         if ($routeName && str_contains($routeName, '.') && ! str_starts_with($routeName, 'default-livewire.')) {
             return explode('.', $routeName)[0];
@@ -173,6 +180,47 @@ class StarterContextService
     }
 
     /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function starterSidebarMods(?UserLogin $login): Collection
+    {
+        if (! $login?->role?->isAdmin()) {
+            return collect();
+        }
+
+        return collect([
+            [
+                'name' => 'User Management',
+                'menus' => collect([
+                    [
+                        'label' => 'User Management',
+                        'icon' => 'ri-user-settings-line',
+                        'url' => 'javascript:void(0);',
+                        'children' => collect([
+                            [
+                                'label' => 'Roles',
+                                'icon' => null,
+                                'url' => $this->routeUrl('starter.user-management.roles'),
+                                'children' => collect(),
+                                'hasChildren' => false,
+                            ],
+                            [
+                                'label' => 'Users',
+                                'icon' => null,
+                                'url' => $this->routeUrl('starter.user-management.users'),
+                                'children' => collect(),
+                                'hasChildren' => false,
+                            ],
+                        ]),
+                        'hasChildren' => true,
+                    ],
+                ]),
+                'menuLabels' => 'Roles, Users',
+            ],
+        ]);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function menuPayload(AppMenu $menu): array
@@ -197,6 +245,11 @@ class StarterContextService
         return Route::has($routeName) ? route($routeName) : url('/');
     }
 
+    private function profileUrl(): string
+    {
+        return $this->routeUrl('starter.profile.edit', url('/profile/edit'));
+    }
+
     private function appUrl(App $app): string
     {
         $routeName = $app->subdomain.'.dashboard';
@@ -216,10 +269,11 @@ class StarterContextService
     {
         $routeName = $menu->route?->name;
 
-        if ($routeName && Route::has($routeName)) {
-            return route($routeName);
-        }
+        return $routeName ? $this->routeUrl($routeName) : 'javascript:void(0);';
+    }
 
-        return 'javascript:void(0);';
+    private function routeUrl(string $routeName, string $fallback = 'javascript:void(0);'): string
+    {
+        return Route::has($routeName) ? route($routeName) : $fallback;
     }
 }

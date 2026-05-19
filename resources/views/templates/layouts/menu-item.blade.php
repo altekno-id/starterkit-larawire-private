@@ -12,7 +12,7 @@
             @endforeach
         </ul>
     @else
-        <a href="{{ $menu['url'] }}" class="waves-effect" @if ($menu['url'] !== 'javascript:void(0);') wire:navigate @endif>
+        <a href="{{ $menu['url'] }}" class="waves-effect" @if ($menu['url'] !== 'javascript:void(0);') data-starter-navigate @endif>
             @if ($menu['icon'])
                 <i class="{{ $menu['icon'] }}"></i>
             @endif

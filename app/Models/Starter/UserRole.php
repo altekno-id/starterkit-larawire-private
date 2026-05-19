@@ -44,7 +44,15 @@ class UserRole extends Model
      */
     public function hasFullAccess(): bool
     {
-        return $this->code === 'admin' && ! $this->mods()->exists();
+        return $this->isAdmin() && ! $this->mods()->exists();
+    }
+
+    /**
+     * Determine if this role is the built-in administrator role.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->code === 'admin';
     }
 
     /**

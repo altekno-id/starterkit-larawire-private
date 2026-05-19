@@ -20,6 +20,10 @@ class StarterAuthorize
         $login = $request->user();
         $routeName = $request->route()?->getName();
 
+        if ($routeName && str_starts_with($routeName, 'starter.')) {
+            return $next($request);
+        }
+
         if (! $login instanceof UserLogin || ! $routeName) {
             abort(403);
         }

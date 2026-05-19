@@ -3,7 +3,7 @@
 namespace App\Services\Starter\Auth;
 
 use App\Contracts\Starter\UserLoginInterface;
-use App\Support\Starter\StarterNavigation;
+use App\Services\Starter\Navigation\AuthorizedRedirectService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -11,7 +11,8 @@ use Illuminate\Validation\ValidationException;
 class LoginService
 {
     public function __construct(
-        private readonly UserLoginInterface $userLogins
+        private readonly UserLoginInterface $userLogins,
+        private readonly AuthorizedRedirectService $redirects
     ) {}
 
     public function attempt(string $credential, string $password, bool $remember = false, ?string $redirect = null): string
@@ -37,8 +38,10 @@ class LoginService
 
         request()->session()->regenerate();
 
-        return StarterNavigation::isSafeRedirect($redirect)
-            ? $redirect
-            : session()->pull('url.intended', route('web.dashboard'));
+        return $this->redirects->forLogin(
+            $login->fresh(['user', 'role']),
+            $redirect,
+            session()->pull('url.intended'),
+        );
     }
 }

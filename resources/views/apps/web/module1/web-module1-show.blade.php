@@ -14,12 +14,11 @@
         </div>
         <div class="card-body">
             <p class="text-secondary mb-3">Halaman detail untuk Module 1.</p>
-            <div class="alert alert-info mb-0">
-                Route aktif: <strong>{{ $routeName }}</strong>
-                @if ($id)
-                    · ID: <strong>{{ $id }}</strong>
-                @endif
-            </div>
+            @include('templates.components.alert', [
+                'type' => 'info',
+                'class' => 'mb-0',
+                'message' => new \Illuminate\Support\HtmlString('Route aktif: <strong>'.e($routeName).'</strong>'.($id ? ' · ID: <strong>'.e($id).'</strong>' : '')),
+            ])
         </div>
     </div>
 </div>

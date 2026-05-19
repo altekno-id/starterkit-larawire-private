@@ -16,9 +16,9 @@
     </div>
 
     @if (session('status'))
-        <div class="alert alert-success">{{ session('status') }}</div>
+        @include('templates.components.alert', ['type' => 'success', 'message' => session('status')])
     @endif
-    @error('role') <div class="alert alert-danger">{{ $message }}</div> @enderror
+    @error('role') @include('templates.components.alert', ['type' => 'danger', 'message' => $message]) @enderror
 
     <div class="row row-cards">
         <div class="col-xl-5">

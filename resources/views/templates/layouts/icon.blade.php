@@ -11,14 +11,18 @@
 
     $allowedIcons = [
         'apps',
+        'alert-triangle',
         'arrow-left',
         'building',
         'check',
         'chevron-down',
         'chevron-right',
         'circle',
+        'circle-check',
+        'circle-x',
         'folder',
         'file-plus',
+        'info-circle',
         'layout-dashboard',
         'lock',
         'logout',
@@ -45,6 +49,12 @@
             <path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
             <path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
             <path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+            @break
+
+        @case('alert-triangle')
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+            <path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
             @break
 
         @case('arrow-left')
@@ -76,6 +86,16 @@
             <path d="M9 6l6 6l-6 6" />
             @break
 
+        @case('circle-check')
+            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+            <path d="M9 12l2 2l4 -4" />
+            @break
+
+        @case('circle-x')
+            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+            <path d="M10 10l4 4m0 -4l-4 4" />
+            @break
+
         @case('folder')
             <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" />
             @break
@@ -85,6 +105,12 @@
             <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
             <path d="M12 11v6" />
             <path d="M9 14h6" />
+            @break
+
+        @case('info-circle')
+            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+            <path d="M12 9h.01" />
+            <path d="M11 12h1v4h1" />
             @break
 
         @case('layout-dashboard')

@@ -14,9 +14,11 @@
         </div>
         <div class="card-body">
             <p class="text-secondary mb-3">Halaman form create untuk Module 1.</p>
-            <div class="alert alert-info mb-0">
-                Route aktif: <strong>{{ $routeName }}</strong>
-            </div>
+            @include('templates.components.alert', [
+                'type' => 'info',
+                'class' => 'mb-0',
+                'message' => new \Illuminate\Support\HtmlString('Route aktif: <strong>'.e($routeName).'</strong>'),
+            ])
         </div>
     </div>
 </div>

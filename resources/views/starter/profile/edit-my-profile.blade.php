@@ -10,7 +10,7 @@
     </div>
 
     @if (session('status'))
-        <div class="alert alert-success">{{ session('status') }}</div>
+        @include('templates.components.alert', ['type' => 'success', 'message' => session('status')])
     @endif
 
     <div class="row row-cards">

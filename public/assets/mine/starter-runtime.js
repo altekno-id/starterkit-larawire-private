@@ -140,6 +140,13 @@ window.StarterTemplate = window.StarterTemplate || {
         });
 
         document.addEventListener('click', (event) => {
+            const alertDismiss = event.target.closest('[data-starter-alert-dismiss]');
+
+            if (alertDismiss) {
+                alertDismiss.closest('[data-starter-alert]')?.remove();
+                return;
+            }
+
             document.querySelectorAll('[data-starter-details][open]').forEach((element) => {
                 if (! element.contains(event.target)) {
                     element.removeAttribute('open');

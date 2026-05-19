@@ -39,23 +39,23 @@ class StarterContextService
         $accessibleApps = $this->accessibleApps($login);
         $sidebarMods = $this->sidebarMods($login, $currentApp);
         $sidebarPayload = $this->sidebarPayload($sidebarMods);
-        $starterSidebarMods = $this->starterSidebarMods($login);
 
         return [
             'login' => $login,
             'loginName' => $login?->name,
             'loginEmail' => $login?->email,
+            'loginAvatarUrl' => $this->avatarUrl($login),
             'loginRoleName' => $login?->role?->name,
             'currentApp' => $currentApp,
             'currentAppKey' => $currentAppKey,
             'currentAppName' => $currentApp?->name,
-            'currentAppIcon' => $currentApp?->icon,
+            'currentAppIcon' => $this->normalizeIcon($currentApp?->icon, 'apps'),
             'currentDashboardUrl' => $this->dashboardUrl($currentAppKey),
             'currentProfileUrl' => $this->profileUrl(),
             'appOptions' => $this->appOptions($accessibleApps, $currentApp),
-            'sidebarMods' => $sidebarPayload->merge($starterSidebarMods)->values(),
+            'sidebarMods' => $sidebarPayload,
             'accessibleAppCount' => $accessibleApps->count(),
-            'sidebarModCount' => $sidebarMods->count() + $starterSidebarMods->count(),
+            'sidebarModCount' => $sidebarMods->count(),
         ];
     }
 
@@ -155,7 +155,7 @@ class StarterContextService
             ->map(fn (App $app): array => [
                 'name' => $app->name,
                 'subdomain' => $app->subdomain,
-                'icon' => $app->icon,
+                'icon' => $this->normalizeIcon($app->icon, 'apps'),
                 'url' => $this->appUrl($app),
                 'active' => $currentApp?->is($app) ?? false,
             ])
@@ -180,62 +180,66 @@ class StarterContextService
     }
 
     /**
-     * @return Collection<int, array<string, mixed>>
-     */
-    private function starterSidebarMods(?UserLogin $login): Collection
-    {
-        if (! $login?->role?->isAdmin()) {
-            return collect();
-        }
-
-        return collect([
-            [
-                'name' => 'User Management',
-                'menus' => collect([
-                    [
-                        'label' => 'User Management',
-                        'icon' => 'ri-user-settings-line',
-                        'url' => 'javascript:void(0);',
-                        'children' => collect([
-                            [
-                                'label' => 'Roles',
-                                'icon' => null,
-                                'url' => $this->routeUrl('starter.user-management.roles'),
-                                'children' => collect(),
-                                'hasChildren' => false,
-                            ],
-                            [
-                                'label' => 'Users',
-                                'icon' => null,
-                                'url' => $this->routeUrl('starter.user-management.users'),
-                                'children' => collect(),
-                                'hasChildren' => false,
-                            ],
-                        ]),
-                        'hasChildren' => true,
-                    ],
-                ]),
-                'menuLabels' => 'Roles, Users',
-            ],
-        ]);
-    }
-
-    /**
      * @return array<string, mixed>
      */
     private function menuPayload(AppMenu $menu): array
     {
         $children = $menu->childrenRecursive;
+        $childPayload = $children
+            ->map(fn (AppMenu $child): array => $this->menuPayload($child))
+            ->values();
+        $isActive = $this->isCurrentUrl($this->menuUrl($menu));
+        $isExpanded = $isActive || $childPayload->contains(fn (array $child): bool => $child['active'] || $child['expanded']);
 
         return [
             'label' => $menu->label,
-            'icon' => $menu->icon,
+            'icon' => $this->normalizeIcon($menu->icon, 'circle'),
             'url' => $this->menuUrl($menu),
-            'children' => $children
-                ->map(fn (AppMenu $child): array => $this->menuPayload($child))
-                ->values(),
+            'children' => $childPayload,
             'hasChildren' => $children->isNotEmpty(),
+            'active' => $isActive,
+            'expanded' => $isExpanded,
         ];
+    }
+
+    private function isCurrentUrl(?string $url): bool
+    {
+        if (! $url || $url === 'javascript:void(0);') {
+            return false;
+        }
+
+        return rtrim($url, '/') === rtrim(url()->current(), '/');
+    }
+
+    private function normalizeIcon(?string $icon, string $fallback): string
+    {
+        return match ($icon) {
+            'ri-global-line' => 'world',
+            'ri-apps-line', 'ri-apps-2-line' => 'apps',
+            'ri-dashboard-line' => 'layout-dashboard',
+            'ri-folder-line' => 'folder',
+            'ri-user-settings-line', 'user-management' => 'users-group',
+            null, '' => $fallback,
+            default => str($icon)
+                ->replaceStart('ri-', '')
+                ->replaceEnd('-line', '')
+                ->toString(),
+        };
+    }
+
+    public function avatarUrl(?UserLogin $login): string
+    {
+        $photo = $login?->profile_photo ?: $login?->google_avatar;
+
+        if (! $photo) {
+            return asset('assets/mine/avatar.png');
+        }
+
+        if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://') || str_starts_with($photo, '//')) {
+            return $photo;
+        }
+
+        return asset(ltrim($photo, '/'));
     }
 
     private function dashboardUrl(string $appKey): string

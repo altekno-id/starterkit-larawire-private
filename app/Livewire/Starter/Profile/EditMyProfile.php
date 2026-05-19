@@ -5,6 +5,7 @@ namespace App\Livewire\Starter\Profile;
 use App\Models\Starter\User;
 use App\Models\Starter\UserLogin;
 use App\Services\Starter\Profile\ProfileService;
+use App\Services\Starter\StarterContextService;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -12,8 +13,6 @@ use Livewire\Component;
 #[Layout('layouts::app')]
 class EditMyProfile extends Component
 {
-    public string $pageTitle = 'Edit My Profile';
-
     public string $name = '';
 
     public string $username = '';
@@ -80,7 +79,16 @@ class EditMyProfile extends Component
             ],
         ]);
 
-        app(ProfileService::class)->updateProfile($login, $validated);
+        $updatedLogin = app(ProfileService::class)
+            ->updateProfile($login, $validated)
+            ->loadMissing('role');
+
+        $this->fillFromLogin($updatedLogin->loadMissing('user'));
+        $this->dispatch('starter-account-updated',
+            avatarUrl: app(StarterContextService::class)->avatarUrl($updatedLogin),
+            name: $updatedLogin->name,
+            roleName: $updatedLogin->role?->name ?? 'Role',
+        );
 
         session()->flash('status', 'Profile berhasil disimpan.');
     }
@@ -169,7 +177,7 @@ class EditMyProfile extends Component
             'canManageClient' => $this->canManageClient($login),
             'accountStatusOptions' => $this->accountStatusOptions(),
             'subscriptionStatusOptions' => $this->subscriptionStatusOptions(),
-        ])->title($this->pageTitle);
+        ])->title('Edit My Profile');
     }
 
     private function login(): UserLogin

@@ -12,8 +12,6 @@ use Livewire\Component;
 #[Layout('layouts::app')]
 class Roles extends Component
 {
-    public string $pageTitle = 'Roles';
-
     public ?int $selectedRoleId = null;
 
     public string $code = '';
@@ -100,7 +98,7 @@ class Roles extends Component
         return view('starter.user-management.roles', [
             'roles' => $roles,
             'modules' => $modules,
-        ])->title($this->pageTitle);
+        ])->title('Roles');
     }
 
     private function roles(): RoleService

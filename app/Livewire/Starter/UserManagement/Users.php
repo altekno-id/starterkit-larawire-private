@@ -11,8 +11,6 @@ use Livewire\Component;
 #[Layout('layouts::app')]
 class Users extends Component
 {
-    public string $pageTitle = 'Users';
-
     public ?int $selectedUserId = null;
 
     public string $name = '';
@@ -107,7 +105,7 @@ class Users extends Component
         return view('starter.user-management.users', [
             'users' => $this->users()->users($this->login()),
             'roles' => $this->users()->roles($this->login()),
-        ])->title($this->pageTitle);
+        ])->title('Users');
     }
 
     private function users(): UserService

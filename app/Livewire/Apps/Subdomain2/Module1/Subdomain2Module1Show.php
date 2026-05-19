@@ -12,17 +12,14 @@ class Subdomain2Module1Show extends Component
 
     public string $routeName = '';
 
-    public string $pageTitle = '';
-
     public function mount(?string $id = null): void
     {
         $this->id = $id;
         $this->routeName = request()->route()?->getName() ?? 'Page';
-        $this->pageTitle = 'Module 1 Show';
     }
 
     public function render()
     {
-        return view('apps.subdomain2.module1.subdomain2-module1-show')->title($this->pageTitle);
+        return view('apps.subdomain2.module1.subdomain2-module1-show')->title('Module 1 Show');
     }
 }

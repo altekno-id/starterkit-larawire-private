@@ -3,66 +3,55 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{ $title ?? 'Login' }} | {{ config('app.name') }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
-    <link href="{{ asset('assets/css/bootstrap.min.css') }}" id="bootstrap-style" rel="stylesheet" type="text/css">
-    <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css">
-    <link href="{{ asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="{{ asset('assets/tabler/static/logo-small.svg') }}">
+    <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler.min.css') }}">
+    <style>
+        .starter-auth-mark {
+            align-items: center;
+            background: var(--tblr-primary);
+            border-radius: 1rem;
+            color: var(--tblr-primary-fg);
+            display: inline-flex;
+            font-size: 1.5rem;
+            font-weight: 700;
+            height: 3.25rem;
+            justify-content: center;
+            width: 3.25rem;
+        }
+    </style>
     @livewireStyles
 </head>
 
-<body class="auth-body-bg">
-    <div class="home-btn d-none d-sm-block">
-        <a href="{{ url('/') }}" wire:navigate><i class="mdi mdi-home-variant h2 text-white"></i></a>
-    </div>
+<body class="d-flex flex-column bg-body-tertiary">
+    <script src="{{ asset('assets/tabler/dist/js/tabler-theme.min.js') }}"></script>
 
-    <div>
-        <div class="container-fluid p-0">
-            <div class="row no-gutters">
-                <div class="col-lg-4">
-                    <div class="authentication-page-content p-4 d-flex align-items-center min-vh-100">
-                        <div class="w-100">
-                            <div class="row justify-content-center">
-                                <div class="col-lg-9">
-                                    <div>
-                                        <div class="text-center">
-                                            <a href="{{ url('/') }}" class="logo" wire:navigate>
-                                                <img src="{{ asset('assets/images/logo-dark.png') }}" height="20" alt="{{ config('app.name') }}">
-                                            </a>
+    <div class="page page-center">
+        <div class="container container-tight py-4">
+            <div class="text-center mb-4">
+                <a href="{{ url('/') }}" class="text-decoration-none" wire:navigate>
+                    <span class="starter-auth-mark">{{ str(config('app.name'))->substr(0, 1)->upper() }}</span>
+                </a>
+            </div>
 
-                                            <h4 class="font-size-18 mt-4">Selamat Datang</h4>
-                                            <p class="text-muted">Masuk untuk melanjutkan ke starter dashboard.</p>
-                                        </div>
-
-                                        <div class="p-2 mt-5">
-                                            {{ $slot }}
-                                        </div>
-
-                                        <div class="mt-5 text-center">
-                                            <p>{{ now()->year }} © {{ config('app.name') }}.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card card-md">
+                <div class="card-body">
+                    <h2 class="h2 text-center mb-2">Masuk ke akun</h2>
+                    <p class="text-secondary text-center mb-4">Gunakan username atau email untuk melanjutkan.</p>
+                    {{ $slot }}
                 </div>
+            </div>
 
-                <div class="col-lg-8">
-                    <div class="authentication-bg">
-                        <div class="bg-overlay"></div>
-                    </div>
-                </div>
+            <div class="text-center text-secondary mt-3">
+                {{ now()->year }} © {{ config('app.name') }}
             </div>
         </div>
     </div>
 
-    <script src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/simplebar/simplebar.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/node-waves/waves.min.js') }}"></script>
+    <script src="{{ asset('assets/tabler/dist/js/tabler.min.js') }}" defer></script>
+    <script src="{{ asset('assets/mine/starter-runtime.js') }}" data-navigate-once defer></script>
     @livewireScripts
 </body>
 

@@ -12,6 +12,6 @@ class Subdomain1DashboardIndex extends Component
 {
     public function render()
     {
-        return view('apps.subdomain1.dashboard.subdomain1-dashboard-index');
+        return view('apps.subdomain1.dashboard.subdomain1-dashboard-index')->title('Dashboard');
     }
 }

@@ -3,7 +3,7 @@
 return [
     'name' => 'Subdomain 1',
     'desc' => 'Contoh aplikasi subdomain pertama.',
-    'icon' => 'ri-apps-line',
+    'icon' => 'apps',
 
     'mods' => [
         'dashboard' => [
@@ -12,7 +12,7 @@ return [
             'menus' => [
                 [
                     'label' => 'Dashboard',
-                    'icon' => 'ri-dashboard-line',
+                    'icon' => 'layout-dashboard',
                     'route' => 'subdomain1.dashboard',
                 ],
             ],
@@ -24,14 +24,16 @@ return [
             'menus' => [
                 [
                     'label' => 'Modules 1',
-                    'icon' => 'ri-folder-line',
+                    'icon' => 'folder',
                     'children' => [
                         [
                             'label' => 'Data',
+                            'icon' => 'table',
                             'route' => 'subdomain1.module1.index',
                         ],
                         [
                             'label' => 'Form',
+                            'icon' => 'file-plus',
                             'route' => 'subdomain1.module1.create',
                         ],
                     ],

@@ -3,7 +3,7 @@
 return [
     'name' => 'Web',
     'desc' => 'Aplikasi root domain.',
-    'icon' => 'ri-global-line',
+    'icon' => 'world',
 
     'mods' => [
         'dashboard' => [
@@ -12,7 +12,7 @@ return [
             'menus' => [
                 [
                     'label' => 'Dashboard',
-                    'icon' => 'ri-dashboard-line',
+                    'icon' => 'layout-dashboard',
                     'route' => 'web.dashboard',
                 ],
             ],
@@ -24,14 +24,16 @@ return [
             'menus' => [
                 [
                     'label' => 'Modules 1',
-                    'icon' => 'ri-folder-line',
+                    'icon' => 'folder',
                     'children' => [
                         [
                             'label' => 'Data',
+                            'icon' => 'table',
                             'route' => 'web.module1.index',
                         ],
                         [
                             'label' => 'Form',
+                            'icon' => 'file-plus',
                             'route' => 'web.module1.create',
                         ],
                     ],

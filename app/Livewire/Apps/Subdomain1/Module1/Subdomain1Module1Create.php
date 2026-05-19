@@ -10,16 +10,13 @@ class Subdomain1Module1Create extends Component
 {
     public string $routeName = '';
 
-    public string $pageTitle = '';
-
     public function mount(): void
     {
         $this->routeName = request()->route()?->getName() ?? 'Page';
-        $this->pageTitle = 'Module 1 Create';
     }
 
     public function render()
     {
-        return view('apps.subdomain1.module1.subdomain1-module1-create')->title($this->pageTitle);
+        return view('apps.subdomain1.module1.subdomain1-module1-create')->title('Module 1 Create');
     }
 }

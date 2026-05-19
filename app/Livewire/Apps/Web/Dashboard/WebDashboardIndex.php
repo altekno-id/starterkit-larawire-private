@@ -12,6 +12,6 @@ class WebDashboardIndex extends Component
 {
     public function render()
     {
-        return view('apps.web.dashboard.web-dashboard-index');
+        return view('apps.web.dashboard.web-dashboard-index')->title('Dashboard');
     }
 }

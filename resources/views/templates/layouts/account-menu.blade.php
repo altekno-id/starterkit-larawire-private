@@ -10,7 +10,7 @@
     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow starter-account-panel">
         <a href="{{ $currentProfileUrl }}" class="dropdown-item" data-starter-navigate>
             @include('templates.layouts.icon', ['name' => 'user-circle', 'class' => 'icon dropdown-item-icon'])
-            Edit Profile Saya
+            Edit My Profile
         </a>
         <div class="dropdown-divider my-1"></div>
         <form method="POST" action="{{ route('auth.logout') }}" data-starter-logout-form>

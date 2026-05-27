@@ -3,10 +3,10 @@
     $type = in_array($type, ['success', 'danger'], true) ? $type : 'success';
     $id = (string) ($id ?? 'starter-'.$type.'-modal');
     $size = (string) ($size ?? 'sm');
-    $title = $title ?? ($type === 'danger' ? 'Yakin lanjut?' : 'Berhasil diselesaikan!');
-    $message = $message ?? ($type === 'danger' ? 'Aksi ini tidak dapat dibatalkan.' : 'Aksi berhasil diselesaikan.');
-    $confirmText = $confirmText ?? ($type === 'danger' ? 'Konfirmasi' : 'Selesai');
-    $cancelText = $cancelText ?? 'Batal';
+    $title = $title ?? ($type === 'danger' ? 'Are you sure?' : 'Completed successfully!');
+    $message = $message ?? ($type === 'danger' ? 'This action cannot be undone.' : 'The action completed successfully.');
+    $confirmText = $confirmText ?? ($type === 'danger' ? 'Confirm' : 'Done');
+    $cancelText = $cancelText ?? 'Cancel';
     $password = (bool) ($password ?? false);
     $passwordName = (string) ($passwordName ?? 'password');
     $passwordModel = $passwordModel ?? null;
@@ -32,7 +32,7 @@
     <div class="modal-dialog modal-{{ $size }} modal-dialog-centered" role="document">
         <div class="modal-content">
             @if ($closeButton)
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             @endif
 
             <div class="modal-status {{ $statusClass }}"></div>

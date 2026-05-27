@@ -28,7 +28,7 @@ class LoginService
 
         if ($login->user?->account_status !== 'approved') {
             throw ValidationException::withMessages([
-                'credential' => 'Client belum aktif atau belum disetujui.',
+                'credential' => 'Client is not active or has not been approved.',
             ]);
         }
 

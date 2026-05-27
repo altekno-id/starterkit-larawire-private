@@ -81,12 +81,12 @@ class Users extends Component
             'userForm.password' => [$this->selectedUserId ? 'nullable' : 'required', 'string', 'min:5', 'same:userForm.password_confirmation'],
             'userForm.password_confirmation' => [$this->selectedUserId ? 'nullable' : 'required', 'string'],
         ], [], [
-            'userForm.name' => 'nama',
+            'userForm.name' => 'name',
             'userForm.username' => 'username',
             'userForm.email' => 'email',
             'userForm.role_id' => 'role',
             'userForm.password' => 'password',
-            'userForm.password_confirmation' => 'konfirmasi password',
+            'userForm.password_confirmation' => 'password confirmation',
         ])['userForm'];
 
         $login = $this->users()->saveUser($this->login(), $this->selectedUserId, [
@@ -101,7 +101,7 @@ class Users extends Component
         $this->userForm['password'] = '';
         $this->userForm['password_confirmation'] = '';
 
-        $this->dispatch('starter-toast', type: 'success', message: 'User login berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'User login saved successfully.');
     }
 
     public function deleteUser(int $id): void
@@ -116,7 +116,7 @@ class Users extends Component
 
         $this->newUser();
 
-        $this->dispatch('starter-toast', type: 'success', message: 'User login berhasil dihapus.');
+        $this->dispatch('starter-toast', type: 'success', message: 'User login deleted successfully.');
     }
 
     public function render()
@@ -143,6 +143,6 @@ class Users extends Component
 
     private function firstValidationMessage(ValidationException $exception): string
     {
-        return collect($exception->errors())->flatten()->first() ?? 'Data tidak valid.';
+        return collect($exception->errors())->flatten()->first() ?? 'Invalid data.';
     }
 }

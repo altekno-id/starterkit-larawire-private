@@ -26,6 +26,6 @@
     </div>
 
     @if ($dismissible)
-        <button type="button" class="btn-close ms-auto" aria-label="Tutup" data-starter-alert-dismiss></button>
+        <button type="button" class="btn-close ms-auto" aria-label="Close" data-starter-alert-dismiss></button>
     @endif
 </div>

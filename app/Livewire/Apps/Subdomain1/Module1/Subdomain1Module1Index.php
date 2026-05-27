@@ -17,6 +17,6 @@ class Subdomain1Module1Index extends Component
 
     public function render()
     {
-        return view('apps.subdomain1.module1.subdomain1-module1-index')->title('Data Modul 1');
+        return view('apps.subdomain1.module1.subdomain1-module1-index')->title('Module 1 Data');
     }
 }

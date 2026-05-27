@@ -1,8 +1,8 @@
 <div>
-    <div class="page-header d-print-none mb-3" aria-label="Header halaman">
+    <div class="page-header d-print-none mb-3" aria-label="Page header">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Ringkasan</div>
+                <div class="page-pretitle">Summary</div>
                 <h2 class="page-title">Dashboard</h2>
             </div>
         </div>
@@ -97,7 +97,7 @@
                     @foreach ($sidebarMods as $mod)
                         <div class="list-group-item">
                             <div class="fw-semibold">{{ $mod['name'] }}</div>
-                            <div class="text-secondary small">{{ $mod['menuLabels'] ?: 'Belum ada menu' }}</div>
+                            <div class="text-secondary small">{{ $mod['menuLabels'] ?: 'No menu available' }}</div>
                         </div>
                     @endforeach
                 </div>

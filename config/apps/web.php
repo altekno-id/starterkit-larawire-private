@@ -2,13 +2,13 @@
 
 return [
     'name' => 'Web',
-    'desc' => 'Aplikasi root domain.',
+    'desc' => 'Root domain app.',
     'icon' => 'world',
 
     'mods' => [
         'dashboard' => [
             'name' => 'Dashboard',
-            'desc' => 'Ringkasan aplikasi root.',
+            'desc' => 'Root app summary.',
             'menus' => [
                 [
                     'label' => 'Dashboard',
@@ -19,11 +19,11 @@ return [
         ],
 
         'module1' => [
-            'name' => 'Modules 1',
-            'desc' => 'Contoh modul CRUD.',
+            'name' => 'Module 1',
+            'desc' => 'Sample CRUD module.',
             'menus' => [
                 [
-                    'label' => 'Modules 1',
+                    'label' => 'Module 1',
                     'icon' => 'folder',
                     'children' => [
                         [

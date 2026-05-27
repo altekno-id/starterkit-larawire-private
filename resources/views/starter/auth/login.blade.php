@@ -17,13 +17,13 @@
 
     <label class="form-check mb-4">
         <input type="checkbox" class="form-check-input" id="remember" wire:model="form.remember">
-        <span class="form-check-label">Ingat saya</span>
+        <span class="form-check-label">Remember me</span>
     </label>
 
     <div class="form-footer">
         <button class="btn btn-primary w-100" type="submit" wire:loading.attr="disabled">
             <span wire:loading.remove>Login</span>
-            <span wire:loading>Memproses...</span>
+            <span wire:loading>Processing...</span>
         </button>
     </div>
 </form>

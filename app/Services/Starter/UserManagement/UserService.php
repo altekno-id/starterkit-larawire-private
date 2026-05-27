@@ -53,7 +53,7 @@ class UserService
 
         if (! $role instanceof UserRole) {
             throw ValidationException::withMessages([
-                'roleId' => 'Role tidak valid.',
+                'roleId' => 'Invalid role.',
             ]);
         }
 
@@ -65,7 +65,7 @@ class UserService
 
         if ($login?->is($currentLogin) && (int) $data['user_role_id'] !== $currentLogin->user_role_id) {
             throw ValidationException::withMessages([
-                'roleId' => 'Role akun yang sedang login tidak boleh diubah dari halaman ini.',
+                'roleId' => 'The current login role cannot be changed from this page.',
             ]);
         }
 
@@ -91,7 +91,7 @@ class UserService
 
         if ($login->is($currentLogin)) {
             throw ValidationException::withMessages([
-                'user' => 'Akun yang sedang login tidak boleh dihapus.',
+                'user' => 'The current login account cannot be deleted.',
             ]);
         }
 

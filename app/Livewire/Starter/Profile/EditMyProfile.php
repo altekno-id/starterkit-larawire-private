@@ -2,18 +2,24 @@
 
 namespace App\Livewire\Starter\Profile;
 
-use App\Models\Starter\User;
 use App\Models\Starter\UserLogin;
 use App\Services\Starter\Profile\ProfileService;
 use App\Services\Starter\StarterContextService;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts::app')]
 class EditMyProfile extends Component
 {
+    use WithFileUploads;
+
+    private const DEFAULT_PROFILE_PHOTO = 'assets/mine/avatar.png';
+
     /**
      * @var array{name: string, username: string, email: string, profile_photo: string}
      */
@@ -24,16 +30,9 @@ class EditMyProfile extends Component
         'profile_photo' => '',
     ];
 
-    /**
-     * @var array{name: string, email: string, phone: string, pic_name: string, logo: string}
-     */
-    public array $clientForm = [
-        'name' => '',
-        'email' => '',
-        'phone' => '',
-        'pic_name' => '',
-        'logo' => '',
-    ];
+    public mixed $profilePhotoUpload = null;
+
+    public bool $profilePhotoReset = false;
 
     /**
      * @var array{current_password: string, password: string, password_confirmation: string}
@@ -69,17 +68,34 @@ class EditMyProfile extends Component
                 Rule::unique('user_logins', 'email')->ignore($login->id),
             ],
             'accountForm.profile_photo' => ['nullable', 'string', 'max:255'],
+            'profilePhotoUpload' => ['nullable', 'image', 'max:2048'],
         ], [], [
-            'accountForm.name' => 'nama tampilan',
+            'accountForm.name' => 'display name',
             'accountForm.username' => 'username',
             'accountForm.email' => 'email login',
-            'accountForm.profile_photo' => 'foto profil',
+            'accountForm.profile_photo' => 'profile photo',
+            'profilePhotoUpload' => 'profile photo upload',
         ])['accountForm'];
+
+        $oldProfilePhoto = (string) $login->profile_photo;
+
+        if ($this->profilePhotoUpload instanceof TemporaryUploadedFile) {
+            $validated['profile_photo'] = 'storage/'.$this->profilePhotoUpload->store(
+                "starter/profile-photos/{$login->id}",
+                'public'
+            );
+        }
 
         $updatedLogin = app(ProfileService::class)
             ->updateProfile($login, $validated)
             ->loadMissing('role');
 
+        if ($oldProfilePhoto && $oldProfilePhoto !== (string) $updatedLogin->profile_photo) {
+            $this->deleteStoredProfilePhoto($oldProfilePhoto);
+        }
+
+        $this->profilePhotoUpload = null;
+        $this->profilePhotoReset = false;
         $this->fillFromLogin($updatedLogin->loadMissing('user'));
         $this->dispatch('starter-account-updated',
             avatarUrl: app(StarterContextService::class)->avatarUrl($updatedLogin),
@@ -87,37 +103,39 @@ class EditMyProfile extends Component
             roleName: $updatedLogin->role?->name ?? 'Role',
         );
 
-        $this->dispatch('starter-toast', type: 'success', message: 'Profil berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Profile saved successfully.');
     }
 
-    public function saveClientProfile(): void
+    public function resetProfilePhoto(): void
     {
-        $this->authorizeClientManagement();
+        $login = $this->login();
+        $oldProfilePhoto = (string) $login->profile_photo;
 
-        $validated = $this->validate([
-            'clientForm.name' => ['required', 'string', 'max:255'],
-            'clientForm.email' => ['nullable', 'email', 'max:255'],
-            'clientForm.phone' => ['nullable', 'string', 'max:255'],
-            'clientForm.pic_name' => ['nullable', 'string', 'max:255'],
-            'clientForm.logo' => ['nullable', 'string', 'max:255'],
-        ], [], [
-            'clientForm.name' => 'nama klien',
-            'clientForm.email' => 'email klien',
-            'clientForm.phone' => 'telepon',
-            'clientForm.pic_name' => 'nama PIC',
-            'clientForm.logo' => 'logo',
-        ])['clientForm'];
+        if ($oldProfilePhoto) {
+            $updatedLogin = app(ProfileService::class)
+                ->updateProfile($login, [
+                    'name' => $login->name,
+                    'username' => $login->username,
+                    'email' => $login->email,
+                    'profile_photo' => self::DEFAULT_PROFILE_PHOTO,
+                ])
+                ->loadMissing('role');
 
-        app(ProfileService::class)->updateClientProfile($this->login(), [
-            'name' => $validated['name'],
-            'email' => $validated['email'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'pic_name' => $validated['pic_name'] ?? null,
-            'logo' => $validated['logo'] ?? null,
-        ]);
+            $this->deleteStoredProfilePhoto($oldProfilePhoto);
 
-        $this->fillFromLogin($this->login()->fresh()->loadMissing('user'));
-        $this->dispatch('starter-toast', type: 'success', message: 'Profil klien berhasil disimpan.');
+            $this->dispatch('starter-account-updated',
+                avatarUrl: app(StarterContextService::class)->avatarUrl($updatedLogin),
+                name: $updatedLogin->name,
+                roleName: $updatedLogin->role?->name ?? 'Role',
+            );
+
+            $this->dispatch('starter-toast', type: 'success', message: 'Profile photo reset to default.');
+        }
+
+        $this->profilePhotoUpload = null;
+        $this->profilePhotoReset = true;
+        $this->accountForm['profile_photo'] = self::DEFAULT_PROFILE_PHOTO;
+        $this->resetValidation(['profilePhotoUpload', 'accountForm.profile_photo']);
     }
 
     public function changePassword(): void
@@ -127,9 +145,9 @@ class EditMyProfile extends Component
             'passwordForm.password' => ['required', 'string', 'min:5', 'same:passwordForm.password_confirmation'],
             'passwordForm.password_confirmation' => ['required', 'string'],
         ], [], [
-            'passwordForm.current_password' => 'password saat ini',
-            'passwordForm.password' => 'password baru',
-            'passwordForm.password_confirmation' => 'konfirmasi password',
+            'passwordForm.current_password' => 'current password',
+            'passwordForm.password' => 'new password',
+            'passwordForm.password_confirmation' => 'password confirmation',
         ])['passwordForm'];
 
         try {
@@ -149,7 +167,7 @@ class EditMyProfile extends Component
         }
 
         $this->reset('passwordForm');
-        $this->dispatch('starter-toast', type: 'success', message: 'Password berhasil diganti.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Password changed successfully.');
     }
 
     public function render()
@@ -158,12 +176,9 @@ class EditMyProfile extends Component
 
         return view('starter.profile.edit-my-profile', [
             'login' => $login,
-            'client' => $login->user,
             'loginAvatarUrl' => app(StarterContextService::class)->avatarUrl($login),
-            'canManageClient' => $this->canManageClient($login),
-            'accountStatusOptions' => $this->accountStatusOptions(),
-            'subscriptionStatusOptions' => $this->subscriptionStatusOptions(),
-        ])->title('Edit Profil Saya');
+            'profilePhotoPreviewUrl' => $this->profilePhotoPreviewUrl($login),
+        ])->title('Edit My Profile');
     }
 
     private function login(): UserLogin
@@ -177,11 +192,13 @@ class EditMyProfile extends Component
 
     private function firstValidationMessage(ValidationException $exception): string
     {
-        return collect($exception->errors())->flatten()->first() ?? 'Data tidak valid.';
+        return collect($exception->errors())->flatten()->first() ?? 'Invalid data.';
     }
 
     private function fillFromLogin(UserLogin $login): void
     {
+        $this->profilePhotoReset = false;
+
         $this->accountForm = [
             'name' => (string) $login->name,
             'username' => (string) $login->username,
@@ -189,58 +206,38 @@ class EditMyProfile extends Component
             'profile_photo' => (string) $login->profile_photo,
         ];
 
-        $client = $login->user;
+    }
 
-        if (! $client instanceof User) {
+    private function profilePhotoPreviewUrl(UserLogin $login): string
+    {
+        if ($this->profilePhotoUpload instanceof TemporaryUploadedFile) {
+            return $this->profilePhotoUpload->temporaryUrl();
+        }
+
+        $profilePhoto = trim((string) ($this->accountForm['profile_photo'] ?? ''));
+
+        if ($profilePhoto !== '') {
+            if (str_starts_with($profilePhoto, 'http://') || str_starts_with($profilePhoto, 'https://') || str_starts_with($profilePhoto, '//')) {
+                return $profilePhoto;
+            }
+
+            return asset(ltrim($profilePhoto, '/'));
+        }
+
+        if ($this->profilePhotoReset) {
+            return asset(self::DEFAULT_PROFILE_PHOTO);
+        }
+
+        return app(StarterContextService::class)->avatarUrl($login);
+    }
+
+    private function deleteStoredProfilePhoto(string $profilePhoto): void
+    {
+        if (! str_starts_with($profilePhoto, 'storage/')) {
             return;
         }
 
-        $this->clientForm = [
-            'name' => (string) $client->name,
-            'email' => (string) $client->email,
-            'phone' => (string) $client->phone,
-            'pic_name' => (string) $client->pic_name,
-            'logo' => (string) $client->logo,
-        ];
-
+        Storage::disk('public')->delete(str($profilePhoto)->after('storage/')->toString());
     }
 
-    private function authorizeClientManagement(): void
-    {
-        abort_unless($this->canManageClient($this->login()), 403);
-    }
-
-    private function canManageClient(UserLogin $login): bool
-    {
-        return $login->loadMissing('role')->role?->isAdmin() ?? false;
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function accountStatusOptions(): array
-    {
-        return [
-            'pending' => 'Tertunda',
-            'approved' => 'Disetujui',
-            'rejected' => 'Ditolak',
-            'suspended' => 'Ditangguhkan',
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function subscriptionStatusOptions(): array
-    {
-        return [
-            'none' => 'Tidak Ada',
-            'trialing' => 'Masa Trial',
-            'pending_approval' => 'Menunggu Persetujuan',
-            'active' => 'Aktif',
-            'past_due' => 'Lewat Jatuh Tempo',
-            'canceled' => 'Dibatalkan',
-            'expired' => 'Kedaluwarsa',
-        ];
-    }
 }

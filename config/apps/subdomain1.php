@@ -2,13 +2,13 @@
 
 return [
     'name' => 'Subdomain 1',
-    'desc' => 'Contoh aplikasi subdomain pertama.',
+    'desc' => 'First sample subdomain app.',
     'icon' => 'apps',
 
     'mods' => [
         'dashboard' => [
             'name' => 'Dashboard',
-            'desc' => 'Ringkasan aplikasi.',
+            'desc' => 'App summary.',
             'menus' => [
                 [
                     'label' => 'Dashboard',
@@ -19,11 +19,11 @@ return [
         ],
 
         'module1' => [
-            'name' => 'Modules 1',
-            'desc' => 'Contoh modul CRUD.',
+            'name' => 'Module 1',
+            'desc' => 'Sample CRUD module.',
             'menus' => [
                 [
-                    'label' => 'Modules 1',
+                    'label' => 'Module 1',
                     'icon' => 'folder',
                     'children' => [
                         [

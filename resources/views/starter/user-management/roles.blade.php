@@ -1,5 +1,5 @@
 <div>
-    <div class="page-header d-print-none mb-3" aria-label="Header halaman">
+    <div class="page-header d-print-none mb-3" aria-label="Page header">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle">Starter / User Management</div>
@@ -8,7 +8,7 @@
             @if ($selectedRoleId)
                 <div class="col-auto ms-auto">
                     <button type="button" class="btn btn-outline-primary" wire:click="newRole">
-                        Tambah Role
+                        Add Role
                     </button>
                 </div>
             @endif
@@ -48,7 +48,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="text-secondary">Belum ada role.</td>
+                                    <td colspan="3" class="text-secondary">No role yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -60,22 +60,22 @@
         <div class="col-xl-7">
             <form class="card" wire:submit="save">
                 <div class="card-header">
-                    <h3 class="card-title">{{ $selectedRoleId ? 'Edit Role' : 'Tambah Role Baru' }}</h3>
+                    <h3 class="card-title">{{ $selectedRoleId ? 'Edit Role' : 'Add New Role' }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label">Kode</label>
+                            <label class="form-label">Code</label>
                             <input type="text" class="form-control @error('roleForm.code') is-invalid @enderror" wire:model.live="roleForm.code">
                             @error('roleForm.code') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Nama</label>
+                            <label class="form-label">Name</label>
                             <input type="text" class="form-control @error('roleForm.name') is-invalid @enderror" wire:model="roleForm.name">
                             @error('roleForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Deskripsi</label>
+                            <label class="form-label">Description</label>
                             <input type="text" class="form-control @error('roleForm.desc') is-invalid @enderror" wire:model="roleForm.desc">
                             @error('roleForm.desc') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
@@ -84,12 +84,12 @@
                 <div class="card-footer d-flex">
                     @if ($selectedRoleId)
                         <button type="button" class="btn btn-outline-danger" wire:click="deleteRole({{ $selectedRoleId }})" @disabled($roleForm['code'] === 'admin')>
-                            Hapus
+                            Delete
                         </button>
                     @else
-                        <span class="text-secondary align-self-center">Isi data lalu simpan sebagai role baru.</span>
+                        <span class="text-secondary align-self-center">Fill the form and save it as a new role.</span>
                     @endif
-                    <button type="submit" class="btn btn-primary ms-auto">Simpan Role</button>
+                    <button type="submit" class="btn btn-primary ms-auto">Save Role</button>
                 </div>
             </form>
 
@@ -97,7 +97,7 @@
                 <div class="card-header">
                     <div>
                         <h3 class="card-title">Module Access</h3>
-                        <p class="card-subtitle">Centang module yang boleh dibuka role ini.</p>
+                        <p class="card-subtitle">Select modules this role can access.</p>
                     </div>
                     @if ($roleForm['code'] === 'admin')
                         <div class="card-actions">

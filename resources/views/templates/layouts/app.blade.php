@@ -317,37 +317,26 @@
         }
 
         .starter-navigate-loader {
-            height: .1875rem;
-            left: 0;
+            align-items: center;
+            background: color-mix(in srgb, var(--tblr-bg-surface) 88%, transparent);
+            display: flex;
+            inset: 0;
+            justify-content: center;
             opacity: 0;
-            overflow: hidden;
             pointer-events: none;
             position: fixed;
-            right: 0;
-            top: 0;
             transition: opacity .14s ease;
             z-index: 2000;
         }
 
-        .starter-navigate-loader::before {
-            animation: starter-loader-slide 1s ease-in-out infinite;
-            background: linear-gradient(90deg, transparent, var(--tblr-primary), transparent);
-            content: "";
-            height: 100%;
-            left: -45%;
-            position: absolute;
-            top: 0;
-            width: 45%;
+        .starter-page-loader {
+            transform: translateY(-.75rem);
+            width: min(16rem, calc(100vw - 2rem));
         }
 
         body.starter-is-navigating .starter-navigate-loader {
             opacity: 1;
-        }
-
-        @keyframes starter-loader-slide {
-            to {
-                left: 100%;
-            }
+            pointer-events: auto;
         }
 
         @supports (view-transition-name: starter-page) {
@@ -380,7 +369,6 @@
                 transition: none;
             }
 
-            .starter-navigate-loader::before,
             ::view-transition-old(starter-page),
             ::view-transition-new(starter-page) {
                 animation: none;
@@ -499,13 +487,25 @@
         $accountPersistBase = 'starter-account-'.($login?->getKey() ?? 'guest');
     @endphp
 
-    <div class="starter-navigate-loader" aria-label="Memuat halaman" role="status"></div>
+    <div class="starter-navigate-loader" aria-label="Preparing application" role="status">
+        <div class="starter-page-loader text-center">
+            <div class="mb-3">
+                <span class="navbar-brand navbar-brand-autodark justify-content-center">
+                    <img src="{{ asset('assets/tabler/static/logo-small.svg') }}" height="36" alt="{{ config('app.name') }}">
+                </span>
+            </div>
+            <div class="text-secondary mb-3">Preparing application</div>
+            <div class="progress progress-sm">
+                <div class="progress-bar progress-bar-indeterminate"></div>
+            </div>
+        </div>
+    </div>
     @include('templates.components.toast')
 
     <div class="page">
         <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
             <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#starter-sidebar-menu" aria-controls="starter-sidebar-menu" aria-expanded="false" aria-label="Buka tutup navigasi">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#starter-sidebar-menu" aria-controls="starter-sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -533,7 +533,7 @@
                                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                                         @include('templates.layouts.icon', ['name' => 'circle'])
                                     </span>
-                                        <span class="nav-link-title">Tidak ada menu</span>
+                                        <span class="nav-link-title">No menu available</span>
                                 </span>
                             </li>
                         @endforelse
@@ -545,6 +545,7 @@
                                 $userManagementOpen = request()->routeIs('starter.user-management.*');
                                 $rolesActive = request()->routeIs('starter.user-management.roles');
                                 $usersActive = request()->routeIs('starter.user-management.users');
+                                $clientProfileActive = request()->routeIs('starter.client-profile');
                             @endphp
 
                             <li class="nav-item {{ $userManagementOpen ? 'active' : '' }}">
@@ -564,6 +565,15 @@
                                         </a>
                                     </div>
                                 </details>
+                            </li>
+
+                            <li class="nav-item {{ $clientProfileActive ? 'active' : '' }}">
+                                <a href="{{ route('starter.client-profile') }}" class="nav-link {{ $clientProfileActive ? 'active' : '' }}" @if ($clientProfileActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ route('starter.client-profile') }}">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                        @include('templates.layouts.icon', ['name' => 'building'])
+                                    </span>
+                                    <span class="nav-link-title">Client Profile</span>
+                                </a>
                             </li>
                         @endif
                     </ul>

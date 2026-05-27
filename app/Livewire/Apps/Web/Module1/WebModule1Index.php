@@ -17,6 +17,6 @@ class WebModule1Index extends Component
 
     public function render()
     {
-        return view('apps.web.module1.web-module1-index')->title('Data Modul 1');
+        return view('apps.web.module1.web-module1-index')->title('Module 1 Data');
     }
 }

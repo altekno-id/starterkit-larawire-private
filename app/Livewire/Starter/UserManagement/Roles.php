@@ -74,11 +74,11 @@ class Roles extends Component
             'roleForm.module_ids' => ['array'],
             'roleForm.module_ids.*' => ['integer', 'exists:app_mods,id'],
         ], [], [
-            'roleForm.code' => 'kode',
-            'roleForm.name' => 'nama',
-            'roleForm.desc' => 'deskripsi',
-            'roleForm.module_ids' => 'akses modul',
-            'roleForm.module_ids.*' => 'akses modul',
+            'roleForm.code' => 'code',
+            'roleForm.name' => 'name',
+            'roleForm.desc' => 'description',
+            'roleForm.module_ids' => 'module access',
+            'roleForm.module_ids.*' => 'module access',
         ])['roleForm'];
 
         $role = $this->roles()->saveRole($this->login(), $this->selectedRoleId, $validated, $validated['module_ids']);
@@ -86,7 +86,7 @@ class Roles extends Component
         $this->selectedRoleId = $role->id;
         $this->roleForm['module_ids'] = $role->mods->pluck('id')->map(fn (int $id): string => (string) $id)->values()->all();
 
-        $this->dispatch('starter-toast', type: 'success', message: 'Role berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Role saved successfully.');
     }
 
     public function deleteRole(int $id): void
@@ -101,14 +101,14 @@ class Roles extends Component
 
         $this->newRole();
 
-        $this->dispatch('starter-toast', type: 'success', message: 'Role berhasil dihapus.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Role deleted successfully.');
     }
 
     public function render()
     {
         $roles = $this->roles()->roles($this->login());
         $modules = $this->roles()->availableModules()
-            ->groupBy(fn ($mod): string => $mod->app?->name ?? 'Tanpa Aplikasi');
+            ->groupBy(fn ($mod): string => $mod->app?->name ?? 'No App');
 
         return view('starter.user-management.roles', [
             'roles' => $roles,
@@ -132,6 +132,6 @@ class Roles extends Component
 
     private function firstValidationMessage(ValidationException $exception): string
     {
-        return collect($exception->errors())->flatten()->first() ?? 'Data tidak valid.';
+        return collect($exception->errors())->flatten()->first() ?? 'Invalid data.';
     }
 }

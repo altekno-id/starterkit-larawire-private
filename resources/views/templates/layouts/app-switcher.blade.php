@@ -6,7 +6,7 @@
 @endphp
 
 <details class="nav-item starter-app-menu {{ $compact ? 'starter-app-menu-compact' : '' }}" data-starter-details>
-    <summary class="nav-link dropdown-toggle starter-app-menu-trigger" aria-label="Pilih app">
+    <summary class="nav-link dropdown-toggle starter-app-menu-trigger" aria-label="Select app">
         <span class="nav-link-icon d-md-none d-lg-inline-block">
             @include('templates.layouts.icon', ['name' => $triggerIcon])
         </span>
@@ -28,7 +28,7 @@
                 @endif
             </a>
         @empty
-            <span class="dropdown-item text-secondary">Tidak ada app</span>
+            <span class="dropdown-item text-secondary">No app available</span>
         @endforelse
     </div>
 </details>

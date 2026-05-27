@@ -47,7 +47,7 @@ class ProfileService
     {
         if (! $login->password || ! Hash::check($currentPassword, $login->password)) {
             throw ValidationException::withMessages([
-                'current_password' => 'Password saat ini tidak sesuai.',
+                'current_password' => 'The current password is incorrect.',
             ]);
         }
 

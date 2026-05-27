@@ -17,6 +17,6 @@ class Subdomain1Module1Create extends Component
 
     public function render()
     {
-        return view('apps.subdomain1.module1.subdomain1-module1-create')->title('Tambah Modul 1');
+        return view('apps.subdomain1.module1.subdomain1-module1-create')->title('Create Module 1');
     }
 }

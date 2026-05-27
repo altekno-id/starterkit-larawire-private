@@ -61,7 +61,7 @@ class RoleService
 
             if ($role?->isAdmin() && $code !== 'admin') {
                 throw ValidationException::withMessages([
-                    'code' => 'Kode role admin tidak boleh diubah.',
+                    'code' => 'The admin role code cannot be changed.',
                 ]);
             }
 
@@ -87,7 +87,7 @@ class RoleService
 
         if ($role->isAdmin()) {
             throw ValidationException::withMessages([
-                'role' => 'Role admin bawaan tidak boleh dihapus.',
+                'role' => 'The default admin role cannot be deleted.',
             ]);
         }
 

@@ -181,10 +181,10 @@ window.StarterTemplate = window.StarterTemplate || {
         const payload = typeof detail === 'string' ? { message: detail } : (detail || {});
         const type = this.normalizeToastType(String(payload.type || payload.status || 'info'));
         const title = payload.title || {
-            success: 'Berhasil',
-            info: 'Informasi',
-            warning: 'Perhatian',
-            danger: 'Gagal',
+            success: 'Success',
+            info: 'Information',
+            warning: 'Warning',
+            danger: 'Error',
         }[type];
         const message = payload.message || payload.text || '';
         const duration = Number(payload.duration ?? payload.timeout ?? 4500);
@@ -220,7 +220,7 @@ window.StarterTemplate = window.StarterTemplate || {
         const close = document.createElement('button');
         close.type = 'button';
         close.className = 'btn-close starter-toast-close';
-        close.setAttribute('aria-label', 'Tutup');
+        close.setAttribute('aria-label', 'Close');
         close.setAttribute('data-starter-toast-dismiss', '');
 
         toast.append(icon, body, close);

@@ -7,11 +7,11 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts::app')]
-#[Title('Dasbor')]
+#[Title('Dashboard')]
 class Subdomain2DashboardIndex extends Component
 {
     public function render()
     {
-        return view('apps.subdomain2.dashboard.subdomain2-dashboard-index')->title('Dasbor');
+        return view('apps.subdomain2.dashboard.subdomain2-dashboard-index')->title('Dashboard');
     }
 }

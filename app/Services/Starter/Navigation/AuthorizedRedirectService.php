@@ -79,6 +79,10 @@ class AuthorizedRedirectService
             return true;
         }
 
+        if ($routeName === 'starter.client-profile') {
+            return $login->role?->isAdmin() ?? false;
+        }
+
         if (str_starts_with($routeName, 'starter.user-management.')) {
             return $login->role?->isAdmin() ?? false;
         }
@@ -122,6 +126,7 @@ class AuthorizedRedirectService
         if ($host === $domain) {
             $starterRoute = match ($path) {
                 'profile/edit' => 'starter.profile.edit',
+                'client-profile' => 'starter.client-profile',
                 'user-management/roles' => 'starter.user-management.roles',
                 'user-management/users' => 'starter.user-management.users',
                 default => null,

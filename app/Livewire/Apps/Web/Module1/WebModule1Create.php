@@ -17,6 +17,6 @@ class WebModule1Create extends Component
 
     public function render()
     {
-        return view('apps.web.module1.web-module1-create')->title('Tambah Modul 1');
+        return view('apps.web.module1.web-module1-create')->title('Create Module 1');
     }
 }

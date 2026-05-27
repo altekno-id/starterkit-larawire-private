@@ -148,7 +148,7 @@ class SyncCommand extends Command
             return true;
         }
 
-        $this->warn("App {$subdomain}: ada {$delete['modules']} module, {$delete['routes']} route, {$delete['menus']} menu yang akan dihapus.");
+        $this->warn("App {$subdomain}: {$delete['modules']} module, {$delete['routes']} route, and {$delete['menus']} menu will be deleted.");
 
         return $this->confirm('Lanjutkan?', false);
     }
@@ -166,7 +166,7 @@ class SyncCommand extends Command
             return true;
         }
 
-        $this->info("App {$subdomain}: ada {$create['modules']} module, {$create['routes']} route, {$create['menus']} menu baru yang akan ditambahkan.");
+        $this->info("App {$subdomain}: {$create['modules']} new module, {$create['routes']} route, and {$create['menus']} menu will be added.");
 
         return $this->confirm('Lanjutkan?', true);
     }

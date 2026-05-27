@@ -15,12 +15,13 @@ use Livewire\Component;
 class EditMyProfile extends Component
 {
     /**
-     * @var array{name: string, username: string, email: string}
+     * @var array{name: string, username: string, email: string, profile_photo: string}
      */
     public array $accountForm = [
         'name' => '',
         'username' => '',
         'email' => '',
+        'profile_photo' => '',
     ];
 
     /**
@@ -32,21 +33,6 @@ class EditMyProfile extends Component
         'phone' => '',
         'pic_name' => '',
         'logo' => '',
-    ];
-
-    /**
-     * @var array{account_status: string, approved_at: string, subscription_status: string, payment_method: string, payment_reference: string, trial_ends_at: string, subscribed_at: string, subscription_ends_at: string, payment_approved_at: string}
-     */
-    public array $adminForm = [
-        'account_status' => 'pending',
-        'approved_at' => '',
-        'subscription_status' => 'none',
-        'payment_method' => '',
-        'payment_reference' => '',
-        'trial_ends_at' => '',
-        'subscribed_at' => '',
-        'subscription_ends_at' => '',
-        'payment_approved_at' => '',
     ];
 
     /**
@@ -82,10 +68,12 @@ class EditMyProfile extends Component
                 'max:255',
                 Rule::unique('user_logins', 'email')->ignore($login->id),
             ],
+            'accountForm.profile_photo' => ['nullable', 'string', 'max:255'],
         ], [], [
-            'accountForm.name' => 'nama login',
+            'accountForm.name' => 'nama tampilan',
             'accountForm.username' => 'username',
             'accountForm.email' => 'email login',
+            'accountForm.profile_photo' => 'foto profil',
         ])['accountForm'];
 
         $updatedLogin = app(ProfileService::class)
@@ -99,7 +87,7 @@ class EditMyProfile extends Component
             roleName: $updatedLogin->role?->name ?? 'Role',
         );
 
-        $this->dispatch('starter-toast', type: 'success', message: 'Profile berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Profil berhasil disimpan.');
     }
 
     public function saveClientProfile(): void
@@ -113,10 +101,10 @@ class EditMyProfile extends Component
             'clientForm.pic_name' => ['nullable', 'string', 'max:255'],
             'clientForm.logo' => ['nullable', 'string', 'max:255'],
         ], [], [
-            'clientForm.name' => 'nama client',
-            'clientForm.email' => 'email client',
-            'clientForm.phone' => 'phone',
-            'clientForm.pic_name' => 'PIC name',
+            'clientForm.name' => 'nama klien',
+            'clientForm.email' => 'email klien',
+            'clientForm.phone' => 'telepon',
+            'clientForm.pic_name' => 'nama PIC',
             'clientForm.logo' => 'logo',
         ])['clientForm'];
 
@@ -129,49 +117,7 @@ class EditMyProfile extends Component
         ]);
 
         $this->fillFromLogin($this->login()->fresh()->loadMissing('user'));
-        $this->dispatch('starter-toast', type: 'success', message: 'Client profile berhasil disimpan.');
-    }
-
-    public function saveAdminControls(): void
-    {
-        $this->authorizeClientManagement();
-
-        $validated = $this->validate([
-            'adminForm.account_status' => ['required', Rule::in(array_keys($this->accountStatusOptions()))],
-            'adminForm.approved_at' => ['nullable', 'date'],
-            'adminForm.subscription_status' => ['required', Rule::in(array_keys($this->subscriptionStatusOptions()))],
-            'adminForm.payment_method' => ['nullable', 'string', 'max:30'],
-            'adminForm.payment_reference' => ['nullable', 'string', 'max:255'],
-            'adminForm.trial_ends_at' => ['nullable', 'date'],
-            'adminForm.subscribed_at' => ['nullable', 'date'],
-            'adminForm.subscription_ends_at' => ['nullable', 'date'],
-            'adminForm.payment_approved_at' => ['nullable', 'date'],
-        ], [], [
-            'adminForm.account_status' => 'account status',
-            'adminForm.approved_at' => 'approved at',
-            'adminForm.subscription_status' => 'subscription status',
-            'adminForm.payment_method' => 'payment method',
-            'adminForm.payment_reference' => 'payment reference',
-            'adminForm.trial_ends_at' => 'trial ends at',
-            'adminForm.subscribed_at' => 'subscribed at',
-            'adminForm.subscription_ends_at' => 'subscription ends at',
-            'adminForm.payment_approved_at' => 'payment approved at',
-        ])['adminForm'];
-
-        app(ProfileService::class)->updateAdminControls($this->login(), [
-            'account_status' => $validated['account_status'],
-            'approved_at' => $validated['approved_at'] ?? null,
-            'subscription_status' => $validated['subscription_status'],
-            'payment_method' => $validated['payment_method'] ?? null,
-            'payment_reference' => $validated['payment_reference'] ?? null,
-            'trial_ends_at' => $validated['trial_ends_at'] ?? null,
-            'subscribed_at' => $validated['subscribed_at'] ?? null,
-            'subscription_ends_at' => $validated['subscription_ends_at'] ?? null,
-            'payment_approved_at' => $validated['payment_approved_at'] ?? null,
-        ]);
-
-        $this->fillFromLogin($this->login()->fresh()->loadMissing('user'));
-        $this->dispatch('starter-toast', type: 'success', message: 'Kontrol admin berhasil disimpan.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Profil klien berhasil disimpan.');
     }
 
     public function changePassword(): void
@@ -213,10 +159,11 @@ class EditMyProfile extends Component
         return view('starter.profile.edit-my-profile', [
             'login' => $login,
             'client' => $login->user,
+            'loginAvatarUrl' => app(StarterContextService::class)->avatarUrl($login),
             'canManageClient' => $this->canManageClient($login),
             'accountStatusOptions' => $this->accountStatusOptions(),
             'subscriptionStatusOptions' => $this->subscriptionStatusOptions(),
-        ])->title('Edit My Profile');
+        ])->title('Edit Profil Saya');
     }
 
     private function login(): UserLogin
@@ -239,6 +186,7 @@ class EditMyProfile extends Component
             'name' => (string) $login->name,
             'username' => (string) $login->username,
             'email' => (string) $login->email,
+            'profile_photo' => (string) $login->profile_photo,
         ];
 
         $client = $login->user;
@@ -255,17 +203,6 @@ class EditMyProfile extends Component
             'logo' => (string) $client->logo,
         ];
 
-        $this->adminForm = [
-            'account_status' => (string) $client->account_status,
-            'approved_at' => $this->dateInputValue($client->approved_at),
-            'subscription_status' => (string) $client->subscription_status,
-            'payment_method' => (string) $client->payment_method,
-            'payment_reference' => (string) $client->payment_reference,
-            'trial_ends_at' => $this->dateInputValue($client->trial_ends_at),
-            'subscribed_at' => $this->dateInputValue($client->subscribed_at),
-            'subscription_ends_at' => $this->dateInputValue($client->subscription_ends_at),
-            'payment_approved_at' => $this->dateInputValue($client->payment_approved_at),
-        ];
     }
 
     private function authorizeClientManagement(): void
@@ -278,21 +215,16 @@ class EditMyProfile extends Component
         return $login->loadMissing('role')->role?->isAdmin() ?? false;
     }
 
-    private function dateInputValue(mixed $value): string
-    {
-        return $value ? $value->format('Y-m-d\TH:i') : '';
-    }
-
     /**
      * @return array<string, string>
      */
     private function accountStatusOptions(): array
     {
         return [
-            'pending' => 'Pending',
-            'approved' => 'Approved',
-            'rejected' => 'Rejected',
-            'suspended' => 'Suspended',
+            'pending' => 'Tertunda',
+            'approved' => 'Disetujui',
+            'rejected' => 'Ditolak',
+            'suspended' => 'Ditangguhkan',
         ];
     }
 
@@ -302,13 +234,13 @@ class EditMyProfile extends Component
     private function subscriptionStatusOptions(): array
     {
         return [
-            'none' => 'None',
-            'trialing' => 'Trialing',
-            'pending_approval' => 'Pending Approval',
-            'active' => 'Active',
-            'past_due' => 'Past Due',
-            'canceled' => 'Canceled',
-            'expired' => 'Expired',
+            'none' => 'Tidak Ada',
+            'trialing' => 'Masa Trial',
+            'pending_approval' => 'Menunggu Persetujuan',
+            'active' => 'Aktif',
+            'past_due' => 'Lewat Jatuh Tempo',
+            'canceled' => 'Dibatalkan',
+            'expired' => 'Kedaluwarsa',
         ];
     }
 }

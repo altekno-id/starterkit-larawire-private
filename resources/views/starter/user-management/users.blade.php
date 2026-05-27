@@ -1,9 +1,9 @@
 <div>
-    <div class="page-header d-print-none mb-3" aria-label="Page header">
+    <div class="page-header d-print-none mb-3" aria-label="Header halaman">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle">Starter / User Management</div>
-                <h2 class="page-title">Users</h2>
+                <h2 class="page-title">User</h2>
             </div>
             @if ($selectedUserId)
                 <div class="col-auto ms-auto">
@@ -86,7 +86,7 @@
                     <div class="mt-3">
                         <label class="form-label">Role</label>
                         <select wire:key="user-role-select-{{ $selectedUserId ?: 'new' }}" class="form-select @error('userForm.role_id') is-invalid @enderror" wire:model="userForm.role_id">
-                            <option value="">Pilih role</option>
+                            <option value="">Pilih Role</option>
                             @foreach ($roles as $role)
                                 <option value="{{ $role->id }}">{{ $role->name }} ({{ $role->code }})</option>
                             @endforeach

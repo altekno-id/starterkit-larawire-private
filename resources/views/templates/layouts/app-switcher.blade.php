@@ -1,12 +1,12 @@
 @php
     $compact = $compact ?? false;
     $activeApp = $appOptions->firstWhere('active', true);
-    $triggerLabel = $triggerLabel ?? ($activeApp['name'] ?? $currentAppName ?? 'Aplikasi');
+    $triggerLabel = $triggerLabel ?? ($activeApp['name'] ?? $currentAppName ?? 'App');
     $triggerIcon = $triggerIcon ?? ($activeApp['icon'] ?? $currentAppIcon ?? 'apps');
 @endphp
 
 <details class="nav-item starter-app-menu {{ $compact ? 'starter-app-menu-compact' : '' }}" data-starter-details>
-    <summary class="nav-link dropdown-toggle starter-app-menu-trigger" aria-label="Pilih aplikasi">
+    <summary class="nav-link dropdown-toggle starter-app-menu-trigger" aria-label="Pilih app">
         <span class="nav-link-icon d-md-none d-lg-inline-block">
             @include('templates.layouts.icon', ['name' => $triggerIcon])
         </span>
@@ -28,7 +28,7 @@
                 @endif
             </a>
         @empty
-            <span class="dropdown-item text-secondary">Tidak ada aplikasi</span>
+            <span class="dropdown-item text-secondary">Tidak ada app</span>
         @endforelse
     </div>
 </details>

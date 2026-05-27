@@ -20,6 +20,6 @@ class Subdomain1Module1Show extends Component
 
     public function render()
     {
-        return view('apps.subdomain1.module1.subdomain1-module1-show')->title('Module 1 Show');
+        return view('apps.subdomain1.module1.subdomain1-module1-show')->title('Detail Modul 1');
     }
 }

@@ -40,7 +40,7 @@
 
             <div class="card card-md">
                 <div class="card-body">
-                    <h2 class="h2 text-center mb-2">Masuk ke akun</h2>
+                    <h2 class="h2 text-center mb-2">Login to Account</h2>
                     <p class="text-secondary text-center mb-4">Gunakan username atau email untuk melanjutkan.</p>
                     {{ $slot }}
                 </div>

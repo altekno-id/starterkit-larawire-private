@@ -306,20 +306,21 @@ class SyncCommand extends Command
     {
         return $menus
             ->where('parent_id', $parentId)
-            ->flatMap(function (AppMenu $menu) use ($menus, $modsById, $parentPath): Collection {
+            ->reduce(function (Collection $keys, AppMenu $menu) use ($menus, $modsById, $parentPath): Collection {
                 $modCode = $modsById->get($menu->app_mod_id)?->code;
 
                 if (! $modCode) {
-                    return collect();
+                    return $keys;
                 }
 
                 $path = $parentPath === ''
                     ? $menu->label
                     : $parentPath.'>'.$menu->label;
 
-                return collect([$menu->id => "{$modCode}|{$path}"])
-                    ->merge($this->collectExistingMenuKeyMap($menus, $modsById, $menu->id, $path));
-            });
+                $keys->put($menu->id, "{$modCode}|{$path}");
+
+                return $keys->union($this->collectExistingMenuKeyMap($menus, $modsById, $menu->id, $path));
+            }, collect());
     }
 
     /**
@@ -473,7 +474,7 @@ class SyncCommand extends Command
             'parent_id' => $parent?->id,
             'label' => $menuConfig['label'],
         ], [
-            'icon' => $menuConfig['icon'] ?? null,
+            'icon' => $parent ? null : ($menuConfig['icon'] ?? null),
             'order' => $order,
             'app_route_id' => $routeName ? $routes->get($routeName)?->id : null,
         ]);

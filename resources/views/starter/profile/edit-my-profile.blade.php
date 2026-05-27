@@ -1,267 +1,249 @@
+@php
+    $accountStatus = (string) ($client?->account_status ?? 'pending');
+    $subscriptionStatus = (string) ($client?->subscription_status ?? 'none');
+    $accountStatusClass = match ($accountStatus) {
+        'approved' => 'bg-success-lt',
+        'rejected', 'suspended' => 'bg-danger-lt',
+        default => 'bg-warning-lt',
+    };
+    $subscriptionStatusClass = match ($subscriptionStatus) {
+        'active', 'trialing' => 'bg-success-lt',
+        'past_due', 'canceled', 'expired' => 'bg-danger-lt',
+        'pending_approval' => 'bg-warning-lt',
+        default => 'bg-secondary-lt',
+    };
+@endphp
+
 <div>
-    <div class="page-header d-print-none mb-3" aria-label="Page header">
+    <div class="page-header d-print-none mb-3" aria-label="Header halaman">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Starter / Profile</div>
-                <h2 class="page-title">Edit My Profile</h2>
-                <div class="text-secondary mt-1">Kelola data login pribadi dan profil client yang terkait dengan akun ini.</div>
+                <div class="page-pretitle">Starter / Profile Saya</div>
+                <h2 class="page-title">Edit Profile Saya</h2>
             </div>
         </div>
     </div>
 
-    <div class="row row-cards">
-        <div class="col-xl-8">
-            <form class="card" wire:submit="saveAccount">
-                <div class="card-header">
-                    <div>
-                        <h3 class="card-title">Public Account</h3>
-                        <p class="card-subtitle">Data akun login yang boleh diubah semua user.</p>
-                    </div>
-                    <div class="card-actions">
-                        <span class="badge bg-success-lt">Semua user</span>
-                    </div>
-                </div>
+    <div class="card">
+        <div class="row g-0">
+            <div class="col-12 col-lg-3 border-end">
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Nama Login</label>
-                            <input type="text" class="form-control @error('accountForm.name') is-invalid @enderror" wire:model="accountForm.name">
-                            @error('accountForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Username</label>
-                            <input type="text" class="form-control @error('accountForm.username') is-invalid @enderror" wire:model="accountForm.username">
-                            @error('accountForm.username') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Email Login</label>
-                            <input type="email" class="form-control @error('accountForm.email') is-invalid @enderror" wire:model="accountForm.email">
-                            @error('accountForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer text-end">
-                    <button type="submit" class="btn btn-primary">Simpan Akun</button>
-                </div>
-            </form>
-
-            <form class="card mt-3" wire:submit="saveClientProfile">
-                <div class="card-header">
-                    <div>
-                        <h3 class="card-title">Client Profile</h3>
-                        <p class="card-subtitle">Data client dipakai bersama oleh semua user login.</p>
-                    </div>
-                    <div class="card-actions">
-                        <span class="badge {{ $canManageClient ? 'bg-primary-lt' : 'bg-secondary-lt' }}">
-                            {{ $canManageClient ? 'Admin only' : 'Read only' }}
-                        </span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Nama Client</label>
-                            <input type="text" class="form-control @error('clientForm.name') is-invalid @enderror" wire:model="clientForm.name" @disabled(! $canManageClient)>
-                            @error('clientForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Email Client</label>
-                            <input type="email" class="form-control @error('clientForm.email') is-invalid @enderror" wire:model="clientForm.email" @disabled(! $canManageClient)>
-                            @error('clientForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Phone</label>
-                            <input type="text" class="form-control @error('clientForm.phone') is-invalid @enderror" wire:model="clientForm.phone" @disabled(! $canManageClient)>
-                            @error('clientForm.phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">PIC Name</label>
-                            <input type="text" class="form-control @error('clientForm.pic_name') is-invalid @enderror" wire:model="clientForm.pic_name" @disabled(! $canManageClient)>
-                            @error('clientForm.pic_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Logo URL / Path</label>
-                            <input type="text" class="form-control @error('clientForm.logo') is-invalid @enderror" wire:model="clientForm.logo" @disabled(! $canManageClient)>
-                            @error('clientForm.logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer text-end">
-                    @if ($canManageClient)
-                        <button type="submit" class="btn btn-outline-primary">Simpan Client</button>
-                    @else
-                        <span class="text-secondary">Hanya role admin yang boleh mengubah data client.</span>
-                    @endif
-                </div>
-            </form>
-
-            <form class="card mt-3" wire:submit="saveAdminControls">
-                <div class="card-header">
-                    <div>
-                        <h3 class="card-title">Admin Controls</h3>
-                        <p class="card-subtitle">Status approval, subscription, dan payment.</p>
-                    </div>
-                    <div class="card-actions">
-                        <span class="badge {{ $canManageClient ? 'bg-danger-lt' : 'bg-secondary-lt' }}">
-                            {{ $canManageClient ? 'Admin only' : 'Read only' }}
-                        </span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Account Status</label>
-                            <select wire:key="profile-account-status-select" class="form-select @error('adminForm.account_status') is-invalid @enderror" wire:model="adminForm.account_status" @disabled(! $canManageClient)>
-                                @foreach ($accountStatusOptions as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            @error('adminForm.account_status') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Approved At</label>
-                            <input type="datetime-local" class="form-control @error('adminForm.approved_at') is-invalid @enderror" wire:model="adminForm.approved_at" @disabled(! $canManageClient)>
-                            @error('adminForm.approved_at') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Subscription Status</label>
-                            <select wire:key="profile-subscription-status-select" class="form-select @error('adminForm.subscription_status') is-invalid @enderror" wire:model="adminForm.subscription_status" @disabled(! $canManageClient)>
-                                @foreach ($subscriptionStatusOptions as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            @error('adminForm.subscription_status') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Payment Method</label>
-                            <input type="text" class="form-control @error('adminForm.payment_method') is-invalid @enderror" wire:model="adminForm.payment_method" @disabled(! $canManageClient)>
-                            @error('adminForm.payment_method') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label">Payment Reference</label>
-                            <input type="text" class="form-control @error('adminForm.payment_reference') is-invalid @enderror" wire:model="adminForm.payment_reference" @disabled(! $canManageClient)>
-                            @error('adminForm.payment_reference') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Trial Ends</label>
-                            <input type="datetime-local" class="form-control @error('adminForm.trial_ends_at') is-invalid @enderror" wire:model="adminForm.trial_ends_at" @disabled(! $canManageClient)>
-                            @error('adminForm.trial_ends_at') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Subscribed At</label>
-                            <input type="datetime-local" class="form-control @error('adminForm.subscribed_at') is-invalid @enderror" wire:model="adminForm.subscribed_at" @disabled(! $canManageClient)>
-                            @error('adminForm.subscribed_at') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Subscription Ends</label>
-                            <input type="datetime-local" class="form-control @error('adminForm.subscription_ends_at') is-invalid @enderror" wire:model="adminForm.subscription_ends_at" @disabled(! $canManageClient)>
-                            @error('adminForm.subscription_ends_at') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Payment Approved</label>
-                            <input type="datetime-local" class="form-control @error('adminForm.payment_approved_at') is-invalid @enderror" wire:model="adminForm.payment_approved_at" @disabled(! $canManageClient)>
-                            @error('adminForm.payment_approved_at') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer text-end">
-                    @if ($canManageClient)
-                        <button type="submit" class="btn btn-outline-danger">Simpan Kontrol</button>
-                    @else
-                        <span class="text-secondary">Status approval dan subscription hanya bisa diubah admin.</span>
-                    @endif
-                </div>
-            </form>
-        </div>
-
-        <div class="col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-start">
-                        @if ($client?->logo)
-                            <span class="avatar avatar-lg me-3" style="background-image: url({{ $client->logo }})"></span>
-                        @else
-                            <span class="avatar avatar-lg me-3">{{ str($client?->name ?? $login->name)->substr(0, 2)->upper() }}</span>
-                        @endif
-                        <div class="flex-fill">
-                            <h3 class="mb-1">{{ $client?->name ?? '-' }}</h3>
-                            <div class="text-secondary">{{ $client?->email ?? '-' }}</div>
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="avatar avatar-xl me-3" style="background-image: url({{ $loginAvatarUrl }})"></span>
+                        <div class="min-w-0">
+                            <div class="h3 mb-1 text-truncate">{{ $login->name }}</div>
+                            <div class="text-secondary text-truncate">{{ $login->email }}</div>
                             <div class="mt-2">
                                 <span class="badge bg-primary-lt">{{ $login->role?->name ?? 'No Role' }}</span>
-                                <span class="badge bg-secondary-lt">{{ $login->role?->code ?? '-' }}</span>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-vcenter card-table table-sm">
-                        <tbody>
-                            <tr>
-                                <td class="text-secondary">Account</td>
-                                <td class="text-end">{{ $accountStatusOptions[$client?->account_status] ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-secondary">Subscription</td>
-                                <td class="text-end">{{ $subscriptionStatusOptions[$client?->subscription_status] ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-secondary">Email Verified</td>
-                                <td class="text-end">{{ $login->email_verified_at?->format('d M Y H:i') ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-secondary">Google</td>
-                                <td class="text-end">{{ $login->google_id ? 'Linked' : '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-secondary">Provider</td>
-                                <td class="text-end">{{ $login->last_login_provider ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-secondary">Last Login</td>
-                                <td class="text-end">{{ $login->last_login_at?->format('d M Y H:i') ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-secondary">IP</td>
-                                <td class="text-end">{{ $login->last_login_ip ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-secondary">Created</td>
-                                <td class="text-end">{{ $login->created_at?->format('d M Y H:i') ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-secondary">Updated</td>
-                                <td class="text-end">{{ $login->updated_at?->format('d M Y H:i') ?? '-' }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                    <h4 class="subheader">Account Settings</h4>
+                    <div class="list-group list-group-transparent mb-4">
+                        <a href="#account-details" class="list-group-item list-group-item-action d-flex align-items-center active">
+                            @include('templates.layouts.icon', ['name' => 'user-circle', 'class' => 'me-2'])
+                            Account Detail
+                        </a>
+                        @if ($canManageClient)
+                            <a href="#client-profile" class="list-group-item list-group-item-action d-flex align-items-center">
+                                @include('templates.layouts.icon', ['name' => 'building', 'class' => 'me-2'])
+                                Client Profile
+                            </a>
+                        @endif
+                        <a href="#security" class="list-group-item list-group-item-action d-flex align-items-center">
+                            @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'me-2'])
+                            Security
+                        </a>
+                    </div>
+
+                    <h4 class="subheader">Login Summary</h4>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-secondary">Username</span>
+                            <span class="fw-medium">{{ $login->username }}</span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-secondary">Email Verified</span>
+                            <span class="fw-medium">{{ $login->email_verified_at?->format('d M Y H:i') ?? '-' }}</span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-secondary">Provider Login</span>
+                            <span class="fw-medium">{{ $login->last_login_provider ?? '-' }}</span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-secondary">Last Login</span>
+                            <span class="fw-medium">{{ $login->last_login_at?->format('d M Y H:i') ?? '-' }}</span>
+                        </div>
+                    </div>
+
+                    @if ($canManageClient)
+                        <h4 class="subheader mt-4">Admin Control</h4>
+                        <div class="mb-2">
+                            <span class="badge {{ $accountStatusClass }}">{{ $accountStatusOptions[$accountStatus] ?? $accountStatus }}</span>
+                            <span class="badge {{ $subscriptionStatusClass }}">{{ $subscriptionStatusOptions[$subscriptionStatus] ?? $subscriptionStatus }}</span>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-secondary">Approved</span>
+                                <span class="fw-medium">{{ $client?->approved_at?->format('d M Y H:i') ?? '-' }}</span>
+                            </div>
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-secondary">Trial Ends</span>
+                                <span class="fw-medium">{{ $client?->trial_ends_at?->format('d M Y H:i') ?? '-' }}</span>
+                            </div>
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-secondary">Subscribed Since</span>
+                                <span class="fw-medium">{{ $client?->subscribed_at?->format('d M Y H:i') ?? '-' }}</span>
+                            </div>
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-secondary">Subscription Ends</span>
+                                <span class="fw-medium">{{ $client?->subscription_ends_at?->format('d M Y H:i') ?? '-' }}</span>
+                            </div>
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-secondary">Payment Method</span>
+                                <span class="fw-medium">{{ $client?->payment_method ?: '-' }}</span>
+                            </div>
+                            <div class="list-group-item px-0">
+                                <div class="text-secondary">Payment Reference</div>
+                                <div class="fw-medium text-break">{{ $client?->payment_reference ?: '-' }}</div>
+                            </div>
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-secondary">Payment Approved</span>
+                                <span class="fw-medium">{{ $client?->payment_approved_at?->format('d M Y H:i') ?? '-' }}</span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 
-            <form class="card mt-3" wire:submit="changePassword">
-                <div class="card-header">
-                    <h3 class="card-title">Security</h3>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">Password Saat Ini</label>
-                        <input type="password" class="form-control @error('passwordForm.current_password') is-invalid @enderror" wire:model="passwordForm.current_password">
-                        @error('passwordForm.current_password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            <div class="col-12 col-lg-9 d-flex flex-column">
+                <form id="account-details" wire:submit="saveAccount">
+                    <div class="card-body border-bottom">
+                        <h2 class="mb-4">Account Saya</h2>
+                        <h3 class="card-title">Profile Detail</h3>
+
+                        <div class="row align-items-center mb-4">
+                            <div class="col-auto">
+                                <span class="avatar avatar-xl" style="background-image: url({{ $loginAvatarUrl }})"></span>
+                            </div>
+                            <div class="col">
+                                <div class="row g-3">
+                                    <div class="col-lg-8">
+                                        <label class="form-label">URL / Path Profile Photo</label>
+                                        <input type="text" class="form-control @error('accountForm.profile_photo') is-invalid @enderror" wire:model="accountForm.profile_photo" placeholder="assets/mine/avatar.png">
+                                        @error('accountForm.profile_photo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <label class="form-label">Avatar Google</label>
+                                        <input type="text" class="form-control" value="{{ $login->google_avatar ?: '-' }}" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Display Name</label>
+                                <input type="text" class="form-control @error('accountForm.name') is-invalid @enderror" wire:model="accountForm.name">
+                                @error('accountForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control @error('accountForm.username') is-invalid @enderror" wire:model="accountForm.username">
+                                @error('accountForm.username') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Email Login</label>
+                                <input type="email" class="form-control @error('accountForm.email') is-invalid @enderror" wire:model="accountForm.email">
+                                @error('accountForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password Baru</label>
-                        <input type="password" class="form-control @error('passwordForm.password') is-invalid @enderror" wire:model="passwordForm.password">
-                        @error('passwordForm.password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="card-footer bg-transparent border-bottom">
+                        <div class="btn-list justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                @include('templates.layouts.icon', ['name' => 'check', 'class' => 'me-1'])
+                                Simpan Account
+                            </button>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Konfirmasi</label>
-                        <input type="password" class="form-control @error('passwordForm.password_confirmation') is-invalid @enderror" wire:model="passwordForm.password_confirmation">
-                        @error('passwordForm.password_confirmation') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </form>
+
+                @if ($canManageClient)
+                    <form id="client-profile" wire:submit="saveClientProfile">
+                        <div class="card-body border-bottom">
+                            <h3 class="card-title">Client Profile</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Client Name</label>
+                                    <input type="text" class="form-control @error('clientForm.name') is-invalid @enderror" wire:model="clientForm.name">
+                                    @error('clientForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Client Email</label>
+                                    <input type="email" class="form-control @error('clientForm.email') is-invalid @enderror" wire:model="clientForm.email">
+                                    @error('clientForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" class="form-control @error('clientForm.phone') is-invalid @enderror" wire:model="clientForm.phone">
+                                    @error('clientForm.phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">PIC Name</label>
+                                    <input type="text" class="form-control @error('clientForm.pic_name') is-invalid @enderror" wire:model="clientForm.pic_name">
+                                    @error('clientForm.pic_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">URL / Path Logo</label>
+                                    <input type="text" class="form-control @error('clientForm.logo') is-invalid @enderror" wire:model="clientForm.logo">
+                                    @error('clientForm.logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-bottom">
+                            <div class="btn-list justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    @include('templates.layouts.icon', ['name' => 'check', 'class' => 'me-1'])
+                                    Simpan Client
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                @endif
+
+                <form id="security" wire:submit="changePassword">
+                    <div class="card-body">
+                        <h3 class="card-title">Security</h3>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Current Password</label>
+                                <input type="password" class="form-control @error('passwordForm.current_password') is-invalid @enderror" wire:model="passwordForm.current_password" autocomplete="current-password">
+                                @error('passwordForm.current_password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">New Password</label>
+                                <input type="password" class="form-control @error('passwordForm.password') is-invalid @enderror" wire:model="passwordForm.password" autocomplete="new-password">
+                                @error('passwordForm.password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Konfirmasi</label>
+                                <input type="password" class="form-control @error('passwordForm.password_confirmation') is-invalid @enderror" wire:model="passwordForm.password_confirmation" autocomplete="new-password">
+                                @error('passwordForm.password_confirmation') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-outline-primary w-100">Ganti Password</button>
-                </div>
-            </form>
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-list justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'me-1'])
+                                Change Password
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

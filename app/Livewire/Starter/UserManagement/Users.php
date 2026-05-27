@@ -124,7 +124,7 @@ class Users extends Component
         return view('starter.user-management.users', [
             'users' => $this->users()->users($this->login()),
             'roles' => $this->users()->roles($this->login()),
-        ])->title('Users');
+        ])->title('User');
     }
 
     private function users(): UserService

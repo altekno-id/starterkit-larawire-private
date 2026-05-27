@@ -20,6 +20,6 @@ class WebModule1Show extends Component
 
     public function render()
     {
-        return view('apps.web.module1.web-module1-show')->title('Module 1 Show');
+        return view('apps.web.module1.web-module1-show')->title('Detail Modul 1');
     }
 }

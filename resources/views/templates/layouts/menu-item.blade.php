@@ -34,7 +34,6 @@
 @elseif ($menu['hasChildren'])
     <details class="starter-sidebar-details starter-sidebar-details-nested" @if ($isExpanded) open @endif>
         <summary class="dropdown-item {{ $isExpanded ? 'active' : '' }}" role="button" aria-controls="{{ $menuId }}">
-            @include('templates.layouts.icon', ['name' => $icon, 'class' => 'icon-inline me-1'])
             <span>{{ $menu['label'] }}</span>
         </summary>
         <div class="dropdown-menu starter-sidebar-submenu" id="{{ $menuId }}">
@@ -45,7 +44,6 @@
     </details>
 @else
     <a href="{{ $menu['url'] }}" class="dropdown-item {{ $isActive ? 'active' : '' }}" @if ($isActive) data-current="true" @endif @if ($menu['url'] !== 'javascript:void(0);') data-starter-navigate data-starter-menu-url="{{ $menu['url'] }}" @endif>
-        @include('templates.layouts.icon', ['name' => $icon, 'class' => 'icon-inline me-1'])
         {{ $menu['label'] }}
     </a>
 @endif

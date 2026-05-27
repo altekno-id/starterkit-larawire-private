@@ -170,9 +170,9 @@ window.StarterTemplate = window.StarterTemplate || {
     toastIcon(type) {
         const icons = {
             success: '<path d="M5 12l5 5l10 -10"></path>',
-            info: '<path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path><path d="M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0 -18"></path>',
-            warning: '<path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86l-8.09 14a2 2 0 0 0 1.71 3h16.18a2 2 0 0 0 1.71 -3l-8.09 -14a2 2 0 0 0 -3.42 0z"></path>',
-            danger: '<path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path><path d="M10 10l4 4m0 -4l-4 4"></path>',
+            info: '<path d="M12 10v6"></path><path d="M12 7h.01"></path>',
+            warning: '<path d="M12 7v6"></path><path d="M12 17h.01"></path>',
+            danger: '<path d="M8 8l8 8"></path><path d="M16 8l-8 8"></path>',
         };
 
         return `<svg xmlns="http://www.w3.org/2000/svg" class="icon m-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[type]}</svg>`;
@@ -220,7 +220,7 @@ window.StarterTemplate = window.StarterTemplate || {
         const close = document.createElement('button');
         close.type = 'button';
         close.className = 'btn-close starter-toast-close';
-        close.setAttribute('aria-label', 'Close');
+        close.setAttribute('aria-label', 'Tutup');
         close.setAttribute('data-starter-toast-dismiss', '');
 
         toast.append(icon, body, close);

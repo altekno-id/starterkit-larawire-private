@@ -505,7 +505,7 @@
     <div class="page">
         <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
             <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#starter-sidebar-menu" aria-controls="starter-sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#starter-sidebar-menu" aria-controls="starter-sidebar-menu" aria-expanded="false" aria-label="Buka tutup navigasi">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -521,7 +521,7 @@
 
                 <div class="collapse navbar-collapse" id="starter-sidebar-menu">
                     <ul class="navbar-nav pt-lg-3">
-                        <li class="starter-sidebar-section">Menu Utama</li>
+                        <li class="starter-sidebar-section">Main Menu</li>
 
                         @forelse ($sidebarMods as $mod)
                             @foreach ($mod['menus'] as $menu)
@@ -533,13 +533,13 @@
                                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                                         @include('templates.layouts.icon', ['name' => 'circle'])
                                     </span>
-                                    <span class="nav-link-title">Tidak ada menu</span>
+                                        <span class="nav-link-title">Tidak ada menu</span>
                                 </span>
                             </li>
                         @endforelse
 
                         @if ($login?->role?->isAdmin())
-                            <li class="starter-sidebar-section">Pengaturan</li>
+                            <li class="starter-sidebar-section">Settings</li>
 
                             @php
                                 $userManagementOpen = request()->routeIs('starter.user-management.*');
@@ -557,12 +557,10 @@
                                     </summary>
                                     <div class="dropdown-menu starter-sidebar-submenu" id="starter-global-user-management">
                                         <a href="{{ route('starter.user-management.roles') }}" class="dropdown-item {{ $rolesActive ? 'active' : '' }}" @if ($rolesActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ route('starter.user-management.roles') }}">
-                                            @include('templates.layouts.icon', ['name' => 'shield-check', 'class' => 'icon-inline me-1'])
-                                            Roles
+                                            Role
                                         </a>
                                         <a href="{{ route('starter.user-management.users') }}" class="dropdown-item {{ $usersActive ? 'active' : '' }}" @if ($usersActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ route('starter.user-management.users') }}">
-                                            @include('templates.layouts.icon', ['name' => 'users', 'class' => 'icon-inline me-1'])
-                                            Users
+                                            User
                                         </a>
                                     </div>
                                 </details>

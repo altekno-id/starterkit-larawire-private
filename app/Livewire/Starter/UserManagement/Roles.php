@@ -77,8 +77,8 @@ class Roles extends Component
             'roleForm.code' => 'kode',
             'roleForm.name' => 'nama',
             'roleForm.desc' => 'deskripsi',
-            'roleForm.module_ids' => 'module access',
-            'roleForm.module_ids.*' => 'module access',
+            'roleForm.module_ids' => 'akses modul',
+            'roleForm.module_ids.*' => 'akses modul',
         ])['roleForm'];
 
         $role = $this->roles()->saveRole($this->login(), $this->selectedRoleId, $validated, $validated['module_ids']);
@@ -113,7 +113,7 @@ class Roles extends Component
         return view('starter.user-management.roles', [
             'roles' => $roles,
             'modules' => $modules,
-        ])->title('Roles');
+        ])->title('Role');
     }
 
     private function roles(): RoleService

@@ -3,28 +3,29 @@
         .starter-toast-stack {
             display: flex;
             flex-direction: column;
-            gap: .75rem;
+            gap: .8rem;
             pointer-events: none;
             position: fixed;
             right: 1rem;
             top: 1rem;
-            width: min(24rem, calc(100vw - 2rem));
+            width: min(25rem, calc(100vw - 2rem));
             z-index: 2060;
         }
 
         .starter-toast {
             align-items: flex-start;
-            background: var(--tblr-primary);
+            background: var(--starter-toast-bg);
             border: 0;
-            border-radius: var(--tblr-border-radius);
-            box-shadow: 0 .75rem 1.75rem rgba(24, 36, 51, .22);
-            color: #fff;
+            border-left: .25rem solid var(--starter-toast-accent);
+            border-radius: .125rem;
+            box-shadow: 0 .45rem 1rem rgba(24, 36, 51, .15);
+            color: var(--tblr-body-color);
             display: flex;
             gap: 1rem;
-            min-height: 5.25rem;
+            min-height: 4.75rem;
             opacity: 0;
             overflow: hidden;
-            padding: 1.05rem 1rem 1rem;
+            padding: 1rem 1rem .95rem 1.2rem;
             pointer-events: auto;
             position: relative;
             transform: translateY(-.5rem);
@@ -42,36 +43,41 @@
         }
 
         .starter-toast-success {
-            background: var(--tblr-success);
+            --starter-toast-accent: #138a22;
+            --starter-toast-bg: #eef9f0;
         }
 
         .starter-toast-info {
-            background: var(--tblr-info);
+            --starter-toast-accent: #3468e7;
+            --starter-toast-bg: #edf2ff;
         }
 
         .starter-toast-warning {
-            background: var(--tblr-warning);
+            --starter-toast-accent: #f2b600;
+            --starter-toast-bg: #fffbe8;
         }
 
         .starter-toast-danger {
-            background: var(--tblr-danger);
+            --starter-toast-accent: #ef1f1f;
+            --starter-toast-bg: #fff0f1;
         }
 
         .starter-toast-icon {
+            align-self: center;
             align-items: center;
+            background: var(--starter-toast-accent);
+            border-radius: 999px;
+            color: #fff;
             display: inline-flex;
-            flex: 0 0 3rem;
-            height: 3rem;
+            flex: 0 0 1.55rem;
+            height: 1.55rem;
             justify-content: center;
-            margin-top: .1rem;
-            opacity: .96;
-            width: 3rem;
+            width: 1.55rem;
         }
 
         .starter-toast-icon svg {
-            filter: drop-shadow(0 .1rem .12rem rgba(0, 0, 0, .16));
-            height: 3rem;
-            width: 3rem;
+            height: 1.05rem;
+            width: 1.05rem;
         }
 
         .starter-toast-body {
@@ -80,24 +86,28 @@
         }
 
         .starter-toast-title {
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
+            color: #202428;
+            font-size: .95rem;
+            font-weight: 700;
             line-height: 1.35;
             margin-bottom: .2rem;
         }
 
         .starter-toast-message {
-            color: rgba(255, 255, 255, .9);
-            line-height: 1.45;
+            color: #202428;
+            font-size: .92rem;
+            line-height: 1.35;
         }
 
         .starter-toast-close {
-            --tblr-btn-close-color: #fff;
-            filter: invert(1) grayscale(100%) brightness(200%);
             flex: 0 0 auto;
-            margin-top: .15rem;
-            opacity: .72;
+            filter: none;
+            height: 1rem;
+            margin-left: .35rem;
+            margin-top: -.05rem;
+            opacity: 1;
+            padding: 0;
+            width: 1rem;
         }
 
         .starter-toast-close:hover,
@@ -107,10 +117,12 @@
 
         .starter-toast-progress {
             animation: starter-toast-progress var(--starter-toast-duration, 4500ms) linear forwards;
-            background: rgba(0, 0, 0, .22);
+            background: var(--starter-toast-accent);
             bottom: 0;
-            height: .35rem;
+            display: none;
+            height: .125rem;
             left: 0;
+            opacity: .2;
             position: absolute;
             transform-origin: left;
             width: 100%;

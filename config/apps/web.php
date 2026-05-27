@@ -28,12 +28,10 @@ return [
                     'children' => [
                         [
                             'label' => 'Data',
-                            'icon' => 'table',
                             'route' => 'web.module1.index',
                         ],
                         [
                             'label' => 'Form',
-                            'icon' => 'file-plus',
                             'route' => 'web.module1.create',
                         ],
                     ],

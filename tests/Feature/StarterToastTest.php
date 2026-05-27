@@ -42,12 +42,37 @@ test('profile update dispatches starter toast', function () {
         ->set('accountForm.name', 'Aldhi Updated')
         ->set('accountForm.username', 'aldhi-updated')
         ->set('accountForm.email', 'aldhi.updated@example.test')
+        ->set('accountForm.profile_photo', 'assets/mine/avatar.png')
         ->call('saveAccount')
         ->assertDispatched('starter-toast', function (string $event, array $params): bool {
             return $event === 'starter-toast'
                 && ($params['type'] ?? null) === 'success'
-                && ($params['message'] ?? null) === 'Profile berhasil disimpan.';
+                && ($params['message'] ?? null) === 'Profil berhasil disimpan.';
         });
+
+    $this->assertDatabaseHas('user_logins', [
+        'id' => $login->id,
+        'name' => 'Aldhi Updated',
+        'username' => 'aldhi-updated',
+        'email' => 'aldhi.updated@example.test',
+        'profile_photo' => 'assets/mine/avatar.png',
+    ]);
+});
+
+test('profile page renders settings sections for admin', function () {
+    $login = starterToastLogin();
+
+    $this->actingAs($login);
+
+    Livewire::test(EditMyProfile::class)
+        ->assertSee('Account Settings')
+        ->assertSee('Account Detail')
+        ->assertSee('Client Profile')
+        ->assertSee('Admin Control')
+        ->assertSee('Security')
+        ->assertSee('URL / Path Profile Photo')
+        ->assertSee('Payment Reference')
+        ->assertDontSee('Simpan Kontrol');
 });
 
 test('role save dispatches starter toast', function () {

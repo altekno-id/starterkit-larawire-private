@@ -1,9 +1,9 @@
 <div>
-    <div class="page-header d-print-none mb-3" aria-label="Page header">
+    <div class="page-header d-print-none mb-3" aria-label="Header halaman">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle">Starter / User Management</div>
-                <h2 class="page-title">Roles</h2>
+                <h2 class="page-title">Role</h2>
             </div>
             @if ($selectedRoleId)
                 <div class="col-auto ms-auto">
@@ -27,7 +27,7 @@
                             <tr>
                                 <th>Role</th>
                                 <th>Access</th>
-                                <th class="text-end">Users</th>
+                                <th class="text-end">User</th>
                             </tr>
                         </thead>
                         <tbody>

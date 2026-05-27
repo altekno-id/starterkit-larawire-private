@@ -20,6 +20,6 @@ class WebModule1Edit extends Component
 
     public function render()
     {
-        return view('apps.web.module1.web-module1-edit')->title('Module 1 Edit');
+        return view('apps.web.module1.web-module1-edit')->title('Edit Modul 1');
     }
 }

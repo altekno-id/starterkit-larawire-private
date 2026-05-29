@@ -12,119 +12,11 @@
     <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler-vendors.min.css') }}">
     <style>
         :root {
-            --starter-sidebar-width: 15rem;
-            --starter-sidebar-bg: #182433;
             --starter-sidebar-muted: rgba(255, 255, 255, .58);
-            --starter-sidebar-text: rgba(255, 255, 255, .78);
-            --starter-sidebar-hover: rgba(255, 255, 255, .08);
-            --starter-sidebar-active: rgba(var(--tblr-primary-rgb), .95);
         }
 
         .navbar-vertical {
-            background: var(--starter-sidebar-bg);
-            width: var(--starter-sidebar-width);
-        }
-
-        @media (min-width: 992px) {
-            .page-wrapper {
-                margin-left: var(--starter-sidebar-width);
-            }
-        }
-
-        .starter-brand-mark {
-            align-items: center;
-            background: var(--tblr-primary);
-            border-radius: var(--tblr-border-radius);
-            color: var(--tblr-primary-fg);
-            display: inline-flex;
-            font-weight: 700;
-            height: 2rem;
-            justify-content: center;
-            width: 2rem;
-        }
-
-        .starter-menu {
-            padding: .5rem .5rem 1rem;
-            width: 100%;
-        }
-
-        .starter-menu-item {
-            margin: .125rem 0;
-        }
-
-        .starter-menu-link {
-            align-items: center;
-            background: transparent;
-            border: 0;
-            border-radius: .5rem;
-            color: var(--starter-sidebar-text);
-            display: flex;
-            gap: .65rem;
-            min-height: 2.35rem;
-            padding: .5rem .625rem;
-            text-align: left;
-            text-decoration: none;
-            transition: background-color .15s ease, color .15s ease;
-            width: 100%;
-        }
-
-        .starter-menu-link:hover,
-        .starter-menu-link:focus {
-            background: var(--starter-sidebar-hover);
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .starter-menu-link.active,
-        .starter-menu-link[data-current] {
-            background: var(--starter-sidebar-active);
-            color: #fff;
-        }
-
-        .starter-menu-icon {
-            flex: 0 0 1.1rem;
-            height: 1.1rem;
-            margin-top: .1rem;
-            width: 1.1rem;
-        }
-
-        .starter-menu-title {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .starter-menu-chevron {
-            flex: 0 0 1rem;
-            height: 1rem;
-            margin-left: auto;
-            opacity: .65;
-            transition: transform .15s ease;
-            width: 1rem;
-        }
-
-        .starter-menu-link[aria-expanded="true"] .starter-menu-chevron {
-            transform: rotate(90deg);
-        }
-
-        .starter-menu-children {
-            border-left: 1px solid rgba(255, 255, 255, .09);
-            margin: .2rem 0 .35rem 1.15rem;
-            padding-left: .45rem;
-        }
-
-        .starter-menu-children .starter-menu-link {
-            color: var(--starter-sidebar-muted);
-            min-height: 2.1rem;
-            padding-block: .4rem;
-        }
-
-        .starter-menu-children .starter-menu-link.active,
-        .starter-menu-children .starter-menu-link[data-current] {
-            background: rgba(var(--tblr-primary-rgb), .22);
-            color: #fff;
+            --tblr-navbar-bg: #182433;
         }
 
         .starter-sidebar-section {
@@ -132,13 +24,17 @@
             font-size: .68rem;
             font-weight: 700;
             letter-spacing: .06em;
-            padding: .85rem 1rem .35rem;
+            padding: .85rem 0 .35rem;
             text-transform: uppercase;
         }
 
+        @media (min-width: 992px) {
+            .starter-sidebar-section {
+                padding-inline: var(--tblr-page-padding);
+            }
+        }
+
         .starter-account-avatar {
-            background-position: center;
-            background-size: cover;
             flex: 0 0 2rem;
         }
 
@@ -164,44 +60,9 @@
         }
 
         .starter-account-panel {
-            background: var(--tblr-bg-surface);
-            border: 1px solid var(--tblr-border-color);
-            border-radius: var(--tblr-border-radius-lg);
-            box-shadow: var(--tblr-box-shadow-dropdown);
             min-width: 13.5rem;
-            padding: .35rem;
-            position: absolute;
             right: 0;
-            top: calc(100% + .6rem);
-            z-index: 1050;
-        }
-
-        .starter-account-item {
-            align-items: center;
-            background: transparent;
-            border: 0;
-            border-radius: var(--tblr-border-radius);
-            color: var(--tblr-body-color);
-            display: flex;
-            gap: .65rem;
-            padding: .55rem .65rem;
-            position: relative;
-            text-align: left;
-            text-decoration: none;
-            width: 100%;
-            z-index: 1;
-        }
-
-        .starter-account-item:hover,
-        .starter-account-item:focus {
-            background: var(--tblr-bg-surface-secondary);
-            color: var(--tblr-body-color);
-            text-decoration: none;
-        }
-
-        .table-nowrap th,
-        .table-nowrap td {
-            white-space: nowrap;
+            top: calc(100% + var(--tblr-dropdown-spacer));
         }
 
         .page-body .page-header {
@@ -276,45 +137,8 @@
             }
         }
 
-        .navbar-vertical {
-            --tblr-navbar-bg: #182433;
-            width: 100%;
-        }
-
-        @media (min-width: 992px) {
-            .navbar-vertical {
-                width: 15rem;
-            }
-
-            .page-wrapper {
-                margin-left: 15rem;
-            }
-        }
-
-        .starter-brand-image {
-            height: 2rem;
-            width: auto;
-        }
-
         .starter-account-menu[open] .starter-account-panel {
             display: block;
-        }
-
-        .starter-account-panel {
-            min-width: 13.5rem;
-        }
-
-        .starter-account-menu summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .starter-account-menu summary {
-            cursor: pointer;
-            list-style: none;
-        }
-
-        .navbar-vertical .dropdown-menu.show {
-            position: static;
         }
 
         .navbar-vertical .starter-sidebar-details summary {
@@ -376,7 +200,7 @@
 
                 <div class="navbar-brand navbar-brand-autodark">
                     <a href="{{ $currentDashboardUrl }}" aria-label="{{ config('app.name') }}" data-starter-navigate>
-                        <img src="{{ asset('assets/tabler/static/logo-white.svg') }}" class="navbar-brand-image starter-brand-image" alt="{{ config('app.name') }}">
+                        <img src="{{ asset('assets/tabler/static/logo-white.svg') }}" class="navbar-brand-image" alt="{{ config('app.name') }}">
                     </a>
                 </div>
 

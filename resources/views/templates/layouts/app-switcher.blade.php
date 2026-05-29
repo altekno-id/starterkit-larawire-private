@@ -4,8 +4,8 @@
     $triggerLabel = $triggerLabel ?? ($activeApp['name'] ?? $currentAppName ?? 'App');
 @endphp
 
-<div class="nav-item dropdown {{ $compact ? '' : 'd-none d-md-flex me-3' }}">
-    <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show app menu" data-bs-auto-close="outside" aria-expanded="false">
+<div class="nav-item dropdown {{ $compact ? '' : 'd-none d-md-flex me-3' }}" data-starter-app-switcher>
+    <a href="#" class="nav-link px-0" tabindex="-1" aria-label="Show app menu" aria-expanded="false" data-starter-app-toggle>
         @include('templates.layouts.icon', ['name' => 'apps'])
         <span class="badge bg-primary"></span>
     </a>

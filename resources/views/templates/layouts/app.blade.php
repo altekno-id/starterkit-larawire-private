@@ -500,7 +500,7 @@
     </div>
 
     <script src="{{ asset('assets/tabler/dist/js/tabler.min.js') }}" defer></script>
-    <script src="{{ asset('assets/mine/starter-runtime.js') }}" data-navigate-once defer></script>
+    <script src="{{ asset('assets/mine/starter-runtime.js') }}?v={{ filemtime(public_path('assets/mine/starter-runtime.js')) }}" data-navigate-once defer></script>
     @livewireScripts
 </body>
 

@@ -316,17 +316,22 @@
             transition: opacity .16s ease;
         }
 
+        .starter-slot-area {
+            position: relative;
+        }
+
         .starter-navigate-loader {
             align-items: center;
             background: color-mix(in srgb, var(--tblr-bg-surface) 88%, transparent);
+            border-radius: var(--tblr-border-radius);
             display: flex;
             inset: 0;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            position: fixed;
+            position: absolute;
             transition: opacity .14s ease;
-            z-index: 2000;
+            z-index: 20;
         }
 
         .starter-page-loader {
@@ -487,19 +492,6 @@
         $accountPersistBase = 'starter-account-'.($login?->getKey() ?? 'guest');
     @endphp
 
-    <div class="starter-navigate-loader" aria-label="Preparing application" role="status">
-        <div class="starter-page-loader text-center">
-            <div class="mb-3">
-                <span class="navbar-brand navbar-brand-autodark justify-content-center">
-                    <img src="{{ asset('assets/tabler/static/logo-small.svg') }}" height="36" alt="{{ config('app.name') }}">
-                </span>
-            </div>
-            <div class="text-secondary mb-3">Preparing application</div>
-            <div class="progress progress-sm">
-                <div class="progress-bar progress-bar-indeterminate"></div>
-            </div>
-        </div>
-    </div>
     @include('templates.components.toast')
 
     <div class="page">
@@ -598,7 +590,23 @@
         <div class="page-wrapper">
             <div class="page-body starter-page-body" wire:transition="starter-page">
                 <div class="container-xl">
-                    {{ $slot }}
+                    <div class="starter-slot-area">
+                        {{ $slot }}
+
+                        <div class="starter-navigate-loader" aria-label="Loading..." role="status">
+                            <div class="starter-page-loader text-center">
+                                <div class="mb-3">
+                                    <span class="navbar-brand navbar-brand-autodark justify-content-center">
+                                        <img src="{{ asset('assets/tabler/static/logo-small.svg') }}" height="36" alt="{{ config('app.name') }}">
+                                    </span>
+                                </div>
+                                <div class="text-secondary mb-3">Loading...</div>
+                                <div class="progress progress-sm">
+                                    <div class="progress-bar progress-bar-indeterminate"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

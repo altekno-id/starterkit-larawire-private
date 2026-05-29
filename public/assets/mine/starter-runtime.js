@@ -54,6 +54,8 @@ window.StarterTemplate = window.StarterTemplate || {
         const current = new URL(window.location.href);
 
         if (this.isSameUrl(target.href, current.href)) {
+            this.showNavigateLoader();
+            window.location.reload();
             return;
         }
 

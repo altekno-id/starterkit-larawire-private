@@ -1,4 +1,4 @@
-window.StarterTemplate = window.StarterTemplate || {
+window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
     normalizeUrl(url) {
         const parsed = new URL(url, window.location.href);
         parsed.hash = '';
@@ -9,6 +9,9 @@ window.StarterTemplate = window.StarterTemplate || {
     },
     isSameUrl(url, compareUrl = window.location.href) {
         return this.normalizeUrl(url) === this.normalizeUrl(compareUrl);
+    },
+    bootstrap() {
+        return window.bootstrap || window.tabler?.bootstrap || null;
     },
     showNavigateLoader() {
         this.navigating = true;
@@ -76,7 +79,7 @@ window.StarterTemplate = window.StarterTemplate || {
         this.closeAppSwitchers();
 
         document.querySelectorAll('.navbar-collapse.show').forEach((element) => {
-            const instance = window.bootstrap?.Collapse?.getInstance(element);
+            const instance = this.bootstrap()?.Collapse?.getInstance(element);
             instance ? instance.hide() : element.classList.remove('show');
         });
     },
@@ -91,7 +94,7 @@ window.StarterTemplate = window.StarterTemplate || {
         document.querySelectorAll('.dropdown-toggle[aria-expanded="true"]').forEach((element) => element.setAttribute('aria-expanded', 'false'));
 
         document.querySelectorAll('[data-bs-toggle="collapse"]').forEach((element) => {
-            window.bootstrap?.Collapse?.getInstance(element)?.dispose();
+            this.bootstrap()?.Collapse?.getInstance(element)?.dispose();
         });
 
         document.querySelectorAll('.collapse.show').forEach((element) => element.classList.remove('show'));
@@ -132,10 +135,12 @@ window.StarterTemplate = window.StarterTemplate || {
         }
     },
     prepareDropdowns() {
-        if (! window.bootstrap?.Dropdown) return;
+        const bootstrap = this.bootstrap();
+
+        if (! bootstrap?.Dropdown) return;
 
         document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach((element) => {
-            window.bootstrap.Dropdown.getOrCreateInstance(element);
+            bootstrap.Dropdown.getOrCreateInstance(element);
         });
     },
     activateSidebar() {
@@ -409,7 +414,7 @@ window.StarterTemplate = window.StarterTemplate || {
         this.activateAppSwitcher();
         this.prepareDropdowns();
     },
-};
+});
 
 document.addEventListener('DOMContentLoaded', () => window.StarterTemplate.init());
 document.addEventListener('livewire:initialized', () => window.StarterTemplate.bindLivewire());

@@ -29,7 +29,7 @@
 @endphp
 
 <div class="modal modal-blur fade {{ $modalClass }}" id="{{ $id }}" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-{{ $size }} modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-{{ $size }}" role="document">
         <div class="modal-content">
             @if ($closeButton)
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

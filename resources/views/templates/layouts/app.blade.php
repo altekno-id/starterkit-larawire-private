@@ -11,31 +11,8 @@
     <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler-vendors.min.css') }}">
     <style>
-        :root {
-            --starter-sidebar-muted: rgba(255, 255, 255, .58);
-        }
-
         .navbar-vertical {
             --tblr-navbar-bg: #182433;
-        }
-
-        .starter-sidebar-section {
-            color: var(--starter-sidebar-muted);
-            font-size: .68rem;
-            font-weight: 700;
-            letter-spacing: .06em;
-            padding: .85rem 0 .35rem;
-            text-transform: uppercase;
-        }
-
-        @media (min-width: 992px) {
-            .starter-sidebar-section {
-                padding-inline: var(--tblr-page-padding);
-            }
-        }
-
-        .starter-account-avatar {
-            flex: 0 0 2rem;
         }
 
         .starter-account-summary,
@@ -43,50 +20,32 @@
             transition: none;
         }
 
-        .starter-account-menu {
-            position: relative;
+        .starter-account-menu summary,
+        .navbar-vertical .starter-sidebar-details summary {
+            list-style: none;
         }
 
         .starter-account-menu summary {
-            align-items: center;
-            cursor: pointer;
             display: flex;
-            list-style: none;
-            user-select: none;
         }
 
-        .starter-account-menu summary::-webkit-details-marker {
+        .starter-account-menu summary::-webkit-details-marker,
+        .navbar-vertical .starter-sidebar-details summary::-webkit-details-marker {
             display: none;
         }
 
         .starter-account-panel {
             min-width: 13.5rem;
-            right: 0;
-            top: calc(100% + var(--tblr-dropdown-spacer));
-        }
-
-        .page-body .page-header {
-            margin-top: 0;
         }
 
         .starter-page-body {
             transition: opacity .16s ease;
         }
 
-        .starter-slot-area {
-            position: relative;
-        }
-
         .starter-navigate-loader {
-            align-items: center;
             background: color-mix(in srgb, var(--tblr-bg-surface) 88%, transparent);
-            border-radius: var(--tblr-border-radius);
-            display: flex;
-            inset: 0;
-            justify-content: center;
             opacity: 0;
             pointer-events: none;
-            position: absolute;
             transition: opacity .14s ease;
             z-index: 20;
         }
@@ -94,6 +53,18 @@
         .starter-page-loader {
             transform: translateY(-.75rem);
             width: min(16rem, calc(100vw - 2rem));
+        }
+
+        .starter-hover-tooltip > .tooltip {
+            bottom: calc(100% + .35rem);
+            left: 0;
+            max-width: min(18rem, 80vw);
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .starter-hover-tooltip:not(:hover):not(:focus-within) > .tooltip {
+            display: none;
         }
 
         body.starter-is-navigating .starter-navigate-loader {
@@ -141,16 +112,6 @@
             display: block;
         }
 
-        .navbar-vertical .starter-sidebar-details summary {
-            cursor: pointer;
-            list-style: none;
-            user-select: none;
-        }
-
-        .navbar-vertical .starter-sidebar-details summary::-webkit-details-marker {
-            display: none;
-        }
-
         .navbar-vertical .starter-sidebar-details > summary.nav-link::after,
         .navbar-vertical .starter-sidebar-details > summary.dropdown-item::after {
             border: 0;
@@ -168,11 +129,6 @@
         .navbar-vertical .starter-sidebar-details[open] > summary.nav-link::after,
         .navbar-vertical .starter-sidebar-details[open] > summary.dropdown-item::after {
             transform: rotate(90deg);
-        }
-
-        .navbar-vertical .starter-sidebar-submenu {
-            display: none;
-            position: static;
         }
 
         .navbar-vertical .starter-sidebar-details[open] > .starter-sidebar-submenu {
@@ -211,7 +167,9 @@
 
                 <div class="collapse navbar-collapse" id="starter-sidebar-menu">
                     <ul class="navbar-nav pt-lg-3">
-                        <li class="starter-sidebar-section">Main Menu</li>
+                        <li class="nav-item px-0 px-lg-3 pt-3 pb-1">
+                            <span class="subheader">Main Menu</span>
+                        </li>
 
                         @forelse ($sidebarMods as $mod)
                             @foreach ($mod['menus'] as $menu)
@@ -229,7 +187,9 @@
                         @endforelse
 
                         @if ($login?->role?->isAdmin())
-                            <li class="starter-sidebar-section">Settings</li>
+                            <li class="nav-item px-0 px-lg-3 pt-3 pb-1">
+                                <span class="subheader">Settings</span>
+                            </li>
 
                             @php
                                 $userManagementOpen = request()->routeIs('starter.user-management.*');
@@ -240,13 +200,13 @@
 
                             <li class="nav-item {{ $userManagementOpen ? 'active' : '' }}">
                                 <details class="starter-sidebar-details" @if ($userManagementOpen) open @endif>
-                                    <summary class="nav-link" role="button" aria-controls="starter-global-user-management">
+                                    <summary class="nav-link cursor-pointer user-select-none" role="button" aria-controls="starter-global-user-management">
                                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                                             @include('templates.layouts.icon', ['name' => 'users-group'])
                                         </span>
                                         <span class="nav-link-title">User Management</span>
                                     </summary>
-                                    <div class="dropdown-menu starter-sidebar-submenu" id="starter-global-user-management">
+                                    <div class="dropdown-menu starter-sidebar-submenu position-static" id="starter-global-user-management">
                                         <a href="{{ route('starter.user-management.roles') }}" class="dropdown-item {{ $rolesActive ? 'active' : '' }}" @if ($rolesActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ route('starter.user-management.roles') }}">
                                             Role
                                         </a>
@@ -288,10 +248,10 @@
         <div class="page-wrapper">
             <div class="page-body starter-page-body" wire:transition="starter-page">
                 <div class="container-xl">
-                    <div class="starter-slot-area">
+                    <div class="starter-slot-area position-relative">
                         {{ $slot }}
 
-                        <div class="starter-navigate-loader" aria-label="Loading..." role="status">
+                        <div class="starter-navigate-loader position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center rounded" aria-label="Loading..." role="status">
                             <div class="starter-page-loader text-center">
                                 <div class="mb-3">
                                     <span class="navbar-brand navbar-brand-autodark justify-content-center">

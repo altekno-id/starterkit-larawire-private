@@ -1,5 +1,5 @@
 <div>
-    <div class="page-header d-print-none mb-3" aria-label="Page header">
+    <div class="page-header d-print-none mt-0 mb-3" aria-label="Page header">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle">Starter / My Profile</div>
@@ -12,11 +12,17 @@
         <div class="row g-0">
             <div class="col-12 col-lg-3 border-end">
                 <div class="card-body">
-                    <div class="d-flex align-items-center mb-4">
-                        <span class="avatar avatar-xl me-3" style="background-image: url({{ $loginAvatarUrl }})"></span>
-                        <div class="min-w-0">
+                    <div class="d-flex align-items-start mb-4">
+                        <span class="avatar avatar-md flex-shrink-0 me-3" style="background-image: url({{ $loginAvatarUrl }})"></span>
+                        <div class="flex-fill min-w-0 overflow-hidden">
                             <div class="h3 mb-1 text-truncate">{{ $login->name }}</div>
-                            <div class="text-secondary text-truncate">{{ $login->email }}</div>
+                            <div class="starter-hover-tooltip position-relative">
+                                <div class="text-secondary text-truncate" tabindex="0">{{ $login->email }}</div>
+                                <div class="tooltip bs-tooltip-top show" role="tooltip">
+                                    <div class="tooltip-arrow"></div>
+                                    <div class="tooltip-inner">{{ $login->email }}</div>
+                                </div>
+                            </div>
                             <div class="mt-2">
                                 <span class="badge bg-primary-lt">{{ $login->role?->name ?? 'No Role' }}</span>
                             </div>
@@ -66,7 +72,7 @@
 
                             <div class="row align-items-center mb-4">
                                 <div class="col-auto">
-                                    <span class="avatar avatar-xl" style="background-image: url({{ $profilePhotoPreviewUrl }})"></span>
+                                    <span class="avatar avatar-xl flex-shrink-0" style="background-image: url({{ $profilePhotoPreviewUrl }})"></span>
                                 </div>
                                 <div class="col-auto">
                                     <label class="btn btn-outline-primary mb-0" for="profile-photo-upload">

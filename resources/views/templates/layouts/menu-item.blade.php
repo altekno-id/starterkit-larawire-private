@@ -10,13 +10,13 @@
     <li class="nav-item {{ $isExpanded || $isActive ? 'active' : '' }}">
         @if ($menu['hasChildren'])
             <details class="starter-sidebar-details" @if ($isExpanded) open @endif>
-                <summary class="nav-link" role="button" aria-controls="{{ $menuId }}">
+                <summary class="nav-link cursor-pointer user-select-none" role="button" aria-controls="{{ $menuId }}">
                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                         @include('templates.layouts.icon', ['name' => $icon])
                     </span>
                     <span class="nav-link-title">{{ $menu['label'] }}</span>
                 </summary>
-                <div class="dropdown-menu starter-sidebar-submenu" id="{{ $menuId }}">
+                <div class="dropdown-menu starter-sidebar-submenu position-static" id="{{ $menuId }}">
                     @foreach ($menu['children'] as $child)
                         @include('templates.layouts.menu-item', ['menu' => $child, 'level' => 2])
                     @endforeach
@@ -33,10 +33,10 @@
     </li>
 @elseif ($menu['hasChildren'])
     <details class="starter-sidebar-details starter-sidebar-details-nested" @if ($isExpanded) open @endif>
-        <summary class="dropdown-item {{ $isExpanded ? 'active' : '' }}" role="button" aria-controls="{{ $menuId }}">
+        <summary class="dropdown-item cursor-pointer user-select-none {{ $isExpanded ? 'active' : '' }}" role="button" aria-controls="{{ $menuId }}">
             <span>{{ $menu['label'] }}</span>
         </summary>
-        <div class="dropdown-menu starter-sidebar-submenu" id="{{ $menuId }}">
+        <div class="dropdown-menu starter-sidebar-submenu position-static" id="{{ $menuId }}">
             @foreach ($menu['children'] as $child)
                 @include('templates.layouts.menu-item', ['menu' => $child, 'level' => $level + 1])
             @endforeach

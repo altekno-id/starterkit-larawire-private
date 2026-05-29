@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Services\Starter\Navigation;
+namespace App\Services\Starter;
 
+use App\Contracts\Starter\AppRouteInterface;
+use App\Contracts\Starter\UserRoleInterface;
 use App\Models\Starter\AppRoute;
 use App\Models\Starter\UserLogin;
 use App\Support\Starter\StarterNavigation;
@@ -9,8 +11,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Throwable;
 
-class AuthorizedRedirectService
+class NavigationAuthorizedRedirectService
 {
+    public function __construct(
+        private readonly AppRouteInterface $appRoutes,
+        private readonly UserRoleInterface $userRoles
+    ) {}
+
     public function forLogin(UserLogin $login, ?string $redirect = null, ?string $intended = null): string
     {
         if ($this->canVisitUrl($login, $redirect)) {
@@ -143,33 +150,21 @@ class AuthorizedRedirectService
             return Route::has($anchorRoute) ? $anchorRoute : null;
         }
 
-        return AppRoute::query()
-            ->where('method', 'GET')
-            ->where('uri', $path)
-            ->whereHas('mod.app', function ($query) use ($appKey): void {
-                $query->where('subdomain', $appKey);
-            })
-            ->value('name');
+        return $this->appRoutes->nameForGetUriAndAppSubdomain($path, $appKey);
     }
 
     private function firstAuthorizedRoute(UserLogin $login, ?string $appKey = null): ?AppRoute
     {
-        $modIds = $login->role?->mods()->pluck('app_mods.id') ?? collect();
+        $modIds = $login->role
+            ? $this->userRoles->modIds($login->role)
+            : collect();
 
         if ($modIds->isEmpty()) {
             return null;
         }
 
-        return AppRoute::query()
-            ->with('mod.app')
-            ->whereIn('app_mod_id', $modIds)
-            ->where('method', 'GET')
-            ->when($appKey, function ($query) use ($appKey): void {
-                $query->whereHas('mod.app', function ($query) use ($appKey): void {
-                    $query->where('subdomain', $appKey);
-                });
-            })
-            ->get()
+        return $this->appRoutes
+            ->getRoutesForModIds($modIds->all(), $appKey)
             ->filter(fn (AppRoute $route): bool => Route::has($route->name))
             ->sortBy(fn (AppRoute $route): array => [
                 $this->routeScore($route->name),

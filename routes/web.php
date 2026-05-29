@@ -6,7 +6,7 @@ use App\Livewire\Apps\Web\Module1\WebModule1Edit;
 use App\Livewire\Apps\Web\Module1\WebModule1Index;
 use App\Livewire\Apps\Web\Module1\WebModule1Show;
 use App\Models\Starter\UserLogin;
-use App\Services\Starter\Navigation\AuthorizedRedirectService;
+use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Support\Facades\Route;
 
@@ -18,7 +18,7 @@ Route::get('/login', function () {
 
 Route::name('web.')->group(function () {
     Route::middleware('auth:web')->group(function () {
-        Route::get('/', function (AuthorizedRedirectService $redirects) {
+        Route::get('/', function (NavigationAuthorizedRedirectService $redirects) {
             $login = auth()->user();
 
             return $login instanceof UserLogin

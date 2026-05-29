@@ -3,7 +3,7 @@
 namespace App\Livewire\Starter\Profile;
 
 use App\Models\Starter\UserLogin;
-use App\Services\Starter\Profile\ProfileService;
+use App\Services\Starter\ProfileService;
 use App\Services\Starter\StarterContextService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;

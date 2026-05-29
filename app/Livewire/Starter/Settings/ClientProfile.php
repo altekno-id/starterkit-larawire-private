@@ -4,7 +4,7 @@ namespace App\Livewire\Starter\Settings;
 
 use App\Models\Starter\User;
 use App\Models\Starter\UserLogin;
-use App\Services\Starter\Profile\ProfileService;
+use App\Services\Starter\ProfileService;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;

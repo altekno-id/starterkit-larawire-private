@@ -2,15 +2,19 @@
 
 namespace App\Providers;
 
-use App\Contracts\Starter\ManagedUserInterface;
-use App\Contracts\Starter\ProfileInterface;
-use App\Contracts\Starter\RoleInterface;
+use App\Contracts\Starter\AppInterface;
+use App\Contracts\Starter\AppModInterface;
+use App\Contracts\Starter\AppRouteInterface;
+use App\Contracts\Starter\UserInterface;
 use App\Contracts\Starter\UserLoginInterface;
+use App\Contracts\Starter\UserRoleInterface;
 use App\Http\Middleware\StarterAuthorize;
-use App\Repositories\Starter\ManagedUserRepository;
-use App\Repositories\Starter\ProfileRepository;
-use App\Repositories\Starter\RoleRepository;
+use App\Repositories\Starter\AppRepository;
+use App\Repositories\Starter\AppModRepository;
+use App\Repositories\Starter\AppRouteRepository;
+use App\Repositories\Starter\UserRepository;
 use App\Repositories\Starter\UserLoginRepository;
+use App\Repositories\Starter\UserRoleRepository;
 use App\Services\Starter\StarterContextService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\View;
@@ -24,10 +28,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(ManagedUserInterface::class, ManagedUserRepository::class);
-        $this->app->bind(ProfileInterface::class, ProfileRepository::class);
-        $this->app->bind(RoleInterface::class, RoleRepository::class);
+        $this->app->bind(AppInterface::class, AppRepository::class);
+        $this->app->bind(AppModInterface::class, AppModRepository::class);
+        $this->app->bind(AppRouteInterface::class, AppRouteRepository::class);
+        $this->app->bind(UserInterface::class, UserRepository::class);
         $this->app->bind(UserLoginInterface::class, UserLoginRepository::class);
+        $this->app->bind(UserRoleInterface::class, UserRoleRepository::class);
         $this->app->scoped(StarterContextService::class);
     }
 

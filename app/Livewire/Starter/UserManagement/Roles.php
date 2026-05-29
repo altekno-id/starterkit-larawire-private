@@ -3,7 +3,7 @@
 namespace App\Livewire\Starter\UserManagement;
 
 use App\Models\Starter\UserLogin;
-use App\Services\Starter\UserManagement\RoleService;
+use App\Services\Starter\UserManagementRoleService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -116,9 +116,9 @@ class Roles extends Component
         ])->title('Role');
     }
 
-    private function roles(): RoleService
+    private function roles(): UserManagementRoleService
     {
-        return app(RoleService::class);
+        return app(UserManagementRoleService::class);
     }
 
     private function login(): UserLogin

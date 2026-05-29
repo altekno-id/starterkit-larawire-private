@@ -3,7 +3,7 @@
 namespace App\Livewire\Starter\UserManagement;
 
 use App\Models\Starter\UserLogin;
-use App\Services\Starter\UserManagement\UserService;
+use App\Services\Starter\UserManagementUserService;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -127,9 +127,9 @@ class Users extends Component
         ])->title('User');
     }
 
-    private function users(): UserService
+    private function users(): UserManagementUserService
     {
-        return app(UserService::class);
+        return app(UserManagementUserService::class);
     }
 
     private function login(): UserLogin

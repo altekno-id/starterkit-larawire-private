@@ -1,18 +1,20 @@
 <?php
 
-namespace App\Services\Starter\UserManagement;
+namespace App\Services\Starter;
 
-use App\Contracts\Starter\ManagedUserInterface;
+use App\Contracts\Starter\UserLoginInterface;
+use App\Contracts\Starter\UserRoleInterface;
 use App\Models\Starter\User;
 use App\Models\Starter\UserLogin;
 use App\Models\Starter\UserRole;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
-class UserService
+class UserManagementUserService
 {
     public function __construct(
-        private readonly ManagedUserInterface $users
+        private readonly UserLoginInterface $userLogins,
+        private readonly UserRoleInterface $userRoles
     ) {}
 
     /**
@@ -20,7 +22,7 @@ class UserService
      */
     public function users(UserLogin $login): Collection
     {
-        return $this->users->forUser($this->client($login));
+        return $this->userLogins->forUser($this->client($login), ['role']);
     }
 
     /**
@@ -28,15 +30,12 @@ class UserService
      */
     public function roles(UserLogin $login): Collection
     {
-        return $this->client($login)
-            ->roles()
-            ->orderBy('name')
-            ->get();
+        return $this->userRoles->forUser($this->client($login));
     }
 
     public function findUser(UserLogin $currentLogin, int $id): UserLogin
     {
-        $login = $this->users->findForUser($this->client($currentLogin), $id);
+        $login = $this->userLogins->findForUser($this->client($currentLogin), $id, ['role']);
 
         abort_unless($login instanceof UserLogin, 404);
 
@@ -49,7 +48,7 @@ class UserService
     public function saveUser(UserLogin $currentLogin, ?int $userLoginId, array $data): UserLogin
     {
         $client = $this->client($currentLogin);
-        $role = $client->roles()->whereKey((int) $data['user_role_id'])->first();
+        $role = $this->userRoles->findForUser($client, (int) $data['user_role_id']);
 
         if (! $role instanceof UserRole) {
             throw ValidationException::withMessages([
@@ -57,7 +56,7 @@ class UserService
             ]);
         }
 
-        $login = $userLoginId ? $this->users->findForUser($client, $userLoginId) : null;
+        $login = $userLoginId ? $this->userLogins->findForUser($client, $userLoginId) : null;
 
         if ($userLoginId && ! $login instanceof UserLogin) {
             abort(404);
@@ -81,8 +80,8 @@ class UserService
         }
 
         return $login instanceof UserLogin
-            ? $this->users->update($login, $payload)
-            : $this->users->create($client, $payload);
+            ? $this->userLogins->update($login, $payload)
+            : $this->userLogins->createForUser($client, $payload);
     }
 
     public function deleteUser(UserLogin $currentLogin, int $userLoginId): void
@@ -95,7 +94,7 @@ class UserService
             ]);
         }
 
-        $this->users->delete($login);
+        $this->userLogins->delete($login);
     }
 
     private function client(UserLogin $login): User

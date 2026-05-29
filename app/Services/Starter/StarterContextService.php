@@ -2,6 +2,9 @@
 
 namespace App\Services\Starter;
 
+use App\Contracts\Starter\AppInterface;
+use App\Contracts\Starter\AppModInterface;
+use App\Contracts\Starter\UserRoleInterface;
 use App\Models\Starter\App;
 use App\Models\Starter\AppMenu;
 use App\Models\Starter\AppMod;
@@ -13,6 +16,12 @@ use Illuminate\Support\Facades\Route;
 
 class StarterContextService
 {
+    public function __construct(
+        private readonly AppInterface $apps,
+        private readonly AppModInterface $appMods,
+        private readonly UserRoleInterface $userRoles
+    ) {}
+
     /**
      * @var array<string, mixed>|null
      */
@@ -83,9 +92,7 @@ class StarterContextService
 
     private function currentApp(string $currentAppKey): ?App
     {
-        return App::query()
-            ->where('subdomain', $currentAppKey)
-            ->first();
+        return $this->apps->findBySubdomain($currentAppKey);
     }
 
     /**
@@ -97,23 +104,19 @@ class StarterContextService
             return new EloquentCollection;
         }
 
-        $query = App::query()->orderBy('name');
-
         if ($login->role?->hasFullAccess()) {
-            return $query->get();
+            return $this->apps->allOrderedByName();
         }
 
-        $modIds = $login->role?->mods()->pluck('app_mods.id') ?? collect();
+        $modIds = $login->role
+            ? $this->userRoles->modIds($login->role)
+            : collect();
 
         if ($modIds->isEmpty()) {
             return new EloquentCollection;
         }
 
-        return $query
-            ->whereHas('mods', function ($query) use ($modIds): void {
-                $query->whereIn('app_mods.id', $modIds);
-            })
-            ->get();
+        return $this->apps->whereHasModIds($modIds->all());
     }
 
     /**
@@ -125,24 +128,26 @@ class StarterContextService
             return new EloquentCollection;
         }
 
-        $query = AppMod::query()
-            ->where('app_id', $currentApp->id)
-            ->with([
-                'menus' => function ($query): void {
-                    $query
-                        ->whereNull('parent_id')
-                        ->with(['route', 'childrenRecursive.route'])
-                        ->orderBy('order');
-                },
-            ])
-            ->orderBy('id');
+        $with = [
+            'menus' => function ($query): void {
+                $query
+                    ->whereNull('parent_id')
+                    ->with(['route', 'childrenRecursive.route'])
+                    ->orderBy('order');
+            },
+        ];
 
-        if (! $login->role?->hasFullAccess()) {
-            $modIds = $login->role?->mods()->pluck('app_mods.id') ?? collect();
-            $query->whereIn('id', $modIds);
+        if ($login->role?->hasFullAccess()) {
+            return $this->appMods->forApp($currentApp, $with);
         }
 
-        return $query->get();
+        $modIds = $login->role
+            ? $this->userRoles->modIds($login->role)
+            : collect();
+
+        return $modIds->isEmpty()
+            ? new EloquentCollection
+            : $this->appMods->forApp($currentApp, $with, $modIds->all());
     }
 
     /**

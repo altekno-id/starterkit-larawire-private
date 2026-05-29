@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Services\Starter\UserManagement;
+namespace App\Services\Starter;
 
-use App\Contracts\Starter\RoleInterface;
+use App\Contracts\Starter\AppModInterface;
+use App\Contracts\Starter\UserRoleInterface;
 use App\Models\Starter\AppMod;
 use App\Models\Starter\User;
 use App\Models\Starter\UserLogin;
@@ -12,10 +13,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class RoleService
+class UserManagementRoleService
 {
     public function __construct(
-        private readonly RoleInterface $roles
+        private readonly UserRoleInterface $userRoles,
+        private readonly AppModInterface $appMods
     ) {}
 
     /**
@@ -23,12 +25,12 @@ class RoleService
      */
     public function roles(UserLogin $login): Collection
     {
-        return $this->roles->forUser($this->client($login));
+        return $this->userRoles->forUser($this->client($login), ['mods.app'], ['userLogins']);
     }
 
     public function findRole(UserLogin $login, int $id): UserRole
     {
-        $role = $this->roles->findForUser($this->client($login), $id);
+        $role = $this->userRoles->findForUser($this->client($login), $id, ['mods.app'], ['userLogins']);
 
         abort_unless($role instanceof UserRole, 404);
 
@@ -40,7 +42,7 @@ class RoleService
      */
     public function availableModules(): Collection
     {
-        return $this->roles->availableModules();
+        return $this->appMods->all(['app'], ['app_id', 'name']);
     }
 
     /**
@@ -53,7 +55,7 @@ class RoleService
         $code = $this->normalizeCode($data['code']);
 
         return DB::transaction(function () use ($client, $roleId, $data, $moduleIds, $code): UserRole {
-            $role = $roleId ? $this->roles->findForUser($client, $roleId) : null;
+            $role = $roleId ? $this->userRoles->findForUser($client, $roleId) : null;
 
             if ($roleId && ! $role instanceof UserRole) {
                 abort(404);
@@ -72,10 +74,10 @@ class RoleService
             ];
 
             $role = $role instanceof UserRole
-                ? $this->roles->update($role, $payload)
-                : $this->roles->create($client, $payload);
+                ? $this->userRoles->update($role, $payload)
+                : $this->userRoles->createForUser($client, $payload);
 
-            $this->roles->syncModules($role, $role->isAdmin() ? [] : $this->moduleIds($moduleIds));
+            $this->userRoles->syncMods($role, $role->isAdmin() ? [] : $this->moduleIds($moduleIds));
 
             return $role->load('mods.app')->loadCount('userLogins');
         });
@@ -91,13 +93,16 @@ class RoleService
             ]);
         }
 
-        if ($role->userLogins()->exists()) {
+        if ($this->userRoles->hasUserLogins($role)) {
             throw ValidationException::withMessages([
-                'role' => 'Role masih dipakai oleh user login.',
+                'role' => 'Role is still assigned to one or more users.',
             ]);
         }
 
-        $this->roles->delete($role);
+        DB::transaction(function () use ($role): void {
+            $this->userRoles->detachMods($role);
+            $this->userRoles->delete($role);
+        });
     }
 
     private function client(UserLogin $login): User

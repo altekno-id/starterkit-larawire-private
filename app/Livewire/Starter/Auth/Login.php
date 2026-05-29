@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Starter\Auth;
 
-use App\Services\Starter\Auth\LoginService;
+use App\Services\Starter\AuthLoginService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -27,7 +27,7 @@ class Login extends Component
         $this->redirect = request()->query('redirect', '');
     }
 
-    public function authenticate(LoginService $loginService)
+    public function authenticate(AuthLoginService $loginService)
     {
         $this->validate([
             'form.credential' => ['required', 'string'],

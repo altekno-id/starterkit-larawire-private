@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Services\Starter\Profile;
+namespace App\Services\Starter;
 
-use App\Contracts\Starter\ProfileInterface;
+use App\Contracts\Starter\UserInterface;
+use App\Contracts\Starter\UserLoginInterface;
 use App\Models\Starter\User;
 use App\Models\Starter\UserLogin;
 use Illuminate\Support\Facades\Hash;
@@ -11,7 +12,8 @@ use Illuminate\Validation\ValidationException;
 class ProfileService
 {
     public function __construct(
-        private readonly ProfileInterface $profiles
+        private readonly UserInterface $users,
+        private readonly UserLoginInterface $userLogins
     ) {}
 
     /**
@@ -19,8 +21,8 @@ class ProfileService
      */
     public function updateProfile(UserLogin $login, array $data): UserLogin
     {
-        return $this->profiles->updateLogin($login, [
-            'name' => $data['name'],
+        return $this->userLogins->update($login, [
+            'name' => trim($data['name']),
             'username' => str($data['username'])->lower()->trim()->toString(),
             'email' => str($data['email'])->lower()->trim()->toString(),
             'profile_photo' => $this->nullableTrim($data['profile_photo'] ?? null),
@@ -34,7 +36,7 @@ class ProfileService
     {
         $this->ensureAdmin($login);
 
-        return $this->profiles->updateClient($this->client($login), [
+        return $this->users->update($this->client($login), [
             'name' => trim($data['name']),
             'email' => $this->nullableTrim($data['email'] ?? null),
             'phone' => $this->nullableTrim($data['phone'] ?? null),
@@ -51,7 +53,9 @@ class ProfileService
             ]);
         }
 
-        $this->profiles->updatePassword($login, $password);
+        $this->userLogins->update($login, [
+            'password' => $password,
+        ]);
     }
 
     private function client(UserLogin $login): User

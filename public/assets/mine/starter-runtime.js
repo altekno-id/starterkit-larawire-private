@@ -97,7 +97,6 @@ window.StarterTemplate = window.StarterTemplate || {
     },
     activateSidebar() {
         const sidebar = document.querySelector('#starter-sidebar-menu');
-        const topbar = document.querySelector('#navbar-menu');
 
         document.querySelectorAll('[data-starter-menu-url]').forEach((link) => {
             link.classList.remove('active');
@@ -129,9 +128,23 @@ window.StarterTemplate = window.StarterTemplate || {
                 detail = detail.parentElement?.closest('.starter-sidebar-details') ?? null;
             }
         });
+    },
+    activateAppSwitcher() {
+        const links = Array.from(document.querySelectorAll('[data-starter-app-link]'));
+        const activeLink = links.find((link) => link.dataset.starterAppHost === window.location.hostname)
+            || links.find((link) => this.isSameUrl(link.href));
 
-        topbar?.querySelectorAll('.dropdown-menu.show').forEach((menu) => menu.classList.remove('show'));
-        topbar?.querySelectorAll('[aria-expanded="true"]').forEach((toggle) => toggle.setAttribute('aria-expanded', 'false'));
+        links.forEach((link) => link.classList.remove('bg-primary-lt', 'text-primary'));
+
+        if (! activeLink) {
+            return;
+        }
+
+        activeLink.classList.add('bg-primary-lt', 'text-primary');
+
+        document.querySelectorAll('[data-starter-current-app-name]').forEach((element) => {
+            element.textContent = activeLink.dataset.starterAppName || 'App';
+        });
     },
     updateAccountSummary(detail = {}) {
         document.querySelectorAll('[data-starter-account-summary]').forEach((summary) => {
@@ -338,6 +351,7 @@ window.StarterTemplate = window.StarterTemplate || {
         this.bind();
         this.bindLivewire();
         this.activateSidebar();
+        this.activateAppSwitcher();
     },
 };
 

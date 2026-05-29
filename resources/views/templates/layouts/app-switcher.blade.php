@@ -2,33 +2,35 @@
     $compact = $compact ?? false;
     $activeApp = $appOptions->firstWhere('active', true);
     $triggerLabel = $triggerLabel ?? ($activeApp['name'] ?? $currentAppName ?? 'App');
-    $triggerIcon = $triggerIcon ?? ($activeApp['icon'] ?? $currentAppIcon ?? 'apps');
 @endphp
 
-<details class="nav-item starter-app-menu {{ $compact ? 'starter-app-menu-compact' : '' }}" data-starter-details>
-    <summary class="nav-link dropdown-toggle starter-app-menu-trigger" aria-label="Select app">
-        <span class="nav-link-icon d-md-none d-lg-inline-block">
-            @include('templates.layouts.icon', ['name' => $triggerIcon])
-        </span>
-        <span class="nav-link-title">
-            {{ $triggerLabel }}
-        </span>
-    </summary>
+<div class="nav-item dropdown {{ $compact ? '' : 'd-none d-md-flex me-3' }}">
+    <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show app menu" data-bs-auto-close="outside" aria-expanded="false">
+        @include('templates.layouts.icon', ['name' => 'apps'])
+        <span class="badge bg-primary"></span>
+    </a>
 
-    <div class="dropdown-menu starter-app-menu-panel">
-        @forelse ($appOptions as $appOption)
-            <a href="{{ $appOption['url'] }}" class="dropdown-item {{ $appOption['active'] ? 'active' : '' }}" data-starter-navigate>
-                @include('templates.layouts.icon', ['name' => $appOption['icon'], 'class' => 'icon dropdown-item-icon'])
-                <span class="min-w-0">
-                    <span class="d-block text-truncate">{{ $appOption['name'] }}</span>
-                    <span class="d-block small text-secondary text-truncate">{{ $appOption['subdomain'] }}</span>
-                </span>
-                @if ($appOption['active'])
-                    @include('templates.layouts.icon', ['name' => 'check', 'class' => 'ms-auto text-primary icon'])
-                @endif
-            </a>
-        @empty
-            <span class="dropdown-item text-secondary">No app available</span>
-        @endforelse
+    <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">My Apps</div>
+            </div>
+            <div class="card-body scroll-y p-2" style="max-height: 50vh">
+                <div class="row g-0">
+                    @forelse ($appOptions as $appOption)
+                        <div class="col-4">
+                            <a href="{{ $appOption['url'] }}" class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable {{ $appOption['active'] ? 'bg-primary-lt text-primary' : '' }}" data-starter-app-link data-starter-app-name="{{ $appOption['name'] }}" data-starter-app-host="{{ parse_url($appOption['url'], PHP_URL_HOST) }}" data-starter-navigate title="{{ $appOption['name'] }}">
+                                @include('templates.layouts.icon', ['name' => $appOption['icon'], 'class' => 'w-6 h-6 mx-auto mb-2'])
+                                <span class="h5 mb-0">{{ $appOption['name'] }}</span>
+                            </a>
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <span class="d-block text-secondary px-3 py-2">No app available</span>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
     </div>
-</details>
+</div>

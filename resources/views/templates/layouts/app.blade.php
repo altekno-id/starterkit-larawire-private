@@ -147,12 +147,10 @@
             transition: none;
         }
 
-        .starter-app-menu,
         .starter-account-menu {
             position: relative;
         }
 
-        .starter-app-menu summary,
         .starter-account-menu summary {
             align-items: center;
             cursor: pointer;
@@ -161,110 +159,8 @@
             user-select: none;
         }
 
-        .starter-app-menu summary::-webkit-details-marker,
         .starter-account-menu summary::-webkit-details-marker {
             display: none;
-        }
-
-        .starter-app-menu-trigger {
-            border-radius: var(--tblr-border-radius);
-            color: var(--tblr-secondary);
-            gap: .45rem;
-            min-height: 2.25rem;
-            padding: .45rem .55rem;
-        }
-
-        .starter-app-menu-trigger:hover,
-        .starter-app-menu[open] .starter-app-menu-trigger {
-            background: var(--tblr-bg-surface-secondary);
-            color: var(--tblr-body-color);
-        }
-
-        .starter-app-menu-icon {
-            flex: 0 0 1.1rem;
-            height: 1.1rem;
-            width: 1.1rem;
-        }
-
-        .starter-app-menu-text {
-            display: flex;
-            min-width: 0;
-        }
-
-        .starter-app-menu-name {
-            color: var(--tblr-body-color);
-            font-size: .925rem;
-            font-weight: 500;
-            max-width: 12rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .starter-app-menu-chevron {
-            color: var(--tblr-secondary);
-            height: 1rem;
-            width: 1rem;
-        }
-
-        .starter-app-menu-panel {
-            background: var(--tblr-bg-surface);
-            border: 1px solid var(--tblr-border-color);
-            border-radius: var(--tblr-border-radius-lg);
-            box-shadow: var(--tblr-box-shadow-dropdown);
-            left: 0;
-            min-width: 23rem;
-            padding: .45rem;
-            position: absolute;
-            top: calc(100% + .5rem);
-            z-index: 1050;
-        }
-
-        .starter-app-menu:not([open]) .starter-app-menu-panel {
-            display: none;
-        }
-
-        .starter-app-menu[open] .starter-app-menu-panel {
-            column-gap: .45rem;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            row-gap: .15rem;
-        }
-
-        .starter-app-menu-item {
-            align-items: center;
-            border-radius: var(--tblr-border-radius);
-            color: var(--tblr-body-color);
-            display: flex;
-            gap: .55rem;
-            min-height: 2.25rem;
-            padding: .45rem .55rem;
-            text-decoration: none;
-        }
-
-        .starter-app-menu-item:hover,
-        .starter-app-menu-item:focus,
-        .starter-app-menu-item.active {
-            background: var(--tblr-primary-lt);
-            color: var(--tblr-primary);
-            text-decoration: none;
-        }
-
-        .starter-app-menu-item-icon {
-            flex: 0 0 1.1rem;
-            height: 1.1rem;
-            width: 1.1rem;
-        }
-
-        @media (max-width: 575.98px) {
-            .starter-app-menu-name {
-                max-width: 8rem;
-            }
-
-            .starter-app-menu-panel {
-                grid-template-columns: 1fr;
-                min-width: min(18rem, calc(100vw - 1.5rem));
-            }
         }
 
         .starter-account-panel {
@@ -400,42 +296,19 @@
             width: auto;
         }
 
-        .starter-app-menu[open] .starter-app-menu-panel {
-            column-gap: .45rem;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            row-gap: .15rem;
-        }
-
         .starter-account-menu[open] .starter-account-panel {
             display: block;
-        }
-
-        .starter-app-menu-panel {
-            min-width: min(36rem, calc(100vw - 2rem));
         }
 
         .starter-account-panel {
             min-width: 13.5rem;
         }
 
-        @media (max-width: 575.98px) {
-            .starter-app-menu[open] .starter-app-menu-panel {
-                grid-template-columns: 1fr;
-            }
-
-            .starter-app-menu-panel {
-                min-width: min(18rem, calc(100vw - 1.5rem));
-            }
-        }
-
-        .starter-account-menu summary::-webkit-details-marker,
-        .starter-app-menu summary::-webkit-details-marker {
+        .starter-account-menu summary::-webkit-details-marker {
             display: none;
         }
 
-        .starter-account-menu summary,
-        .starter-app-menu summary {
+        .starter-account-menu summary {
             cursor: pointer;
             list-style: none;
         }
@@ -507,7 +380,8 @@
                     </a>
                 </div>
 
-                <div class="navbar-nav flex-row d-lg-none ms-auto" x-persist="{{ $accountPersistBase }}-mobile">
+                <div class="navbar-nav flex-row d-lg-none ms-auto align-items-center gap-2" x-persist="{{ $accountPersistBase }}-mobile">
+                    @include('templates.layouts.app-switcher', ['compact' => true])
                     @include('templates.layouts.account-menu')
                 </div>
 
@@ -575,14 +449,14 @@
 
         <header class="navbar navbar-expand-lg d-none d-lg-flex d-print-none" x-persist="{{ $accountPersistBase }}-topbar">
             <div class="container-xl">
-                <div class="navbar-nav flex-row order-lg-last ms-auto">
-                    @include('templates.layouts.account-menu')
+                <div class="d-none d-lg-flex flex-column lh-sm me-auto">
+                    <span class="small text-secondary">Active App</span>
+                    <span class="fw-semibold text-truncate" data-starter-current-app-name>{{ $currentAppName ?? 'App' }}</span>
                 </div>
 
-                <div class="collapse navbar-collapse" id="navbar-menu">
-                    <ul class="navbar-nav">
-                        @include('templates.layouts.app-switcher', ['compact' => false])
-                    </ul>
+                <div class="navbar-nav flex-row order-lg-last ms-auto align-items-center">
+                    @include('templates.layouts.app-switcher', ['compact' => false])
+                    @include('templates.layouts.account-menu')
                 </div>
             </div>
         </header>

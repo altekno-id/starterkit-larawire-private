@@ -44,7 +44,7 @@
                     </div>
                 </div>
 
-                <div class="list-group list-group-flush list-group-hoverable">
+                <div class="list-group list-group-flush list-group-hoverable rounded-0">
                     @forelse ($roles as $role)
                         @php
                             $roleSelected = $selectedRoleId === $role->id;

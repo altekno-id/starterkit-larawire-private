@@ -16,6 +16,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
     showNavigateLoader() {
         this.navigating = true;
         clearTimeout(this.navigateLoaderTimer);
+        this.positionNavigateLoader();
         document.body?.classList.add('starter-is-navigating');
     },
     hideNavigateLoader() {
@@ -40,6 +41,20 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
     },
     redirectToLogin(redirect = window.location.href) {
         window.location.assign(this.authLoginUrl(redirect));
+    },
+    positionNavigateLoader() {
+        const slot = document.querySelector('.starter-slot-area');
+        const rect = slot?.getBoundingClientRect();
+
+        if (! rect) return;
+
+        const viewportWidth = document.documentElement.clientWidth;
+        const root = document.documentElement;
+
+        root.style.setProperty('--starter-loader-top', `${Math.max(rect.top, 0)}px`);
+        root.style.setProperty('--starter-loader-right', `${Math.max(viewportWidth - rect.right, 0)}px`);
+        root.style.setProperty('--starter-loader-bottom', '0px');
+        root.style.setProperty('--starter-loader-left', `${Math.max(rect.left, 0)}px`);
     },
     extractRedirectUrl(body) {
         try {
@@ -385,6 +400,12 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
 
             event.preventDefault();
             this.redirectToLogin();
+        });
+
+        window.addEventListener('resize', () => {
+            if (this.navigating) {
+                this.positionNavigateLoader();
+            }
         });
 
         this.bound = true;

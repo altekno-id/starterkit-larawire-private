@@ -44,8 +44,13 @@
 
         .starter-navigate-loader {
             background: color-mix(in srgb, var(--tblr-bg-surface) 88%, transparent);
+            bottom: var(--starter-loader-bottom, 0);
+            left: var(--starter-loader-left, 0);
             opacity: 0;
             pointer-events: none;
+            position: fixed;
+            right: var(--starter-loader-right, 0);
+            top: var(--starter-loader-top, 0);
             transition: opacity .14s ease;
             z-index: 20;
         }
@@ -167,6 +172,11 @@
 
                 <div class="collapse navbar-collapse" id="starter-sidebar-menu">
                     <ul class="navbar-nav pt-lg-3">
+                        <li class="nav-item d-lg-none px-0 pt-3 pb-2">
+                            <div class="small text-secondary">Active App</div>
+                            <div class="fw-semibold text-truncate" data-starter-current-app-name>{{ $currentAppName ?? 'App' }}</div>
+                        </li>
+
                         <li class="nav-item px-0 px-lg-3 pt-3 pb-1">
                             <span class="subheader">Main Menu</span>
                         </li>
@@ -251,7 +261,7 @@
                     <div class="starter-slot-area position-relative">
                         {{ $slot }}
 
-                        <div class="starter-navigate-loader position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center rounded" aria-label="Loading..." role="status">
+                        <div class="starter-navigate-loader d-flex align-items-center justify-content-center rounded" aria-label="Loading..." role="status">
                             <div class="starter-page-loader text-center">
                                 <div class="mb-3">
                                     <span class="navbar-brand navbar-brand-autodark justify-content-center">

@@ -91,6 +91,22 @@ test('profile page renders settings sections for admin', function () {
         ->assertDontSee('Save Control');
 });
 
+test('profile route stays on current app subdomain', function () {
+    $login = starterToastLogin();
+
+    App::query()->create([
+        'name' => 'Subdomain 1',
+        'subdomain' => 'subdomain1',
+    ]);
+
+    $this->actingAs($login)
+        ->get('http://subdomain1.13-starterpack.test/profile/edit')
+        ->assertOk()
+        ->assertSee('Edit My Profile')
+        ->assertSee('http://subdomain1.13-starterpack.test/profile/edit', false)
+        ->assertDontSee('http://13-starterpack.test/profile/edit', false);
+});
+
 test('admin can update client profile from settings page', function () {
     $login = starterToastLogin();
 

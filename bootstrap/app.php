@@ -23,7 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/auth.php'));
 
             Route::middleware('web')
-                ->domain(config('app.domain'))
                 ->group(base_path('routes/starter.php'));
 
             foreach (StarterAppRegistry::keys() as $appKey) {

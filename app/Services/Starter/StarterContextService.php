@@ -72,12 +72,12 @@ class StarterContextService
     {
         $routeName = request()->route()?->getName();
 
-        if ($routeName && str_starts_with($routeName, 'starter.')) {
-            return 'web';
-        }
-
         if ($routeName && str_contains($routeName, '.') && ! str_starts_with($routeName, 'default-livewire.')) {
-            return explode('.', $routeName)[0];
+            $routeAppKey = explode('.', $routeName)[0];
+
+            if ($routeAppKey !== 'starter') {
+                return $routeAppKey;
+            }
         }
 
         $host = request()->getHost();

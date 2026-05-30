@@ -33,6 +33,15 @@ class NavigationAuthorizedRedirectService
 
     public function forAppAnchor(UserLogin $login, string $appKey): string
     {
+        $landingMenu = $login->role
+            ? $this->userRoles->landingMenuForApp($login->role, $appKey)
+            : null;
+        $landingRoute = $landingMenu?->route;
+
+        if ($landingRoute instanceof AppRoute && $this->canAccessRouteName($login, $landingRoute->name)) {
+            return route($landingRoute->name);
+        }
+
         $dashboardRoute = "{$appKey}.dashboard";
 
         if ($this->canAccessRouteName($login, $dashboardRoute)) {

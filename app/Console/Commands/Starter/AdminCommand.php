@@ -132,6 +132,7 @@ class AdminCommand extends Command
 
             // Empty module listing is intentionally treated as full access for admin roles.
             DB::table('rel_user_roles_app_mods')->where('user_role_id', $role->id)->delete();
+            $this->syncAdminLandings($role);
 
             $login = UserLogin::query()->firstOrNew([
                 'email' => $this->adminEmail($client),
@@ -152,6 +153,36 @@ class AdminCommand extends Command
 
             $login->save();
         });
+    }
+
+    private function syncAdminLandings(UserRole $role): void
+    {
+        $dashboardMenus = DB::table('app_menus')
+            ->join('app_routes', 'app_menus.app_route_id', '=', 'app_routes.id')
+            ->join('app_mods', 'app_menus.app_mod_id', '=', 'app_mods.id')
+            ->join('apps', 'app_mods.app_id', '=', 'apps.id')
+            ->where('app_menus.is_landing_candidate', true)
+            ->select([
+                'apps.id as app_id',
+                'apps.subdomain',
+                'app_routes.name',
+                'app_menus.id as app_menu_id',
+            ])
+            ->get()
+            ->filter(fn ($menu): bool => $menu->name === $menu->subdomain.'.dashboard');
+
+        $now = now();
+
+        foreach ($dashboardMenus as $menu) {
+            DB::table('rel_user_roles_app_landings')->updateOrInsert([
+                'user_role_id' => $role->id,
+                'app_id' => $menu->app_id,
+            ], [
+                'app_menu_id' => $menu->app_menu_id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
     }
 
     /**

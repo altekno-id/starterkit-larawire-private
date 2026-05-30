@@ -40,6 +40,14 @@ class UserRole extends Model
     }
 
     /**
+     * Get app default page menus configured for this role.
+     */
+    public function landings(): HasMany
+    {
+        return $this->hasMany(UserRoleAppLanding::class);
+    }
+
+    /**
      * Determine if this role bypasses module-based authorization.
      */
     public function hasFullAccess(): bool

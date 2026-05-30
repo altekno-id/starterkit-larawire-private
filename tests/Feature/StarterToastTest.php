@@ -3,9 +3,15 @@
 use App\Livewire\Starter\Profile\EditMyProfile;
 use App\Livewire\Starter\Settings\ClientProfile;
 use App\Livewire\Starter\UserManagement\Roles;
+use App\Models\Starter\App;
+use App\Models\Starter\AppMenu;
+use App\Models\Starter\AppMod;
+use App\Models\Starter\AppRoute;
 use App\Models\Starter\User;
 use App\Models\Starter\UserLogin;
 use App\Models\Starter\UserRole;
+use App\Models\Starter\UserRoleAppLanding;
+use App\Services\Starter\NavigationAuthorizedRedirectService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -288,6 +294,156 @@ test('role save dispatches starter toast', function () {
         });
 });
 
+test('role save requires default page for selected app modules', function () {
+    $login = starterToastLogin();
+    $app = App::query()->create([
+        'name' => 'Web',
+        'subdomain' => 'web',
+    ]);
+    $mod = AppMod::query()->create([
+        'app_id' => $app->id,
+        'code' => 'dashboard',
+        'name' => 'Dashboard',
+    ]);
+    $route = AppRoute::query()->create([
+        'app_mod_id' => $mod->id,
+        'name' => 'web.dashboard',
+        'uri' => 'dashboard/index',
+        'method' => 'GET',
+    ]);
+    $alternateRoute = AppRoute::query()->create([
+        'app_mod_id' => $mod->id,
+        'name' => 'web.dashboard.summary',
+        'uri' => 'dashboard/summary',
+        'method' => 'GET',
+    ]);
+    AppMenu::query()->create([
+        'app_mod_id' => $mod->id,
+        'app_route_id' => $route->id,
+        'label' => 'Dashboard',
+        'is_landing_candidate' => true,
+    ]);
+    AppMenu::query()->create([
+        'app_mod_id' => $mod->id,
+        'app_route_id' => $alternateRoute->id,
+        'label' => 'Summary',
+        'is_landing_candidate' => true,
+    ]);
+
+    $this->actingAs($login);
+
+    Livewire::test(Roles::class)
+        ->set('roleForm.code', 'operator')
+        ->set('roleForm.name', 'Operator')
+        ->set('roleForm.module_ids', [(string) $mod->id])
+        ->call('save')
+        ->assertDispatched('starter-toast', function (string $event, array $params): bool {
+            return $event === 'starter-toast'
+                && ($params['type'] ?? null) === 'danger'
+                && ($params['message'] ?? null) === 'Default page is required for Web.';
+        });
+});
+
+test('role save stores default page menu for selected app modules', function () {
+    $login = starterToastLogin();
+    $app = App::query()->create([
+        'name' => 'Web',
+        'subdomain' => 'web',
+    ]);
+    $mod = AppMod::query()->create([
+        'app_id' => $app->id,
+        'code' => 'dashboard',
+        'name' => 'Dashboard',
+    ]);
+    $route = AppRoute::query()->create([
+        'app_mod_id' => $mod->id,
+        'name' => 'web.dashboard',
+        'uri' => 'dashboard/index',
+        'method' => 'GET',
+    ]);
+    $formRoute = AppRoute::query()->create([
+        'app_mod_id' => $mod->id,
+        'name' => 'web.dashboard.create',
+        'uri' => 'dashboard/create',
+        'method' => 'GET',
+    ]);
+    AppMenu::query()->create([
+        'app_mod_id' => $mod->id,
+        'app_route_id' => $route->id,
+        'label' => 'Dashboard',
+        'is_landing_candidate' => true,
+    ]);
+    $menu = AppMenu::query()->create([
+        'app_mod_id' => $mod->id,
+        'app_route_id' => $formRoute->id,
+        'label' => 'Form',
+        'is_landing_candidate' => false,
+    ]);
+
+    $this->actingAs($login);
+
+    Livewire::test(Roles::class)
+        ->set('roleForm.code', 'operator')
+        ->set('roleForm.name', 'Operator')
+        ->set('roleForm.module_ids', [(string) $mod->id])
+        ->set("roleForm.landing_menu_ids.{$app->id}", (string) $menu->id)
+        ->call('save')
+        ->assertDispatched('starter-toast', function (string $event, array $params): bool {
+            return $event === 'starter-toast'
+                && ($params['type'] ?? null) === 'success'
+                && ($params['message'] ?? null) === 'Role saved successfully.';
+        });
+
+    $role = UserRole::query()->where('code', 'operator')->firstOrFail();
+
+    $this->assertDatabaseHas('rel_user_roles_app_landings', [
+        'user_role_id' => $role->id,
+        'app_id' => $app->id,
+        'app_menu_id' => $menu->id,
+    ]);
+});
+
+test('app anchor redirects to role default page', function () {
+    $login = starterToastLogin();
+    $app = App::query()->create([
+        'name' => 'Web',
+        'subdomain' => 'web',
+    ]);
+    $mod = AppMod::query()->create([
+        'app_id' => $app->id,
+        'code' => 'dashboard',
+        'name' => 'Dashboard',
+    ]);
+    $route = AppRoute::query()->create([
+        'app_mod_id' => $mod->id,
+        'name' => 'web.dashboard',
+        'uri' => 'dashboard/index',
+        'method' => 'GET',
+    ]);
+    $menu = AppMenu::query()->create([
+        'app_mod_id' => $mod->id,
+        'app_route_id' => $route->id,
+        'label' => 'Dashboard',
+        'is_landing_candidate' => true,
+    ]);
+    $role = UserRole::query()->create([
+        'user_id' => $login->user_id,
+        'code' => 'operator',
+        'name' => 'Operator',
+    ]);
+    $role->mods()->attach($mod);
+    UserRoleAppLanding::query()->create([
+        'user_role_id' => $role->id,
+        'app_id' => $app->id,
+        'app_menu_id' => $menu->id,
+    ]);
+    $login->forceFill(['user_role_id' => $role->id])->save();
+
+    $target = app(NavigationAuthorizedRedirectService::class)->forAppAnchor($login->fresh('role'), 'web');
+
+    expect($target)->toBe(route('web.dashboard'));
+});
+
 test('role delete validation dispatches danger starter toast', function () {
     $login = starterToastLogin();
 
@@ -300,4 +456,145 @@ test('role delete validation dispatches danger starter toast', function () {
                 && ($params['type'] ?? null) === 'danger'
                 && ($params['message'] ?? null) === 'The default admin role cannot be deleted.';
         });
+});
+
+test('default admin role is read only', function () {
+    $login = starterToastLogin();
+
+    $this->actingAs($login);
+
+    Livewire::test(Roles::class)
+        ->call('editRole', $login->user_role_id)
+        ->set('roleForm.name', 'Changed Admin')
+        ->call('save')
+        ->assertDispatched('starter-toast', function (string $event, array $params): bool {
+            return $event === 'starter-toast'
+                && ($params['type'] ?? null) === 'danger'
+                && ($params['message'] ?? null) === 'The default admin role is read only.';
+        });
+
+    $this->assertDatabaseHas('user_roles', [
+        'id' => $login->user_role_id,
+        'name' => 'Administrator',
+    ]);
+});
+
+test('role users modal lists assigned users', function () {
+    $login = starterToastLogin();
+
+    UserLogin::query()->create([
+        'user_id' => $login->user_id,
+        'user_role_id' => $login->user_role_id,
+        'name' => 'Second Admin',
+        'username' => 'second-admin',
+        'email' => 'second-admin@example.test',
+        'password' => 'secret',
+    ]);
+
+    $this->actingAs($login);
+
+    Livewire::test(Roles::class)
+        ->call('showRoleUsers', $login->user_role_id)
+        ->assertSet('roleUsersModalOpen', true)
+        ->assertSet('roleUsersRoleName', 'Administrator')
+        ->assertSee('Aldhi Admin')
+        ->assertSee('Second Admin')
+        ->assertSee('second-admin@example.test');
+});
+
+test('module accordion keeps expanded app when module access changes', function () {
+    $login = starterToastLogin();
+    $appOne = App::query()->create([
+        'name' => 'App One',
+        'subdomain' => 'app-one',
+    ]);
+    $appTwo = App::query()->create([
+        'name' => 'App Two',
+        'subdomain' => 'app-two',
+    ]);
+    $modOne = AppMod::query()->create([
+        'app_id' => $appOne->id,
+        'code' => 'app_one_module',
+        'name' => 'Shared Module',
+        'desc' => 'Module for app one.',
+    ]);
+    AppMod::query()->create([
+        'app_id' => $appTwo->id,
+        'code' => 'app_two_module',
+        'name' => 'Shared Module',
+        'desc' => 'Module for app two.',
+    ]);
+
+    $this->actingAs($login);
+
+    Livewire::test(Roles::class)
+        ->call('toggleModuleApp', 'app-'.$appOne->id)
+        ->assertSet('expandedModuleAppKeys', ['app-'.$appOne->id])
+        ->set('roleForm.module_ids', [(string) $modOne->id])
+        ->assertSet('expandedModuleAppKeys', ['app-'.$appOne->id])
+        ->assertSeeHtml('id="role-app-modules-app-'.$appOne->id.'" class="accordion-collapse collapse show"')
+        ->assertDontSeeHtml('id="role-app-modules-app-'.$appTwo->id.'" class="accordion-collapse collapse show"');
+});
+
+test('module accordion can expand all apps', function () {
+    $login = starterToastLogin();
+    $appOne = App::query()->create([
+        'name' => 'App One',
+        'subdomain' => 'app-one',
+    ]);
+    $appTwo = App::query()->create([
+        'name' => 'App Two',
+        'subdomain' => 'app-two',
+    ]);
+    AppMod::query()->create([
+        'app_id' => $appOne->id,
+        'code' => 'app_one_module',
+        'name' => 'App One Module',
+    ]);
+    AppMod::query()->create([
+        'app_id' => $appTwo->id,
+        'code' => 'app_two_module',
+        'name' => 'App Two Module',
+    ]);
+
+    $this->actingAs($login);
+
+    Livewire::test(Roles::class)
+        ->call('expandAllModuleApps')
+        ->assertSet('expandedModuleAppKeys', ['app-'.$appOne->id, 'app-'.$appTwo->id])
+        ->assertSeeHtml('id="role-app-modules-app-'.$appOne->id.'" class="accordion-collapse collapse show"')
+        ->assertSeeHtml('id="role-app-modules-app-'.$appTwo->id.'" class="accordion-collapse collapse show"');
+});
+
+test('module accordion toggles all apps', function () {
+    $login = starterToastLogin();
+    $appOne = App::query()->create([
+        'name' => 'App One',
+        'subdomain' => 'app-one',
+    ]);
+    $appTwo = App::query()->create([
+        'name' => 'App Two',
+        'subdomain' => 'app-two',
+    ]);
+    AppMod::query()->create([
+        'app_id' => $appOne->id,
+        'code' => 'app_one_module',
+        'name' => 'App One Module',
+    ]);
+    AppMod::query()->create([
+        'app_id' => $appTwo->id,
+        'code' => 'app_two_module',
+        'name' => 'App Two Module',
+    ]);
+
+    $this->actingAs($login);
+
+    Livewire::test(Roles::class)
+        ->assertSee('Expand all')
+        ->call('toggleAllModuleApps')
+        ->assertSet('expandedModuleAppKeys', ['app-'.$appOne->id, 'app-'.$appTwo->id])
+        ->assertSee('Collapse all')
+        ->call('toggleAllModuleApps')
+        ->assertSet('expandedModuleAppKeys', [])
+        ->assertSee('Expand all');
 });

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('label');
             $table->string('icon')->nullable();
             $table->unsignedTinyInteger('order')->default(1);
+            $table->boolean('is_landing_candidate')->default(false);
             $table->foreignIdFor(AppMod::class)->constrained();
             $table->foreignIdFor(AppRoute::class)->nullable()->constrained();
             $table->foreignIdFor(AppMenu::class, 'parent_id')->nullable()->constrained('app_menus');

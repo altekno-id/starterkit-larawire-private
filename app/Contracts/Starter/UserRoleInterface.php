@@ -3,6 +3,7 @@
 namespace App\Contracts\Starter;
 
 use App\Models\Starter\User;
+use App\Models\Starter\AppMenu;
 use App\Models\Starter\UserRole;
 use Illuminate\Support\Collection;
 
@@ -36,12 +37,21 @@ interface UserRoleInterface
      */
     public function syncMods(UserRole $role, array $moduleIds): void;
 
+    /**
+     * @param  array<int, int>  $landings
+     */
+    public function syncLandings(UserRole $role, array $landings): void;
+
     public function detachMods(UserRole $role): void;
+
+    public function detachLandings(UserRole $role): void;
 
     /**
      * @return Collection<int, int>
      */
     public function modIds(UserRole $role): Collection;
+
+    public function landingMenuForApp(UserRole $role, string $appSubdomain): ?AppMenu;
 
     public function hasUserLogins(UserRole $role): bool;
 

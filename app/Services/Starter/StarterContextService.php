@@ -249,7 +249,7 @@ class StarterContextService
 
     private function dashboardUrl(string $appKey): string
     {
-        $routeName = $appKey.'.dashboard';
+        $routeName = $appKey.'.anchor';
 
         return Route::has($routeName) ? route($routeName) : url('/');
     }
@@ -261,7 +261,7 @@ class StarterContextService
 
     private function appUrl(App $app): string
     {
-        $routeName = $app->subdomain.'.dashboard';
+        $routeName = $app->subdomain.'.anchor';
 
         if (Route::has($routeName)) {
             return route($routeName);

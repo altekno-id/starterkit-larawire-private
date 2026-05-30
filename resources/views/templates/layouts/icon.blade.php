@@ -17,6 +17,7 @@
         'check',
         'chevron-down',
         'chevron-right',
+        'chevron-up',
         'circle',
         'circle-check',
         'circle-x',
@@ -29,6 +30,7 @@
         'menu-2',
         'shield-check',
         'table',
+        'trash',
         'user',
         'user-circle',
         'users',
@@ -84,6 +86,10 @@
 
         @case('chevron-right')
             <path d="M9 6l6 6l-6 6" />
+            @break
+
+        @case('chevron-up')
+            <path d="M6 15l6 -6l6 6" />
             @break
 
         @case('circle-check')
@@ -147,6 +153,14 @@
             <path d="M4 5a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
             <path d="M4 10h16" />
             <path d="M10 3v18" />
+            @break
+
+        @case('trash')
+            <path d="M4 7h16" />
+            <path d="M10 11v6" />
+            <path d="M14 11v6" />
+            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
             @break
 
         @case('user')

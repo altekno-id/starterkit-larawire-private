@@ -182,12 +182,13 @@ class SyncCommand extends Command
             $config = $plan['config'];
             $app = $this->upsertApp($subdomain, $config);
             $mods = $this->syncMods($app, $config['mods'] ?? []);
-            $routes = $this->syncRoutes($subdomain, $mods);
+            $routes = $this->syncRoutes($subdomain, $mods, $config['mods'] ?? []);
 
             $this->pruneRoutes($mods, $routes);
             $this->syncMenus($mods, $routes, $config['mods'] ?? []);
             $this->pruneMenus($mods, $plan['configured_menu_keys']);
             $this->pruneMods($app, $mods);
+            $this->syncAdminDashboardLandings($app, $subdomain);
         });
     }
 
@@ -233,6 +234,28 @@ class SyncCommand extends Command
         if (empty($config['mods']) || ! is_array($config['mods'])) {
             $this->fail("App [{$subdomain}] must define at least one module in the [mods] array.");
         }
+
+        if (empty($config['mods']['dashboard']) || ! is_array($config['mods']['dashboard'])) {
+            $this->fail("App [{$subdomain}] must define a [dashboard] module.");
+        }
+
+        if (! $this->hasLandingMenu($config['mods']['dashboard']['menus'] ?? [], "{$subdomain}.dashboard")) {
+            $this->fail("App [{$subdomain}] dashboard module must include a default page menu for [{$subdomain}.dashboard].");
+        }
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $menus
+     */
+    private function hasLandingMenu(array $menus, string $routeName): bool
+    {
+        return collect($menus)->contains(function (array $menu) use ($routeName): bool {
+            if (($menu['route'] ?? null) === $routeName && ($menu['landing'] ?? false) === true) {
+                return true;
+            }
+
+            return $this->hasLandingMenu($menu['children'] ?? [], $routeName);
+        });
     }
 
     /**
@@ -389,7 +412,7 @@ class SyncCommand extends Command
      * @param  Collection<string, AppMod>  $mods
      * @return Collection<string, AppRoute>
      */
-    private function syncRoutes(string $subdomain, Collection $mods): Collection
+    private function syncRoutes(string $subdomain, Collection $mods, array $configuredMods): Collection
     {
         return collect(Route::getRoutes())
             ->filter(function ($route) use ($subdomain): bool {
@@ -416,6 +439,47 @@ class SyncCommand extends Command
 
                 return [$name => $appRoute];
             });
+    }
+
+    private function syncAdminDashboardLandings(App $app, string $subdomain): void
+    {
+        $dashboardMenu = AppMenu::query()
+            ->where('is_landing_candidate', true)
+            ->whereHas('mod', function ($query) use ($app): void {
+                $query->where('app_id', $app->id);
+            })
+            ->whereHas('route', function ($query) use ($subdomain): void {
+                $query->where('name', "{$subdomain}.dashboard");
+            })
+            ->first();
+
+        if (! $dashboardMenu instanceof AppMenu) {
+            return;
+        }
+
+        DB::table('rel_user_roles_app_landings')
+            ->where('app_id', $app->id)
+            ->whereIn('user_role_id', function ($query): void {
+                $query
+                    ->select('id')
+                    ->from('user_roles')
+                    ->where('code', 'admin');
+            })
+            ->delete();
+
+        $now = now();
+        $adminRoleIds = DB::table('user_roles')->where('code', 'admin')->pluck('id');
+
+        foreach ($adminRoleIds as $roleId) {
+            DB::table('rel_user_roles_app_landings')->updateOrInsert([
+                'user_role_id' => $roleId,
+                'app_id' => $app->id,
+            ], [
+                'app_menu_id' => $dashboardMenu->id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
     }
 
     /**
@@ -476,6 +540,7 @@ class SyncCommand extends Command
         ], [
             'icon' => $parent ? null : ($menuConfig['icon'] ?? null),
             'order' => $order,
+            'is_landing_candidate' => $routeName !== null && ($menuConfig['landing'] ?? false) === true,
             'app_route_id' => $routeName ? $routes->get($routeName)?->id : null,
         ]);
 

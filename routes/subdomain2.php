@@ -20,9 +20,10 @@ Route::name('subdomain2.')->group(function () {
     Route::middleware('auth:web')->group(function () {
         Route::get('/', function (NavigationAuthorizedRedirectService $redirects) {
             $login = auth()->user();
+            $appKey = str((string) request()->route()?->getName())->before('.anchor')->toString();
 
             return $login instanceof UserLogin
-                ? redirect($redirects->forAppAnchor($login, 'subdomain2'))
+                ? redirect($redirects->forAppAnchor($login, $appKey))
                 : redirect()->route('auth.login');
         })->name('anchor');
 

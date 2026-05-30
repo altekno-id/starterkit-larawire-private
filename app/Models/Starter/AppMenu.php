@@ -8,10 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['label', 'icon', 'order', 'app_mod_id', 'app_route_id', 'parent_id'])]
+#[Fillable(['label', 'icon', 'order', 'is_landing_candidate', 'app_mod_id', 'app_route_id', 'parent_id'])]
 class AppMenu extends Model
 {
     use HasActivityLog;
+
+    protected function casts(): array
+    {
+        return [
+            'is_landing_candidate' => 'bool',
+        ];
+    }
 
     /**
      * Get the module that owns this menu.

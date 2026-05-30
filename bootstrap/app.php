@@ -3,7 +3,7 @@
 use App\Http\Middleware\StarterAdmin;
 use App\Http\Middleware\StarterAuthorize;
 use App\Models\Starter\UserLogin;
-use App\Services\Starter\Navigation\AuthorizedRedirectService;
+use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Support\Starter\StarterAppRegistry;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Auth\AuthenticationException;
@@ -52,7 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $login = $request->user();
 
             return $login instanceof UserLogin
-                ? app(AuthorizedRedirectService::class)->forLogin($login, $request->query('redirect'))
+                ? app(NavigationAuthorizedRedirectService::class)->forLogin($login, $request->query('redirect'))
                 : route('web.dashboard');
         });
     })

@@ -14,6 +14,7 @@ return [
                     'label' => 'Dashboard',
                     'icon' => 'layout-dashboard',
                     'route' => 'web.dashboard',
+                    'landing' => true,
                 ],
             ],
         ],
@@ -29,6 +30,7 @@ return [
                         [
                             'label' => 'Data',
                             'route' => 'web.module1.index',
+                            'landing' => true,
                         ],
                         [
                             'label' => 'Form',

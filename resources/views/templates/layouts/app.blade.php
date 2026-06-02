@@ -60,16 +60,13 @@
             width: min(16rem, calc(100vw - 2rem));
         }
 
-        .starter-hover-tooltip > .tooltip {
-            bottom: calc(100% + .35rem);
-            left: 0;
-            max-width: min(18rem, 80vw);
-            position: absolute;
-            pointer-events: none;
+        .modal-backdrop {
+            --tblr-backdrop-opacity: 0.4;
         }
 
-        .starter-hover-tooltip:not(:hover):not(:focus-within) > .tooltip {
-            display: none;
+        .modal-blur {
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         body.starter-is-navigating .starter-navigate-loader {
@@ -221,7 +218,7 @@
                                             Role
                                         </a>
                                         <a href="{{ route('starter.user-management.users') }}" class="dropdown-item {{ $usersActive ? 'active' : '' }}" @if ($usersActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ route('starter.user-management.users') }}">
-                                            User
+                                            Client
                                         </a>
                                     </div>
                                 </details>

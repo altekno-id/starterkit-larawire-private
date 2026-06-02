@@ -3,11 +3,11 @@
 namespace App\Services\Starter;
 
 use App\Contracts\Starter\AppModInterface;
-use App\Contracts\Starter\UserRoleInterface;
+use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppMod;
-use App\Models\Starter\User;
-use App\Models\Starter\UserLogin;
-use App\Models\Starter\UserRole;
+use App\Models\Starter\Client;
+use App\Models\Starter\ClientLogin;
+use App\Models\Starter\ClientRole;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -16,23 +16,23 @@ use Illuminate\Validation\ValidationException;
 class UserManagementRoleService
 {
     public function __construct(
-        private readonly UserRoleInterface $userRoles,
+        private readonly ClientRoleInterface $clientRoles,
         private readonly AppModInterface $appMods
     ) {}
 
     /**
-     * @return Collection<int, UserRole>
+     * @return Collection<int, ClientRole>
      */
-    public function roles(UserLogin $login): Collection
+    public function roles(ClientLogin $login): Collection
     {
-        return $this->userRoles->forUser($this->client($login), ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['userLogins']);
+        return $this->clientRoles->forClient($this->client($login), ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins']);
     }
 
-    public function findRole(UserLogin $login, int $id): UserRole
+    public function findRole(ClientLogin $login, int $id): ClientRole
     {
-        $role = $this->userRoles->findForUser($this->client($login), $id, ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['userLogins']);
+        $role = $this->clientRoles->findForClient($this->client($login), $id, ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins']);
 
-        abort_unless($role instanceof UserRole, 404);
+        abort_unless($role instanceof ClientRole, 404);
 
         return $role;
     }
@@ -58,17 +58,17 @@ class UserManagementRoleService
      * @param  array<int, int|string>  $moduleIds
      * @param  array<int|string, int|string|null>  $landingMenuIds
      */
-    public function saveRole(UserLogin $login, ?int $roleId, array $data, array $moduleIds, array $landingMenuIds = []): UserRole
+    public function saveRole(ClientLogin $login, ?int $roleId, array $data, array $moduleIds, array $landingMenuIds = []): ClientRole
     {
         $client = $this->client($login);
         $code = $this->normalizeCode($data['code']);
         $moduleIds = $this->moduleIds($moduleIds);
         $landings = $this->landingMenuIds($moduleIds, $landingMenuIds);
 
-        return DB::transaction(function () use ($client, $roleId, $data, $moduleIds, $landings, $code): UserRole {
-            $role = $roleId ? $this->userRoles->findForUser($client, $roleId) : null;
+        return DB::transaction(function () use ($client, $roleId, $data, $moduleIds, $landings, $code): ClientRole {
+            $role = $roleId ? $this->clientRoles->findForClient($client, $roleId) : null;
 
-            if ($roleId && ! $role instanceof UserRole) {
+            if ($roleId && ! $role instanceof ClientRole) {
                 abort(404);
             }
 
@@ -84,18 +84,18 @@ class UserManagementRoleService
                 'desc' => filled($data['desc'] ?? null) ? trim((string) $data['desc']) : null,
             ];
 
-            $role = $role instanceof UserRole
-                ? $this->userRoles->update($role, $payload)
-                : $this->userRoles->createForUser($client, $payload);
+            $role = $role instanceof ClientRole
+                ? $this->clientRoles->update($role, $payload)
+                : $this->clientRoles->createForClient($client, $payload);
 
-            $this->userRoles->syncMods($role, $role->isAdmin() ? [] : $moduleIds);
-            $this->userRoles->syncLandings($role, $role->isAdmin() ? [] : $landings);
+            $this->clientRoles->syncMods($role, $role->isAdmin() ? [] : $moduleIds);
+            $this->clientRoles->syncLandings($role, $role->isAdmin() ? [] : $landings);
 
-            return $role->load('mods.app', 'landings.menu.route', 'landings.menu.mod.app')->loadCount('userLogins');
+            return $role->load('mods.app', 'landings.menu.route', 'landings.menu.mod.app')->loadCount('clientLogins');
         });
     }
 
-    public function deleteRole(UserLogin $login, int $roleId): void
+    public function deleteRole(ClientLogin $login, int $roleId): void
     {
         $role = $this->findRole($login, $roleId);
 
@@ -105,24 +105,24 @@ class UserManagementRoleService
             ]);
         }
 
-        if ($this->userRoles->hasUserLogins($role)) {
+        if ($this->clientRoles->hasClientLogins($role)) {
             throw ValidationException::withMessages([
                 'role' => 'Role is still assigned to one or more users.',
             ]);
         }
 
         DB::transaction(function () use ($role): void {
-            $this->userRoles->detachLandings($role);
-            $this->userRoles->detachMods($role);
-            $this->userRoles->delete($role);
+            $this->clientRoles->detachLandings($role);
+            $this->clientRoles->detachMods($role);
+            $this->clientRoles->delete($role);
         });
     }
 
-    private function client(UserLogin $login): User
+    private function client(ClientLogin $login): Client
     {
-        $client = $login->user;
+        $client = $login->client;
 
-        abort_unless($client instanceof User, 403);
+        abort_unless($client instanceof Client, 403);
 
         return $client;
     }

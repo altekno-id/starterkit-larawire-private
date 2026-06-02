@@ -69,64 +69,6 @@
                     @error('clientForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
             </div>
-
-            <h3 class="card-title mt-4">Account Status</h3>
-            <div class="datagrid">
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Account Status</div>
-                    <div class="datagrid-content">
-                        <span class="badge bg-primary-lt">{{ $accountStatusOptions[$client->account_status] ?? $client->account_status ?? '-' }}</span>
-                    </div>
-                </div>
-
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Approved At</div>
-                    <div class="datagrid-content">{{ $client->approved_at?->format('d M Y H:i') ?? '-' }}</div>
-                </div>
-            </div>
-
-            <h3 class="card-title mt-4">Subscription</h3>
-            <div class="datagrid">
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Subscription Status</div>
-                    <div class="datagrid-content">
-                        <span class="badge bg-secondary-lt">{{ $subscriptionStatusOptions[$client->subscription_status] ?? $client->subscription_status ?? '-' }}</span>
-                    </div>
-                </div>
-
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Trial Ends</div>
-                    <div class="datagrid-content">{{ $client->trial_ends_at?->format('d M Y H:i') ?? '-' }}</div>
-                </div>
-
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Subscribed Since</div>
-                    <div class="datagrid-content">{{ $client->subscribed_at?->format('d M Y H:i') ?? '-' }}</div>
-                </div>
-
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Subscription Ends</div>
-                    <div class="datagrid-content">{{ $client->subscription_ends_at?->format('d M Y H:i') ?? '-' }}</div>
-                </div>
-            </div>
-
-            <h3 class="card-title mt-4">Payment</h3>
-            <div class="datagrid">
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Payment Method</div>
-                    <div class="datagrid-content">{{ $client->payment_method ?: '-' }}</div>
-                </div>
-
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Payment Reference</div>
-                    <div class="datagrid-content text-break">{{ $client->payment_reference ?: '-' }}</div>
-                </div>
-
-                <div class="datagrid-item">
-                    <div class="datagrid-title">Payment Approved At</div>
-                    <div class="datagrid-content">{{ $client->payment_approved_at?->format('d M Y H:i') ?? '-' }}</div>
-                </div>
-            </div>
         </div>
 
         <div class="card-footer bg-transparent mt-auto">

@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Starter\AppRoute;
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +24,7 @@ class StarterAuthorize
             return $next($request);
         }
 
-        if (! $login instanceof UserLogin || ! $routeName) {
+        if (! $login instanceof ClientLogin || ! $routeName) {
             abort(403);
         }
 

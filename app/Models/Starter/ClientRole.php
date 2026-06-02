@@ -2,32 +2,29 @@
 
 namespace App\Models\Starter;
 
-use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'code', 'name', 'desc'])]
-class UserRole extends Model
+#[Fillable(['client_id', 'code', 'name', 'desc'])]
+class ClientRole extends Model
 {
-    use HasActivityLog;
-
     /**
      * Get the client that owns this role.
      */
-    public function user(): BelongsTo
+    public function client(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Client::class);
     }
 
     /**
      * Get all login accounts assigned to this role.
      */
-    public function userLogins(): HasMany
+    public function clientLogins(): HasMany
     {
-        return $this->hasMany(UserLogin::class);
+        return $this->hasMany(ClientLogin::class);
     }
 
     /**
@@ -35,7 +32,7 @@ class UserRole extends Model
      */
     public function mods(): BelongsToMany
     {
-        return $this->belongsToMany(AppMod::class, 'rel_user_roles_app_mods')
+        return $this->belongsToMany(AppMod::class, 'rel_client_roles_app_mods')
             ->withTimestamps();
     }
 
@@ -44,7 +41,7 @@ class UserRole extends Model
      */
     public function landings(): HasMany
     {
-        return $this->hasMany(UserRoleAppLanding::class);
+        return $this->hasMany(ClientRoleAppLanding::class);
     }
 
     /**

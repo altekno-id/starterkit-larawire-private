@@ -2,7 +2,6 @@
 
 namespace App\Models\Starter;
 
-use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,8 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['label', 'icon', 'order', 'is_landing_candidate', 'app_mod_id', 'app_route_id', 'parent_id'])]
 class AppMenu extends Model
 {
-    use HasActivityLog;
-
     protected function casts(): array
     {
         return [

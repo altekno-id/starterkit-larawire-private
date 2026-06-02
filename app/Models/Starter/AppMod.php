@@ -2,7 +2,6 @@
 
 namespace App\Models\Starter;
 
-use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,8 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['code', 'name', 'desc', 'app_id'])]
 class AppMod extends Model
 {
-    use HasActivityLog;
-
     /**
      * Get the app that owns this module.
      */
@@ -43,7 +40,7 @@ class AppMod extends Model
      */
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(UserRole::class, 'rel_user_roles_app_mods')
+        return $this->belongsToMany(ClientRole::class, 'rel_client_roles_app_mods')
             ->withTimestamps();
     }
 }

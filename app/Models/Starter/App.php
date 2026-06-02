@@ -2,7 +2,6 @@
 
 namespace App\Models\Starter;
 
-use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,8 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'subdomain', 'desc', 'icon'])]
 class App extends Model
 {
-    use HasActivityLog;
-
     /**
      * Get all modules registered for this app.
      */

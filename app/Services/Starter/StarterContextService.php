@@ -4,11 +4,11 @@ namespace App\Services\Starter;
 
 use App\Contracts\Starter\AppInterface;
 use App\Contracts\Starter\AppModInterface;
-use App\Contracts\Starter\UserRoleInterface;
+use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\App;
 use App\Models\Starter\AppMenu;
 use App\Models\Starter\AppMod;
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -19,7 +19,7 @@ class StarterContextService
     public function __construct(
         private readonly AppInterface $apps,
         private readonly AppModInterface $appMods,
-        private readonly UserRoleInterface $userRoles
+        private readonly ClientRoleInterface $clientRoles
     ) {}
 
     /**
@@ -41,7 +41,7 @@ class StarterContextService
     private function build(): array
     {
         $login = auth()->user();
-        $login = $login instanceof UserLogin ? $login : null;
+        $login = $login instanceof ClientLogin ? $login : null;
 
         $currentAppKey = $this->currentAppKey();
         $currentApp = $this->currentApp($currentAppKey);
@@ -98,7 +98,7 @@ class StarterContextService
     /**
      * @return EloquentCollection<int, App>
      */
-    private function accessibleApps(?UserLogin $login): EloquentCollection
+    private function accessibleApps(?ClientLogin $login): EloquentCollection
     {
         if (! $login) {
             return new EloquentCollection;
@@ -109,7 +109,7 @@ class StarterContextService
         }
 
         $modIds = $login->role
-            ? $this->userRoles->modIds($login->role)
+            ? $this->clientRoles->modIds($login->role)
             : collect();
 
         if ($modIds->isEmpty()) {
@@ -122,7 +122,7 @@ class StarterContextService
     /**
      * @return EloquentCollection<int, AppMod>
      */
-    private function sidebarMods(?UserLogin $login, ?App $currentApp): EloquentCollection
+    private function sidebarMods(?ClientLogin $login, ?App $currentApp): EloquentCollection
     {
         if (! $login || ! $currentApp) {
             return new EloquentCollection;
@@ -142,7 +142,7 @@ class StarterContextService
         }
 
         $modIds = $login->role
-            ? $this->userRoles->modIds($login->role)
+            ? $this->clientRoles->modIds($login->role)
             : collect();
 
         return $modIds->isEmpty()
@@ -232,7 +232,7 @@ class StarterContextService
         };
     }
 
-    public function avatarUrl(?UserLogin $login): string
+    public function avatarUrl(?ClientLogin $login): string
     {
         $photo = $login?->profile_photo ?: $login?->google_avatar;
 

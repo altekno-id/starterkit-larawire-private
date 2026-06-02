@@ -2,7 +2,6 @@
 
 namespace App\Models\Starter;
 
-use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,8 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'uri', 'method', 'app_mod_id'])]
 class AppRoute extends Model
 {
-    use HasActivityLog;
-
     /**
      * Get the module that owns this route.
      */

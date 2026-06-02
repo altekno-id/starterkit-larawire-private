@@ -3,9 +3,9 @@
 namespace App\Services\Starter;
 
 use App\Contracts\Starter\AppRouteInterface;
-use App\Contracts\Starter\UserRoleInterface;
+use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppRoute;
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,10 +15,10 @@ class NavigationAuthorizedRedirectService
 {
     public function __construct(
         private readonly AppRouteInterface $appRoutes,
-        private readonly UserRoleInterface $userRoles
+        private readonly ClientRoleInterface $clientRoles
     ) {}
 
-    public function forLogin(UserLogin $login, ?string $redirect = null, ?string $intended = null): string
+    public function forLogin(ClientLogin $login, ?string $redirect = null, ?string $intended = null): string
     {
         if ($this->canVisitUrl($login, $redirect)) {
             return (string) $redirect;
@@ -31,10 +31,10 @@ class NavigationAuthorizedRedirectService
         return $this->firstAuthorizedUrl($login);
     }
 
-    public function forAppAnchor(UserLogin $login, string $appKey): string
+    public function forAppAnchor(ClientLogin $login, string $appKey): string
     {
         $landingMenu = $login->role
-            ? $this->userRoles->landingMenuForApp($login->role, $appKey)
+            ? $this->clientRoles->landingMenuForApp($login->role, $appKey)
             : null;
         $landingRoute = $landingMenu?->route;
 
@@ -57,7 +57,7 @@ class NavigationAuthorizedRedirectService
         return $this->firstAuthorizedUrl($login);
     }
 
-    public function firstAuthorizedUrl(UserLogin $login): string
+    public function firstAuthorizedUrl(ClientLogin $login): string
     {
         if ($login->role?->hasFullAccess() && Route::has('web.dashboard')) {
             return route('web.dashboard');
@@ -74,7 +74,7 @@ class NavigationAuthorizedRedirectService
             : url('/');
     }
 
-    public function canVisitUrl(UserLogin $login, ?string $url): bool
+    public function canVisitUrl(ClientLogin $login, ?string $url): bool
     {
         if (! StarterNavigation::isSafeRedirect($url)) {
             return false;
@@ -85,7 +85,7 @@ class NavigationAuthorizedRedirectService
         return $routeName !== null && $this->canAccessRouteName($login, $routeName);
     }
 
-    private function canAccessRouteName(UserLogin $login, string $routeName): bool
+    private function canAccessRouteName(ClientLogin $login, string $routeName): bool
     {
         if (! Route::has($routeName)) {
             return false;
@@ -162,10 +162,10 @@ class NavigationAuthorizedRedirectService
         return $this->appRoutes->nameForGetUriAndAppSubdomain($path, $appKey);
     }
 
-    private function firstAuthorizedRoute(UserLogin $login, ?string $appKey = null): ?AppRoute
+    private function firstAuthorizedRoute(ClientLogin $login, ?string $appKey = null): ?AppRoute
     {
         $modIds = $login->role
-            ? $this->userRoles->modIds($login->role)
+            ? $this->clientRoles->modIds($login->role)
             : collect();
 
         if ($modIds->isEmpty()) {

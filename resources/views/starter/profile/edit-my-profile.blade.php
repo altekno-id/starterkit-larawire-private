@@ -16,13 +16,7 @@
                         <span class="avatar avatar-md flex-shrink-0 me-3" style="background-image: url({{ $loginAvatarUrl }})"></span>
                         <div class="flex-fill min-w-0 overflow-hidden">
                             <div class="h3 mb-1 text-truncate">{{ $login->name }}</div>
-                            <div class="starter-hover-tooltip position-relative">
-                                <div class="text-secondary text-truncate" tabindex="0">{{ $login->email }}</div>
-                                <div class="tooltip bs-tooltip-top show" role="tooltip">
-                                    <div class="tooltip-arrow"></div>
-                                    <div class="tooltip-inner">{{ $login->email }}</div>
-                                </div>
-                            </div>
+                            <div class="text-secondary text-truncate" title="{{ $login->email }}">{{ $login->email }}</div>
                             <div class="mt-2">
                                 <span class="badge bg-primary-lt">{{ $login->role?->name ?? 'No Role' }}</span>
                             </div>

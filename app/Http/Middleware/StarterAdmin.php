@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +18,7 @@ class StarterAdmin
     {
         $login = $request->user();
 
-        if (! $login instanceof UserLogin || ! $login->role?->isAdmin()) {
+        if (! $login instanceof ClientLogin || ! $login->role?->isAdmin()) {
             abort(403);
         }
 

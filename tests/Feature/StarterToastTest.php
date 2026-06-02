@@ -3,14 +3,15 @@
 use App\Livewire\Starter\Profile\EditMyProfile;
 use App\Livewire\Starter\Settings\ClientProfile;
 use App\Livewire\Starter\UserManagement\Roles;
+use App\Livewire\Starter\UserManagement\Users;
 use App\Models\Starter\App;
 use App\Models\Starter\AppMenu;
 use App\Models\Starter\AppMod;
 use App\Models\Starter\AppRoute;
-use App\Models\Starter\User;
-use App\Models\Starter\UserLogin;
-use App\Models\Starter\UserRole;
-use App\Models\Starter\UserRoleAppLanding;
+use App\Models\Starter\Client;
+use App\Models\Starter\ClientLogin;
+use App\Models\Starter\ClientRole;
+use App\Models\Starter\ClientRoleAppLanding;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -19,22 +20,22 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-function starterToastLogin(): UserLogin
+function starterToastLogin(): ClientLogin
 {
-    $client = User::query()->create([
+    $client = Client::query()->create([
         'name' => 'Acme Client',
         'email' => 'client@example.test',
     ]);
 
-    $role = UserRole::query()->create([
-        'user_id' => $client->id,
+    $role = ClientRole::query()->create([
+        'client_id' => $client->id,
         'code' => 'admin',
         'name' => 'Administrator',
     ]);
 
-    return UserLogin::query()->create([
-        'user_id' => $client->id,
-        'user_role_id' => $role->id,
+    return ClientLogin::query()->create([
+        'client_id' => $client->id,
+        'client_role_id' => $role->id,
         'name' => 'Aldhi Admin',
         'username' => 'aldhi',
         'email' => 'aldhi@example.test',
@@ -59,7 +60,7 @@ test('profile update dispatches starter toast', function () {
                 && ($params['message'] ?? null) === 'Profile saved successfully.';
         });
 
-    $this->assertDatabaseHas('user_logins', [
+    $this->assertDatabaseHas('client_logins', [
         'id' => $login->id,
         'name' => 'Aldhi Updated',
         'username' => 'aldhi-updated',
@@ -117,10 +118,10 @@ test('admin can update client profile from settings page', function () {
         ->assertSee('Client Settings')
         ->assertSee('Change Logo')
         ->assertSee('Delete Logo')
-        ->assertSee('Account Status')
-        ->assertSee('Subscription')
-        ->assertSee('Payment')
         ->assertSee('Client Name')
+        ->assertDontSee('Account Status')
+        ->assertDontSee('Subscription')
+        ->assertDontSee('Payment')
         ->set('clientForm.name', 'Updated Client')
         ->set('clientForm.email', 'updated-client@example.test')
         ->set('clientForm.phone', '08123456789')
@@ -134,8 +135,8 @@ test('admin can update client profile from settings page', function () {
                 && ($params['message'] ?? null) === 'Client profile saved successfully.';
         });
 
-    $this->assertDatabaseHas('users', [
-        'id' => $login->user_id,
+    $this->assertDatabaseHas('clients', [
+        'id' => $login->client_id,
         'name' => 'Updated Client',
         'email' => 'updated-client@example.test',
         'phone' => '08123456789',
@@ -148,10 +149,10 @@ test('admin can update client profile from settings page', function () {
     ]);
 });
 
-test('client lifecycle and payment fields are read only in client profile settings', function () {
+test('client lifecycle and payment fields are hidden from client profile settings', function () {
     $login = starterToastLogin();
 
-    User::query()->whereKey($login->user_id)->update([
+    Client::query()->whereKey($login->client_id)->update([
         'account_status' => 'approved',
         'approved_at' => '2026-05-01 10:00:00',
         'subscription_status' => 'active',
@@ -166,10 +167,13 @@ test('client lifecycle and payment fields are read only in client profile settin
     $this->actingAs($login);
 
     Livewire::test(ClientProfile::class)
-        ->assertSee('Approved')
-        ->assertSee('Active')
-        ->assertSee('bank-transfer')
-        ->assertSee('INV-001')
+        ->assertDontSee('Approved')
+        ->assertDontSee('Active')
+        ->assertDontSee('bank-transfer')
+        ->assertDontSee('INV-001')
+        ->assertDontSee('Account Status')
+        ->assertDontSee('Subscription')
+        ->assertDontSee('Payment')
         ->assertDontSee('wire:model=&quot;clientForm.account_status&quot;', false)
         ->assertDontSee('wire:model=&quot;clientForm.subscription_status&quot;', false)
         ->assertDontSee('wire:model=&quot;clientForm.payment_method&quot;', false)
@@ -188,7 +192,7 @@ test('client profile photo upload and reset are supported', function () {
         ->call('save')
         ->assertHasNoErrors();
 
-    $client = $login->user->fresh();
+    $client = $login->client->fresh();
     $logo = (string) $client->logo;
 
     expect($logo)->toStartWith("storage/starter/client-photos/{$client->id}/");
@@ -204,7 +208,7 @@ test('client profile photo upload and reset are supported', function () {
                 && ($params['message'] ?? null) === 'Logo reset to default.';
         });
 
-    $this->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('clients', [
         'id' => $client->id,
         'logo' => null,
     ]);
@@ -221,10 +225,10 @@ test('client profile settings route is visible to admin only', function () {
         ->assertSee('Client Profile')
         ->assertSee('Save Client Profile');
 
-    $operator = UserLogin::query()->create([
-        'user_id' => $login->user_id,
-        'user_role_id' => UserRole::query()->create([
-            'user_id' => $login->user_id,
+    $operator = ClientLogin::query()->create([
+        'client_id' => $login->client_id,
+        'client_role_id' => ClientRole::query()->create([
+            'client_id' => $login->client_id,
             'code' => 'operator',
             'name' => 'Operator',
         ])->id,
@@ -284,7 +288,7 @@ test('profile photo reset clears stored image path', function () {
                 && ($params['message'] ?? null) === 'Profile photo reset to default.';
         });
 
-    $this->assertDatabaseHas('user_logins', [
+    $this->assertDatabaseHas('client_logins', [
         'id' => $login->id,
         'profile_photo' => 'assets/mine/avatar.png',
     ]);
@@ -410,10 +414,10 @@ test('role save stores default page menu for selected app modules', function () 
                 && ($params['message'] ?? null) === 'Role saved successfully.';
         });
 
-    $role = UserRole::query()->where('code', 'operator')->firstOrFail();
+    $role = ClientRole::query()->where('code', 'operator')->firstOrFail();
 
-    $this->assertDatabaseHas('rel_user_roles_app_landings', [
-        'user_role_id' => $role->id,
+    $this->assertDatabaseHas('rel_client_roles_app_landings', [
+        'client_role_id' => $role->id,
         'app_id' => $app->id,
         'app_menu_id' => $menu->id,
     ]);
@@ -442,18 +446,18 @@ test('app anchor redirects to role default page', function () {
         'label' => 'Dashboard',
         'is_landing_candidate' => true,
     ]);
-    $role = UserRole::query()->create([
-        'user_id' => $login->user_id,
+    $role = ClientRole::query()->create([
+        'client_id' => $login->client_id,
         'code' => 'operator',
         'name' => 'Operator',
     ]);
     $role->mods()->attach($mod);
-    UserRoleAppLanding::query()->create([
-        'user_role_id' => $role->id,
+    ClientRoleAppLanding::query()->create([
+        'client_role_id' => $role->id,
         'app_id' => $app->id,
         'app_menu_id' => $menu->id,
     ]);
-    $login->forceFill(['user_role_id' => $role->id])->save();
+    $login->forceFill(['client_role_id' => $role->id])->save();
 
     $target = app(NavigationAuthorizedRedirectService::class)->forAppAnchor($login->fresh('role'), 'web');
 
@@ -466,7 +470,7 @@ test('role delete validation dispatches danger starter toast', function () {
     $this->actingAs($login);
 
     Livewire::test(Roles::class)
-        ->call('deleteRole', $login->user_role_id)
+        ->call('deleteRole', $login->client_role_id)
         ->assertDispatched('starter-toast', function (string $event, array $params): bool {
             return $event === 'starter-toast'
                 && ($params['type'] ?? null) === 'danger'
@@ -480,7 +484,7 @@ test('default admin role is read only', function () {
     $this->actingAs($login);
 
     Livewire::test(Roles::class)
-        ->call('editRole', $login->user_role_id)
+        ->call('editRole', $login->client_role_id)
         ->set('roleForm.name', 'Changed Admin')
         ->call('save')
         ->assertDispatched('starter-toast', function (string $event, array $params): bool {
@@ -489,8 +493,8 @@ test('default admin role is read only', function () {
                 && ($params['message'] ?? null) === 'The default admin role is read only.';
         });
 
-    $this->assertDatabaseHas('user_roles', [
-        'id' => $login->user_role_id,
+    $this->assertDatabaseHas('client_roles', [
+        'id' => $login->client_role_id,
         'name' => 'Administrator',
     ]);
 });
@@ -498,9 +502,9 @@ test('default admin role is read only', function () {
 test('role users modal lists assigned users', function () {
     $login = starterToastLogin();
 
-    UserLogin::query()->create([
-        'user_id' => $login->user_id,
-        'user_role_id' => $login->user_role_id,
+    ClientLogin::query()->create([
+        'client_id' => $login->client_id,
+        'client_role_id' => $login->client_role_id,
         'name' => 'Second Admin',
         'username' => 'second-admin',
         'email' => 'second-admin@example.test',
@@ -510,12 +514,54 @@ test('role users modal lists assigned users', function () {
     $this->actingAs($login);
 
     Livewire::test(Roles::class)
-        ->call('showRoleUsers', $login->user_role_id)
+        ->call('showRoleUsers', $login->client_role_id)
         ->assertSet('roleUsersModalOpen', true)
         ->assertSet('roleUsersRoleName', 'Administrator')
         ->assertSee('Aldhi Admin')
         ->assertSee('Second Admin')
         ->assertSee('second-admin@example.test');
+});
+
+test('user detail modal shows related account metadata', function () {
+    $login = starterToastLogin();
+
+    Client::query()->whereKey($login->client_id)->update([
+        'phone' => '08123456789',
+        'pic_name' => 'Aldhi PIC',
+        'account_status' => 'approved',
+        'subscription_status' => 'active',
+        'payment_method' => 'manual',
+        'payment_reference' => 'INV-001',
+    ]);
+
+    $operator = ClientLogin::query()->create([
+        'client_id' => $login->client_id,
+        'client_role_id' => $login->client_role_id,
+        'name' => 'Operator Login',
+        'username' => 'operator-login',
+        'email' => 'operator@example.test',
+        'email_verified_at' => now(),
+        'password' => 'secret',
+        'last_login_provider' => 'email',
+        'last_login_ip' => '127.0.0.1',
+    ]);
+
+    $this->actingAs($login);
+
+    Livewire::test(Users::class)
+        ->call('showUserDetail', $operator->id)
+        ->assertSet('detailUserModalOpen', true)
+        ->assertSee('Login Detail')
+        ->assertSee('Operator Login')
+        ->assertSee('operator@example.test')
+        ->assertSee('Client Detail')
+        ->assertSee('08123456789')
+        ->assertSee('Audit')
+        ->assertDontSee('Subscription & Audit', false)
+        ->assertDontSee('INV-001')
+        ->assertDontSee('Payment Method')
+        ->assertDontSee('Payment Reference')
+        ->assertDontSee('Account Status');
 });
 
 test('module accordion keeps expanded app when module access changes', function () {

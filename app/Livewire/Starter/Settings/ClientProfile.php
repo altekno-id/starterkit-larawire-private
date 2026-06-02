@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Starter\Settings;
 
-use App\Models\Starter\User;
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\Client;
+use App\Models\Starter\ClientLogin;
 use App\Services\Starter\ProfileService;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
@@ -111,30 +111,28 @@ class ClientProfile extends Component
             'client' => $this->client(),
             'clientLogoPreviewUrl' => $this->clientLogoPreviewUrl(),
             'clientInitials' => $this->clientInitials(),
-            'accountStatusOptions' => $this->accountStatusOptions(),
-            'subscriptionStatusOptions' => $this->subscriptionStatusOptions(),
         ])->title('Client Profile');
     }
 
-    private function login(): UserLogin
+    private function login(): ClientLogin
     {
         $login = auth()->user();
 
-        abort_unless($login instanceof UserLogin && ($login->loadMissing('role')->role?->isAdmin() ?? false), 403);
+        abort_unless($login instanceof ClientLogin && ($login->loadMissing('role')->role?->isAdmin() ?? false), 403);
 
-        return $login->loadMissing('user');
+        return $login->loadMissing('client');
     }
 
-    private function client(): User
+    private function client(): Client
     {
-        $client = $this->login()->user;
+        $client = $this->login()->client;
 
-        abort_unless($client instanceof User, 403);
+        abort_unless($client instanceof Client, 403);
 
         return $client;
     }
 
-    private function fillFromClient(User $client): void
+    private function fillFromClient(Client $client): void
     {
         $this->clientForm = [
             'name' => (string) $client->name,
@@ -188,32 +186,4 @@ class ClientProfile extends Component
         Storage::disk('public')->delete(str($logo)->after('storage/')->toString());
     }
 
-    /**
-     * @return array<string, string>
-     */
-    private function accountStatusOptions(): array
-    {
-        return [
-            'pending' => 'Pending',
-            'approved' => 'Approved',
-            'rejected' => 'Rejected',
-            'suspended' => 'Suspended',
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function subscriptionStatusOptions(): array
-    {
-        return [
-            'none' => 'None',
-            'trialing' => 'Trialing',
-            'pending_approval' => 'Pending Approval',
-            'active' => 'Active',
-            'past_due' => 'Past Due',
-            'canceled' => 'Canceled',
-            'expired' => 'Expired',
-        ];
-    }
 }

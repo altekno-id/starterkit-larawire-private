@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Starter\Profile;
 
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use App\Services\Starter\ProfileService;
 use App\Services\Starter\StarterContextService;
 use Illuminate\Support\Facades\Storage;
@@ -45,7 +45,7 @@ class EditMyProfile extends Component
 
     public function mount(): void
     {
-        $this->fillFromLogin($this->login()->loadMissing('user'));
+        $this->fillFromLogin($this->login()->loadMissing('client'));
     }
 
     public function saveAccount(): void
@@ -59,13 +59,13 @@ class EditMyProfile extends Component
                 'string',
                 'max:255',
                 'regex:/^[A-Za-z0-9_-]+$/',
-                Rule::unique('user_logins', 'username')->ignore($login->id),
+                Rule::unique('client_logins', 'username')->ignore($login->id),
             ],
             'accountForm.email' => [
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('user_logins', 'email')->ignore($login->id),
+                Rule::unique('client_logins', 'email')->ignore($login->id),
             ],
             'accountForm.profile_photo' => ['nullable', 'string', 'max:255'],
             'profilePhotoUpload' => ['nullable', 'image', 'max:2048'],
@@ -96,7 +96,7 @@ class EditMyProfile extends Component
 
         $this->profilePhotoUpload = null;
         $this->profilePhotoReset = false;
-        $this->fillFromLogin($updatedLogin->loadMissing('user'));
+        $this->fillFromLogin($updatedLogin->loadMissing('client'));
         $this->dispatch('starter-account-updated',
             avatarUrl: app(StarterContextService::class)->avatarUrl($updatedLogin),
             name: $updatedLogin->name,
@@ -172,7 +172,7 @@ class EditMyProfile extends Component
 
     public function render()
     {
-        $login = $this->login()->loadMissing(['user', 'role']);
+        $login = $this->login()->loadMissing(['client', 'role']);
 
         return view('starter.profile.edit-my-profile', [
             'login' => $login,
@@ -181,11 +181,11 @@ class EditMyProfile extends Component
         ])->title('Edit My Profile');
     }
 
-    private function login(): UserLogin
+    private function login(): ClientLogin
     {
         $login = auth()->user();
 
-        abort_unless($login instanceof UserLogin, 403);
+        abort_unless($login instanceof ClientLogin, 403);
 
         return $login;
     }
@@ -195,7 +195,7 @@ class EditMyProfile extends Component
         return collect($exception->errors())->flatten()->first() ?? 'Invalid data.';
     }
 
-    private function fillFromLogin(UserLogin $login): void
+    private function fillFromLogin(ClientLogin $login): void
     {
         $this->profilePhotoReset = false;
 
@@ -208,7 +208,7 @@ class EditMyProfile extends Component
 
     }
 
-    private function profilePhotoPreviewUrl(UserLogin $login): string
+    private function profilePhotoPreviewUrl(ClientLogin $login): string
     {
         if ($this->profilePhotoUpload instanceof TemporaryUploadedFile) {
             return $this->profilePhotoUpload->temporaryUrl();

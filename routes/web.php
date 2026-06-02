@@ -5,7 +5,7 @@ use App\Livewire\Apps\Web\Module1\WebModule1Create;
 use App\Livewire\Apps\Web\Module1\WebModule1Edit;
 use App\Livewire\Apps\Web\Module1\WebModule1Index;
 use App\Livewire\Apps\Web\Module1\WebModule1Show;
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +22,7 @@ Route::name('web.')->group(function () {
             $login = auth()->user();
             $appKey = str((string) request()->route()?->getName())->before('.anchor')->toString();
 
-            return $login instanceof UserLogin
+            return $login instanceof ClientLogin
                 ? redirect($redirects->forAppAnchor($login, $appKey))
                 : redirect()->route('auth.login');
         })->name('anchor');

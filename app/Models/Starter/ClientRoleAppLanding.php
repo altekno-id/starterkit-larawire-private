@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_role_id', 'app_id', 'app_menu_id'])]
-class UserRoleAppLanding extends Model
+#[Fillable(['client_role_id', 'app_id', 'app_menu_id'])]
+class ClientRoleAppLanding extends Model
 {
-    protected $table = 'rel_user_roles_app_landings';
+    protected $table = 'rel_client_roles_app_landings';
 
     public function role(): BelongsTo
     {
-        return $this->belongsTo(UserRole::class, 'user_role_id');
+        return $this->belongsTo(ClientRole::class, 'client_role_id');
     }
 
     public function app(): BelongsTo

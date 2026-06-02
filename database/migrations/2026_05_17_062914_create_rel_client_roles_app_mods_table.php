@@ -3,7 +3,7 @@
 use App\Models\Starter\AppMod;
 use App\Models\Starter\App;
 use App\Models\Starter\AppMenu;
-use App\Models\Starter\UserRole;
+use App\Models\Starter\ClientRole;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,23 +15,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rel_user_roles_app_mods', function (Blueprint $table) {
+        Schema::create('rel_client_roles_app_mods', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(UserRole::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ClientRole::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(AppMod::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['user_role_id', 'app_mod_id']);
+            $table->unique(['client_role_id', 'app_mod_id']);
         });
 
-        Schema::create('rel_user_roles_app_landings', function (Blueprint $table) {
+        Schema::create('rel_client_roles_app_landings', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(UserRole::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ClientRole::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(App::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(AppMenu::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['user_role_id', 'app_id']);
+            $table->unique(['client_role_id', 'app_id']);
         });
     }
 
@@ -40,7 +40,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rel_user_roles_app_landings');
-        Schema::dropIfExists('rel_user_roles_app_mods');
+        Schema::dropIfExists('rel_client_roles_app_landings');
+        Schema::dropIfExists('rel_client_roles_app_mods');
     }
 };

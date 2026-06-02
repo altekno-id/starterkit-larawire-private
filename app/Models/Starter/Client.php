@@ -2,7 +2,6 @@
 
 namespace App\Models\Starter;
 
-use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,9 +23,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'subscription_ends_at',
     'payment_approved_at',
 ])]
-class User extends Model
+class Client extends Model
 {
-    use HasActivityLog, SoftDeletes;
+    use SoftDeletes;
 
     /**
      * The attributes that should be cast.
@@ -49,7 +48,7 @@ class User extends Model
      */
     public function logins(): HasMany
     {
-        return $this->hasMany(UserLogin::class);
+        return $this->hasMany(ClientLogin::class);
     }
 
     /**
@@ -57,6 +56,6 @@ class User extends Model
      */
     public function roles(): HasMany
     {
-        return $this->hasMany(UserRole::class);
+        return $this->hasMany(ClientRole::class);
     }
 }

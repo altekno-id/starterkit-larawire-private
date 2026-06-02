@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Starter\UserManagement;
 
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use App\Services\Starter\UserManagementRoleService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -123,7 +123,7 @@ class Roles extends Component
             $this->roleForm['landing_menu_ids'],
         );
 
-        $clientId = $this->login()->user_id;
+        $clientId = $this->login()->client_id;
 
         $validated = $this->validate([
             'roleForm.code' => [
@@ -131,8 +131,8 @@ class Roles extends Component
                 'string',
                 'max:255',
                 'regex:/^[A-Za-z0-9_-]+$/',
-                Rule::unique('user_roles', 'code')
-                    ->where(fn ($query) => $query->where('user_id', $clientId))
+                Rule::unique('client_roles', 'code')
+                    ->where(fn ($query) => $query->where('client_id', $clientId))
                     ->ignore($this->selectedRoleId),
             ],
             'roleForm.name' => ['required', 'string', 'max:255'],
@@ -185,11 +185,11 @@ class Roles extends Component
 
     public function showRoleUsers(int $id): void
     {
-        $role = $this->roles()->findRole($this->login(), $id)->load('userLogins');
+        $role = $this->roles()->findRole($this->login(), $id)->load('clientLogins');
 
         $this->roleUsersRoleName = $role->name;
-        $this->roleUsers = $role->userLogins
-            ->map(fn (UserLogin $login): array => [
+        $this->roleUsers = $role->clientLogins
+            ->map(fn (ClientLogin $login): array => [
                 'name' => $login->name,
                 'username' => $login->username,
                 'email' => $login->email,
@@ -233,13 +233,13 @@ class Roles extends Component
         return app(UserManagementRoleService::class);
     }
 
-    private function login(): UserLogin
+    private function login(): ClientLogin
     {
         $login = auth()->user();
 
-        abort_unless($login instanceof UserLogin, 403);
+        abort_unless($login instanceof ClientLogin, 403);
 
-        return $login->loadMissing('user');
+        return $login->loadMissing('client');
     }
 
     private function firstValidationMessage(ValidationException $exception): string

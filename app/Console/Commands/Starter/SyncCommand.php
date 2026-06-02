@@ -457,22 +457,22 @@ class SyncCommand extends Command
             return;
         }
 
-        DB::table('rel_user_roles_app_landings')
+        DB::table('rel_client_roles_app_landings')
             ->where('app_id', $app->id)
-            ->whereIn('user_role_id', function ($query): void {
+            ->whereIn('client_role_id', function ($query): void {
                 $query
                     ->select('id')
-                    ->from('user_roles')
+                    ->from('client_roles')
                     ->where('code', 'admin');
             })
             ->delete();
 
         $now = now();
-        $adminRoleIds = DB::table('user_roles')->where('code', 'admin')->pluck('id');
+        $adminRoleIds = DB::table('client_roles')->where('code', 'admin')->pluck('id');
 
         foreach ($adminRoleIds as $roleId) {
-            DB::table('rel_user_roles_app_landings')->updateOrInsert([
-                'user_role_id' => $roleId,
+            DB::table('rel_client_roles_app_landings')->updateOrInsert([
+                'client_role_id' => $roleId,
                 'app_id' => $app->id,
             ], [
                 'app_menu_id' => $dashboardMenu->id,
@@ -604,7 +604,7 @@ class SyncCommand extends Command
 
         $this->deleteMenus(AppMenu::query()->whereIn('app_mod_id', $staleModIds)->pluck('id'));
         AppRoute::query()->whereIn('app_mod_id', $staleModIds)->delete();
-        DB::table('rel_user_roles_app_mods')->whereIn('app_mod_id', $staleModIds)->delete();
+        DB::table('rel_client_roles_app_mods')->whereIn('app_mod_id', $staleModIds)->delete();
         AppMod::query()->whereIn('id', $staleModIds)->delete();
     }
 }

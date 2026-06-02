@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Starter\User;
-use App\Models\Starter\UserRole;
+use App\Models\Starter\Client;
+use App\Models\Starter\ClientRole;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_logins', function (Blueprint $table) {
+        Schema::create('client_logins', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('username')->unique();
@@ -27,11 +27,11 @@ return new class extends Migration
             $table->string('last_login_ip', 45)->nullable();
             $table->string('last_login_provider', 20)->nullable();
             $table->rememberToken();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(UserRole::class)->constrained()->restrictOnDelete();
+            $table->foreignIdFor(Client::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ClientRole::class)->constrained()->restrictOnDelete();
             $table->timestamps();
 
-            $table->index(['user_id', 'user_role_id']);
+            $table->index(['client_id', 'client_role_id']);
         });
     }
 
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_logins');
+        Schema::dropIfExists('client_logins');
     }
 };

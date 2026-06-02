@@ -2,7 +2,6 @@
 
 namespace App\Models\Starter;
 
-use App\Models\Starter\Concerns\HasActivityLog;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,8 +9,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable([
-    'user_id',
-    'user_role_id',
+    'client_id',
+    'client_role_id',
     'name',
     'username',
     'email',
@@ -26,9 +25,9 @@ use Illuminate\Notifications\Notifiable;
     'remember_token',
 ])]
 #[Hidden(['password', 'remember_token'])]
-class UserLogin extends Authenticatable
+class ClientLogin extends Authenticatable
 {
-    use HasActivityLog, Notifiable;
+    use Notifiable;
 
     /**
      * The attributes that should be cast.
@@ -47,9 +46,9 @@ class UserLogin extends Authenticatable
     /**
      * Get the client that owns this login account.
      */
-    public function user(): BelongsTo
+    public function client(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Client::class);
     }
 
     /**
@@ -57,7 +56,7 @@ class UserLogin extends Authenticatable
      */
     public function role(): BelongsTo
     {
-        return $this->belongsTo(UserRole::class, 'user_role_id');
+        return $this->belongsTo(ClientRole::class, 'client_role_id');
     }
 
     /**

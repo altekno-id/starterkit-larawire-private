@@ -3,9 +3,9 @@
 namespace App\Console\Commands\Starter;
 
 use App\Models\Starter\App;
-use App\Models\Starter\User;
-use App\Models\Starter\UserLogin;
-use App\Models\Starter\UserRole;
+use App\Models\Starter\Client;
+use App\Models\Starter\ClientLogin;
+use App\Models\Starter\ClientRole;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +46,7 @@ class AdminCommand extends Command
             return self::FAILURE;
         }
 
-        if (User::query()->count() === 0) {
+        if (Client::query()->count() === 0) {
             $this->createDefaultClients();
         }
 
@@ -89,11 +89,11 @@ class AdminCommand extends Command
     /**
      * Get all clients that should receive an admin login.
      *
-     * @return Collection<int, User>
+     * @return Collection<int, Client>
      */
     private function clients(): Collection
     {
-        return User::query()->orderBy('id')->get();
+        return Client::query()->orderBy('id')->get();
     }
 
     /**
@@ -104,7 +104,7 @@ class AdminCommand extends Command
         foreach ($this->subdomains() as $subdomain) {
             $app = App::query()->where('subdomain', $subdomain)->first();
 
-            User::query()->create([
+            Client::query()->create([
                 'name' => ($app?->name ?? str($subdomain)->headline()).' Development',
                 'email' => "client@{$subdomain}.".config('app.domain'),
                 'pic_name' => 'Admin',
@@ -119,11 +119,11 @@ class AdminCommand extends Command
     /**
      * Create or update one admin login for one client.
      */
-    private function createAdmin(User $client): void
+    private function createAdmin(Client $client): void
     {
         DB::transaction(function () use ($client): void {
-            $role = UserRole::query()->updateOrCreate([
-                'user_id' => $client->id,
+            $role = ClientRole::query()->updateOrCreate([
+                'client_id' => $client->id,
                 'code' => 'admin',
             ], [
                 'name' => 'Admin',
@@ -131,16 +131,16 @@ class AdminCommand extends Command
             ]);
 
             // Empty module listing is intentionally treated as full access for admin roles.
-            DB::table('rel_user_roles_app_mods')->where('user_role_id', $role->id)->delete();
+            DB::table('rel_client_roles_app_mods')->where('client_role_id', $role->id)->delete();
             $this->syncAdminLandings($role);
 
-            $login = UserLogin::query()->firstOrNew([
+            $login = ClientLogin::query()->firstOrNew([
                 'email' => $this->adminEmail($client),
             ]);
 
             $login->fill([
-                'user_id' => $client->id,
-                'user_role_id' => $role->id,
+                'client_id' => $client->id,
+                'client_role_id' => $role->id,
                 'name' => $login->name ?: 'Admin',
                 'username' => $this->adminUsername($client),
                 'email_verified_at' => $login->email_verified_at ?: now(),
@@ -155,7 +155,7 @@ class AdminCommand extends Command
         });
     }
 
-    private function syncAdminLandings(UserRole $role): void
+    private function syncAdminLandings(ClientRole $role): void
     {
         $dashboardMenus = DB::table('app_menus')
             ->join('app_routes', 'app_menus.app_route_id', '=', 'app_routes.id')
@@ -174,8 +174,8 @@ class AdminCommand extends Command
         $now = now();
 
         foreach ($dashboardMenus as $menu) {
-            DB::table('rel_user_roles_app_landings')->updateOrInsert([
-                'user_role_id' => $role->id,
+            DB::table('rel_client_roles_app_landings')->updateOrInsert([
+                'client_role_id' => $role->id,
                 'app_id' => $menu->app_id,
             ], [
                 'app_menu_id' => $menu->app_menu_id,
@@ -188,7 +188,7 @@ class AdminCommand extends Command
     /**
      * Build a unique admin email for one client.
      */
-    private function adminEmail(User $client): string
+    private function adminEmail(Client $client): string
     {
         return "admin+client{$client->id}@".config('app.domain');
     }
@@ -196,7 +196,7 @@ class AdminCommand extends Command
     /**
      * Build a unique admin username for one client.
      */
-    private function adminUsername(User $client): string
+    private function adminUsername(Client $client): string
     {
         return "admin{$client->id}";
     }

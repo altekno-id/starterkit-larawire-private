@@ -21,6 +21,8 @@
         'circle',
         'circle-check',
         'circle-x',
+        'dots',
+        'dots-vertical',
         'folder',
         'file-plus',
         'info-circle',
@@ -100,6 +102,18 @@
         @case('circle-x')
             <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
             <path d="M10 10l4 4m0 -4l-4 4" />
+            @break
+
+        @case('dots')
+            <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+            <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+            <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+            @break
+
+        @case('dots-vertical')
+            <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+            <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+            <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
             @break
 
         @case('folder')

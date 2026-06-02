@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Starter\Auth\LogoutController;
 use App\Livewire\Starter\Auth\Login;
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ Route::name('auth.')->group(function () {
 
         $login = auth()->user();
 
-        if ($login instanceof UserLogin) {
+        if ($login instanceof ClientLogin) {
             return redirect($redirects->forLogin($login, $redirect));
         }
 

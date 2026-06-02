@@ -2,67 +2,77 @@
 
 namespace App\Services\Starter;
 
-use App\Contracts\Starter\UserLoginInterface;
-use App\Contracts\Starter\UserRoleInterface;
-use App\Models\Starter\User;
-use App\Models\Starter\UserLogin;
-use App\Models\Starter\UserRole;
+use App\Contracts\Starter\AppModInterface;
+use App\Contracts\Starter\ClientLoginInterface;
+use App\Contracts\Starter\ClientRoleInterface;
+use App\Models\Starter\Client;
+use App\Models\Starter\ClientLogin;
+use App\Models\Starter\ClientRole;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class UserManagementUserService
 {
     public function __construct(
-        private readonly UserLoginInterface $userLogins,
-        private readonly UserRoleInterface $userRoles
+        private readonly ClientLoginInterface $clientLogins,
+        private readonly ClientRoleInterface $clientRoles,
+        private readonly AppModInterface $appMods
     ) {}
 
     /**
-     * @return Collection<int, UserLogin>
+     * @return Collection<int, ClientLogin>
      */
-    public function users(UserLogin $login): Collection
+    public function users(ClientLogin $login): Collection
     {
-        return $this->userLogins->forUser($this->client($login), ['role']);
+        return $this->clientLogins->forClient($this->client($login), [
+            'role.mods.app',
+            'role.landings.menu.mod.app',
+            'client',
+        ]);
     }
 
     /**
-     * @return Collection<int, UserRole>
+     * @return Collection<int, ClientRole>
      */
-    public function roles(UserLogin $login): Collection
+    public function roles(ClientLogin $login): Collection
     {
-        return $this->userRoles->forUser($this->client($login));
+        return $this->clientRoles->forClient($this->client($login), ['mods.app']);
     }
 
-    public function findUser(UserLogin $currentLogin, int $id): UserLogin
+    public function findUser(ClientLogin $currentLogin, int $id): ClientLogin
     {
-        $login = $this->userLogins->findForUser($this->client($currentLogin), $id, ['role']);
+        $login = $this->clientLogins->findForClient($this->client($currentLogin), $id, [
+            'role.mods.app',
+            'role.landings.menu.mod.app',
+            'client',
+        ]);
 
-        abort_unless($login instanceof UserLogin, 404);
+        abort_unless($login instanceof ClientLogin, 404);
 
         return $login;
     }
 
     /**
-     * @param  array{name: string, username: string, email: string, user_role_id: int|string, password?: ?string}  $data
+     * @param  array{name: string, username: string, email: string, client_role_id: int|string, password?: ?string}  $data
      */
-    public function saveUser(UserLogin $currentLogin, ?int $userLoginId, array $data): UserLogin
+    public function saveUser(ClientLogin $currentLogin, ?int $userLoginId, array $data): ClientLogin
     {
         $client = $this->client($currentLogin);
-        $role = $this->userRoles->findForUser($client, (int) $data['user_role_id']);
+        $role = $this->clientRoles->findForClient($client, (int) $data['client_role_id']);
 
-        if (! $role instanceof UserRole) {
+        if (! $role instanceof ClientRole) {
             throw ValidationException::withMessages([
                 'roleId' => 'Invalid role.',
             ]);
         }
 
-        $login = $userLoginId ? $this->userLogins->findForUser($client, $userLoginId) : null;
+        $login = $userLoginId ? $this->clientLogins->findForClient($client, $userLoginId) : null;
 
-        if ($userLoginId && ! $login instanceof UserLogin) {
+        if ($userLoginId && ! $login instanceof ClientLogin) {
             abort(404);
         }
 
-        if ($login?->is($currentLogin) && (int) $data['user_role_id'] !== $currentLogin->user_role_id) {
+        if ($login?->is($currentLogin) && (int) $data['client_role_id'] !== $currentLogin->client_role_id) {
             throw ValidationException::withMessages([
                 'roleId' => 'The current login role cannot be changed from this page.',
             ]);
@@ -72,19 +82,19 @@ class UserManagementUserService
             'name' => trim($data['name']),
             'username' => str($data['username'])->lower()->trim()->toString(),
             'email' => str($data['email'])->lower()->trim()->toString(),
-            'user_role_id' => $role->id,
+            'client_role_id' => $role->id,
         ];
 
         if (filled($data['password'] ?? null)) {
             $payload['password'] = $data['password'];
         }
 
-        return $login instanceof UserLogin
-            ? $this->userLogins->update($login, $payload)
-            : $this->userLogins->createForUser($client, $payload);
+        return $login instanceof ClientLogin
+            ? $this->clientLogins->update($login, $payload)
+            : $this->clientLogins->createForClient($client, $payload);
     }
 
-    public function deleteUser(UserLogin $currentLogin, int $userLoginId): void
+    public function deleteUser(ClientLogin $currentLogin, int $userLoginId): void
     {
         $login = $this->findUser($currentLogin, $userLoginId);
 
@@ -94,14 +104,24 @@ class UserManagementUserService
             ]);
         }
 
-        $this->userLogins->delete($login);
+        $this->clientLogins->delete($login);
     }
 
-    private function client(UserLogin $login): User
+    public function appCount(): int
     {
-        $client = $login->user;
+        return $this->appMods
+            ->all(['app'])
+            ->pluck('app_id')
+            ->filter()
+            ->unique()
+            ->count();
+    }
 
-        abort_unless($client instanceof User, 403);
+    private function client(ClientLogin $login): Client
+    {
+        $client = $login->client;
+
+        abort_unless($client instanceof Client, 403);
 
         return $client;
     }

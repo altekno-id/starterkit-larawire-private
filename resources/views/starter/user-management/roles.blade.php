@@ -7,7 +7,7 @@
         : $modules
             ->filter(fn ($appModules): bool => $appModules->contains(fn ($module): bool => in_array((string) $module->id, $selectedModuleIds, true)))
             ->count();
-    $assignedUserCount = $selectedRole?->user_logins_count ?? 0;
+    $assignedUserCount = $selectedRole?->client_logins_count ?? 0;
     $moduleAppKeys = $modules->map(fn ($appModules): string => 'app-'.($appModules->first()?->app_id ?? 'none'))->values();
     $allModuleAppsExpanded = $appTotal > 0 && $moduleAppKeys->diff($expandedModuleAppKeys)->isEmpty();
     $roleTitle = filled($roleForm['name']) ? $roleForm['name'] : ($selectedRoleId ? 'Selected Role' : 'New Role');
@@ -74,19 +74,19 @@
                                     <span class="font-monospace ms-1">{{ $role->code }}</span>
                                 </span>
                                 <span class="col-6 text-end">
-                                    @if ($role->user_logins_count > 0)
+                                    @if ($role->client_logins_count > 0)
                                         <button type="button" class="btn btn-link btn-sm p-0 align-baseline" wire:click.stop="showRoleUsers({{ $role->id }})">
                                             <span>Users</span>
                                             <span>:</span>
                                             <span class="fw-semibold ms-1">
-                                                {{ $role->user_logins_count }}
+                                                {{ $role->client_logins_count }}
                                             </span>
                                         </button>
                                     @else
                                         <span class="text-secondary">Users</span>
                                         <span class="text-secondary">:</span>
                                         <span class="fw-semibold ms-1">
-                                            {{ $role->user_logins_count }}
+                                            {{ $role->client_logins_count }}
                                         </span>
                                     @endif
                                 </span>

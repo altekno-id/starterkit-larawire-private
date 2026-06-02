@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Starter\User;
+use App\Models\Starter\Client;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,15 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_roles', function (Blueprint $table) {
+        Schema::create('client_roles', function (Blueprint $table) {
             $table->id();
             $table->string('code');
             $table->string('name');
             $table->text('desc')->nullable();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Client::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['user_id', 'code']);
+            $table->unique(['client_id', 'code']);
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_roles');
+        Schema::dropIfExists('client_roles');
     }
 };

@@ -27,7 +27,7 @@ class Roles extends Component
     public string $roleUsersRoleName = '';
 
     /**
-     * @var array<int, array{name: string, username: string, email: string}>
+     * @var array<int, array{name: string, email: string}>
      */
     public array $roleUsers = [];
 
@@ -191,7 +191,6 @@ class Roles extends Component
         $this->roleUsers = $role->clientLogins
             ->map(fn (ClientLogin $login): array => [
                 'name' => $login->name,
-                'username' => $login->username,
                 'email' => $login->email,
             ])
             ->values()

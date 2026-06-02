@@ -17,13 +17,12 @@ class ProfileService
     ) {}
 
     /**
-     * @param  array{name: string, username: string, email: string, profile_photo?: ?string}  $data
+     * @param  array{name: string, email: string, profile_photo?: ?string}  $data
      */
     public function updateProfile(ClientLogin $login, array $data): ClientLogin
     {
         return $this->clientLogins->update($login, [
             'name' => trim($data['name']),
-            'username' => str($data['username'])->lower()->trim()->toString(),
             'email' => str($data['email'])->lower()->trim()->toString(),
             'profile_photo' => $this->nullableTrim($data['profile_photo'] ?? null),
         ]);

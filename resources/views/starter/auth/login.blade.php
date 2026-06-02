@@ -1,8 +1,8 @@
 <form wire:submit="authenticate" autocomplete="on">
     <div class="mb-3">
-        <label class="form-label" for="credential">Username atau Email</label>
-        <input type="text" class="form-control @error('form.credential') is-invalid @enderror" id="credential" wire:model="form.credential" placeholder="admin1 atau admin@example.com" autofocus autocomplete="username">
-        @error('form.credential')
+        <label class="form-label" for="email">Email</label>
+        <input type="email" class="form-control @error('form.email') is-invalid @enderror" id="email" wire:model="form.email" placeholder="name@example.com" autofocus autocomplete="email">
+        @error('form.email')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>

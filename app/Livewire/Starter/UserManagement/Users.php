@@ -36,11 +36,10 @@ class Users extends Component
     public bool $detailUserModalOpen = false;
 
     /**
-     * @var array{name: string, username: string, email: string, role_id: string, password: string, password_confirmation: string}
+     * @var array{name: string, email: string, role_id: string, password: string, password_confirmation: string}
      */
     public array $userForm = [
         'name' => '',
-        'username' => '',
         'email' => '',
         'role_id' => '',
         'password' => '',
@@ -67,7 +66,6 @@ class Users extends Component
         $this->selectedUserId = $login->id;
         $this->userForm = [
             'name' => $login->name,
-            'username' => $login->username,
             'email' => $login->email,
             'role_id' => (string) $login->client_role_id,
             'password' => '',
@@ -113,13 +111,6 @@ class Users extends Component
 
         $validated = $this->validate([
             'userForm.name' => ['required', 'string', 'max:255'],
-            'userForm.username' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^[A-Za-z0-9_-]+$/',
-                Rule::unique('client_logins', 'username')->ignore($this->selectedUserId),
-            ],
             'userForm.email' => [
                 'required',
                 'email',
@@ -135,7 +126,6 @@ class Users extends Component
             'userForm.password_confirmation' => [$this->selectedUserId ? 'nullable' : 'required', 'string'],
         ], [], [
             'userForm.name' => 'name',
-            'userForm.username' => 'username',
             'userForm.email' => 'email',
             'userForm.role_id' => 'role',
             'userForm.password' => 'password',
@@ -144,7 +134,6 @@ class Users extends Component
 
         $login = $this->users()->saveUser($this->login(), $this->selectedUserId, [
             'name' => $validated['name'],
-            'username' => $validated['username'],
             'email' => $validated['email'],
             'client_role_id' => $validated['role_id'],
             'password' => $validated['password'] ?? null,
@@ -212,7 +201,6 @@ class Users extends Component
             ? $allUsers
             : $allUsers->filter(function (ClientLogin $user) use ($search): bool {
                 return Str::of($user->name)->lower()->contains($search)
-                    || Str::of($user->username)->lower()->contains($search)
                     || Str::of($user->email)->lower()->contains($search)
                     || Str::of((string) $user->role?->name)->lower()->contains($search)
                     || Str::of((string) $user->role?->code)->lower()->contains($search);

@@ -17,7 +17,7 @@
             <div class="col-auto">
                 <button type="button" class="btn btn-primary" wire:click="newUser">
                     @include('templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
-                    Add Client
+                    Add User
                 </button>
             </div>
         </div>
@@ -101,7 +101,7 @@
                     <div class="row g-3 align-items-end">
                         <div class="col-md-6 col-xl-3">
                             <label class="form-label">Search</label>
-                            <input type="search" class="form-control" placeholder="Name, email, username, role" wire:model.live.debounce.250ms="search">
+                            <input type="search" class="form-control" placeholder="Name, email, role" wire:model.live.debounce.250ms="search">
                         </div>
                         <div class="col-md-6 col-xl-2">
                             <label class="form-label">Role</label>
@@ -156,7 +156,7 @@
                         <thead>
                             <tr>
                                 <th class="w-1"></th>
-                                <th>Client</th>
+                                <th>User</th>
                                 <th>Role & Access</th>
                                 <th>Client</th>
                                 <th>Security</th>
@@ -211,10 +211,6 @@
                                                     @endif
                                                 </div>
                                                 <div class="text-secondary text-truncate">{{ $user->email }}</div>
-                                                <div class="small text-secondary">
-                                                    Username:
-                                                    <span class="font-monospace">{{ $user->username }}</span>
-                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -270,7 +266,7 @@
                                             <div class="empty-action">
                                                 <button type="button" class="btn btn-primary" wire:click="newUser">
                                                     @include('templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
-                                                    Add Client
+                                                    Add User
                                                 </button>
                                             </div>
                                         </div>
@@ -290,7 +286,7 @@
                 <form class="modal-content" wire:submit="save">
                     <div class="modal-header">
                         <div>
-                            <h3 class="modal-title">{{ $selectedUserId ? 'Edit Client' : 'Create New Client' }}</h3>
+                            <h3 class="modal-title">{{ $selectedUserId ? 'Edit User' : 'Create New User' }}</h3>
                             <div class="text-secondary">{{ $selectedUserId ? 'Update login identity and role assignment.' : 'Create a new login account for this client.' }}</div>
                         </div>
                         <button type="button" class="btn-close" wire:click="closeUserModal" aria-label="Close"></button>
@@ -304,7 +300,7 @@
                                         <span class="avatar avatar-md bg-primary-lt text-primary">{{ filled($userForm['name']) ? str($userForm['name'])->substr(0, 2)->upper() : 'US' }}</span>
                                     </div>
                                     <div class="col text-truncate">
-                                        <div class="fw-semibold text-truncate">{{ filled($userForm['name']) ? $userForm['name'] : 'New Client' }}</div>
+                                        <div class="fw-semibold text-truncate">{{ filled($userForm['name']) ? $userForm['name'] : 'New User' }}</div>
                                         <div class="text-secondary text-truncate">{{ filled($userForm['email']) ? $userForm['email'] : 'email@example.test' }}</div>
                                     </div>
                                 </div>
@@ -342,17 +338,10 @@
                                     @error('userForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
-                                <div class="row g-3">
-                                    <div class="col-md-5">
-                                        <label class="form-label">Username</label>
-                                        <input type="text" class="form-control @error('userForm.username') is-invalid @enderror" wire:model="userForm.username" autocomplete="username">
-                                        @error('userForm.username') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
-                                    <div class="col-md-7">
-                                        <label class="form-label">Email</label>
-                                        <input type="email" class="form-control @error('userForm.email') is-invalid @enderror" wire:model="userForm.email" autocomplete="email">
-                                        @error('userForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
+                                <div class="mt-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control @error('userForm.email') is-invalid @enderror" wire:model="userForm.email" autocomplete="email">
+                                    @error('userForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="mt-3">
@@ -394,7 +383,7 @@
                         @endif
                         <button type="button" class="btn ms-auto" wire:click="closeUserModal">Cancel</button>
                         <button type="submit" class="btn btn-primary">
-                            {{ $selectedUserId ? 'Save Changes' : 'Create Client' }}
+                            {{ $selectedUserId ? 'Save Changes' : 'Create User' }}
                         </button>
                     </div>
                 </form>
@@ -456,10 +445,6 @@
                                             <div class="datagrid-item">
                                                 <div class="datagrid-title">Login ID</div>
                                                 <div class="datagrid-content font-monospace">{{ $selectedDetailUser->id }}</div>
-                                            </div>
-                                            <div class="datagrid-item">
-                                                <div class="datagrid-title">Username</div>
-                                                <div class="datagrid-content font-monospace">{{ $selectedDetailUser->username }}</div>
                                             </div>
                                             <div class="datagrid-item">
                                                 <div class="datagrid-title">Email</div>
@@ -604,7 +589,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn" wire:click="closeUserDetail">Close</button>
                         <button type="button" class="btn btn-primary" wire:click="editUser({{ $selectedDetailUser->id }})">
-                            Edit Client
+                            Edit User
                         </button>
                     </div>
                 </div>

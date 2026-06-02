@@ -21,11 +21,10 @@ class EditMyProfile extends Component
     private const DEFAULT_PROFILE_PHOTO = 'assets/mine/avatar.png';
 
     /**
-     * @var array{name: string, username: string, email: string, profile_photo: string}
+     * @var array{name: string, email: string, profile_photo: string}
      */
     public array $accountForm = [
         'name' => '',
-        'username' => '',
         'email' => '',
         'profile_photo' => '',
     ];
@@ -54,13 +53,6 @@ class EditMyProfile extends Component
 
         $validated = $this->validate([
             'accountForm.name' => ['required', 'string', 'max:255'],
-            'accountForm.username' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^[A-Za-z0-9_-]+$/',
-                Rule::unique('client_logins', 'username')->ignore($login->id),
-            ],
             'accountForm.email' => [
                 'required',
                 'email',
@@ -71,7 +63,6 @@ class EditMyProfile extends Component
             'profilePhotoUpload' => ['nullable', 'image', 'max:2048'],
         ], [], [
             'accountForm.name' => 'display name',
-            'accountForm.username' => 'username',
             'accountForm.email' => 'email login',
             'accountForm.profile_photo' => 'profile photo',
             'profilePhotoUpload' => 'profile photo upload',
@@ -115,7 +106,6 @@ class EditMyProfile extends Component
             $updatedLogin = app(ProfileService::class)
                 ->updateProfile($login, [
                     'name' => $login->name,
-                    'username' => $login->username,
                     'email' => $login->email,
                     'profile_photo' => self::DEFAULT_PROFILE_PHOTO,
                 ])
@@ -201,7 +191,6 @@ class EditMyProfile extends Component
 
         $this->accountForm = [
             'name' => (string) $login->name,
-            'username' => (string) $login->username,
             'email' => (string) $login->email,
             'profile_photo' => (string) $login->profile_photo,
         ];

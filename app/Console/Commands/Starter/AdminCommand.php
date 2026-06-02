@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands\Starter;
 
-use App\Models\Starter\App;
 use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
@@ -25,7 +24,7 @@ class AdminCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create development admin client, role, and login for every starter app';
+    protected $description = 'Create development clients, admin roles, and admin logins';
 
     /**
      * Execute the console command.
@@ -59,34 +58,6 @@ class AdminCommand extends Command
     }
 
     /**
-     * Get the subdomains that should receive a default client on fresh projects.
-     *
-     * @return array<int, string>
-     */
-    private function subdomains(): array
-    {
-        $subdomain = $this->argument('subdomain');
-
-        return $subdomain ? [$subdomain] : $this->discoverSubdomains();
-    }
-
-    /**
-     * Discover app configs from config/apps/*.php.
-     *
-     * @return array<int, string>
-     */
-    private function discoverSubdomains(): array
-    {
-        return collect(glob(config_path('apps/*.php')) ?: [])
-            ->map(function (string $path): string {
-                return pathinfo($path, PATHINFO_FILENAME);
-            })
-            ->sort()
-            ->values()
-            ->all();
-    }
-
-    /**
      * Get all clients that should receive an admin login.
      *
      * @return Collection<int, Client>
@@ -97,23 +68,40 @@ class AdminCommand extends Command
     }
 
     /**
-     * Create one default client for each registered app on fresh projects.
+     * Create default development clients on fresh projects.
      */
     private function createDefaultClients(): void
     {
-        foreach ($this->subdomains() as $subdomain) {
-            $app = App::query()->where('subdomain', $subdomain)->first();
-
+        foreach ($this->defaultClients() as $client) {
             Client::query()->create([
-                'name' => ($app?->name ?? str($subdomain)->headline()).' Development',
-                'email' => "client@{$subdomain}.".config('app.domain'),
-                'pic_name' => 'Admin',
+                'name' => $client['name'],
+                'email' => $client['email'],
+                'pic_name' => $client['pic_name'],
                 'account_status' => 'approved',
                 'approved_at' => now(),
                 'subscription_status' => 'active',
                 'subscribed_at' => now(),
             ]);
         }
+    }
+
+    /**
+     * @return array<int, array{name: string, email: string, pic_name: string}>
+     */
+    private function defaultClients(): array
+    {
+        return [
+            [
+                'name' => 'Client 1',
+                'email' => 'admin1@email.com',
+                'pic_name' => 'Client 1 Admin',
+            ],
+            [
+                'name' => 'Client 2',
+                'email' => 'admin2@email.com',
+                'pic_name' => 'Client 2 Admin',
+            ],
+        ];
     }
 
     /**
@@ -142,9 +130,8 @@ class AdminCommand extends Command
                 'client_id' => $client->id,
                 'client_role_id' => $role->id,
                 'name' => $login->name ?: 'Admin',
-                'username' => $this->adminUsername($client),
                 'email_verified_at' => $login->email_verified_at ?: now(),
-                'last_login_provider' => $login->last_login_provider ?: 'username',
+                'last_login_provider' => $login->last_login_provider ?: 'email',
             ]);
 
             if (! $login->exists || app()->environment(['local', 'testing'])) {
@@ -190,15 +177,7 @@ class AdminCommand extends Command
      */
     private function adminEmail(Client $client): string
     {
-        return "admin+client{$client->id}@".config('app.domain');
-    }
-
-    /**
-     * Build a unique admin username for one client.
-     */
-    private function adminUsername(Client $client): string
-    {
-        return "admin{$client->id}";
+        return "admin{$client->id}@email.com";
     }
 
     /**

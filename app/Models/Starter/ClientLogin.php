@@ -12,7 +12,6 @@ use Illuminate\Notifications\Notifiable;
     'client_id',
     'client_role_id',
     'name',
-    'username',
     'email',
     'email_verified_at',
     'password',

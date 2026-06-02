@@ -340,7 +340,6 @@
                                             <div class="fw-semibold text-truncate">{{ $user['name'] }}</div>
                                             <div class="text-secondary small text-truncate">{{ $user['email'] }}</div>
                                         </div>
-                                        <div class="ms-auto font-monospace small text-secondary">{{ $user['username'] }}</div>
                                     </div>
                                 </div>
                             @empty

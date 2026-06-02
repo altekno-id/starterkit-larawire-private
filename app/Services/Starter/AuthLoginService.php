@@ -14,20 +14,20 @@ class AuthLoginService
         private readonly NavigationAuthorizedRedirectService $redirects
     ) {}
 
-    public function attempt(string $credential, string $password, bool $remember = false, ?string $redirect = null): string
+    public function attempt(string $email, string $password, bool $remember = false, ?string $redirect = null): string
     {
-        $field = filter_var($credential, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        $login = $this->clientLogins->findByColumn($field, $credential, ['client', 'role']);
+        $email = str($email)->lower()->trim()->toString();
+        $login = $this->clientLogins->findByColumn('email', $email, ['client', 'role']);
 
         if (! $login || ! $login->password || ! Hash::check($password, $login->password)) {
             throw ValidationException::withMessages([
-                'credential' => __('auth.failed'),
+                'email' => __('auth.failed'),
             ]);
         }
 
         if ($login->client?->account_status !== 'approved') {
             throw ValidationException::withMessages([
-                'credential' => 'Client is not active or has not been approved.',
+                'email' => 'Client is not active or has not been approved.',
             ]);
         }
 
@@ -36,7 +36,7 @@ class AuthLoginService
         $this->clientLogins->update($login, [
             'last_login_at' => now(),
             'last_login_ip' => request()->ip(),
-            'last_login_provider' => $field,
+            'last_login_provider' => 'email',
         ]);
 
         request()->session()->regenerate();

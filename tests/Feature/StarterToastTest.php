@@ -37,7 +37,6 @@ function starterToastLogin(): ClientLogin
         'client_id' => $client->id,
         'client_role_id' => $role->id,
         'name' => 'Aldhi Admin',
-        'username' => 'aldhi',
         'email' => 'aldhi@example.test',
         'password' => 'secret',
     ]);
@@ -50,7 +49,6 @@ test('profile update dispatches starter toast', function () {
 
     Livewire::test(EditMyProfile::class)
         ->set('accountForm.name', 'Aldhi Updated')
-        ->set('accountForm.username', 'aldhi-updated')
         ->set('accountForm.email', 'aldhi.updated@example.test')
         ->set('accountForm.profile_photo', 'assets/mine/avatar.png')
         ->call('saveAccount')
@@ -63,7 +61,6 @@ test('profile update dispatches starter toast', function () {
     $this->assertDatabaseHas('client_logins', [
         'id' => $login->id,
         'name' => 'Aldhi Updated',
-        'username' => 'aldhi-updated',
         'email' => 'aldhi.updated@example.test',
         'profile_photo' => 'assets/mine/avatar.png',
     ]);
@@ -233,7 +230,6 @@ test('client profile settings route is visible to admin only', function () {
             'name' => 'Operator',
         ])->id,
         'name' => 'Operator Login',
-        'username' => 'operator',
         'email' => 'operator@example.test',
         'password' => 'secret',
     ]);
@@ -506,7 +502,6 @@ test('role users modal lists assigned users', function () {
         'client_id' => $login->client_id,
         'client_role_id' => $login->client_role_id,
         'name' => 'Second Admin',
-        'username' => 'second-admin',
         'email' => 'second-admin@example.test',
         'password' => 'secret',
     ]);
@@ -538,7 +533,6 @@ test('user detail modal shows related account metadata', function () {
         'client_id' => $login->client_id,
         'client_role_id' => $login->client_role_id,
         'name' => 'Operator Login',
-        'username' => 'operator-login',
         'email' => 'operator@example.test',
         'email_verified_at' => now(),
         'password' => 'secret',

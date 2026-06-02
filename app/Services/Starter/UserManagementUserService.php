@@ -53,7 +53,7 @@ class UserManagementUserService
     }
 
     /**
-     * @param  array{name: string, username: string, email: string, client_role_id: int|string, password?: ?string}  $data
+     * @param  array{name: string, email: string, client_role_id: int|string, password?: ?string}  $data
      */
     public function saveUser(ClientLogin $currentLogin, ?int $userLoginId, array $data): ClientLogin
     {
@@ -80,7 +80,6 @@ class UserManagementUserService
 
         $payload = [
             'name' => trim($data['name']),
-            'username' => str($data['username'])->lower()->trim()->toString(),
             'email' => str($data['email'])->lower()->trim()->toString(),
             'client_role_id' => $role->id,
         ];

@@ -12,10 +12,10 @@ use Livewire\Component;
 class Login extends Component
 {
     /**
-     * @var array{credential: string, password: string, remember: bool}
+     * @var array{email: string, password: string, remember: bool}
      */
     public array $form = [
-        'credential' => '',
+        'email' => '',
         'password' => '',
         'remember' => false,
     ];
@@ -30,15 +30,15 @@ class Login extends Component
     public function authenticate(AuthLoginService $loginService)
     {
         $this->validate([
-            'form.credential' => ['required', 'string'],
+            'form.email' => ['required', 'email'],
             'form.password' => ['required', 'string'],
         ], [], [
-            'form.credential' => 'username atau email',
+            'form.email' => 'email',
             'form.password' => 'password',
         ]);
 
         $target = $loginService->attempt(
-            credential: $this->form['credential'],
+            email: $this->form['email'],
             password: $this->form['password'],
             remember: $this->form['remember'],
             redirect: $this->redirect,

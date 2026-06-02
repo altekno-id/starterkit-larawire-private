@@ -38,10 +38,6 @@
                     <h4 class="subheader">Login Summary</h4>
                     <div class="list-group list-group-flush">
                         <div class="list-group-item px-0 d-flex justify-content-between">
-                            <span class="text-secondary">Username</span>
-                            <span class="fw-medium">{{ $login->username }}</span>
-                        </div>
-                        <div class="list-group-item px-0 d-flex justify-content-between">
                             <span class="text-secondary">Email Verified</span>
                             <span class="fw-medium">{{ $login->email_verified_at?->format('d M Y H:i') ?? '-' }}</span>
                         </div>
@@ -88,17 +84,12 @@
                             </div>
 
                             <div class="row g-3">
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">Display Name</label>
                                     <input type="text" class="form-control @error('accountForm.name') is-invalid @enderror" wire:model="accountForm.name">
                                     @error('accountForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Username</label>
-                                    <input type="text" class="form-control @error('accountForm.username') is-invalid @enderror" wire:model="accountForm.username">
-                                    @error('accountForm.username') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">Email Login</label>
                                     <input type="email" class="form-control @error('accountForm.email') is-invalid @enderror" wire:model="accountForm.email">
                                     @error('accountForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror

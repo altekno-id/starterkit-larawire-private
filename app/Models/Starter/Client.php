@@ -4,12 +4,14 @@ namespace App\Models\Starter;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'name',
     'email',
+    'package_id',
     'phone',
     'pic_name',
     'logo',
@@ -26,6 +28,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Client extends Model
 {
     use SoftDeletes;
+
+    protected $table = 'starter_clients';
 
     /**
      * The attributes that should be cast.
@@ -49,6 +53,14 @@ class Client extends Model
     public function logins(): HasMany
     {
         return $this->hasMany(ClientLogin::class);
+    }
+
+    /**
+     * Get the package selected by this client.
+     */
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
     }
 
     /**

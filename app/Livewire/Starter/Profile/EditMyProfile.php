@@ -57,7 +57,7 @@ class EditMyProfile extends Component
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('client_logins', 'email')->ignore($login->id),
+                Rule::unique('starter_client_logins', 'email')->ignore($login->id),
             ],
             'accountForm.profile_photo' => ['nullable', 'string', 'max:255'],
             'profilePhotoUpload' => ['nullable', 'image', 'max:2048'],

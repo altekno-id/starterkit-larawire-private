@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['client_role_id', 'app_id', 'app_menu_id'])]
 class ClientRoleAppLanding extends Model
 {
-    protected $table = 'rel_client_roles_app_landings';
+    protected $table = 'pivot_client_roles_app_landings';
 
     public function role(): BelongsTo
     {

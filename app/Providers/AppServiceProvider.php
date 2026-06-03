@@ -16,6 +16,8 @@ use App\Repositories\Starter\ClientRepository;
 use App\Repositories\Starter\ClientLoginRepository;
 use App\Repositories\Starter\ClientRoleRepository;
 use App\Services\Starter\StarterContextService;
+use App\Support\Starter\StarterNavigation;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -44,11 +46,19 @@ class AppServiceProvider extends ServiceProvider
     {
         Model::preventSilentlyDiscardingAttributes($this->app->isLocal());
 
+        ResetPassword::createUrlUsing(function (object $notifiable, string $token): string {
+            $query = http_build_query(['email' => $notifiable->getEmailForPasswordReset()]);
+
+            return StarterNavigation::authUrl("reset-password/{$token}")."?{$query}";
+        });
+
         View::composer([
             'layouts::app',
             'templates.layouts.app',
             'apps.*',
-            'starter.*',
+            'starter.profile.*',
+            'starter.settings.*',
+            'starter.user-management.*',
         ], function ($view): void {
             $view->with(app(StarterContextService::class)->data());
         });

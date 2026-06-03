@@ -26,7 +26,7 @@ class AppRepository implements AppInterface
     {
         return App::query()
             ->whereHas('mods', function ($query) use ($modIds): void {
-                $query->whereIn('app_mods.id', $modIds);
+                $query->whereIn('starter_app_mods.id', $modIds);
             })
             ->orderBy('name')
             ->get();

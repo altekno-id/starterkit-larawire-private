@@ -80,7 +80,7 @@ class ClientRoleRepository implements ClientRoleInterface
 
     public function modIds(ClientRole $role): Collection
     {
-        return $role->mods()->pluck('app_mods.id');
+        return $role->mods()->pluck('starter_app_mods.id');
     }
 
     public function landingMenuForApp(ClientRole $role, string $appSubdomain): ?AppMenu

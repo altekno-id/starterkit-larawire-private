@@ -131,16 +131,16 @@ class Roles extends Component
                 'string',
                 'max:255',
                 'regex:/^[A-Za-z0-9_-]+$/',
-                Rule::unique('client_roles', 'code')
+                Rule::unique('starter_client_roles', 'code')
                     ->where(fn ($query) => $query->where('client_id', $clientId))
                     ->ignore($this->selectedRoleId),
             ],
             'roleForm.name' => ['required', 'string', 'max:255'],
             'roleForm.desc' => ['nullable', 'string', 'max:2000'],
             'roleForm.module_ids' => ['array'],
-            'roleForm.module_ids.*' => ['integer', 'exists:app_mods,id'],
+            'roleForm.module_ids.*' => ['integer', 'exists:starter_app_mods,id'],
             'roleForm.landing_menu_ids' => ['array'],
-            'roleForm.landing_menu_ids.*' => ['nullable', 'integer', 'exists:app_menus,id'],
+            'roleForm.landing_menu_ids.*' => ['nullable', 'integer', 'exists:starter_app_menus,id'],
         ], [], [
             'roleForm.code' => 'code',
             'roleForm.name' => 'name',

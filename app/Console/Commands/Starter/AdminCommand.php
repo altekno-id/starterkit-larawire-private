@@ -5,6 +5,7 @@ namespace App\Console\Commands\Starter;
 use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
+use Database\Seeders\PackageSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +45,9 @@ class AdminCommand extends Command
         if ($syncStatus !== self::SUCCESS) {
             return self::FAILURE;
         }
+
+        PackageSeeder::syncDefaults();
+        $this->info('Ensured default packages.');
 
         if (Client::query()->count() === 0) {
             $this->createDefaultClients();
@@ -119,7 +123,7 @@ class AdminCommand extends Command
             ]);
 
             // Empty module listing is intentionally treated as full access for admin roles.
-            DB::table('rel_client_roles_app_mods')->where('client_role_id', $role->id)->delete();
+            DB::table('pivot_client_roles_app_mods')->where('client_role_id', $role->id)->delete();
             $this->syncAdminLandings($role);
 
             $login = ClientLogin::query()->firstOrNew([
@@ -144,16 +148,16 @@ class AdminCommand extends Command
 
     private function syncAdminLandings(ClientRole $role): void
     {
-        $dashboardMenus = DB::table('app_menus')
-            ->join('app_routes', 'app_menus.app_route_id', '=', 'app_routes.id')
-            ->join('app_mods', 'app_menus.app_mod_id', '=', 'app_mods.id')
-            ->join('apps', 'app_mods.app_id', '=', 'apps.id')
-            ->where('app_menus.is_landing_candidate', true)
+        $dashboardMenus = DB::table('starter_app_menus')
+            ->join('starter_app_routes', 'starter_app_menus.app_route_id', '=', 'starter_app_routes.id')
+            ->join('starter_app_mods', 'starter_app_menus.app_mod_id', '=', 'starter_app_mods.id')
+            ->join('starter_apps', 'starter_app_mods.app_id', '=', 'starter_apps.id')
+            ->where('starter_app_menus.is_landing_candidate', true)
             ->select([
-                'apps.id as app_id',
-                'apps.subdomain',
-                'app_routes.name',
-                'app_menus.id as app_menu_id',
+                'starter_apps.id as app_id',
+                'starter_apps.subdomain',
+                'starter_app_routes.name',
+                'starter_app_menus.id as app_menu_id',
             ])
             ->get()
             ->filter(fn ($menu): bool => $menu->name === $menu->subdomain.'.dashboard');
@@ -161,7 +165,7 @@ class AdminCommand extends Command
         $now = now();
 
         foreach ($dashboardMenus as $menu) {
-            DB::table('rel_client_roles_app_landings')->updateOrInsert([
+            DB::table('pivot_client_roles_app_landings')->updateOrInsert([
                 'client_role_id' => $role->id,
                 'app_id' => $menu->app_id,
             ], [

@@ -58,7 +58,7 @@ test('profile update dispatches starter toast', function () {
                 && ($params['message'] ?? null) === 'Profile saved successfully.';
         });
 
-    $this->assertDatabaseHas('client_logins', [
+    $this->assertDatabaseHas('starter_client_logins', [
         'id' => $login->id,
         'name' => 'Aldhi Updated',
         'email' => 'aldhi.updated@example.test',
@@ -93,15 +93,15 @@ test('profile route stays on current app subdomain', function () {
     $login = starterToastLogin();
 
     App::query()->create([
-        'name' => 'Subdomain 1',
-        'subdomain' => 'subdomain1',
+        'name' => 'App 1',
+        'subdomain' => 'app1',
     ]);
 
     $this->actingAs($login)
-        ->get('http://subdomain1.13-starterpack.test/profile/edit')
+        ->get('http://app1.13-starterpack.test/profile/edit')
         ->assertOk()
         ->assertSee('Edit My Profile')
-        ->assertSee('http://subdomain1.13-starterpack.test/profile/edit', false)
+        ->assertSee('http://app1.13-starterpack.test/profile/edit', false)
         ->assertDontSee('http://13-starterpack.test/profile/edit', false);
 });
 
@@ -132,7 +132,7 @@ test('admin can update client profile from settings page', function () {
                 && ($params['message'] ?? null) === 'Client profile saved successfully.';
         });
 
-    $this->assertDatabaseHas('clients', [
+    $this->assertDatabaseHas('starter_clients', [
         'id' => $login->client_id,
         'name' => 'Updated Client',
         'email' => 'updated-client@example.test',
@@ -205,7 +205,7 @@ test('client profile photo upload and reset are supported', function () {
                 && ($params['message'] ?? null) === 'Logo reset to default.';
         });
 
-    $this->assertDatabaseHas('clients', [
+    $this->assertDatabaseHas('starter_clients', [
         'id' => $client->id,
         'logo' => null,
     ]);
@@ -284,7 +284,7 @@ test('profile photo reset clears stored image path', function () {
                 && ($params['message'] ?? null) === 'Profile photo reset to default.';
         });
 
-    $this->assertDatabaseHas('client_logins', [
+    $this->assertDatabaseHas('starter_client_logins', [
         'id' => $login->id,
         'profile_photo' => 'assets/mine/avatar.png',
     ]);
@@ -313,8 +313,8 @@ test('role save dispatches starter toast', function () {
 test('role save requires default page for selected app modules', function () {
     $login = starterToastLogin();
     $app = App::query()->create([
-        'name' => 'Web',
-        'subdomain' => 'web',
+        'name' => 'App 1',
+        'subdomain' => 'app1',
     ]);
     $mod = AppMod::query()->create([
         'app_id' => $app->id,
@@ -323,13 +323,13 @@ test('role save requires default page for selected app modules', function () {
     ]);
     $route = AppRoute::query()->create([
         'app_mod_id' => $mod->id,
-        'name' => 'web.dashboard',
+        'name' => 'app1.dashboard',
         'uri' => 'dashboard/index',
         'method' => 'GET',
     ]);
     $alternateRoute = AppRoute::query()->create([
         'app_mod_id' => $mod->id,
-        'name' => 'web.dashboard.summary',
+        'name' => 'app1.dashboard.summary',
         'uri' => 'dashboard/summary',
         'method' => 'GET',
     ]);
@@ -356,15 +356,15 @@ test('role save requires default page for selected app modules', function () {
         ->assertDispatched('starter-toast', function (string $event, array $params): bool {
             return $event === 'starter-toast'
                 && ($params['type'] ?? null) === 'danger'
-                && ($params['message'] ?? null) === 'Default page is required for Web.';
+                && ($params['message'] ?? null) === 'Default page is required for App 1.';
         });
 });
 
 test('role save stores default page menu for selected app modules', function () {
     $login = starterToastLogin();
     $app = App::query()->create([
-        'name' => 'Web',
-        'subdomain' => 'web',
+        'name' => 'App 1',
+        'subdomain' => 'app1',
     ]);
     $mod = AppMod::query()->create([
         'app_id' => $app->id,
@@ -373,13 +373,13 @@ test('role save stores default page menu for selected app modules', function () 
     ]);
     $route = AppRoute::query()->create([
         'app_mod_id' => $mod->id,
-        'name' => 'web.dashboard',
+        'name' => 'app1.dashboard',
         'uri' => 'dashboard/index',
         'method' => 'GET',
     ]);
     $formRoute = AppRoute::query()->create([
         'app_mod_id' => $mod->id,
-        'name' => 'web.dashboard.create',
+        'name' => 'app1.dashboard.create',
         'uri' => 'dashboard/create',
         'method' => 'GET',
     ]);
@@ -412,7 +412,7 @@ test('role save stores default page menu for selected app modules', function () 
 
     $role = ClientRole::query()->where('code', 'operator')->firstOrFail();
 
-    $this->assertDatabaseHas('rel_client_roles_app_landings', [
+    $this->assertDatabaseHas('pivot_client_roles_app_landings', [
         'client_role_id' => $role->id,
         'app_id' => $app->id,
         'app_menu_id' => $menu->id,
@@ -422,8 +422,8 @@ test('role save stores default page menu for selected app modules', function () 
 test('app anchor redirects to role default page', function () {
     $login = starterToastLogin();
     $app = App::query()->create([
-        'name' => 'Web',
-        'subdomain' => 'web',
+        'name' => 'App 1',
+        'subdomain' => 'app1',
     ]);
     $mod = AppMod::query()->create([
         'app_id' => $app->id,
@@ -432,7 +432,7 @@ test('app anchor redirects to role default page', function () {
     ]);
     $route = AppRoute::query()->create([
         'app_mod_id' => $mod->id,
-        'name' => 'web.dashboard',
+        'name' => 'app1.dashboard',
         'uri' => 'dashboard/index',
         'method' => 'GET',
     ]);
@@ -455,9 +455,9 @@ test('app anchor redirects to role default page', function () {
     ]);
     $login->forceFill(['client_role_id' => $role->id])->save();
 
-    $target = app(NavigationAuthorizedRedirectService::class)->forAppAnchor($login->fresh('role'), 'web');
+    $target = app(NavigationAuthorizedRedirectService::class)->forAppAnchor($login->fresh('role'), 'app1');
 
-    expect($target)->toBe(route('web.dashboard'));
+    expect($target)->toBe(route('app1.dashboard'));
 });
 
 test('role delete validation dispatches danger starter toast', function () {
@@ -489,7 +489,7 @@ test('default admin role is read only', function () {
                 && ($params['message'] ?? null) === 'The default admin role is read only.';
         });
 
-    $this->assertDatabaseHas('client_roles', [
+    $this->assertDatabaseHas('starter_client_roles', [
         'id' => $login->client_role_id,
         'name' => 'Administrator',
     ]);

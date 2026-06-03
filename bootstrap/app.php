@@ -2,7 +2,7 @@
 
 use App\Http\Middleware\StarterAdmin;
 use App\Http\Middleware\StarterAuthorize;
-use App\Models\Starter\UserLogin;
+use App\Models\Starter\ClientLogin;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Support\Starter\StarterAppRegistry;
 use App\Support\Starter\StarterNavigation;
@@ -19,24 +19,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         using: function () {
             Route::middleware('web')
-                ->domain('auth.'.config('app.domain'))
-                ->group(base_path('routes/auth.php'));
-
-            Route::middleware('web')
                 ->group(base_path('routes/starter.php'));
 
+            Route::middleware('web')
+                ->domain(config('app.domain'))
+                ->group(base_path('routes/web.php'));
+
             foreach (StarterAppRegistry::keys() as $appKey) {
-                if ($appKey === 'web') {
-                    Route::middleware('web')
-                        ->domain(config('app.domain'))
-                        ->group(base_path('routes/web.php'));
-
-                    continue;
-                }
-
                 Route::middleware('web')
                     ->domain($appKey.'.'.config('app.domain'))
-                    ->group(base_path("routes/{$appKey}.php"));
+                    ->group(base_path("routes/apps/{$appKey}.php"));
             }
         },
     )
@@ -50,9 +42,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(function ($request): string {
             $login = $request->user();
 
-            return $login instanceof UserLogin
+            return $login instanceof ClientLogin
                 ? app(NavigationAuthorizedRedirectService::class)->forLogin($login, $request->query('redirect'))
-                : route('web.dashboard');
+                : url('/');
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {

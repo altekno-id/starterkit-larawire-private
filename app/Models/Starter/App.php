@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'subdomain', 'desc', 'icon'])]
 class App extends Model
 {
+    protected $table = 'starter_apps';
+
     /**
      * Get all modules registered for this app.
      */

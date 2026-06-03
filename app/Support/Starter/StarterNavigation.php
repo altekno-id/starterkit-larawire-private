@@ -4,14 +4,21 @@ namespace App\Support\Starter;
 
 class StarterNavigation
 {
-    public static function authHost(): string
+    public static function rootHost(): string
     {
-        return 'auth.'.config('app.domain');
+        return (string) config('app.domain');
+    }
+
+    public static function authUrl(string $path = ''): string
+    {
+        $path = trim($path, '/');
+
+        return request()->getScheme().'://'.self::rootHost().'/auth'.($path === '' ? '' : '/'.$path);
     }
 
     public static function authLoginUrl(?string $redirect = null): string
     {
-        $url = request()->getScheme().'://'.self::authHost().'/login';
+        $url = self::authUrl('login');
 
         return $redirect ? $url.'?'.http_build_query(['redirect' => $redirect]) : $url;
     }

@@ -28,6 +28,8 @@ class ClientLogin extends Authenticatable
 {
     use Notifiable;
 
+    protected $table = 'starter_client_logins';
+
     /**
      * The attributes that should be cast.
      *

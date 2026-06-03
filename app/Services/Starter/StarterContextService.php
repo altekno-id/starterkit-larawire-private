@@ -83,11 +83,11 @@ class StarterContextService
         $host = request()->getHost();
         $domain = config('app.domain');
 
-        if ($domain && $host !== $domain && $host !== StarterNavigation::authHost() && str_ends_with($host, '.'.$domain)) {
+        if ($domain && $host !== $domain && str_ends_with($host, '.'.$domain)) {
             return str($host)->before('.'.$domain)->toString();
         }
 
-        return 'web';
+        return 'landing';
     }
 
     private function currentApp(string $currentAppKey): ?App
@@ -267,9 +267,7 @@ class StarterContextService
             return route($routeName);
         }
 
-        $host = $app->subdomain === 'web'
-            ? config('app.domain')
-            : $app->subdomain.'.'.config('app.domain');
+        $host = $app->subdomain.'.'.config('app.domain');
 
         return request()->getScheme().'://'.$host;
     }

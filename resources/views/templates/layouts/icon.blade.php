@@ -14,6 +14,7 @@
         'alert-triangle',
         'arrow-left',
         'building',
+        'brand-google',
         'check',
         'chevron-down',
         'chevron-right',
@@ -76,6 +77,10 @@
             <path d="M14 12l1 0" />
             <path d="M14 16l1 0" />
             <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" />
+            @break
+
+        @case('brand-google')
+            <text x="12" y="17" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="currentColor" stroke="none">G</text>
             @break
 
         @case('check')

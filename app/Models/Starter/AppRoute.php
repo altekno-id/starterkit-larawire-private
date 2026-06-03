@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'uri', 'method', 'app_mod_id'])]
 class AppRoute extends Model
 {
+    protected $table = 'starter_app_routes';
+
     /**
      * Get the module that owns this route.
      */

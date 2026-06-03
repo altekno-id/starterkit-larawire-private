@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['label', 'icon', 'order', 'is_landing_candidate', 'app_mod_id', 'app_route_id', 'parent_id'])]
 class AppMenu extends Model
 {
+    protected $table = 'starter_app_menus';
+
     protected function casts(): array
     {
         return [

@@ -6,6 +6,7 @@ use App\Contracts\Starter\AppRouteInterface;
 use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppRoute;
 use App\Models\Starter\ClientLogin;
+use App\Support\Starter\StarterAppRegistry;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -59,8 +60,12 @@ class NavigationAuthorizedRedirectService
 
     public function firstAuthorizedUrl(ClientLogin $login): string
     {
-        if ($login->role?->hasFullAccess() && Route::has('web.dashboard')) {
-            return route('web.dashboard');
+        if ($login->role?->hasFullAccess()) {
+            foreach (StarterAppRegistry::keys() as $appKey) {
+                if (Route::has("{$appKey}.dashboard")) {
+                    return route("{$appKey}.dashboard");
+                }
+            }
         }
 
         $route = $this->firstAuthorizedRoute($login);
@@ -103,6 +108,10 @@ class NavigationAuthorizedRedirectService
             return $login->role?->isAdmin() ?? false;
         }
 
+        if (str_starts_with($routeName, 'admin.')) {
+            return $login->role?->isAdmin() ?? false;
+        }
+
         if (str_ends_with($routeName, '.anchor')) {
             $dashboardRoute = str($routeName)->replaceEnd('.anchor', '.dashboard')->toString();
 
@@ -131,13 +140,11 @@ class NavigationAuthorizedRedirectService
         $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
         $domain = config('app.domain');
 
-        if (! $host || $host === StarterNavigation::authHost()) {
+        if (! $host || $host === config('app.domain')) {
             return null;
         }
 
-        $appKey = $host === $domain
-            ? 'web'
-            : str((string) $host)->before('.'.$domain)->toString();
+        $appKey = str((string) $host)->before('.'.$domain)->toString();
 
         if ($host === $domain) {
             $starterRoute = match ($path) {

@@ -7,7 +7,7 @@ class StarterAppRegistry
     /**
      * Discover runnable starter apps from config/apps/*.php.
      *
-     * A file is runnable only when the filename is domain-safe, the route file
+     * A file is runnable only when the filename is domain-safe, the app route file
      * exists, and at least one module is configured.
      *
      * @return array<int, string>
@@ -23,7 +23,7 @@ class StarterAppRegistry
                     return false;
                 }
 
-                if (! is_file(base_path("routes/{$key}.php"))) {
+                if (! is_file(base_path("routes/apps/{$key}.php"))) {
                     return false;
                 }
 

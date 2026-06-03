@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['client_id', 'code', 'name', 'desc'])]
 class ClientRole extends Model
 {
+    protected $table = 'starter_client_roles';
+
     /**
      * Get the client that owns this role.
      */
@@ -32,7 +34,7 @@ class ClientRole extends Model
      */
     public function mods(): BelongsToMany
     {
-        return $this->belongsToMany(AppMod::class, 'rel_client_roles_app_mods')
+        return $this->belongsToMany(AppMod::class, 'pivot_client_roles_app_mods')
             ->withTimestamps();
     }
 

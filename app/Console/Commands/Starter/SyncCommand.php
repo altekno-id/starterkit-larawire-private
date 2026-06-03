@@ -207,8 +207,8 @@ class SyncCommand extends Command
             $this->fail("Config not found: {$configPath}");
         }
 
-        if (! file_exists(base_path("routes/{$subdomain}.php"))) {
-            $this->fail('Route file not found: '.base_path("routes/{$subdomain}.php"));
+        if (! file_exists(base_path("routes/apps/{$subdomain}.php"))) {
+            $this->fail('Route file not found: '.base_path("routes/apps/{$subdomain}.php"));
         }
 
         return require $configPath;
@@ -457,21 +457,21 @@ class SyncCommand extends Command
             return;
         }
 
-        DB::table('rel_client_roles_app_landings')
+        DB::table('pivot_client_roles_app_landings')
             ->where('app_id', $app->id)
             ->whereIn('client_role_id', function ($query): void {
                 $query
                     ->select('id')
-                    ->from('client_roles')
+                    ->from('starter_client_roles')
                     ->where('code', 'admin');
             })
             ->delete();
 
         $now = now();
-        $adminRoleIds = DB::table('client_roles')->where('code', 'admin')->pluck('id');
+        $adminRoleIds = DB::table('starter_client_roles')->where('code', 'admin')->pluck('id');
 
         foreach ($adminRoleIds as $roleId) {
-            DB::table('rel_client_roles_app_landings')->updateOrInsert([
+            DB::table('pivot_client_roles_app_landings')->updateOrInsert([
                 'client_role_id' => $roleId,
                 'app_id' => $app->id,
             ], [
@@ -604,7 +604,7 @@ class SyncCommand extends Command
 
         $this->deleteMenus(AppMenu::query()->whereIn('app_mod_id', $staleModIds)->pluck('id'));
         AppRoute::query()->whereIn('app_mod_id', $staleModIds)->delete();
-        DB::table('rel_client_roles_app_mods')->whereIn('app_mod_id', $staleModIds)->delete();
+        DB::table('pivot_client_roles_app_mods')->whereIn('app_mod_id', $staleModIds)->delete();
         AppMod::query()->whereIn('id', $staleModIds)->delete();
     }
 }

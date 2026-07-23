@@ -29,6 +29,56 @@
             display: flex;
         }
 
+        .starter-sidebar-brand {
+            align-items: center;
+            display: flex;
+            height: 3rem;
+            justify-content: center;
+            padding: .25rem .75rem;
+            width: 100%;
+        }
+
+        .starter-sidebar-brand-image {
+            display: block;
+            height: 2.5rem;
+            max-height: 2.5rem;
+            max-width: 10.5rem;
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+        }
+
+        .starter-page-loader-brand-image {
+            display: block;
+            height: 2.25rem;
+            margin-inline: auto;
+            max-width: 10rem;
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+        }
+
+        .starter-client-logo-preview {
+            align-items: center;
+            background: var(--tblr-bg-surface);
+            border: 1px solid var(--tblr-border-color);
+            border-radius: var(--tblr-border-radius);
+            display: flex;
+            height: 5rem;
+            justify-content: center;
+            overflow: hidden;
+            padding: .625rem;
+            width: 9rem;
+        }
+
+        .starter-client-logo-preview-image {
+            display: block;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+        }
+
         .starter-account-menu summary::-webkit-details-marker,
         .navbar-vertical .starter-sidebar-details summary::-webkit-details-marker {
             display: none;
@@ -38,11 +88,62 @@
             min-width: 13.5rem;
         }
 
+        .starter-role-access-trigger {
+            appearance: none;
+            color: inherit;
+            font: inherit;
+            line-height: 1.25;
+        }
+
+        .starter-role-access-trigger:hover,
+        .starter-role-access-trigger:active {
+            background: transparent !important;
+            color: inherit;
+        }
+
+        .starter-role-access-trigger:hover .starter-role-access-title {
+            color: var(--tblr-primary);
+        }
+
+        .starter-role-access-trigger:focus-visible {
+            border-radius: var(--tblr-border-radius);
+            outline: 2px solid color-mix(in srgb, var(--tblr-primary) 35%, transparent);
+            outline-offset: 4px;
+        }
+
+        .starter-table-action-link {
+            appearance: none;
+            background: transparent;
+            border: 0;
+            color: var(--tblr-primary);
+            font: inherit;
+            padding: 0;
+        }
+
+        .starter-table-action-link:hover,
+        .starter-table-action-link:active {
+            background: transparent !important;
+            color: color-mix(in srgb, var(--tblr-primary) 78%, var(--tblr-body-color));
+            text-decoration: underline;
+        }
+
+        .starter-table-action-link:focus-visible {
+            border-radius: .125rem;
+            outline: 2px solid color-mix(in srgb, var(--tblr-primary) 35%, transparent);
+            outline-offset: 3px;
+        }
+
         .starter-page-body {
             transition: opacity .16s ease;
         }
 
-        .starter-navigate-loader {
+        .starter-content-container {
+            max-width: 1680px;
+            width: 100%;
+        }
+
+        .starter-navigate-loader,
+        .starter-livewire-loader {
             background: color-mix(in srgb, var(--tblr-bg-surface) 88%, transparent);
             bottom: var(--starter-loader-bottom, 0);
             left: var(--starter-loader-left, 0);
@@ -53,6 +154,25 @@
             top: var(--starter-loader-top, 0);
             transition: opacity .14s ease;
             z-index: 20;
+        }
+
+        .starter-livewire-loader {
+            background: color-mix(in srgb, var(--tblr-bg-surface) 68%, transparent);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            z-index: 1045;
+        }
+
+        .starter-livewire-loader-card {
+            min-width: 10rem;
+        }
+
+        [data-starter-livewire-loading] {
+            filter: blur(2px);
+            opacity: .55;
+            pointer-events: none;
+            transition: filter .14s ease, opacity .14s ease;
+            user-select: none;
         }
 
         .starter-page-loader {
@@ -70,6 +190,17 @@
         }
 
         body.starter-is-navigating .starter-navigate-loader {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        body.starter-is-navigating .starter-slot-area > [wire\:id] {
+            filter: blur(2px);
+            opacity: .55;
+            pointer-events: none;
+        }
+
+        body.starter-livewire-is-loading .starter-livewire-loader {
             opacity: 1;
             pointer-events: auto;
         }
@@ -100,7 +231,9 @@
 
         @media (prefers-reduced-motion: reduce) {
             .starter-page-body,
-            .starter-navigate-loader {
+            .starter-navigate-loader,
+            .starter-livewire-loader,
+            [data-starter-livewire-loading] {
                 transition: none;
             }
 
@@ -145,6 +278,9 @@
 
     @php
         $accountPersistBase = 'starter-account-'.($login?->getKey() ?? 'guest');
+        $defaultBrandLogoUrl = asset('assets/tabler/static/logo-white.svg');
+        $brandLogoUrl = $clientLogoUrl ?: $defaultBrandLogoUrl;
+        $brandLogoAlt = $clientLogoUrl ? ($clientName ?: config('app.name')) : config('app.name');
     @endphp
 
     @include('templates.components.toast')
@@ -152,13 +288,20 @@
     <div class="page">
         <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
             <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#starter-sidebar-menu" aria-controls="starter-sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#starter-sidebar-menu" aria-controls="starter-sidebar-menu" aria-expanded="false" aria-label="Buka atau tutup navigasi">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="navbar-brand navbar-brand-autodark">
-                    <a href="{{ $currentDashboardUrl }}" aria-label="{{ config('app.name') }}" data-starter-navigate>
-                        <img src="{{ asset('assets/tabler/static/logo-white.svg') }}" class="navbar-brand-image" alt="{{ config('app.name') }}">
+                    <a href="{{ $currentDashboardUrl }}" class="starter-sidebar-brand" aria-label="{{ $brandLogoAlt }}" data-starter-navigate>
+                        <img
+                            src="{{ $brandLogoUrl }}"
+                            class="starter-sidebar-brand-image"
+                            alt="{{ $brandLogoAlt }}"
+                            data-starter-brand-logo
+                            data-fallback-src="{{ $defaultBrandLogoUrl }}"
+                            @if ($clientLogoUrl) data-company-logo="true" @endif
+                        >
                     </a>
                 </div>
 
@@ -170,12 +313,12 @@
                 <div class="collapse navbar-collapse" id="starter-sidebar-menu">
                     <ul class="navbar-nav pt-lg-3">
                         <li class="nav-item d-lg-none px-0 pt-3 pb-2">
-                            <div class="small text-secondary">Active App</div>
+                            <div class="small text-secondary">App Aktif</div>
                             <div class="fw-semibold text-truncate" data-starter-current-app-name>{{ $currentAppName ?? 'App' }}</div>
                         </li>
 
                         <li class="nav-item px-0 px-lg-3 pt-3 pb-1">
-                            <span class="subheader">Main Menu</span>
+                            <span class="subheader">Menu Utama</span>
                         </li>
 
                         @forelse ($sidebarMods as $mod)
@@ -188,60 +331,20 @@
                                     <span class="nav-link-icon d-md-none d-lg-inline-block">
                                         @include('templates.layouts.icon', ['name' => 'circle'])
                                     </span>
-                                        <span class="nav-link-title">No menu available</span>
+                                        <span class="nav-link-title">Belum ada menu</span>
                                 </span>
                             </li>
                         @endforelse
 
-                        @if ($login?->role?->isAdmin())
-                            <li class="nav-item px-0 px-lg-3 pt-3 pb-1">
-                                <span class="subheader">Settings</span>
-                            </li>
-
-                            @php
-                                $userManagementOpen = request()->routeIs('starter.user-management.*');
-                                $rolesActive = request()->routeIs('starter.user-management.roles');
-                                $usersActive = request()->routeIs('starter.user-management.users');
-                                $clientProfileActive = request()->routeIs('starter.client-profile');
-                            @endphp
-
-                            <li class="nav-item {{ $userManagementOpen ? 'active' : '' }}">
-                                <details class="starter-sidebar-details" @if ($userManagementOpen) open @endif>
-                                    <summary class="nav-link cursor-pointer user-select-none" role="button" aria-controls="starter-global-user-management">
-                                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                            @include('templates.layouts.icon', ['name' => 'users-group'])
-                                        </span>
-                                        <span class="nav-link-title">User Management</span>
-                                    </summary>
-                                    <div class="dropdown-menu starter-sidebar-submenu position-static" id="starter-global-user-management">
-                                        <a href="{{ route('starter.user-management.roles') }}" class="dropdown-item {{ $rolesActive ? 'active' : '' }}" @if ($rolesActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ route('starter.user-management.roles') }}">
-                                            Role
-                                        </a>
-                                        <a href="{{ route('starter.user-management.users') }}" class="dropdown-item {{ $usersActive ? 'active' : '' }}" @if ($usersActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ route('starter.user-management.users') }}">
-                                            Client
-                                        </a>
-                                    </div>
-                                </details>
-                            </li>
-
-                            <li class="nav-item {{ $clientProfileActive ? 'active' : '' }}">
-                                <a href="{{ route('starter.client-profile') }}" class="nav-link {{ $clientProfileActive ? 'active' : '' }}" @if ($clientProfileActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ route('starter.client-profile') }}">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        @include('templates.layouts.icon', ['name' => 'building'])
-                                    </span>
-                                    <span class="nav-link-title">Client Profile</span>
-                                </a>
-                            </li>
-                        @endif
                     </ul>
                 </div>
             </div>
         </aside>
 
         <header class="navbar navbar-expand-lg d-none d-lg-flex d-print-none" x-persist="{{ $accountPersistBase }}-topbar">
-            <div class="container-xl">
+            <div class="container-fluid starter-content-container">
                 <div class="d-none d-lg-flex flex-column lh-sm me-auto">
-                    <span class="small text-secondary">Active App</span>
+                    <span class="small text-secondary">App Aktif</span>
                     <span class="fw-semibold text-truncate" data-starter-current-app-name>{{ $currentAppName ?? 'App' }}</span>
                 </div>
 
@@ -254,18 +357,34 @@
 
         <div class="page-wrapper">
             <div class="page-body starter-page-body" wire:transition="starter-page">
-                <div class="container-xl">
+                <div class="container-fluid starter-content-container">
                     <div class="starter-slot-area position-relative">
                         {{ $slot }}
 
-                        <div class="starter-navigate-loader d-flex align-items-center justify-content-center rounded" aria-label="Loading..." role="status">
+                        <div class="starter-livewire-loader d-flex align-items-center justify-content-center rounded" data-starter-livewire-loader aria-label="Memproses permintaan" aria-hidden="true" role="status">
+                            <div class="card card-sm shadow starter-livewire-loader-card">
+                                <div class="card-body d-flex align-items-center justify-content-center gap-3">
+                                    <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+                                    <span class="fw-semibold">Memproses...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="starter-navigate-loader d-flex align-items-center justify-content-center rounded" aria-label="Memuat..." role="status">
                             <div class="starter-page-loader text-center">
                                 <div class="mb-3">
                                     <span class="navbar-brand navbar-brand-autodark justify-content-center">
-                                        <img src="{{ asset('assets/tabler/static/logo-small.svg') }}" height="36" alt="{{ config('app.name') }}">
+                                        <img
+                                            src="{{ $brandLogoUrl }}"
+                                            class="starter-page-loader-brand-image"
+                                            alt="{{ $brandLogoAlt }}"
+                                            data-starter-brand-logo
+                                            data-fallback-src="{{ $defaultBrandLogoUrl }}"
+                                            @if ($clientLogoUrl) data-company-logo="true" @endif
+                                        >
                                     </span>
                                 </div>
-                                <div class="text-secondary mb-3">Loading...</div>
+                                <div class="text-secondary mb-3">Memuat...</div>
                                 <div class="progress progress-sm">
                                     <div class="progress-bar progress-bar-indeterminate"></div>
                                 </div>
@@ -276,7 +395,7 @@
             </div>
 
             <footer class="footer footer-transparent d-print-none">
-                <div class="container-xl">
+                <div class="container-fluid starter-content-container">
                     <div class="row text-center align-items-center flex-row-reverse">
                         <div class="col-lg-auto ms-lg-auto">
                             <span class="text-secondary">{{ $currentAppName ?? 'Starter' }}</span>

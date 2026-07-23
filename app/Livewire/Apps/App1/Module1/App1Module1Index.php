@@ -17,6 +17,6 @@ class App1Module1Index extends Component
 
     public function render()
     {
-        return view('apps.app1.module1.app1-module1-index')->title('Module 1 Data');
+        return view('apps.app1.module1.app1-module1-index')->title('Data Module 1');
     }
 }

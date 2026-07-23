@@ -4,23 +4,20 @@ namespace App\Livewire\Starter\UserManagement;
 
 use App\Models\Starter\ClientLogin;
 use App\Services\Starter\UserManagementRoleService;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts::app')]
 class Roles extends Component
 {
-    public ?int $selectedRoleId = null;
+    use WithPagination;
+
+    public bool $embedded = false;
 
     public string $search = '';
-
-    /**
-     * @var array<int, string>
-     */
-    public array $expandedModuleAppKeys = [];
 
     public bool $roleUsersModalOpen = false;
 
@@ -31,156 +28,35 @@ class Roles extends Component
      */
     public array $roleUsers = [];
 
+    public bool $roleAccessModalOpen = false;
+
+    public string $roleAccessRoleName = '';
+
+    public string $roleAccessRoleCode = '';
+
+    public bool $roleAccessIsFull = false;
+
+    public bool $roleAccessCanManageSettings = false;
+
+    public bool $roleAccessCanViewLogs = false;
+
+    public int $roleAccessAppCount = 0;
+
+    public int $roleAccessModuleCount = 0;
+
     /**
-     * @var array{code: string, name: string, desc: string, module_ids: array<int, string>, landing_menu_ids: array<int|string, string>}
+     * @var array<int, array{name: string, modules: array<int, array{name: string, code: string, desc: string}>}>
      */
-    public array $roleForm = [
-        'code' => '',
-        'name' => '',
-        'desc' => '',
-        'module_ids' => [],
-        'landing_menu_ids' => [],
-    ];
+    public array $roleAccessApps = [];
 
-    public function mount(): void
+    public function mount(bool $embedded = false): void
     {
-        $this->newRole();
+        $this->embedded = $embedded;
     }
 
-    public function newRole(): void
+    public function updatedSearch(): void
     {
-        $this->reset(['selectedRoleId', 'roleForm']);
-        $this->expandedModuleAppKeys = [];
-        $this->resetValidation();
-    }
-
-    public function editRole(int $id): void
-    {
-        $role = $this->roles()->findRole($this->login(), $id);
-
-        $this->selectedRoleId = $role->id;
-        $this->roleForm = [
-            'code' => $role->code,
-            'name' => $role->name,
-            'desc' => (string) $role->desc,
-            'module_ids' => $role->mods->pluck('id')->map(fn (int $id): string => (string) $id)->values()->all(),
-            'landing_menu_ids' => $role->landings->mapWithKeys(fn ($landing): array => [
-                $landing->app_id => (string) $landing->app_menu_id,
-            ])->all(),
-        ];
-        $this->expandedModuleAppKeys = [];
-        $this->resetValidation();
-    }
-
-    public function toggleModuleApp(string $appKey): void
-    {
-        $this->expandedModuleAppKeys = in_array($appKey, $this->expandedModuleAppKeys, true)
-            ? array_values(array_diff($this->expandedModuleAppKeys, [$appKey]))
-            : [...$this->expandedModuleAppKeys, $appKey];
-    }
-
-    public function expandAllModuleApps(): void
-    {
-        $this->expandedModuleAppKeys = $this->roles()
-            ->availableModules()
-            ->groupBy(fn ($mod): string => 'app-'.($mod->app_id ?? 'none'))
-            ->keys()
-            ->values()
-            ->all();
-    }
-
-    public function toggleAllModuleApps(): void
-    {
-        $moduleAppKeys = $this->roles()
-            ->availableModules()
-            ->groupBy(fn ($mod): string => 'app-'.($mod->app_id ?? 'none'))
-            ->keys()
-            ->values()
-            ->all();
-
-        $this->expandedModuleAppKeys = array_diff($moduleAppKeys, $this->expandedModuleAppKeys) === []
-            ? []
-            : $moduleAppKeys;
-    }
-
-    public function updatedRoleFormCode(string $value): void
-    {
-        $this->roleForm['code'] = Str::of($value)->lower()->slug('_')->toString();
-    }
-
-    public function updatedRoleFormModuleIds(): void
-    {
-        $this->roleForm['landing_menu_ids'] = $this->normalizedLandingMenuIds(
-            $this->roleForm['module_ids'],
-            $this->roleForm['landing_menu_ids'],
-        );
-    }
-
-    public function save(): void
-    {
-        $this->roleForm['landing_menu_ids'] = $this->normalizedLandingMenuIds(
-            $this->roleForm['module_ids'],
-            $this->roleForm['landing_menu_ids'],
-        );
-
-        $clientId = $this->login()->client_id;
-
-        $validated = $this->validate([
-            'roleForm.code' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^[A-Za-z0-9_-]+$/',
-                Rule::unique('starter_client_roles', 'code')
-                    ->where(fn ($query) => $query->where('client_id', $clientId))
-                    ->ignore($this->selectedRoleId),
-            ],
-            'roleForm.name' => ['required', 'string', 'max:255'],
-            'roleForm.desc' => ['nullable', 'string', 'max:2000'],
-            'roleForm.module_ids' => ['array'],
-            'roleForm.module_ids.*' => ['integer', 'exists:starter_app_mods,id'],
-            'roleForm.landing_menu_ids' => ['array'],
-            'roleForm.landing_menu_ids.*' => ['nullable', 'integer', 'exists:starter_app_menus,id'],
-        ], [], [
-            'roleForm.code' => 'code',
-            'roleForm.name' => 'name',
-            'roleForm.desc' => 'description',
-            'roleForm.module_ids' => 'module access',
-            'roleForm.module_ids.*' => 'module access',
-            'roleForm.landing_menu_ids' => 'default page',
-            'roleForm.landing_menu_ids.*' => 'default page',
-        ])['roleForm'];
-
-        try {
-            $role = $this->roles()->saveRole($this->login(), $this->selectedRoleId, $validated, $validated['module_ids'], $validated['landing_menu_ids'] ?? []);
-        } catch (ValidationException $exception) {
-            $this->dispatch('starter-toast', type: 'danger', message: $this->firstValidationMessage($exception));
-
-            return;
-        }
-
-        $this->selectedRoleId = $role->id;
-        $this->roleForm['module_ids'] = $role->mods->pluck('id')->map(fn (int $id): string => (string) $id)->values()->all();
-        $this->roleForm['landing_menu_ids'] = $role->landings->mapWithKeys(fn ($landing): array => [
-            $landing->app_id => (string) $landing->app_menu_id,
-        ])->all();
-
-        $this->dispatch('starter-toast', type: 'success', message: 'Role saved successfully.');
-    }
-
-    public function deleteRole(int $id): void
-    {
-        try {
-            $this->roles()->deleteRole($this->login(), $id);
-        } catch (ValidationException $exception) {
-            $this->dispatch('starter-toast', type: 'danger', message: $this->firstValidationMessage($exception));
-
-            return;
-        }
-
-        $this->newRole();
-
-        $this->dispatch('starter-toast', type: 'success', message: 'Role deleted successfully.');
+        $this->resetPage('rolesPage');
     }
 
     public function showRoleUsers(int $id): void
@@ -205,26 +81,92 @@ class Roles extends Component
         $this->roleUsers = [];
     }
 
+    public function showRoleAccess(int $id): void
+    {
+        $role = $this->roles()->findRole($this->login(), $id);
+        $modules = $role->isSuperuser()
+            ? $this->roles()->availableModules()
+            : $role->mods;
+
+        $this->roleAccessRoleName = $role->name;
+        $this->roleAccessRoleCode = $role->code;
+        $this->roleAccessIsFull = $role->isSuperuser();
+        $this->roleAccessCanManageSettings = $role->canManageSettings();
+        $this->roleAccessCanViewLogs = $role->canViewLogs();
+        $this->roleAccessModuleCount = $modules->count();
+        $this->roleAccessApps = $modules
+            ->groupBy(fn ($module): string => $module->app?->name ?? 'Tanpa App')
+            ->sortKeys(SORT_NATURAL | SORT_FLAG_CASE)
+            ->map(function ($appModules, string $appName): array {
+                return [
+                    'name' => $appName,
+                    'modules' => $appModules
+                        ->sortBy(fn ($module): string => $module->name, SORT_NATURAL | SORT_FLAG_CASE)
+                        ->map(fn ($module): array => [
+                            'name' => $module->name,
+                            'code' => $module->code,
+                            'desc' => (string) $module->desc,
+                        ])
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->values()
+            ->all();
+        $this->roleAccessAppCount = count($this->roleAccessApps);
+        $this->roleAccessModalOpen = true;
+    }
+
+    public function closeRoleAccessModal(): void
+    {
+        $this->roleAccessModalOpen = false;
+        $this->roleAccessRoleName = '';
+        $this->roleAccessRoleCode = '';
+        $this->roleAccessIsFull = false;
+        $this->roleAccessCanManageSettings = false;
+        $this->roleAccessCanViewLogs = false;
+        $this->roleAccessAppCount = 0;
+        $this->roleAccessModuleCount = 0;
+        $this->roleAccessApps = [];
+    }
+
     public function render()
     {
-        $allRoles = $this->roles()->roles($this->login());
+        $login = $this->login();
+        $visibleRoles = $this->roles()->roles($login);
+        $superuserRole = $visibleRoles->first(fn ($role): bool => $role->isSuperuser());
+        $allRoles = $visibleRoles
+            ->reject(fn ($role): bool => $role->isSuperuser())
+            ->sortBy(fn ($role): string => $role->name, SORT_NATURAL | SORT_FLAG_CASE)
+            ->when($superuserRole, fn ($roles) => $roles->prepend($superuserRole))
+            ->values();
         $search = Str::of($this->search)->trim()->lower()->toString();
-        $roles = $search === ''
+        $filteredRoles = $search === ''
             ? $allRoles
             : $allRoles->filter(function ($role) use ($search): bool {
                 return Str::of($role->name)->lower()->contains($search)
                     || Str::of($role->code)->lower()->contains($search)
                     || Str::of((string) $role->desc)->lower()->contains($search);
             });
-        $modules = $this->roles()->availableModules()
-            ->groupBy(fn ($mod): string => $mod->app?->name ?? 'No App');
+        $currentPage = $this->getPage(pageName: 'rolesPage');
+        $perPage = 10;
+        $roles = new LengthAwarePaginator(
+            $filteredRoles->forPage($currentPage, $perPage)->values(),
+            $filteredRoles->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'pageName' => 'rolesPage',
+            ],
+        );
 
         return view('starter.user-management.roles', [
             'roles' => $roles,
             'roleCount' => $allRoles->count(),
-            'selectedRole' => $allRoles->firstWhere('id', $this->selectedRoleId),
-            'modules' => $modules,
-        ])->title('Role Management');
+            'totalAppCount' => $this->roles()->availableModules()->pluck('app_id')->filter()->unique()->count(),
+            'totalModuleCount' => $this->roles()->availableModules()->count(),
+        ])->title('Manajemen Role');
     }
 
     private function roles(): UserManagementRoleService
@@ -235,60 +177,12 @@ class Roles extends Component
     private function login(): ClientLogin
     {
         $login = auth()->user();
-
-        abort_unless($login instanceof ClientLogin, 403);
+        abort_unless(
+            $login instanceof ClientLogin
+                && ($login->loadMissing('role')->role?->canManageSettings() ?? false),
+            403,
+        );
 
         return $login->loadMissing('client');
-    }
-
-    private function firstValidationMessage(ValidationException $exception): string
-    {
-        return collect($exception->errors())->flatten()->first() ?? 'Invalid data.';
-    }
-
-    /**
-     * @param  array<int, int|string>  $moduleIds
-     * @param  array<int|string, int|string|null>  $landingMenuIds
-     * @return array<int, string>
-     */
-    private function normalizedLandingMenuIds(array $moduleIds, array $landingMenuIds): array
-    {
-        $selectedModuleIds = collect($moduleIds)
-            ->map(fn (int|string $id): string => (string) $id)
-            ->filter()
-            ->values();
-
-        if ($selectedModuleIds->isEmpty()) {
-            return [];
-        }
-
-        $nextLandingMenuIds = [];
-
-        $this->roles()
-            ->availableModules()
-            ->filter(fn ($module): bool => $selectedModuleIds->contains((string) $module->id))
-            ->groupBy('app_id')
-            ->each(function ($appModules, int|string $appId) use (&$nextLandingMenuIds, $landingMenuIds): void {
-                $candidateMenuIds = $appModules
-                    ->flatMap(fn ($module) => $module->menus)
-                    ->pluck('id')
-                    ->map(fn (int|string $id): string => (string) $id)
-                    ->unique()
-                    ->values();
-
-                $currentMenuId = (string) ($landingMenuIds[$appId] ?? '');
-
-                if ($candidateMenuIds->contains($currentMenuId)) {
-                    $nextLandingMenuIds[$appId] = $currentMenuId;
-
-                    return;
-                }
-
-                if ($candidateMenuIds->count() === 1) {
-                    $nextLandingMenuIds[$appId] = $candidateMenuIds->first();
-                }
-            });
-
-        return $nextLandingMenuIds;
     }
 }

@@ -2,10 +2,13 @@
 
 use App\Http\Middleware\StarterAdmin;
 use App\Http\Middleware\StarterAuthorize;
+use App\Http\Middleware\StarterEnsureActiveUser;
+use App\Http\Middleware\StarterForcePasswordChange;
+use App\Http\Middleware\StarterLogAccess;
 use App\Models\Starter\ClientLogin;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
-use App\Support\Starter\StarterAppRegistry;
 use App\Support\Starter\StarterNavigation;
+use App\Support\Starter\StarterRouteRegistrar;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,17 +28,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->domain(config('app.domain'))
                 ->group(base_path('routes/web.php'));
 
-            foreach (StarterAppRegistry::keys() as $appKey) {
-                Route::middleware('web')
-                    ->domain($appKey.'.'.config('app.domain'))
-                    ->group(base_path("routes/apps/{$appKey}.php"));
-            }
+            StarterRouteRegistrar::registerAll();
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'starter.admin' => StarterAdmin::class,
             'starter.authorize' => StarterAuthorize::class,
+            'starter.active' => StarterEnsureActiveUser::class,
+            'starter.password-change' => StarterForcePasswordChange::class,
+            'starter.logs' => StarterLogAccess::class,
         ]);
 
         $middleware->redirectGuestsTo(fn ($request) => StarterNavigation::authLoginUrl($request->fullUrl()));

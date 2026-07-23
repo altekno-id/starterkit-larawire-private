@@ -9,7 +9,6 @@ use App\Models\Starter\App;
 use App\Models\Starter\AppMenu;
 use App\Models\Starter\AppMod;
 use App\Models\Starter\ClientLogin;
-use App\Support\Starter\StarterNavigation;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
@@ -23,16 +22,20 @@ class StarterContextService
     ) {}
 
     /**
-     * @var array<string, mixed>|null
-     */
-    private ?array $data = null;
-
-    /**
      * @return array<string, mixed>
      */
     public function data(): array
     {
-        return $this->data ??= $this->build();
+        $attribute = 'starter.context.data';
+
+        if (request()->attributes->has($attribute)) {
+            return request()->attributes->get($attribute);
+        }
+
+        $data = $this->build();
+        request()->attributes->set($attribute, $data);
+
+        return $data;
     }
 
     /**
@@ -43,9 +46,11 @@ class StarterContextService
         $login = auth()->user();
         $login = $login instanceof ClientLogin ? $login : null;
 
-        $currentAppKey = $this->currentAppKey();
-        $currentApp = $this->currentApp($currentAppKey);
+        $login?->loadMissing(['client', 'role']);
+
         $accessibleApps = $this->accessibleApps($login);
+        $currentApp = $this->resolveCurrentApp($accessibleApps);
+        $currentAppKey = $currentApp?->subdomain ?? 'landing';
         $sidebarMods = $this->sidebarMods($login, $currentApp);
         $sidebarPayload = $this->sidebarPayload($sidebarMods);
 
@@ -55,6 +60,8 @@ class StarterContextService
             'loginEmail' => $login?->email,
             'loginAvatarUrl' => $this->avatarUrl($login),
             'loginRoleName' => $login?->role?->name,
+            'clientName' => $login?->client?->name,
+            'clientLogoUrl' => $this->clientLogoUrl($login),
             'currentApp' => $currentApp,
             'currentAppKey' => $currentAppKey,
             'currentAppName' => $currentApp?->name,
@@ -68,7 +75,7 @@ class StarterContextService
         ];
     }
 
-    private function currentAppKey(): string
+    private function requestedAppKey(): ?string
     {
         $routeName = request()->route()?->getName();
 
@@ -87,12 +94,50 @@ class StarterContextService
             return str($host)->before('.'.$domain)->toString();
         }
 
-        return 'landing';
+        return null;
     }
 
-    private function currentApp(string $currentAppKey): ?App
+    /**
+     * Keep the sidebar attached to an authorized app on global starter pages.
+     *
+     * @param  EloquentCollection<int, App>  $accessibleApps
+     */
+    private function resolveCurrentApp(EloquentCollection $accessibleApps): ?App
     {
-        return $this->apps->findBySubdomain($currentAppKey);
+        $requestedAppKey = $this->requestedAppKey();
+        $requestedApp = $requestedAppKey ? $this->apps->findBySubdomain($requestedAppKey) : null;
+
+        if ($requestedApp instanceof App && $accessibleApps->contains(fn (App $app): bool => $app->is($requestedApp))) {
+            $this->rememberCurrentApp($requestedApp);
+
+            return $requestedApp;
+        }
+
+        $rememberedAppKey = request()->hasSession()
+            ? request()->session()->get('starter.current_app_key')
+            : null;
+        $rememberedApp = filled($rememberedAppKey)
+            ? $accessibleApps->firstWhere('subdomain', $rememberedAppKey)
+            : null;
+
+        if ($rememberedApp instanceof App) {
+            return $rememberedApp;
+        }
+
+        $fallbackApp = $accessibleApps->first();
+
+        if ($fallbackApp instanceof App) {
+            $this->rememberCurrentApp($fallbackApp);
+        }
+
+        return $fallbackApp;
+    }
+
+    private function rememberCurrentApp(App $app): void
+    {
+        if (request()->hasSession()) {
+            request()->session()->put('starter.current_app_key', $app->subdomain);
+        }
     }
 
     /**
@@ -234,7 +279,7 @@ class StarterContextService
 
     public function avatarUrl(?ClientLogin $login): string
     {
-        $photo = $login?->profile_photo ?: $login?->google_avatar;
+        $photo = $login?->profile_photo;
 
         if (! $photo) {
             return asset('assets/mine/avatar.png');
@@ -245,6 +290,21 @@ class StarterContextService
         }
 
         return asset(ltrim($photo, '/'));
+    }
+
+    private function clientLogoUrl(?ClientLogin $login): ?string
+    {
+        $logo = trim((string) $login?->client?->logo);
+
+        if ($logo === '') {
+            return null;
+        }
+
+        if (str_starts_with($logo, 'http://') || str_starts_with($logo, 'https://') || str_starts_with($logo, '//')) {
+            return $logo;
+        }
+
+        return asset(ltrim($logo, '/'));
     }
 
     private function dashboardUrl(string $appKey): string

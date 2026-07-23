@@ -9,16 +9,18 @@ use App\Contracts\Starter\ClientInterface;
 use App\Contracts\Starter\ClientLoginInterface;
 use App\Contracts\Starter\ClientRoleInterface;
 use App\Http\Middleware\StarterAuthorize;
-use App\Repositories\Starter\AppRepository;
+use App\Http\Middleware\StarterEnsureActiveUser;
+use App\Http\Middleware\StarterForcePasswordChange;
 use App\Repositories\Starter\AppModRepository;
+use App\Repositories\Starter\AppRepository;
 use App\Repositories\Starter\AppRouteRepository;
-use App\Repositories\Starter\ClientRepository;
 use App\Repositories\Starter\ClientLoginRepository;
+use App\Repositories\Starter\ClientRepository;
 use App\Repositories\Starter\ClientRoleRepository;
+use App\Services\Starter\AuditLogService;
 use App\Services\Starter\StarterContextService;
-use App\Support\Starter\StarterNavigation;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -36,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ClientInterface::class, ClientRepository::class);
         $this->app->bind(ClientLoginInterface::class, ClientLoginRepository::class);
         $this->app->bind(ClientRoleInterface::class, ClientRoleRepository::class);
+        $this->app->scoped(AuditLogService::class);
         $this->app->scoped(StarterContextService::class);
     }
 
@@ -46,10 +49,17 @@ class AppServiceProvider extends ServiceProvider
     {
         Model::preventSilentlyDiscardingAttributes($this->app->isLocal());
 
-        ResetPassword::createUrlUsing(function (object $notifiable, string $token): string {
-            $query = http_build_query(['email' => $notifiable->getEmailForPasswordReset()]);
+        Event::listen([
+            'eloquent.created: *',
+            'eloquent.updated: *',
+            'eloquent.deleted: *',
+        ], function (string $eventName, array $models): void {
+            $event = str($eventName)->after('eloquent.')->before(':')->value();
+            $model = $models[0] ?? null;
 
-            return StarterNavigation::authUrl("reset-password/{$token}")."?{$query}";
+            if ($model instanceof Model) {
+                app(AuditLogService::class)->recordModelEvent($event, $model);
+            }
         });
 
         View::composer([
@@ -64,6 +74,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Livewire::addPersistentMiddleware([
+            StarterEnsureActiveUser::class,
+            StarterForcePasswordChange::class,
             StarterAuthorize::class,
         ]);
     }

@@ -10,6 +10,16 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
     isSameUrl(url, compareUrl = window.location.href) {
         return this.normalizeUrl(url) === this.normalizeUrl(compareUrl);
     },
+    normalizeNavigationUrl(url) {
+        const parsed = new URL(url, window.location.href);
+        parsed.hash = '';
+        parsed.pathname = parsed.pathname.replace(/\/+$/, '') || '/';
+
+        return parsed.href;
+    },
+    isSameNavigationUrl(url, compareUrl = window.location.href) {
+        return this.normalizeNavigationUrl(url) === this.normalizeNavigationUrl(compareUrl);
+    },
     bootstrap() {
         return window.bootstrap || window.tabler?.bootstrap || null;
     },
@@ -27,6 +37,48 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
                 document.body?.classList.remove('starter-is-navigating');
             }
         }, 140);
+    },
+    showLivewireLoader(components = []) {
+        this.livewireLoadingCount = (this.livewireLoadingCount || 0) + 1;
+        this.livewireLoadingComponents = this.livewireLoadingComponents || new Set();
+        clearTimeout(this.livewireLoaderTimer);
+
+        components.filter(Boolean).forEach((component) => {
+            this.livewireLoadingComponents.add(component);
+            component.el?.setAttribute('data-starter-livewire-loading', '');
+            component.el?.setAttribute('aria-busy', 'true');
+        });
+
+        this.positionNavigateLoader();
+        document.querySelector('[data-starter-livewire-loader]')?.setAttribute('aria-hidden', 'false');
+        document.body?.classList.add('starter-livewire-is-loading');
+    },
+    hideLivewireLoader() {
+        this.livewireLoadingCount = Math.max((this.livewireLoadingCount || 1) - 1, 0);
+
+        if (this.livewireLoadingCount > 0) {
+            return;
+        }
+
+        clearTimeout(this.livewireLoaderTimer);
+        this.clearLivewireLoader();
+    },
+    clearLivewireLoader() {
+        this.livewireLoadingCount = 0;
+
+        (this.livewireLoadingComponents || new Set()).forEach((component) => {
+            component.el?.removeAttribute('data-starter-livewire-loading');
+            component.el?.removeAttribute('aria-busy');
+        });
+
+        document.querySelectorAll('[data-starter-livewire-loading]').forEach((element) => {
+            element.removeAttribute('data-starter-livewire-loading');
+            element.removeAttribute('aria-busy');
+        });
+
+        this.livewireLoadingComponents?.clear();
+        document.querySelector('[data-starter-livewire-loader]')?.setAttribute('aria-hidden', 'true');
+        document.body?.classList.remove('starter-livewire-is-loading');
     },
     authLoginUrl(redirect = window.location.href) {
         const configured = document.querySelector('meta[name="starter-auth-login-url"]')?.content;
@@ -71,7 +123,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         const target = new URL(url, window.location.href);
         const current = new URL(window.location.href);
 
-        if (this.isSameUrl(target.href, current.href)) {
+        if (this.isSameNavigationUrl(target.href, current.href)) {
             this.showNavigateLoader();
             window.location.reload();
             return;
@@ -228,6 +280,42 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
             }
         });
     },
+    updateClientBranding(detail = {}) {
+        document.querySelectorAll('[data-starter-brand-logo]').forEach((image) => {
+            const fallbackUrl = image.dataset.fallbackSrc;
+            const logoUrl = detail.logoUrl || fallbackUrl;
+
+            if (logoUrl) {
+                image.src = logoUrl;
+            }
+
+            image.alt = detail.clientName || image.alt;
+            image.toggleAttribute('data-company-logo', Boolean(detail.logoUrl));
+        });
+    },
+    prepareClientBranding() {
+        document.querySelectorAll('[data-starter-brand-logo]').forEach((image) => {
+            if (image.dataset.starterBrandBound === 'true') {
+                return;
+            }
+
+            image.dataset.starterBrandBound = 'true';
+            const useFallback = () => {
+                const fallbackUrl = image.dataset.fallbackSrc;
+
+                if (fallbackUrl && image.src !== fallbackUrl) {
+                    image.src = fallbackUrl;
+                    image.removeAttribute('data-company-logo');
+                }
+            };
+
+            image.addEventListener('error', useFallback);
+
+            if (image.complete && image.naturalWidth === 0) {
+                useFallback();
+            }
+        });
+    },
     toastStack() {
         let stack = document.querySelector('[data-starter-toast-stack]');
 
@@ -259,9 +347,9 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         const payload = typeof detail === 'string' ? { message: detail } : (detail || {});
         const type = this.normalizeToastType(String(payload.type || payload.status || 'info'));
         const title = payload.title || {
-            success: 'Success',
-            info: 'Information',
-            warning: 'Warning',
+            success: 'Berhasil',
+            info: 'Informasi',
+            warning: 'Peringatan',
             danger: 'Error',
         }[type];
         const message = payload.message || payload.text || '';
@@ -298,7 +386,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         const close = document.createElement('button');
         close.type = 'button';
         close.className = 'btn-close starter-toast-close';
-        close.setAttribute('aria-label', 'Close');
+        close.setAttribute('aria-label', 'Tutup');
         close.setAttribute('data-starter-toast-dismiss', '');
 
         toast.append(icon, body, close);
@@ -326,6 +414,25 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         toast.classList.add('is-leaving');
         toast.classList.remove('is-visible');
         setTimeout(() => toast.remove(), 180);
+    },
+    consumeFlashToasts() {
+        document.querySelectorAll('[data-starter-flash-toast]').forEach((element) => {
+            const payload = {
+                type: element.dataset.type || 'info',
+                message: element.dataset.message || '',
+            };
+
+            if (element.dataset.title) {
+                payload.title = element.dataset.title;
+            }
+
+            if (element.dataset.duration) {
+                payload.duration = Number(element.dataset.duration);
+            }
+
+            element.remove();
+            this.toast(payload);
+        });
     },
     bind() {
         if (this.bound) return;
@@ -387,6 +494,10 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
             this.updateAccountSummary(event.detail || {});
         });
 
+        document.addEventListener('starter-client-branding-updated', (event) => {
+            this.updateClientBranding(event.detail || {});
+        });
+
         ['starter-toast', 'toast', 'notify'].forEach((name) => {
             window.addEventListener(name, (event) => this.toast(event.detail || {}));
         });
@@ -403,9 +514,19 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         });
 
         window.addEventListener('resize', () => {
-            if (this.navigating) {
+            if (this.navigating || (this.livewireLoadingCount || 0) > 0) {
                 this.positionNavigateLoader();
             }
+        });
+
+        window.addEventListener('livewire-upload-start', (event) => {
+            const componentRoot = event.target?.closest?.('[wire\\:id]');
+
+            this.showLivewireLoader(componentRoot ? [{ el: componentRoot }] : []);
+        });
+
+        ['livewire-upload-finish', 'livewire-upload-error', 'livewire-upload-cancel'].forEach((eventName) => {
+            window.addEventListener(eventName, () => this.hideLivewireLoader());
         });
 
         this.bound = true;
@@ -413,7 +534,23 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
     bindLivewire() {
         if (this.livewireBound || ! window.Livewire?.interceptRequest) return;
 
-        window.Livewire.interceptRequest(({ onError }) => {
+        window.Livewire.interceptRequest(({ request, onSend, onError, onFinish }) => {
+            const messages = Array.from(request?.messages || []);
+            const actionMessages = messages.filter((message) => Array.isArray(message.calls) && message.calls.length > 0);
+            const components = actionMessages
+                .map((message) => message.component)
+                .filter(Boolean);
+            let started = false;
+
+            onSend(() => {
+                if (actionMessages.length === 0) {
+                    return;
+                }
+
+                started = true;
+                this.showLivewireLoader(components);
+            });
+
             onError(({ response, body, preventDefault }) => {
                 if (![401, 419].includes(response.status)) {
                     return;
@@ -423,6 +560,12 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
 
                 preventDefault();
                 window.location.assign(redirect);
+            });
+
+            onFinish(() => {
+                if (started) {
+                    this.hideLivewireLoader();
+                }
             });
         });
 
@@ -434,6 +577,8 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         this.activateSidebar();
         this.activateAppSwitcher();
         this.prepareDropdowns();
+        this.prepareClientBranding();
+        this.consumeFlashToasts();
     },
 });
 
@@ -443,9 +588,11 @@ document.addEventListener('livewire:navigate', () => window.StarterTemplate.show
 document.addEventListener('livewire:navigating', () => window.StarterTemplate.disposeBootstrap());
 document.addEventListener('livewire:navigated', () => {
     window.StarterTemplate.hideNavigateLoader();
+    window.StarterTemplate.clearLivewireLoader();
     window.StarterTemplate.init();
 });
 window.addEventListener('pageshow', () => {
     window.StarterTemplate.hideNavigateLoader();
+    window.StarterTemplate.clearLivewireLoader();
     window.StarterTemplate.init();
 });

@@ -1,0 +1,158 @@
+@php
+    $sections = [
+        'roles' => [
+            'label' => 'Roles',
+            'description' => 'Atur hak akses module dan halaman awal.',
+            'icon' => 'shield-lock',
+        ],
+        'users' => [
+            'label' => 'Users',
+            'description' => 'Kelola akun, status, role, dan password.',
+            'icon' => 'users',
+        ],
+        'company' => [
+            'label' => 'Profil Perusahaan',
+            'description' => 'Perbarui identitas dan kontak perusahaan.',
+            'icon' => 'building',
+        ],
+    ];
+    $activeSection = $sections[$section];
+@endphp
+
+<div>
+    <div class="page-header d-print-none mt-0 mb-3" aria-label="Header halaman">
+        <div class="row g-3 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">Administrasi Sistem</div>
+                <h2 class="page-title">Pengaturan</h2>
+                <div class="text-secondary">Kelola akses, akun user, dan identitas perusahaan dari satu tempat.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cards mb-3">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <span class="avatar bg-primary-lt text-primary me-3">
+                            {{ str($client->name)->substr(0, 1)->upper() }}
+                        </span>
+                        <div class="overflow-hidden">
+                            <div class="text-secondary">Perusahaan</div>
+                            <div class="fw-semibold text-truncate">{{ $client->name }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <span class="avatar bg-purple-lt text-purple me-3">{{ $roleCount }}</span>
+                        <div>
+                            <div class="text-secondary">Role</div>
+                            <div class="fw-semibold">{{ $roleCount }} role terdaftar</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <span class="avatar bg-green-lt text-green me-3">{{ $userCount }}</span>
+                        <div>
+                            <div class="text-secondary">User</div>
+                            <div class="fw-semibold">{{ $userCount }} akun dikelola</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <span class="avatar bg-azure-lt text-azure me-3">
+                            @include('templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm'])
+                        </span>
+                        <div>
+                            <div class="text-secondary">Total Aplikasi</div>
+                            <div class="fw-semibold">{{ $appCount }} aplikasi tersedia</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cards align-items-start">
+        <div class="col-12 col-lg-3 col-xxl-2">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="avatar avatar-md bg-primary-lt text-primary">
+                            @include('templates.layouts.icon', ['name' => 'settings', 'class' => 'icon'])
+                        </span>
+                        <div class="overflow-hidden">
+                            <div class="fw-semibold">Pusat Pengaturan</div>
+                            <div class="small text-secondary text-truncate">{{ $client->name }}</div>
+                        </div>
+                    </div>
+
+                    <h3 class="subheader mb-2">Manajemen</h3>
+                    <div class="list-group list-group-transparent">
+                        @foreach ($sections as $sectionKey => $sectionItem)
+                            <a
+                                href="{{ route('starter.settings', ['section' => $sectionKey]) }}"
+                                class="list-group-item list-group-item-action d-flex align-items-start gap-2 {{ $section === $sectionKey ? 'active' : '' }}"
+                                @if ($section === $sectionKey) aria-current="page" @endif
+                                data-starter-navigate
+                            >
+                                <span class="mt-1 flex-shrink-0">
+                                    @include('templates.layouts.icon', ['name' => $sectionItem['icon'], 'class' => 'icon-sm'])
+                                </span>
+                                <span>
+                                    <span class="d-block fw-semibold">{{ $sectionItem['label'] }}</span>
+                                    <span class="d-block small text-secondary">{{ $sectionItem['description'] }}</span>
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+
+                    <div class="alert alert-info mt-4 mb-0" role="note">
+                        <div class="d-flex gap-2">
+                            @include('templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm flex-shrink-0 mt-1'])
+                            <div class="small">
+                                Perubahan akses dan akun tercatat otomatis dalam audit log.
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-9 col-xxl-10">
+            <div class="card">
+                <div class="card-header bg-body">
+                    <div>
+                        <h3 class="card-title">{{ $activeSection['label'] }}</h3>
+                        <p class="card-subtitle">{{ $activeSection['description'] }}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if ($section === 'roles')
+                        <livewire:starter.user-management.roles :embedded="true" key="settings-roles" />
+                    @elseif ($section === 'users')
+                        <livewire:starter.user-management.users :embedded="true" key="settings-users" />
+                    @else
+                        <livewire:starter.settings.client-profile :embedded="true" key="settings-company" />
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

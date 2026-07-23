@@ -100,12 +100,17 @@ class NavigationAuthorizedRedirectService
             return true;
         }
 
-        if ($routeName === 'starter.client-profile') {
-            return $login->role?->isAdmin() ?? false;
+        if ($routeName === 'starter.logs.index') {
+            return $login->role?->canViewLogs() ?? false;
         }
 
-        if (str_starts_with($routeName, 'starter.user-management.')) {
-            return $login->role?->isAdmin() ?? false;
+        if ($routeName === 'starter.client-profile' || $routeName === 'starter.settings') {
+            return $login->role?->canManageSettings() ?? false;
+        }
+
+        if (str_starts_with($routeName, 'starter.user-management.')
+            || str_starts_with($routeName, 'starter.settings.')) {
+            return $login->role?->canManageSettings() ?? false;
         }
 
         if (str_starts_with($routeName, 'admin.')) {
@@ -149,6 +154,7 @@ class NavigationAuthorizedRedirectService
         if ($host === $domain) {
             $starterRoute = match ($path) {
                 'profile/edit' => 'starter.profile.edit',
+                'settings' => 'starter.settings',
                 'client-profile' => 'starter.client-profile',
                 'user-management/roles' => 'starter.user-management.roles',
                 'user-management/users' => 'starter.user-management.users',

@@ -17,7 +17,7 @@ Route::get('/login', function () {
 });
 
 Route::name('app1.')->group(function () {
-    Route::middleware('auth:web')->group(function () {
+    Route::middleware(['auth:web', 'starter.active', 'starter.password-change'])->group(function () {
         Route::get('/', function (NavigationAuthorizedRedirectService $redirects) {
             $login = auth()->user();
             $appKey = str((string) request()->route()?->getName())->before('.anchor')->toString();
@@ -29,6 +29,7 @@ Route::name('app1.')->group(function () {
 
         Route::middleware('starter.authorize')->group(function () {
             Route::livewire('/dashboard/index', App1DashboardIndex::class)->name('dashboard');
+            Route::livewire('/dashboard/summary-2', App1DashboardIndex::class)->name('dashboard.summary2');
 
             Route::prefix('module-1')->name('module1.')->group(function () {
                 Route::livewire('/data', App1Module1Index::class)->name('index');

@@ -25,7 +25,14 @@ class UserManagementRoleService
      */
     public function roles(ClientLogin $login): Collection
     {
-        return $this->clientRoles->forClient($this->client($login), ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins']);
+        return $this->clientRoles
+            ->forClient($this->client($login), ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins'])
+            ->when(
+                ! $login->role?->isSuperuser(),
+                fn (Collection $roles): Collection => $roles
+                    ->reject(fn (ClientRole $role): bool => $role->isSuperuser())
+                    ->values(),
+            );
     }
 
     public function findRole(ClientLogin $login, int $id): ClientRole
@@ -33,6 +40,7 @@ class UserManagementRoleService
         $role = $this->clientRoles->findForClient($this->client($login), $id, ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins']);
 
         abort_unless($role instanceof ClientRole, 404);
+        abort_if($role->isSuperuser() && ! $login->role?->isSuperuser(), 404);
 
         return $role;
     }
@@ -54,7 +62,7 @@ class UserManagementRoleService
     }
 
     /**
-     * @param  array{name: string, code: string, desc?: ?string}  $data
+     * @param  array{name: string, code: string, desc?: ?string, can_manage_settings?: bool, can_view_logs?: bool}  $data
      * @param  array<int, int|string>  $moduleIds
      * @param  array<int|string, int|string|null>  $landingMenuIds
      */
@@ -65,33 +73,66 @@ class UserManagementRoleService
         $moduleIds = $this->moduleIds($moduleIds);
         $landings = $this->landingMenuIds($moduleIds, $landingMenuIds);
 
-        return DB::transaction(function () use ($client, $roleId, $data, $moduleIds, $landings, $code): ClientRole {
-            $role = $roleId ? $this->clientRoles->findForClient($client, $roleId) : null;
+        $actionKey = $roleId ? 'role.update' : 'role.create';
+        $actionLabel = ($roleId ? 'Mengubah role ' : 'Membuat role ').trim($data['name']);
 
-            if ($roleId && ! $role instanceof ClientRole) {
-                abort(404);
-            }
+        return app(AuditLogService::class)->withinAction($actionKey, $actionLabel, function () use ($client, $roleId, $data, $moduleIds, $landings, $code): ClientRole {
+            return DB::transaction(function () use ($client, $roleId, $data, $moduleIds, $landings, $code): ClientRole {
+                $role = $roleId ? $this->clientRoles->findForClient($client, $roleId) : null;
 
-            if ($role?->isAdmin()) {
-                throw ValidationException::withMessages([
-                    'role' => 'The default admin role is read only.',
-                ]);
-            }
+                if ($roleId && ! $role instanceof ClientRole) {
+                    abort(404);
+                }
 
-            $payload = [
-                'code' => $code,
-                'name' => trim($data['name']),
-                'desc' => filled($data['desc'] ?? null) ? trim((string) $data['desc']) : null,
-            ];
+                if ($role?->isSuperuser()) {
+                    throw ValidationException::withMessages([
+                        'role' => 'Role bawaan Superuser hanya dapat dilihat.',
+                    ]);
+                }
 
-            $role = $role instanceof ClientRole
-                ? $this->clientRoles->update($role, $payload)
-                : $this->clientRoles->createForClient($client, $payload);
+                $oldModuleIds = $role?->mods()->pluck('starter_app_mods.id')->map(fn ($id): int => (int) $id)->all() ?? [];
+                $oldLandings = $role?->landings()->pluck('app_menu_id', 'app_id')->map(fn ($id): int => (int) $id)->all() ?? [];
+                $oldCanManageSettings = $role?->can_manage_settings ?? false;
+                $oldCanViewLogs = $role?->can_view_logs ?? false;
 
-            $this->clientRoles->syncMods($role, $role->isAdmin() ? [] : $moduleIds);
-            $this->clientRoles->syncLandings($role, $role->isAdmin() ? [] : $landings);
+                $payload = [
+                    'code' => $code,
+                    'name' => trim($data['name']),
+                    'desc' => filled($data['desc'] ?? null) ? trim((string) $data['desc']) : null,
+                    'can_manage_settings' => (bool) ($data['can_manage_settings'] ?? false),
+                    'can_view_logs' => (bool) ($data['can_view_logs'] ?? false),
+                ];
 
-            return $role->load('mods.app', 'landings.menu.route', 'landings.menu.mod.app')->loadCount('clientLogins');
+                $role = $role instanceof ClientRole
+                    ? $this->clientRoles->update($role, $payload)
+                    : $this->clientRoles->createForClient($client, $payload);
+
+                $this->clientRoles->syncMods($role, $moduleIds);
+                $this->clientRoles->syncLandings($role, $landings);
+
+                app(AuditLogService::class)->recordManual(
+                    'updated',
+                    ClientRole::class,
+                    $role->id,
+                    [
+                        'module_ids' => $oldModuleIds,
+                        'landing_menu_ids' => $oldLandings,
+                        'can_manage_settings' => $oldCanManageSettings,
+                        'can_view_logs' => $oldCanViewLogs,
+                    ],
+                    [
+                        'module_ids' => $moduleIds,
+                        'landing_menu_ids' => $landings,
+                        'can_manage_settings' => $role->can_manage_settings,
+                        'can_view_logs' => $role->can_view_logs,
+                    ],
+                    tableName: 'pivot_client_roles_app_mods',
+                    auditableLabel: $role->name,
+                    metadata: ['operation' => 'sync_role_access'],
+                );
+
+                return $role->load('mods.app', 'landings.menu.route', 'landings.menu.mod.app')->loadCount('clientLogins');
+            });
         });
     }
 
@@ -99,22 +140,24 @@ class UserManagementRoleService
     {
         $role = $this->findRole($login, $roleId);
 
-        if ($role->isAdmin()) {
+        if ($role->isSuperuser()) {
             throw ValidationException::withMessages([
-                'role' => 'The default admin role cannot be deleted.',
+                'role' => 'Role bawaan Superuser tidak dapat dihapus.',
             ]);
         }
 
         if ($this->clientRoles->hasClientLogins($role)) {
             throw ValidationException::withMessages([
-                'role' => 'Role is still assigned to one or more users.',
+                'role' => 'Role masih digunakan oleh satu atau beberapa user.',
             ]);
         }
 
-        DB::transaction(function () use ($role): void {
-            $this->clientRoles->detachLandings($role);
-            $this->clientRoles->detachMods($role);
-            $this->clientRoles->delete($role);
+        app(AuditLogService::class)->withinAction('role.delete', 'Menghapus role '.$role->name, function () use ($role): void {
+            DB::transaction(function () use ($role): void {
+                $this->clientRoles->detachLandings($role);
+                $this->clientRoles->detachMods($role);
+                $this->clientRoles->delete($role);
+            });
         });
     }
 
@@ -173,7 +216,7 @@ class UserManagementRoleService
         $landings = [];
 
         foreach ($mods->groupBy('app_id') as $appId => $appMods) {
-            $appName = $appMods->first()?->app?->name ?? 'selected app';
+            $appName = $appMods->first()?->app?->name ?? 'app terpilih';
             $candidateMenuIds = $appMods
                 ->flatMap(fn (AppMod $mod): Collection => $mod->menus)
                 ->pluck('id')
@@ -183,7 +226,7 @@ class UserManagementRoleService
 
             if ($candidateMenuIds->isEmpty()) {
                 throw ValidationException::withMessages([
-                    'roleForm.landing_menu_ids' => "Selected modules for {$appName} do not provide a default page.",
+                    'roleForm.landing_menu_ids' => "Module yang dipilih untuk {$appName} belum memiliki halaman awal.",
                 ]);
             }
 
@@ -191,13 +234,13 @@ class UserManagementRoleService
 
             if ($menuId === 0) {
                 throw ValidationException::withMessages([
-                    'roleForm.landing_menu_ids' => "Default page is required for {$appName}.",
+                    'roleForm.landing_menu_ids' => "Halaman awal wajib dipilih untuk {$appName}.",
                 ]);
             }
 
             if (! $candidateMenuIds->contains($menuId)) {
                 throw ValidationException::withMessages([
-                    'roleForm.landing_menu_ids' => "Default page for {$appName} must belong to selected modules.",
+                    'roleForm.landing_menu_ids' => "Halaman awal untuk {$appName} harus berasal dari module yang dipilih.",
                 ]);
             }
 

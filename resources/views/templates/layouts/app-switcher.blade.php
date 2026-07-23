@@ -5,7 +5,7 @@
 @endphp
 
 <div class="nav-item dropdown {{ $compact ? '' : 'd-none d-md-flex me-3' }}" data-starter-app-switcher>
-    <a href="#" class="nav-link px-0" tabindex="-1" aria-label="Show app menu" aria-expanded="false" data-starter-app-toggle>
+    <a href="#" class="nav-link px-0" tabindex="-1" aria-label="Tampilkan menu app" aria-expanded="false" data-starter-app-toggle>
         @include('templates.layouts.icon', ['name' => 'apps'])
         <span class="badge bg-primary"></span>
     </a>
@@ -13,7 +13,7 @@
     <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
         <div class="card">
             <div class="card-header">
-                <div class="card-title">My Apps</div>
+                <div class="card-title">App Saya</div>
             </div>
             <div class="card-body scroll-y p-2" style="max-height: 50vh">
                 <div class="row g-0">
@@ -26,7 +26,7 @@
                         </div>
                     @empty
                         <div class="col-12">
-                            <span class="d-block text-secondary px-3 py-2">No app available</span>
+                            <span class="d-block text-secondary px-3 py-2">Belum ada app tersedia</span>
                         </div>
                     @endforelse
                 </div>

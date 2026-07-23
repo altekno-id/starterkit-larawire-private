@@ -20,7 +20,8 @@ class SyncCommand extends Command
      */
     protected $signature = 'starter:sync
         {subdomain? : Sync only one registered subdomain}
-        {--force : Run without confirmation}';
+        {--force : Run without confirmation}
+        {--dry-run : Validate and show changes without writing to the database}';
 
     /**
      * The console command description.
@@ -36,6 +37,15 @@ class SyncCommand extends Command
     {
         foreach ($this->subdomains() as $subdomain) {
             $plan = $this->buildPlan($subdomain);
+
+            if ($this->option('dry-run')) {
+                $this->table(['App', 'Change', 'Modules', 'Routes', 'Menus'], [
+                    [$subdomain, 'create', $plan['create']['modules'], $plan['create']['routes'], $plan['create']['menus']],
+                    [$subdomain, 'delete', $plan['delete']['modules'], $plan['delete']['routes'], $plan['delete']['menus']],
+                ]);
+
+                continue;
+            }
 
             if (! $this->confirmDeletes($subdomain, $plan)) {
                 return self::FAILURE;
@@ -241,6 +251,61 @@ class SyncCommand extends Command
 
         if (! $this->hasLandingMenu($config['mods']['dashboard']['menus'] ?? [], "{$subdomain}.dashboard")) {
             $this->fail("App [{$subdomain}] dashboard module must include a default page menu for [{$subdomain}.dashboard].");
+        }
+
+        foreach ($config['mods'] as $modCode => $modConfig) {
+            if (! is_string($modCode) || preg_match('/^[a-z0-9][a-z0-9_-]*$/', $modCode) !== 1) {
+                $this->fail("Invalid module code [{$modCode}] in app [{$subdomain}]. Use lowercase letters, numbers, underscore, or hyphen.");
+            }
+
+            if (! is_array($modConfig) || blank($modConfig['name'] ?? null)) {
+                $this->fail("Module [{$subdomain}.{$modCode}] must define a name.");
+            }
+
+            $this->validateMenus($subdomain, $modCode, $modConfig['menus'] ?? []);
+        }
+
+        collect(Route::getRoutes())
+            ->map(fn ($route): string => (string) $route->getName())
+            ->filter(fn (string $name): bool => str_starts_with($name, "{$subdomain}.") && $name !== "{$subdomain}.anchor")
+            ->each(function (string $name) use ($subdomain, $config): void {
+                $modCode = explode('.', $name)[1] ?? '';
+
+                if (! array_key_exists($modCode, $config['mods'])) {
+                    $this->fail("Route [{$name}] is not owned by a configured module [{$subdomain}.{$modCode}].");
+                }
+            });
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $menus
+     */
+    private function validateMenus(string $subdomain, string $modCode, array $menus): void
+    {
+        foreach ($menus as $menu) {
+            if (! is_array($menu) || blank($menu['label'] ?? null)) {
+                $this->fail("Every menu in module [{$subdomain}.{$modCode}] must define a label.");
+            }
+
+            $routeName = $menu['route'] ?? null;
+
+            if ($routeName !== null) {
+                if (! is_string($routeName) || ! Route::has($routeName)) {
+                    $this->fail("Menu [{$menu['label']}] references missing route [{$routeName}].");
+                }
+
+                $expectedPrefix = "{$subdomain}.{$modCode}";
+
+                if ($routeName !== $expectedPrefix && ! str_starts_with($routeName, $expectedPrefix.'.')) {
+                    $this->fail("Menu route [{$routeName}] must belong to module [{$subdomain}.{$modCode}].");
+                }
+            }
+
+            if (($menu['landing'] ?? false) === true && $routeName === null) {
+                $this->fail("Landing menu [{$menu['label']}] must define a route.");
+            }
+
+            $this->validateMenus($subdomain, $modCode, $menu['children'] ?? []);
         }
     }
 
@@ -463,12 +528,12 @@ class SyncCommand extends Command
                 $query
                     ->select('id')
                     ->from('starter_client_roles')
-                    ->where('code', 'admin');
+                    ->where('code', 'superuser');
             })
             ->delete();
 
         $now = now();
-        $adminRoleIds = DB::table('starter_client_roles')->where('code', 'admin')->pluck('id');
+        $adminRoleIds = DB::table('starter_client_roles')->where('code', 'superuser')->pluck('id');
 
         foreach ($adminRoleIds as $roleId) {
             DB::table('pivot_client_roles_app_landings')->updateOrInsert([

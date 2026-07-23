@@ -3,6 +3,8 @@
 namespace App\Livewire\Starter\Profile;
 
 use App\Models\Starter\ClientLogin;
+use App\Rules\StarterPasswordRules;
+use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Services\Starter\ProfileService;
 use App\Services\Starter\StarterContextService;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +21,8 @@ class EditMyProfile extends Component
     use WithFileUploads;
 
     private const DEFAULT_PROFILE_PHOTO = 'assets/mine/avatar.png';
+
+    public string $activeTab = 'account-details';
 
     /**
      * @var array{name: string, email: string, profile_photo: string}
@@ -44,11 +48,16 @@ class EditMyProfile extends Component
 
     public function mount(): void
     {
-        $this->fillFromLogin($this->login()->loadMissing('client'));
+        $login = $this->login()->loadMissing('client');
+        $this->activeTab = $login->must_change_password || request()->query('tab') === 'security'
+            ? 'security'
+            : 'account-details';
+        $this->fillFromLogin($login);
     }
 
     public function saveAccount(): void
     {
+        $this->activeTab = 'account-details';
         $login = $this->login();
 
         $validated = $this->validate([
@@ -94,11 +103,12 @@ class EditMyProfile extends Component
             roleName: $updatedLogin->role?->name ?? 'Role',
         );
 
-        $this->dispatch('starter-toast', type: 'success', message: 'Profile saved successfully.');
+        $this->dispatch('starter-toast', type: 'success', message: 'Profil berhasil disimpan.');
     }
 
     public function resetProfilePhoto(): void
     {
+        $this->activeTab = 'account-details';
         $login = $this->login();
         $oldProfilePhoto = (string) $login->profile_photo;
 
@@ -119,7 +129,7 @@ class EditMyProfile extends Component
                 roleName: $updatedLogin->role?->name ?? 'Role',
             );
 
-            $this->dispatch('starter-toast', type: 'success', message: 'Profile photo reset to default.');
+            $this->dispatch('starter-toast', type: 'success', message: 'Foto profil berhasil dikembalikan ke default.');
         }
 
         $this->profilePhotoUpload = null;
@@ -128,11 +138,15 @@ class EditMyProfile extends Component
         $this->resetValidation(['profilePhotoUpload', 'accountForm.profile_photo']);
     }
 
-    public function changePassword(): void
+    public function changePassword(): mixed
     {
+        $this->activeTab = 'security';
+        $login = $this->login();
+        $passwordChangeWasRequired = $login->must_change_password;
+
         $validated = $this->validate([
             'passwordForm.current_password' => ['required', 'string'],
-            'passwordForm.password' => ['required', 'string', 'min:5', 'same:passwordForm.password_confirmation'],
+            'passwordForm.password' => [...StarterPasswordRules::rules(), 'same:passwordForm.password_confirmation'],
             'passwordForm.password_confirmation' => ['required', 'string'],
         ], [], [
             'passwordForm.current_password' => 'current password',
@@ -142,7 +156,7 @@ class EditMyProfile extends Component
 
         try {
             app(ProfileService::class)->changePassword(
-                $this->login(),
+                $login,
                 $validated['current_password'],
                 $validated['password'],
             );
@@ -153,11 +167,38 @@ class EditMyProfile extends Component
 
             $this->dispatch('starter-toast', type: 'danger', message: $this->firstValidationMessage($exception));
 
-            return;
+            return null;
         }
 
         $this->reset('passwordForm');
-        $this->dispatch('starter-toast', type: 'success', message: 'Password changed successfully.');
+
+        if ($passwordChangeWasRequired) {
+            session()->flash('starter-toast', [
+                'type' => 'success',
+                'message' => 'Password berhasil diubah. Anda sudah dapat menggunakan aplikasi.',
+            ]);
+
+            return $this->redirect(
+                app(NavigationAuthorizedRedirectService::class)->firstAuthorizedUrl($login->fresh(['role'])),
+            );
+        }
+
+        $this->dispatch('starter-toast', type: 'success', message: 'Password berhasil diubah.');
+
+        return null;
+    }
+
+    public function showTab(string $tab): void
+    {
+        if ($this->login()->must_change_password) {
+            $this->activeTab = 'security';
+
+            return;
+        }
+
+        if (in_array($tab, ['account-details', 'security'], true)) {
+            $this->activeTab = $tab;
+        }
     }
 
     public function render()
@@ -168,7 +209,7 @@ class EditMyProfile extends Component
             'login' => $login,
             'loginAvatarUrl' => app(StarterContextService::class)->avatarUrl($login),
             'profilePhotoPreviewUrl' => $this->profilePhotoPreviewUrl($login),
-        ])->title('Edit My Profile');
+        ])->title('Edit Profil Saya');
     }
 
     private function login(): ClientLogin
@@ -182,7 +223,7 @@ class EditMyProfile extends Component
 
     private function firstValidationMessage(ValidationException $exception): string
     {
-        return collect($exception->errors())->flatten()->first() ?? 'Invalid data.';
+        return collect($exception->errors())->flatten()->first() ?? 'Data tidak valid.';
     }
 
     private function fillFromLogin(ClientLogin $login): void
@@ -194,7 +235,6 @@ class EditMyProfile extends Component
             'email' => (string) $login->email,
             'profile_photo' => (string) $login->profile_photo,
         ];
-
     }
 
     private function profilePhotoPreviewUrl(ClientLogin $login): string
@@ -228,5 +268,4 @@ class EditMyProfile extends Component
 
         Storage::disk('public')->delete(str($profilePhoto)->after('storage/')->toString());
     }
-
 }

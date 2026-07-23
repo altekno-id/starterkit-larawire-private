@@ -12,6 +12,8 @@ class App2DashboardIndex extends Component
 {
     public function render()
     {
-        return view('apps.app2.dashboard.app2-dashboard-index')->title('Dashboard');
+        $dashboardTitle = request()->routeIs('app2.dashboard.summary2') ? 'Summary 2' : 'Summary 1';
+
+        return view('apps.app2.dashboard.app2-dashboard-index', compact('dashboardTitle'))->title($dashboardTitle);
     }
 }

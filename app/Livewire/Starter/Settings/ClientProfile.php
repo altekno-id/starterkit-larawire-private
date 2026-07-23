@@ -16,6 +16,8 @@ class ClientProfile extends Component
 {
     use WithFileUploads;
 
+    public bool $embedded = false;
+
     /**
      * @var array{name: string, email: string, phone: string, pic_name: string, logo: string}
      */
@@ -31,8 +33,9 @@ class ClientProfile extends Component
 
     public bool $clientPhotoReset = false;
 
-    public function mount(): void
+    public function mount(bool $embedded = false): void
     {
+        $this->embedded = $embedded;
         $this->fillFromClient($this->client());
     }
 
@@ -80,7 +83,8 @@ class ClientProfile extends Component
         $this->clientPhotoUpload = null;
         $this->clientPhotoReset = false;
         $this->fillFromClient($updatedClient);
-        $this->dispatch('starter-toast', type: 'success', message: 'Client profile saved successfully.');
+        $this->dispatchClientBrandingUpdated($updatedClient);
+        $this->dispatch('starter-toast', type: 'success', message: 'Profil perusahaan berhasil disimpan.');
     }
 
     public function resetClientPhoto(): void
@@ -96,7 +100,8 @@ class ClientProfile extends Component
 
             $this->deleteStoredClientPhoto($oldLogo);
             $this->fillFromClient($updatedClient);
-            $this->dispatch('starter-toast', type: 'success', message: 'Logo reset to default.');
+            $this->dispatchClientBrandingUpdated($updatedClient);
+            $this->dispatch('starter-toast', type: 'success', message: 'Logo berhasil dikembalikan ke default.');
         }
 
         $this->clientPhotoUpload = null;
@@ -111,14 +116,14 @@ class ClientProfile extends Component
             'client' => $this->client(),
             'clientLogoPreviewUrl' => $this->clientLogoPreviewUrl(),
             'clientInitials' => $this->clientInitials(),
-        ])->title('Client Profile');
+        ])->title('Profil Perusahaan');
     }
 
     private function login(): ClientLogin
     {
         $login = auth()->user();
 
-        abort_unless($login instanceof ClientLogin && ($login->loadMissing('role')->role?->isAdmin() ?? false), 403);
+        abort_unless($login instanceof ClientLogin && ($login->loadMissing('role')->role?->canManageSettings() ?? false), 403);
 
         return $login->loadMissing('client');
     }
@@ -152,11 +157,7 @@ class ClientProfile extends Component
         $logo = trim((string) ($this->clientForm['logo'] ?? ''));
 
         if ($logo !== '') {
-            if (str_starts_with($logo, 'http://') || str_starts_with($logo, 'https://') || str_starts_with($logo, '//')) {
-                return $logo;
-            }
-
-            return asset(ltrim($logo, '/'));
+            return $this->logoUrl($logo);
         }
 
         if ($this->clientPhotoReset) {
@@ -164,6 +165,30 @@ class ClientProfile extends Component
         }
 
         return null;
+    }
+
+    private function dispatchClientBrandingUpdated(Client $client): void
+    {
+        $this->dispatch(
+            'starter-client-branding-updated',
+            logoUrl: $this->logoUrl($client->logo),
+            clientName: $client->name,
+        );
+    }
+
+    private function logoUrl(?string $logo): ?string
+    {
+        $logo = trim((string) $logo);
+
+        if ($logo === '') {
+            return null;
+        }
+
+        if (str_starts_with($logo, 'http://') || str_starts_with($logo, 'https://') || str_starts_with($logo, '//')) {
+            return $logo;
+        }
+
+        return asset(ltrim($logo, '/'));
     }
 
     private function clientInitials(): string
@@ -185,5 +210,4 @@ class ClientProfile extends Component
 
         Storage::disk('public')->delete(str($logo)->after('storage/')->toString());
     }
-
 }

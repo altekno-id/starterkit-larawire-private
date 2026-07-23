@@ -1,321 +1,194 @@
-@php
-    $appTotal = $modules->count();
-    $selectedModuleIds = collect($roleForm['module_ids'])->map(fn ($id): string => (string) $id)->all();
-    $isAdminRole = $roleForm['code'] === 'admin';
-    $grantedAppCount = $isAdminRole
-        ? $appTotal
-        : $modules
-            ->filter(fn ($appModules): bool => $appModules->contains(fn ($module): bool => in_array((string) $module->id, $selectedModuleIds, true)))
-            ->count();
-    $assignedUserCount = $selectedRole?->client_logins_count ?? 0;
-    $moduleAppKeys = $modules->map(fn ($appModules): string => 'app-'.($appModules->first()?->app_id ?? 'none'))->values();
-    $allModuleAppsExpanded = $appTotal > 0 && $moduleAppKeys->diff($expandedModuleAppKeys)->isEmpty();
-    $roleTitle = filled($roleForm['name']) ? $roleForm['name'] : ($selectedRoleId ? 'Selected Role' : 'New Role');
-    $formMode = $isAdminRole ? 'View Role' : ($selectedRoleId ? 'Edit Role' : 'Create New Role');
-    $submitLabel = $selectedRoleId ? 'Save Changes' : 'Save Role';
-@endphp
-
 <div>
-    <div class="page-header d-print-none mt-0 mb-3" aria-label="Page header">
-        <div class="row g-3 align-items-center">
-            <div class="col">
-                <div class="page-pretitle">Starter / User Management</div>
-                <h2 class="page-title">Role Management</h2>
-            </div>
-            <div class="col-12 col-lg-4">
-                <input type="search" class="form-control" placeholder="Search roles, code, description" wire:model.live.debounce.250ms="search">
+    @unless ($embedded)
+        <div class="page-header d-print-none mt-0 mb-3" aria-label="Header halaman">
+            <div class="row g-3 align-items-center">
+                <div class="col">
+                    <div class="page-pretitle">Starter / Manajemen User</div>
+                    <h2 class="page-title">Roles</h2>
+                    <div class="text-secondary">Kelola role tanpa mencampurkan daftar dengan form pengaturan akses.</div>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ route('starter.settings.roles.create') }}" class="btn btn-primary" data-starter-navigate>
+                        @include('templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
+                        Tambah Role
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+    @endunless
 
-    <div class="row row-cards">
-        <div class="col-xl-4 order-1 order-xl-2">
-            <div class="card h-100">
-                <div class="card-header">
-                    <div>
-                        <h3 class="card-title">Defined Roles</h3>
-                        <p class="card-subtitle">{{ $roleCount }} role registered</p>
-                    </div>
-                    <div class="card-actions">
-                        <button type="button" class="btn btn-outline-primary btn-sm" wire:click="newRole">
-                            @include('templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
-                            New
-                        </button>
-                    </div>
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h3 class="card-title">Daftar Role</h3>
+                <p class="card-subtitle">{{ $roleCount }} role terdaftar</p>
+            </div>
+            <div class="card-actions">
+                <a
+                    href="{{ route('starter.settings.roles.create') }}"
+                    class="btn btn-primary"
+                    data-role-create-location="content"
+                    data-starter-navigate
+                >
+                    @include('templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
+                    Tambah Role
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body border-bottom py-3">
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-lg">
+                    <input
+                        type="search"
+                        class="form-control"
+                        placeholder="Cari nama, kode, atau deskripsi role"
+                        aria-label="Cari role"
+                        wire:model.live.debounce.250ms="search"
+                    >
                 </div>
+                <div class="col-12 col-lg-auto text-secondary small">
+                    Menampilkan {{ $roles->firstItem() ?? 0 }}–{{ $roles->lastItem() ?? 0 }} dari {{ $roles->total() }} role
+                </div>
+            </div>
+        </div>
 
-                <div class="list-group list-group-flush list-group-hoverable rounded-0">
+        <div class="table-responsive">
+            <table class="table table-vcenter table-hover card-table" style="table-layout: fixed; min-width: 42rem;">
+                <thead>
+                    <tr>
+                        <th style="width: 52%;">Role</th>
+                        <th class="text-nowrap" style="width: 26%;">Cakupan Akses</th>
+                        <th style="width: 12%;">User</th>
+                        <th style="width: 10%;"></th>
+                    </tr>
+                </thead>
+                <tbody>
                     @forelse ($roles as $role)
                         @php
-                            $roleSelected = $selectedRoleId === $role->id;
-                            $roleAppAccess = $role->isAdmin()
-                                ? $modules->map(fn ($appModules): int => $appModules->count())
-                                : $role->mods->groupBy(fn ($mod): string => $mod->app?->name ?? 'No App')->map(fn ($appModules): int => $appModules->count());
-                            $roleAppCount = $roleAppAccess->count();
-                            $roleDescription = filled($role->desc) ? $role->desc : 'No description provided.';
+                            $roleAppCount = $role->isSuperuser()
+                                ? $totalAppCount
+                                : $role->mods->pluck('app_id')->filter()->unique()->count();
+                            $roleModuleCount = $role->isSuperuser()
+                                ? $totalModuleCount
+                                : $role->mods->count();
                         @endphp
-
-                        <div class="list-group-item list-group-item-action py-3 cursor-pointer {{ $roleSelected ? 'active' : '' }}" role="button" tabindex="0" wire:click="editRole({{ $role->id }})" wire:key="role-list-{{ $role->id }}">
-                            <div class="d-flex w-100 align-items-start justify-content-between gap-3">
-                                <div class="text-start overflow-hidden">
-                                    <div class="fw-semibold text-truncate">{{ $role->name }}</div>
-                                    <div class="small text-secondary">
-                                        {{ $roleDescription }}
-                                    </div>
-                                </div>
-                                <span class="badge {{ $role->isAdmin() ? 'bg-danger-lt text-danger' : 'bg-primary-lt text-primary' }}">
-                                    {{ $role->isAdmin() ? 'Full Access' : $roleAppCount.' App' }}
-                                </span>
-                            </div>
-                            <div class="row g-1 mt-1 small">
-                                <span class="col-6">
-                                    <span class="text-secondary">Code</span>
-                                    <span class="text-secondary">:</span>
-                                    <span class="font-monospace ms-1">{{ $role->code }}</span>
-                                </span>
-                                <span class="col-6 text-end">
-                                    @if ($role->client_logins_count > 0)
-                                        <button type="button" class="btn btn-link btn-sm p-0 align-baseline" wire:click.stop="showRoleUsers({{ $role->id }})">
-                                            <span>Users</span>
-                                            <span>:</span>
-                                            <span class="fw-semibold ms-1">
-                                                {{ $role->client_logins_count }}
-                                            </span>
-                                        </button>
-                                    @else
-                                        <span class="text-secondary">Users</span>
-                                        <span class="text-secondary">:</span>
-                                        <span class="fw-semibold ms-1">
-                                            {{ $role->client_logins_count }}
-                                        </span>
-                                    @endif
-                                </span>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="list-group-item">
-                            <div class="empty py-4">
-                                <div class="empty-icon">
-                                    @include('templates.layouts.icon', ['name' => 'users-group'])
-                                </div>
-                                <p class="empty-title">No roles found</p>
-                                <p class="empty-subtitle text-secondary">Try another keyword or create a new role.</p>
-                            </div>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-8 order-2 order-xl-1">
-            <form class="vstack gap-3" wire:submit="save">
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2 class="card-title h2 mb-0">{{ $formMode }}</h2>
-                            <p class="card-subtitle">Role Detail</p>
-                        </div>
-                        @if ($selectedRoleId)
-                            <div class="card-actions">
-                                <div class="btn-list">
-                                    <button type="button" class="btn btn-outline-danger" wire:click="deleteRole({{ $selectedRoleId }})">
-                                        @include('templates.layouts.icon', ['name' => 'trash', 'class' => 'icon-sm me-1'])
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3 align-items-start mb-3">
-                            <div class="col">
-                                <div class="d-flex flex-wrap align-items-center gap-2 text-secondary">
-                                    <div class="fw-semibold">{{ $roleTitle }}</div>
-                                    @if ($isAdminRole)
-                                        <span class="badge bg-danger-lt text-danger">High Privileges</span>
-                                        <span class="badge bg-secondary-lt">View Only</span>
-                                    @elseif ($selectedRoleId)
-                                        <span class="badge bg-primary-lt text-primary">Custom Access</span>
-                                    @else
-                                        <span class="badge bg-secondary-lt">Draft</span>
-                                    @endif
-                                </div>
-                                <p class="text-secondary mt-1 mb-0">
-                                    {{ filled($roleForm['desc']) ? $roleForm['desc'] : 'Configure the role identity and choose which application modules it can access.' }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="row g-3">
-                            <div class="col-md-3 col-lg-2">
-                                <label class="form-label">Code</label>
-                                <input type="text" class="form-control @error('roleForm.code') is-invalid @enderror" wire:model.live="roleForm.code" @readonly($isAdminRole)>
-                                @error('roleForm.code') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-4 col-lg-3">
-                                <label class="form-label">Name</label>
-                                <input type="text" class="form-control @error('roleForm.name') is-invalid @enderror" wire:model="roleForm.name" @readonly($isAdminRole)>
-                                @error('roleForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-5 col-lg-7">
-                                <label class="form-label">Description</label>
-                                <input type="text" class="form-control @error('roleForm.desc') is-invalid @enderror" wire:model="roleForm.desc" @readonly($isAdminRole)>
-                                @error('roleForm.desc') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                        </div>
-
-                        <div class="datagrid mt-4">
-                            <div class="datagrid-item">
-                                <div class="datagrid-title">Users Assigned</div>
-                                <div class="datagrid-content">{{ $assignedUserCount }}</div>
-                            </div>
-                            <div class="datagrid-item">
-                                <div class="datagrid-title">App Access</div>
-                                <div class="datagrid-content">
-                                    <span class="status {{ $isAdminRole ? 'status-green' : 'status-blue' }} status-lite">
-                                        {{ $grantedAppCount }} / {{ $appTotal }}
+                        <tr
+                            class="{{ $role->isSuperuser() ? 'bg-danger-lt' : '' }}"
+                            wire:key="role-row-{{ $role->id }}"
+                            @if ($role->isSuperuser()) data-default-role @endif
+                        >
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span
+                                        class="avatar avatar-sm flex-shrink-0 {{ $role->isSuperuser() ? 'bg-danger-lt text-danger' : 'bg-primary-lt text-primary' }}"
+                                        data-role-avatar
+                                    >
+                                        @include('templates.layouts.icon', ['name' => $role->isSuperuser() ? 'shield-check' : 'shield-lock', 'class' => 'm-0'])
                                     </span>
-                                </div>
-                            </div>
-                            <div class="datagrid-item">
-                                <div class="datagrid-title">Role Code</div>
-                                <div class="datagrid-content font-monospace text-truncate">{{ filled($roleForm['code']) ? $roleForm['code'] : '-' }}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card-header border-top">
-                        <div>
-                            <h3 class="card-title">Module Access</h3>
-                            <p class="card-subtitle">Grant or deny access to registered modules for this role.</p>
-                        </div>
-                        <div class="card-actions">
-                            <div class="btn-list">
-                                @if ($isAdminRole)
-                                    <span class="status status-green status-lite">Admin full access</span>
-                                @else
-                                    <span class="status status-blue status-lite">{{ $grantedAppCount }} apps granted</span>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap justify-content-end align-items-center mb-3">
-                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" wire:click="toggleAllModuleApps">
-                                @include('templates.layouts.icon', ['name' => $allModuleAppsExpanded ? 'chevron-up' : 'chevron-down', 'class' => 'me-1'])
-                                {{ $allModuleAppsExpanded ? 'Collapse all' : 'Expand all' }}
-                            </button>
-                        </div>
-
-                        <div class="accordion accordion-inverted" id="role-module-access">
-                            @foreach ($modules as $appName => $appModules)
-                                @php
-                                    $grantedAppModules = $isAdminRole
-                                        ? $appModules->count()
-                                        : $appModules->filter(fn ($module): bool => in_array((string) $module->id, $selectedModuleIds, true))->count();
-                                    $appId = $appModules->first()?->app_id;
-                                    $appKey = 'app-'.($appId ?? 'none');
-                                    $appExpanded = in_array($appKey, $expandedModuleAppKeys, true);
-                                    $appAccordionId = 'role-app-modules-'.$appKey;
-                                @endphp
-
-                                <div class="accordion-item" wire:key="role-app-modules-{{ $appKey }}">
-                                    <div class="accordion-header">
-                                        <button class="accordion-button {{ $appExpanded ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $appAccordionId }}" wire:click="toggleModuleApp('{{ $appKey }}')" aria-expanded="{{ $appExpanded ? 'true' : 'false' }}" aria-controls="{{ $appAccordionId }}">
-                                            <span class="me-auto">
-                                                <span class="d-block fw-semibold">{{ $appName }}</span>
-                                                <span class="d-block small text-secondary">{{ $appModules->count() }} module available</span>
-                                            </span>
-                                            <span class="badge {{ $grantedAppModules > 0 ? 'bg-primary-lt text-primary' : 'bg-secondary-lt' }}">
-                                                {{ $grantedAppModules }} / {{ $appModules->count() }} mods
-                                            </span>
-                                            <div class="accordion-button-toggle">
-                                                @include('templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'icon-1'])
-                                            </div>
-                                        </button>
-                                    </div>
-
-                                    <div id="{{ $appAccordionId }}" class="accordion-collapse collapse {{ $appExpanded ? 'show' : '' }}">
-                                        <div class="accordion-body">
-                                            <div class="vstack gap-3">
-                                                @foreach ($appModules as $module)
-                                                    @php
-                                                        $moduleGranted = $isAdminRole || in_array((string) $module->id, $selectedModuleIds, true);
-                                                        $moduleLandingMenus = $moduleGranted ? $module->menus : collect();
-                                                    @endphp
-
-                                                    <div class="form-check mb-0" wire:key="role-module-{{ $module->id }}">
-                                                        @if ($isAdminRole)
-                                                            <input type="checkbox" class="form-check-input" id="module-{{ $module->id }}" checked disabled>
-                                                        @else
-                                                            <input type="checkbox" class="form-check-input" id="module-{{ $module->id }}" value="{{ $module->id }}" wire:model.live="roleForm.module_ids">
-                                                        @endif
-                                                        <label class="form-check-label" for="module-{{ $module->id }}">
-                                                            <span class="d-block">
-                                                                <span class="overflow-hidden">
-                                                                    <span class="d-flex align-items-baseline gap-2">
-                                                                        <span class="fw-semibold">{{ $module->name }}</span>
-                                                                        <span class="small text-secondary font-monospace">{{ $module->code }}</span>
-                                                                    </span>
-                                                                    <span class="d-block small text-secondary">
-                                                                        {{ filled($module->desc) ? $module->desc : 'No description provided.' }}
-                                                                    </span>
-                                                                </span>
-                                                            </span>
-                                                        </label>
-
-                                                        @if ($moduleGranted && $appId)
-                                                            <div class="mt-2 vstack gap-1">
-                                                                @forelse ($moduleLandingMenus as $menu)
-                                                                    <label class="form-check mb-0 ps-4">
-                                                                        <input type="radio" class="form-check-input w-3 h-3 ms-n4" value="{{ $menu->id }}" wire:model.live="roleForm.landing_menu_ids.{{ $appId }}" @disabled($isAdminRole)>
-                                                                        <span class="form-check-label small">
-                                                                            Set <span class="fw-semibold">{{ $menu->label }}</span> as landing page
-                                                                        </span>
-                                                                    </label>
-                                                                @empty
-                                                                    <div class="text-warning small">
-                                                                        No default page available for this module.
-                                                                    </div>
-                                                                @endforelse
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                            @error('roleForm.landing_menu_ids') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
+                                    <div class="overflow-hidden">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fw-semibold">{{ $role->name }}</span>
+                                            @if ($role->isSuperuser())
+                                                <span class="badge bg-danger-lt text-danger">Role Default</span>
+                                            @endif
+                                            @if (! $role->isSuperuser() && $role->canManageSettings())
+                                                <span class="badge bg-azure-lt text-azure">
+                                                    @include('templates.layouts.icon', ['name' => 'settings', 'class' => 'icon-sm me-1'])
+                                                    Pengaturan
+                                                </span>
+                                            @endif
+                                            @if (! $role->isSuperuser() && $role->canViewLogs())
+                                                <span class="badge bg-purple-lt text-purple">
+                                                    @include('templates.layouts.icon', ['name' => 'history', 'class' => 'icon-sm me-1'])
+                                                    Log
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="small text-secondary text-truncate">
+                                            @if ($role->isSuperuser())
+                                                <span class="font-monospace">{{ $role->code }}</span>
+                                                <span class="mx-1">·</span>
+                                                Tidak dapat diedit, hanya dapat dilihat oleh Superuser.
+                                            @else
+                                                <span class="font-monospace">{{ $role->code }}</span>
+                                                <span class="mx-1">·</span>
+                                                {{ filled($role->desc) ? $role->desc : 'Belum ada deskripsi' }}
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-
-                        @error('roleForm.module_ids.*') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="card-footer position-sticky bottom-0 z-2 bg-body shadow-sm">
-                        <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
-                            <div class="text-secondary small">
-                                {{ $isAdminRole ? 'This role is view only.' : 'Review module access and default pages before saving.' }}
-                            </div>
-                            <div class="btn-list ms-sm-auto">
-                                @if ($isAdminRole)
-                                    <button type="button" class="btn btn-outline-secondary" disabled>
-                                        @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'icon-sm me-1'])
-                                        View Only
+                            </td>
+                            <td class="text-nowrap">
+                                <button
+                                    type="button"
+                                    class="starter-role-access-trigger d-inline-flex align-items-center gap-2 border-0 bg-transparent p-0 text-start"
+                                    wire:click="showRoleAccess({{ $role->id }})"
+                                    aria-label="Lihat detail akses role {{ $role->name }}"
+                                    data-role-access-summary
+                                    data-role-access-trigger
+                                >
+                                    <span class="avatar avatar-xs rounded {{ $role->isSuperuser() ? 'bg-success-lt text-success' : 'bg-primary-lt text-primary' }} flex-shrink-0">
+                                        @include('templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm m-0'])
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="starter-role-access-title d-block fw-semibold text-truncate">
+                                            {{ $role->isSuperuser() ? 'Akses penuh' : $roleAppCount.' app' }}
+                                        </span>
+                                        <span class="d-block small text-secondary fw-normal" data-role-module-count>{{ $roleModuleCount }} module</span>
+                                    </span>
+                                    @include('templates.layouts.icon', ['name' => 'chevron-right', 'class' => 'icon-sm text-secondary flex-shrink-0'])
+                                </button>
+                            </td>
+                            <td>
+                                @if ($role->client_logins_count > 0)
+                                    <button
+                                        type="button"
+                                        class="starter-table-action-link"
+                                        wire:click="showRoleUsers({{ $role->id }})"
+                                        aria-label="Lihat user dalam role {{ $role->name }}"
+                                        data-role-users-trigger
+                                    >
+                                        {{ $role->client_logins_count }} user
                                     </button>
                                 @else
-                                    <button type="submit" class="btn btn-primary">
-                                        @include('templates.layouts.icon', ['name' => 'check', 'class' => 'icon-sm me-1'])
-                                        {{ $submitLabel }}
-                                    </button>
+                                    <span class="text-secondary">0 user</span>
                                 @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
+                            </td>
+                            <td class="text-end">
+                                <a
+                                    href="{{ route('starter.settings.roles.edit', $role->id) }}"
+                                    class="btn btn-sm"
+                                    data-starter-navigate
+                                >
+                                    {{ $role->isSuperuser() ? 'Lihat' : 'Edit' }}
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty py-5">
+                                    <div class="empty-icon">
+                                        @include('templates.layouts.icon', ['name' => 'users-group'])
+                                    </div>
+                                    <p class="empty-title">Role tidak ditemukan</p>
+                                    <p class="empty-subtitle text-secondary">Coba kata kunci lain atau buat role baru.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+
+        @if ($roles->hasPages())
+            <div class="card-footer d-flex align-items-center">
+                <div class="ms-auto">
+                    {{ $roles->links() }}
+                </div>
+            </div>
+        @endif
     </div>
 
     @if ($roleUsersModalOpen)
@@ -324,12 +197,11 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <div>
-                            <h3 class="modal-title" id="role-users-modal-title">Role Users</h3>
+                            <h3 class="modal-title" id="role-users-modal-title">User dalam Role</h3>
                             <div class="text-secondary small">{{ $roleUsersRoleName }} · {{ count($roleUsers) }} user</div>
                         </div>
-                        <button type="button" class="btn-close" aria-label="Close" wire:click="closeRoleUsersModal"></button>
+                        <button type="button" class="btn-close" aria-label="Tutup" wire:click="closeRoleUsersModal"></button>
                     </div>
-
                     <div class="modal-body overflow-auto" style="max-height: min(32rem, calc(100vh - 14rem));">
                         <div class="list-group list-group-flush">
                             @forelse ($roleUsers as $user)
@@ -344,15 +216,124 @@
                                 </div>
                             @empty
                                 <div class="empty">
-                                    <p class="empty-title">No users assigned</p>
-                                    <p class="empty-subtitle text-secondary">This role is not assigned to any login account.</p>
+                                    <p class="empty-title">Belum ada user</p>
+                                    <p class="empty-subtitle text-secondary">Role ini belum digunakan oleh akun login mana pun.</p>
                                 </div>
                             @endforelse
                         </div>
                     </div>
-
                     <div class="modal-footer">
-                        <button type="button" class="btn" wire:click="closeRoleUsersModal">Close</button>
+                        <button type="button" class="btn" wire:click="closeRoleUsersModal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-backdrop fade show"></div>
+    @endif
+
+    @if ($roleAccessModalOpen)
+        <div class="modal modal-blur fade show d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="role-access-modal-title">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div>
+                            <h3 class="modal-title" id="role-access-modal-title">Detail Akses Role</h3>
+                            <div class="text-secondary small">
+                                {{ $roleAccessRoleName }}
+                                <span class="mx-1">·</span>
+                                <span class="font-monospace">{{ $roleAccessRoleCode }}</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" aria-label="Tutup" wire:click="closeRoleAccessModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if ($roleAccessIsFull)
+                            <div class="alert alert-success" role="note">
+                                <div class="d-flex gap-2">
+                                    @include('templates.layouts.icon', ['name' => 'shield-check', 'class' => 'icon-sm flex-shrink-0 mt-1'])
+                                    <div>
+                                        <div class="fw-semibold">Akses penuh role default</div>
+                                        <div class="small">Superuser otomatis dapat mengakses seluruh app dan module yang terdaftar.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if (! $roleAccessIsFull)
+                            <div class="card card-sm mb-3">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item">
+                                        <div class="d-flex gap-2">
+                                            @include('templates.layouts.icon', ['name' => $roleAccessCanManageSettings ? 'settings' : 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1 '.($roleAccessCanManageSettings ? 'text-azure' : 'text-secondary')])
+                                            <div>
+                                                <div class="fw-semibold">
+                                                    {{ $roleAccessCanManageSettings ? 'Dapat mengakses Pengaturan' : 'Tidak dapat mengakses Pengaturan' }}
+                                                </div>
+                                                <div class="small text-secondary">
+                                                    {{ $roleAccessCanManageSettings
+                                                        ? 'Dapat mengelola role, user, dan profil perusahaan.'
+                                                        : 'Tidak memiliki izin mengelola pusat Pengaturan.' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <div class="d-flex gap-2">
+                                            @include('templates.layouts.icon', ['name' => $roleAccessCanViewLogs ? 'history' : 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1 '.($roleAccessCanViewLogs ? 'text-purple' : 'text-secondary')])
+                                            <div>
+                                                <div class="fw-semibold">
+                                                    {{ $roleAccessCanViewLogs ? 'Dapat melihat Log Aktivitas' : 'Tidak dapat melihat Log Aktivitas' }}
+                                                </div>
+                                                <div class="small text-secondary">
+                                                    {{ $roleAccessCanViewLogs
+                                                        ? 'Dapat meninjau riwayat pembuatan, perubahan, dan penghapusan data.'
+                                                        : 'Riwayat perubahan data tidak dapat dibuka oleh role ini.' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="vstack gap-3" data-role-access-detail>
+                            @forelse ($roleAccessApps as $app)
+                                <div class="border rounded overflow-hidden">
+                                    <div class="d-flex align-items-center gap-2 bg-body-tertiary px-3 py-2 border-bottom">
+                                        @include('templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm text-primary flex-shrink-0'])
+                                        <div class="fw-semibold">{{ $app['name'] }}</div>
+                                        <span class="badge bg-secondary-lt ms-auto">{{ count($app['modules']) }} module</span>
+                                    </div>
+                                    <div class="list-group list-group-flush">
+                                        @foreach ($app['modules'] as $module)
+                                            <div class="list-group-item">
+                                                <div class="d-flex align-items-baseline gap-2">
+                                                    <span class="fw-semibold">{{ $module['name'] }}</span>
+                                                    <span class="small text-secondary font-monospace">{{ $module['code'] }}</span>
+                                                </div>
+                                                @if (filled($module['desc']))
+                                                    <div class="small text-secondary mt-1">{{ $module['desc'] }}</div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="empty py-4">
+                                    <div class="empty-icon">
+                                        @include('templates.layouts.icon', ['name' => 'shield-lock'])
+                                    </div>
+                                    <p class="empty-title">Belum ada akses module</p>
+                                    <p class="empty-subtitle text-secondary">Role ini belum memiliki app atau module yang dapat diakses.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="text-secondary small me-auto">
+                            {{ $roleAccessAppCount }} app · {{ $roleAccessModuleCount }} module
+                        </div>
+                        <button type="button" class="btn" wire:click="closeRoleAccessModal">Tutup</button>
                     </div>
                 </div>
             </div>

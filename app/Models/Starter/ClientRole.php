@@ -8,10 +8,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['client_id', 'code', 'name', 'desc'])]
+#[Fillable(['client_id', 'code', 'name', 'desc', 'is_system', 'can_manage_settings', 'can_view_logs'])]
 class ClientRole extends Model
 {
     protected $table = 'starter_client_roles';
+
+    protected function casts(): array
+    {
+        return [
+            'is_system' => 'boolean',
+            'can_manage_settings' => 'boolean',
+            'can_view_logs' => 'boolean',
+        ];
+    }
 
     /**
      * Get the client that owns this role.
@@ -51,7 +60,7 @@ class ClientRole extends Model
      */
     public function hasFullAccess(): bool
     {
-        return $this->isAdmin() && ! $this->mods()->exists();
+        return $this->isSuperuser();
     }
 
     /**
@@ -59,7 +68,25 @@ class ClientRole extends Model
      */
     public function isAdmin(): bool
     {
-        return $this->code === 'admin';
+        return $this->isSuperuser();
+    }
+
+    public function isSuperuser(): bool
+    {
+        return $this->is_system || $this->code === 'superuser';
+    }
+
+    /**
+     * Determine if this role can open and manage the application settings.
+     */
+    public function canManageSettings(): bool
+    {
+        return $this->isSuperuser() || $this->can_manage_settings;
+    }
+
+    public function canViewLogs(): bool
+    {
+        return $this->isSuperuser() || $this->can_view_logs;
     }
 
     /**

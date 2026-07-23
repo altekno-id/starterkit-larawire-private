@@ -2,26 +2,35 @@
 
 return [
     'name' => 'App 2',
-    'desc' => 'Second sample application.',
+    'desc' => 'Contoh aplikasi kedua.',
     'icon' => 'apps',
 
     'mods' => [
         'dashboard' => [
             'name' => 'Dashboard',
-            'desc' => 'App summary.',
+            'desc' => 'Ringkasan app.',
             'menus' => [
                 [
                     'label' => 'Dashboard',
                     'icon' => 'layout-dashboard',
-                    'route' => 'app2.dashboard',
-                    'landing' => true,
+                    'children' => [
+                        [
+                            'label' => 'Summary 1',
+                            'route' => 'app2.dashboard',
+                            'landing' => true,
+                        ],
+                        [
+                            'label' => 'Summary 2',
+                            'route' => 'app2.dashboard.summary2',
+                        ],
+                    ],
                 ],
             ],
         ],
 
         'module1' => [
             'name' => 'Module 1',
-            'desc' => 'Sample CRUD module.',
+            'desc' => 'Contoh module CRUD.',
             'menus' => [
                 [
                     'label' => 'Module 1',

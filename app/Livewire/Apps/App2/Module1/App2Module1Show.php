@@ -20,6 +20,6 @@ class App2Module1Show extends Component
 
     public function render()
     {
-        return view('apps.app2.module1.app2-module1-show')->title('Module 1 Detail');
+        return view('apps.app2.module1.app2-module1-show')->title('Detail Module 1');
     }
 }

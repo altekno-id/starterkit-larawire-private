@@ -5,10 +5,12 @@ namespace App\Services\Starter;
 use App\Contracts\Starter\AppModInterface;
 use App\Contracts\Starter\ClientLoginInterface;
 use App\Contracts\Starter\ClientRoleInterface;
+use App\Models\Starter\AppMod;
 use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class UserManagementUserService
@@ -16,44 +18,47 @@ class UserManagementUserService
     public function __construct(
         private readonly ClientLoginInterface $clientLogins,
         private readonly ClientRoleInterface $clientRoles,
-        private readonly AppModInterface $appMods
+        private readonly AppModInterface $appMods,
     ) {}
 
-    /**
-     * @return Collection<int, ClientLogin>
-     */
+    /** @return Collection<int, ClientLogin> */
     public function users(ClientLogin $login): Collection
     {
-        return $this->clientLogins->forClient($this->client($login), [
-            'role.mods.app',
-            'role.landings.menu.mod.app',
-            'client',
-        ]);
+        return $this->clientLogins
+            ->forClient($this->client($login), ['role.mods.app', 'client'])
+            ->when(
+                ! $login->role?->isSuperuser(),
+                fn (Collection $users): Collection => $users
+                    ->reject(fn (ClientLogin $user): bool => $user->role?->isSuperuser() ?? false)
+                    ->values(),
+            );
     }
 
-    /**
-     * @return Collection<int, ClientRole>
-     */
+    /** @return Collection<int, ClientRole> */
     public function roles(ClientLogin $login): Collection
     {
-        return $this->clientRoles->forClient($this->client($login), ['mods.app']);
+        return $this->clientRoles
+            ->forClient($this->client($login), ['mods.app'])
+            ->when(
+                ! $login->role?->isSuperuser(),
+                fn (Collection $roles): Collection => $roles
+                    ->reject(fn (ClientRole $role): bool => $role->isSuperuser())
+                    ->values(),
+            );
     }
 
     public function findUser(ClientLogin $currentLogin, int $id): ClientLogin
     {
-        $login = $this->clientLogins->findForClient($this->client($currentLogin), $id, [
-            'role.mods.app',
-            'role.landings.menu.mod.app',
-            'client',
-        ]);
+        $login = $this->clientLogins->findForClient($this->client($currentLogin), $id, ['role.mods.app', 'client']);
 
         abort_unless($login instanceof ClientLogin, 404);
+        abort_if($login->role?->isSuperuser() && ! $currentLogin->role?->isSuperuser(), 404);
 
         return $login;
     }
 
     /**
-     * @param  array{name: string, email: string, client_role_id: int|string, password?: ?string}  $data
+     * @param  array{name: string, username: string, email: string, client_role_id: int|string, status: string, password?: string}  $data
      */
     public function saveUser(ClientLogin $currentLogin, ?int $userLoginId, array $data): ClientLogin
     {
@@ -61,9 +66,7 @@ class UserManagementUserService
         $role = $this->clientRoles->findForClient($client, (int) $data['client_role_id']);
 
         if (! $role instanceof ClientRole) {
-            throw ValidationException::withMessages([
-                'roleId' => 'Invalid role.',
-            ]);
+            throw ValidationException::withMessages(['userForm.role_id' => 'Role tidak valid.']);
         }
 
         $login = $userLoginId ? $this->clientLogins->findForClient($client, $userLoginId) : null;
@@ -72,54 +75,78 @@ class UserManagementUserService
             abort(404);
         }
 
-        if ($login?->is($currentLogin) && (int) $data['client_role_id'] !== $currentLogin->client_role_id) {
-            throw ValidationException::withMessages([
-                'roleId' => 'The current login role cannot be changed from this page.',
-            ]);
+        abort_if($login?->role?->isSuperuser() && ! $currentLogin->role?->isSuperuser(), 404);
+
+        if ($role->isSuperuser() && ! $login?->role?->isSuperuser()) {
+            throw ValidationException::withMessages(['userForm.role_id' => 'Role sistem Superuser tidak dapat diberikan ke akun lain.']);
+        }
+
+        if ($login?->role?->isSuperuser() && (
+            (int) $data['client_role_id'] !== $login->client_role_id || $data['status'] !== 'active'
+        )) {
+            throw ValidationException::withMessages(['userForm.status' => 'Akun Superuser harus tetap aktif dengan role sistem.']);
         }
 
         $payload = [
             'name' => trim($data['name']),
+            'username' => str($data['username'])->lower()->trim()->toString(),
             'email' => str($data['email'])->lower()->trim()->toString(),
             'client_role_id' => $role->id,
+            'status' => $data['status'],
         ];
 
-        if (filled($data['password'] ?? null)) {
-            $payload['password'] = $data['password'];
+        if (! $login instanceof ClientLogin) {
+            $payload += [
+                'password' => $data['password'] ?? Str::password(16),
+                'must_change_password' => true,
+            ];
         }
 
-        return $login instanceof ClientLogin
-            ? $this->clientLogins->update($login, $payload)
-            : $this->clientLogins->createForClient($client, $payload);
+        $actionKey = $login instanceof ClientLogin ? 'user.update' : 'user.create';
+        $actionLabel = ($login instanceof ClientLogin ? 'Mengubah user ' : 'Membuat user ').$payload['name'];
+
+        return app(AuditLogService::class)->withinAction(
+            $actionKey,
+            $actionLabel,
+            fn (): ClientLogin => $login instanceof ClientLogin
+                ? $this->clientLogins->update($login, $payload)
+                : $this->clientLogins->createForClient($client, $payload),
+        );
     }
 
-    public function deleteUser(ClientLogin $currentLogin, int $userLoginId): void
+    public function resetPassword(ClientLogin $currentLogin, int $userLoginId): string
     {
         $login = $this->findUser($currentLogin, $userLoginId);
+        $temporaryPassword = Str::password(16);
 
-        if ($login->is($currentLogin)) {
-            throw ValidationException::withMessages([
-                'user' => 'The current login account cannot be deleted.',
+        app(AuditLogService::class)->withinAction('user.reset_password', 'Reset password user '.$login->name, function () use ($login, $temporaryPassword): void {
+            $this->clientLogins->update($login, [
+                'password' => $temporaryPassword,
+                'must_change_password' => true,
+                'password_changed_at' => now(),
+                'failed_login_count' => 0,
+                'locked_until' => null,
+                'remember_token' => Str::random(60),
             ]);
-        }
+        });
 
-        $this->clientLogins->delete($login);
+        return $temporaryPassword;
     }
 
     public function appCount(): int
     {
-        return $this->appMods
-            ->all(['app'])
-            ->pluck('app_id')
-            ->filter()
-            ->unique()
-            ->count();
+        return $this->appMods->all(['app'])->pluck('app_id')->filter()->unique()->count();
+    }
+
+    /** @return Collection<int, AppMod> */
+    public function availableModules(): Collection
+    {
+        return $this->appMods->all(['app'], ['app_id', 'name']);
     }
 
     private function client(ClientLogin $login): Client
     {
         $client = $login->client;
-
         abort_unless($client instanceof Client, 403);
 
         return $client;

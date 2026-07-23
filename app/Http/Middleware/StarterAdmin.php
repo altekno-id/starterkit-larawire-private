@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 class StarterAdmin
 {
     /**
-     * Allow only the built-in admin role to access global starter management.
+     * Allow roles with the settings capability to access starter management.
      *
      * @param  Closure(Request): Response  $next
      */
@@ -18,7 +18,7 @@ class StarterAdmin
     {
         $login = $request->user();
 
-        if (! $login instanceof ClientLogin || ! $login->role?->isAdmin()) {
+        if (! $login instanceof ClientLogin || ! $login->role?->canManageSettings()) {
             abort(403);
         }
 

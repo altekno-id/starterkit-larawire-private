@@ -7,6 +7,7 @@ use App\Contracts\Starter\ClientLoginInterface;
 use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ProfileService
@@ -48,12 +49,17 @@ class ProfileService
     {
         if (! $login->password || ! Hash::check($currentPassword, $login->password)) {
             throw ValidationException::withMessages([
-                'current_password' => 'The current password is incorrect.',
+                'current_password' => 'Password saat ini tidak sesuai.',
             ]);
         }
 
         $this->clientLogins->update($login, [
             'password' => $password,
+            'must_change_password' => false,
+            'password_changed_at' => now(),
+            'failed_login_count' => 0,
+            'locked_until' => null,
+            'remember_token' => Str::random(60),
         ]);
     }
 
@@ -68,7 +74,7 @@ class ProfileService
 
     private function ensureAdmin(ClientLogin $login): void
     {
-        abort_unless($login->loadMissing('role')->role?->isAdmin(), 403);
+        abort_unless($login->loadMissing('role')->role?->canManageSettings(), 403);
     }
 
     private function nullableTrim(?string $value): ?string

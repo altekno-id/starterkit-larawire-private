@@ -17,6 +17,6 @@ class App1Module1Create extends Component
 
     public function render()
     {
-        return view('apps.app1.module1.app1-module1-create')->title('Create Module 1');
+        return view('apps.app1.module1.app1-module1-create')->title('Tambah Module 1');
     }
 }

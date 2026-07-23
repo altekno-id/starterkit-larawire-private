@@ -12,15 +12,18 @@ use Illuminate\Notifications\Notifiable;
     'client_id',
     'client_role_id',
     'name',
+    'username',
     'email',
     'email_verified_at',
     'password',
-    'google_id',
-    'google_avatar',
     'profile_photo',
+    'status',
+    'must_change_password',
+    'password_changed_at',
+    'failed_login_count',
+    'locked_until',
     'last_login_at',
     'last_login_ip',
-    'last_login_provider',
     'remember_token',
 ])]
 #[Hidden(['password', 'remember_token'])]
@@ -40,8 +43,16 @@ class ClientLogin extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'password_changed_at' => 'datetime',
+            'locked_until' => 'datetime',
+            'must_change_password' => 'boolean',
             'password' => 'hashed',
         ];
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active' && ($this->locked_until === null || $this->locked_until->isPast());
     }
 
     /**

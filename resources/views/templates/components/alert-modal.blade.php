@@ -3,10 +3,10 @@
     $type = in_array($type, ['success', 'danger'], true) ? $type : 'success';
     $id = (string) ($id ?? 'starter-'.$type.'-modal');
     $size = (string) ($size ?? 'sm');
-    $title = $title ?? ($type === 'danger' ? 'Are you sure?' : 'Completed successfully!');
-    $message = $message ?? ($type === 'danger' ? 'This action cannot be undone.' : 'The action completed successfully.');
-    $confirmText = $confirmText ?? ($type === 'danger' ? 'Confirm' : 'Done');
-    $cancelText = $cancelText ?? 'Cancel';
+    $title = $title ?? ($type === 'danger' ? 'Anda yakin?' : 'Berhasil!');
+    $message = $message ?? ($type === 'danger' ? 'Tindakan ini tidak dapat dibatalkan.' : 'Tindakan berhasil diselesaikan.');
+    $confirmText = $confirmText ?? ($type === 'danger' ? 'Konfirmasi' : 'Selesai');
+    $cancelText = $cancelText ?? 'Batal';
     $password = (bool) ($password ?? false);
     $passwordName = (string) ($passwordName ?? 'password');
     $passwordModel = $passwordModel ?? null;
@@ -14,12 +14,14 @@
     $passwordLabel = $passwordLabel ?? 'Password Login';
     $passwordPlaceholder = $passwordPlaceholder ?? 'Password login';
     $confirmAction = $confirmAction ?? null;
+    $cancelAction = $cancelAction ?? null;
     $wireSubmit = $wireSubmit ?? null;
     $formAction = $formAction ?? null;
     $formMethod = strtoupper((string) ($formMethod ?? 'POST'));
     $dismissOnConfirm = $dismissOnConfirm ?? ($type === 'success' || (! $password && ! $confirmAction));
     $dismissOnConfirm = (bool) $dismissOnConfirm;
     $closeButton = (bool) ($closeButton ?? true);
+    $visible = (bool) ($visible ?? false);
     $modalClass = trim((string) ($class ?? ''));
     $icon = $icon ?? ($type === 'danger' ? 'alert-triangle' : 'circle-check');
     $statusClass = $type === 'danger' ? 'bg-danger' : 'bg-success';
@@ -28,11 +30,11 @@
     $passwordErrorMessage = isset($errors) && $errors->has($passwordErrorKey) ? $errors->first($passwordErrorKey) : null;
 @endphp
 
-<div class="modal modal-blur fade {{ $modalClass }}" id="{{ $id }}" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal modal-blur fade {{ $visible ? 'show d-block' : '' }} {{ $modalClass }}" id="{{ $id }}" tabindex="-1" role="dialog" aria-hidden="{{ $visible ? 'false' : 'true' }}">
     <div class="modal-dialog modal-{{ $size }}" role="document">
         <div class="modal-content">
             @if ($closeButton)
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" @if ($cancelAction) wire:click="{{ $cancelAction }}" @else data-bs-dismiss="modal" @endif aria-label="Tutup"></button>
             @endif
 
             <div class="modal-status {{ $statusClass }}"></div>
@@ -85,7 +87,7 @@
                 <div class="w-100">
                     <div class="row">
                         <div class="col">
-                            <button type="button" class="btn w-100" data-bs-dismiss="modal">{{ $cancelText }}</button>
+                            <button type="button" class="btn w-100" @if ($cancelAction) wire:click="{{ $cancelAction }}" @else data-bs-dismiss="modal" @endif>{{ $cancelText }}</button>
                         </div>
                         <div class="col">
                             <button

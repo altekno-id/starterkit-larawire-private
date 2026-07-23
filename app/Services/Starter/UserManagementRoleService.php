@@ -5,7 +5,6 @@ namespace App\Services\Starter;
 use App\Contracts\Starter\AppModInterface;
 use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppMod;
-use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
 use Illuminate\Support\Collection;
@@ -26,7 +25,7 @@ class UserManagementRoleService
     public function roles(ClientLogin $login): Collection
     {
         return $this->clientRoles
-            ->forClient($this->client($login), ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins'])
+            ->all(['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins'])
             ->when(
                 ! $login->role?->isSuperuser(),
                 fn (Collection $roles): Collection => $roles
@@ -37,7 +36,7 @@ class UserManagementRoleService
 
     public function findRole(ClientLogin $login, int $id): ClientRole
     {
-        $role = $this->clientRoles->findForClient($this->client($login), $id, ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins']);
+        $role = $this->clientRoles->find($id, ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins']);
 
         abort_unless($role instanceof ClientRole, 404);
         abort_if($role->isSuperuser() && ! $login->role?->isSuperuser(), 404);
@@ -68,7 +67,6 @@ class UserManagementRoleService
      */
     public function saveRole(ClientLogin $login, ?int $roleId, array $data, array $moduleIds, array $landingMenuIds = []): ClientRole
     {
-        $client = $this->client($login);
         $code = $this->normalizeCode($data['code']);
         $moduleIds = $this->moduleIds($moduleIds);
         $landings = $this->landingMenuIds($moduleIds, $landingMenuIds);
@@ -76,9 +74,9 @@ class UserManagementRoleService
         $actionKey = $roleId ? 'role.update' : 'role.create';
         $actionLabel = ($roleId ? 'Mengubah role ' : 'Membuat role ').trim($data['name']);
 
-        return app(AuditLogService::class)->withinAction($actionKey, $actionLabel, function () use ($client, $roleId, $data, $moduleIds, $landings, $code): ClientRole {
-            return DB::transaction(function () use ($client, $roleId, $data, $moduleIds, $landings, $code): ClientRole {
-                $role = $roleId ? $this->clientRoles->findForClient($client, $roleId) : null;
+        return app(AuditLogService::class)->withinAction($actionKey, $actionLabel, function () use ($roleId, $data, $moduleIds, $landings, $code): ClientRole {
+            return DB::transaction(function () use ($roleId, $data, $moduleIds, $landings, $code): ClientRole {
+                $role = $roleId ? $this->clientRoles->find($roleId) : null;
 
                 if ($roleId && ! $role instanceof ClientRole) {
                     abort(404);
@@ -105,7 +103,7 @@ class UserManagementRoleService
 
                 $role = $role instanceof ClientRole
                     ? $this->clientRoles->update($role, $payload)
-                    : $this->clientRoles->createForClient($client, $payload);
+                    : $this->clientRoles->create($payload);
 
                 $this->clientRoles->syncMods($role, $moduleIds);
                 $this->clientRoles->syncLandings($role, $landings);
@@ -159,15 +157,6 @@ class UserManagementRoleService
                 $this->clientRoles->delete($role);
             });
         });
-    }
-
-    private function client(ClientLogin $login): Client
-    {
-        $client = $login->client;
-
-        abort_unless($client instanceof Client, 403);
-
-        return $client;
     }
 
     private function normalizeCode(string $code): string

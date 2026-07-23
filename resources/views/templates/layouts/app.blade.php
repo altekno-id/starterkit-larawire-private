@@ -5,7 +5,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="starter-auth-login-url" content="{{ \App\Support\Starter\StarterNavigation::authLoginUrl() }}">
+    <meta name="starter-lock-screen-enabled" content="{{ $lockScreenEnabled ? '1' : '0' }}">
+    <meta name="starter-lock-screen-timeout" content="{{ $lockScreenTimeoutSeconds }}">
+    <meta name="starter-lock-screen-url" content="{{ $lockScreenUrl }}">
+    <meta name="starter-session-activity-url" content="{{ $sessionActivityUrl }}">
     <title>{{ $title ?? ($currentAppName ?? config('app.name')) }} | {{ config('app.name') }}</title>
     <link rel="shortcut icon" href="{{ asset('assets/tabler/static/logo-small.svg') }}">
     <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler.min.css') }}">
@@ -273,7 +278,7 @@
     @livewireStyles
 </head>
 
-<body>
+<body data-starter-app-shell>
     <script src="{{ asset('assets/tabler/dist/js/tabler-theme.min.js') }}"></script>
 
     @php

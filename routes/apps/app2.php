@@ -17,7 +17,7 @@ Route::get('/login', function () {
 });
 
 Route::name('app2.')->group(function () {
-    Route::middleware(['auth:web', 'starter.active', 'starter.password-change'])->group(function () {
+    Route::middleware(['auth:web', 'starter.active', 'starter.password-change', 'starter.lock'])->group(function () {
         Route::get('/', function (NavigationAuthorizedRedirectService $redirects) {
             $login = auth()->user();
             $appKey = str((string) request()->route()?->getName())->before('.anchor')->toString();

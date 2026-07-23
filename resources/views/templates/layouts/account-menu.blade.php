@@ -24,6 +24,12 @@
                 Log Aktivitas
             </a>
         @endif
+        @if ($lockScreenEnabled ?? false)
+            <a href="{{ route('starter.lock-screen', ['manual' => 1]) }}" class="dropdown-item" data-starter-navigate>
+                @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'icon dropdown-item-icon'])
+                Kunci Layar
+            </a>
+        @endif
         <div class="dropdown-divider my-1"></div>
         <form method="POST" action="{{ route('auth.logout') }}" data-starter-logout-form>
             @csrf

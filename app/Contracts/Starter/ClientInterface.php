@@ -6,6 +6,8 @@ use App\Models\Starter\Client;
 
 interface ClientInterface
 {
+    public function current(): Client;
+
     /**
      * @param  array<string, mixed>  $data
      */

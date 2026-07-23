@@ -23,25 +23,21 @@ function activityLogUsers(): array
         'approved_at' => now(),
     ]);
     $superRole = ClientRole::query()->create([
-        'client_id' => $client->id,
         'code' => 'superuser',
         'name' => 'Superuser',
         'is_system' => true,
     ]);
     $viewerRole = ClientRole::query()->create([
-        'client_id' => $client->id,
         'code' => 'auditor',
         'name' => 'Auditor',
         'can_view_logs' => true,
     ]);
     $deniedRole = ClientRole::query()->create([
-        'client_id' => $client->id,
         'code' => 'operator',
         'name' => 'Operator',
     ]);
 
     $user = fn (ClientRole $role, string $name, string $username): ClientLogin => ClientLogin::query()->create([
-        'client_id' => $client->id,
         'client_role_id' => $role->id,
         'name' => $name,
         'username' => $username,
@@ -61,10 +57,9 @@ function activityLogUsers(): array
 /**
  * @param  array<string, mixed>  $overrides
  */
-function createActivityLog(Client $client, ClientLogin $actor, array $overrides = []): ActivityLog
+function createActivityLog(ClientLogin $actor, array $overrides = []): ActivityLog
 {
     return ActivityLog::query()->create(array_merge([
-        'client_id' => $client->id,
         'client_login_id' => $actor->id,
         'actor_name' => $actor->name,
         'actor_username' => $actor->username,
@@ -124,7 +119,7 @@ test('activity table groups one action and live filters update its result', func
     $users = activityLogUsers();
     $actionId = (string) Str::ulid();
 
-    createActivityLog($users['client'], $users['viewer'], [
+    createActivityLog($users['viewer'], [
         'action_id' => $actionId,
         'sequence' => 1,
         'event' => 'updated',
@@ -132,7 +127,7 @@ test('activity table groups one action and live filters update its result', func
         'action_label' => 'Mengubah mahasiswa Budi',
         'auditable_label' => 'Budi',
     ]);
-    createActivityLog($users['client'], $users['viewer'], [
+    createActivityLog($users['viewer'], [
         'action_id' => $actionId,
         'sequence' => 2,
         'event' => 'created',
@@ -140,7 +135,7 @@ test('activity table groups one action and live filters update its result', func
         'action_label' => 'Mengubah mahasiswa Budi',
         'auditable_label' => 'Riwayat Budi',
     ]);
-    createActivityLog($users['client'], $users['viewer'], [
+    createActivityLog($users['viewer'], [
         'action_label' => 'Menghapus mahasiswa Siti',
         'event' => 'deleted',
         'table_name' => 'students',
@@ -175,41 +170,21 @@ test('activity table groups one action and live filters update its result', func
         ->assertSee('Nama Baru');
 });
 
-test('logs are isolated per client and superuser identity is protected from delegated viewers', function () {
+test('superuser identity and system account changes are protected from delegated viewers', function () {
     $users = activityLogUsers();
-    $otherClient = Client::query()->create([
-        'name' => 'Other Company',
-        'account_status' => 'approved',
-        'approved_at' => now(),
-    ]);
-    $otherRole = ClientRole::query()->create([
-        'client_id' => $otherClient->id,
-        'code' => 'superuser',
-        'name' => 'Superuser',
-        'is_system' => true,
-    ]);
-    $otherActor = ClientLogin::query()->create([
-        'client_id' => $otherClient->id,
-        'client_role_id' => $otherRole->id,
-        'name' => 'Other Actor',
-        'username' => 'other',
-        'email' => 'other@example.test',
-        'password' => 'Secret12345',
-        'status' => 'active',
-    ]);
 
-    createActivityLog($users['client'], $users['superuser'], [
+    createActivityLog($users['superuser'], [
         'action_label' => 'Mengubah data perusahaan',
         'auditable_type' => Client::class,
         'auditable_id' => (string) $users['client']->id,
     ]);
-    createActivityLog($users['client'], $users['superuser'], [
+    createActivityLog($users['superuser'], [
         'action_label' => 'Mengubah akun rahasia',
         'auditable_type' => ClientLogin::class,
         'auditable_id' => (string) $users['superuser']->id,
     ]);
-    createActivityLog($otherClient, $otherActor, [
-        'action_label' => 'Aktivitas perusahaan lain',
+    createActivityLog($users['viewer'], [
+        'action_label' => 'Aktivitas auditor',
     ]);
 
     $this->actingAs($users['viewer']);
@@ -217,7 +192,7 @@ test('logs are isolated per client and superuser identity is protected from dele
     Livewire::test(ActivityLogIndex::class)
         ->assertSee('Mengubah data perusahaan')
         ->assertSee('Sistem')
+        ->assertSee('Aktivitas auditor')
         ->assertDontSee('Developer Secret')
-        ->assertDontSee('Mengubah akun rahasia')
-        ->assertDontSee('Aktivitas perusahaan lain');
+        ->assertDontSee('Mengubah akun rahasia');
 });

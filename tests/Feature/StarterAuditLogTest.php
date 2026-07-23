@@ -19,14 +19,12 @@ function auditActor(): ClientLogin
         'approved_at' => now(),
     ]);
     $role = ClientRole::query()->create([
-        'client_id' => $client->id,
         'code' => 'superuser',
         'name' => 'Superuser',
         'is_system' => true,
     ]);
 
     return ClientLogin::query()->create([
-        'client_id' => $client->id,
         'client_role_id' => $role->id,
         'name' => 'Audit Actor',
         'username' => 'audit-actor',

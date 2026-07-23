@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('starter_audit_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->nullable()->constrained('starter_clients')->nullOnDelete();
             $table->foreignId('client_login_id')->nullable()->constrained('starter_client_logins')->nullOnDelete();
             $table->string('event', 20);
             $table->string('auditable_type');
@@ -28,7 +27,6 @@ return new class extends Migration
             $table->timestamp('created_at')->useCurrent();
 
             $table->index(['auditable_type', 'auditable_id']);
-            $table->index(['client_id', 'created_at']);
             $table->index(['client_login_id', 'created_at']);
             $table->index(['event', 'created_at']);
         });

@@ -48,7 +48,7 @@ class SetupCommand extends Command
         }
 
         DB::transaction(function () use ($companyName, $email, $username, $password, $existingLogin): void {
-            $client = $existingLogin?->client ?? Client::query()->firstOrCreate([], [
+            $client = Client::query()->firstOrCreate([], [
                 'name' => $companyName,
                 'email' => $email,
                 'pic_name' => 'Developer',
@@ -61,7 +61,6 @@ class SetupCommand extends Command
             }
 
             $role = ClientRole::query()->updateOrCreate([
-                'client_id' => $client->id,
                 'code' => 'superuser',
             ], [
                 'name' => 'Superuser',
@@ -73,7 +72,6 @@ class SetupCommand extends Command
 
             $login = $existingLogin ?? new ClientLogin;
             $login->forceFill([
-                'client_id' => $client->id,
                 'client_role_id' => $role->id,
                 'name' => $login->name ?: 'Superuser',
                 'username' => $username,

@@ -24,11 +24,6 @@ class ActivityLog extends Model
         ];
     }
 
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
-
     public function login(): BelongsTo
     {
         return $this->belongsTo(ClientLogin::class, 'client_login_id');

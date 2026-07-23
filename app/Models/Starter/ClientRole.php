@@ -4,11 +4,10 @@ namespace App\Models\Starter;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['client_id', 'code', 'name', 'desc', 'is_system', 'can_manage_settings', 'can_view_logs'])]
+#[Fillable(['code', 'name', 'desc', 'is_system', 'can_manage_settings', 'can_view_logs'])]
 class ClientRole extends Model
 {
     protected $table = 'starter_client_roles';
@@ -20,14 +19,6 @@ class ClientRole extends Model
             'can_manage_settings' => 'boolean',
             'can_view_logs' => 'boolean',
         ];
-    }
-
-    /**
-     * Get the client that owns this role.
-     */
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
     }
 
     /**

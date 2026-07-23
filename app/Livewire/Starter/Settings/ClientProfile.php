@@ -5,6 +5,7 @@ namespace App\Livewire\Starter\Settings;
 use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use App\Services\Starter\ProfileService;
+use App\Services\Starter\StarterConfigService;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -49,7 +50,7 @@ class ClientProfile extends Component
             'clientForm.phone' => ['nullable', 'string', 'max:255'],
             'clientForm.pic_name' => ['nullable', 'string', 'max:255'],
             'clientForm.logo' => ['nullable', 'string', 'max:255'],
-            'clientPhotoUpload' => ['nullable', 'image', 'max:2048'],
+            'clientPhotoUpload' => ['nullable', 'image', 'max:'.app(StarterConfigService::class)->uploadImageMaxKilobytes()],
         ], [], [
             'clientForm.name' => 'client name',
             'clientForm.email' => 'client email',
@@ -125,12 +126,12 @@ class ClientProfile extends Component
 
         abort_unless($login instanceof ClientLogin && ($login->loadMissing('role')->role?->canManageSettings() ?? false), 403);
 
-        return $login->loadMissing('client');
+        return $login;
     }
 
     private function client(): Client
     {
-        $client = $this->login()->client;
+        $client = Client::query()->first();
 
         abort_unless($client instanceof Client, 403);
 

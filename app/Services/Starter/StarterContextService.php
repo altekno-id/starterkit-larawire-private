@@ -4,6 +4,7 @@ namespace App\Services\Starter;
 
 use App\Contracts\Starter\AppInterface;
 use App\Contracts\Starter\AppModInterface;
+use App\Contracts\Starter\ClientInterface;
 use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\App;
 use App\Models\Starter\AppMenu;
@@ -18,7 +19,9 @@ class StarterContextService
     public function __construct(
         private readonly AppInterface $apps,
         private readonly AppModInterface $appMods,
-        private readonly ClientRoleInterface $clientRoles
+        private readonly ClientRoleInterface $clientRoles,
+        private readonly ClientInterface $clients,
+        private readonly StarterConfigService $configs,
     ) {}
 
     /**
@@ -46,7 +49,8 @@ class StarterContextService
         $login = auth()->user();
         $login = $login instanceof ClientLogin ? $login : null;
 
-        $login?->loadMissing(['client', 'role']);
+        $login?->loadMissing('role');
+        $client = $login ? $this->clients->current() : null;
 
         $accessibleApps = $this->accessibleApps($login);
         $currentApp = $this->resolveCurrentApp($accessibleApps);
@@ -54,14 +58,20 @@ class StarterContextService
         $sidebarMods = $this->sidebarMods($login, $currentApp);
         $sidebarPayload = $this->sidebarPayload($sidebarMods);
 
+        $lockScreenEnabled = $this->configs->boolean('security.lock_screen_enabled');
+        $lockScreenTimeoutSeconds = max(
+            60,
+            min(86400, $this->configs->integer('security.lock_screen_timeout_minutes') * 60),
+        );
+
         return [
             'login' => $login,
             'loginName' => $login?->name,
             'loginEmail' => $login?->email,
             'loginAvatarUrl' => $this->avatarUrl($login),
             'loginRoleName' => $login?->role?->name,
-            'clientName' => $login?->client?->name,
-            'clientLogoUrl' => $this->clientLogoUrl($login),
+            'clientName' => $client?->name,
+            'clientLogoUrl' => $this->clientLogoUrl($client?->logo),
             'currentApp' => $currentApp,
             'currentAppKey' => $currentAppKey,
             'currentAppName' => $currentApp?->name,
@@ -72,6 +82,10 @@ class StarterContextService
             'sidebarMods' => $sidebarPayload,
             'accessibleAppCount' => $accessibleApps->count(),
             'sidebarModCount' => $sidebarMods->count(),
+            'lockScreenEnabled' => $lockScreenEnabled,
+            'lockScreenTimeoutSeconds' => $lockScreenTimeoutSeconds,
+            'lockScreenUrl' => route('starter.lock-screen'),
+            'sessionActivityUrl' => route('starter.session.activity'),
         ];
     }
 
@@ -292,9 +306,9 @@ class StarterContextService
         return asset(ltrim($photo, '/'));
     }
 
-    private function clientLogoUrl(?ClientLogin $login): ?string
+    private function clientLogoUrl(?string $logo): ?string
     {
-        $logo = trim((string) $login?->client?->logo);
+        $logo = trim((string) $logo);
 
         if ($logo === '') {
             return null;

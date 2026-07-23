@@ -6,6 +6,7 @@ use App\Models\Starter\ClientLogin;
 use App\Rules\StarterPasswordRules;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Services\Starter\ProfileService;
+use App\Services\Starter\StarterConfigService;
 use App\Services\Starter\StarterContextService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -48,7 +49,7 @@ class EditMyProfile extends Component
 
     public function mount(): void
     {
-        $login = $this->login()->loadMissing('client');
+        $login = $this->login();
         $this->activeTab = $login->must_change_password || request()->query('tab') === 'security'
             ? 'security'
             : 'account-details';
@@ -69,7 +70,7 @@ class EditMyProfile extends Component
                 Rule::unique('starter_client_logins', 'email')->ignore($login->id),
             ],
             'accountForm.profile_photo' => ['nullable', 'string', 'max:255'],
-            'profilePhotoUpload' => ['nullable', 'image', 'max:2048'],
+            'profilePhotoUpload' => ['nullable', 'image', 'max:'.app(StarterConfigService::class)->uploadImageMaxKilobytes()],
         ], [], [
             'accountForm.name' => 'display name',
             'accountForm.email' => 'email login',
@@ -96,7 +97,7 @@ class EditMyProfile extends Component
 
         $this->profilePhotoUpload = null;
         $this->profilePhotoReset = false;
-        $this->fillFromLogin($updatedLogin->loadMissing('client'));
+        $this->fillFromLogin($updatedLogin);
         $this->dispatch('starter-account-updated',
             avatarUrl: app(StarterContextService::class)->avatarUrl($updatedLogin),
             name: $updatedLogin->name,
@@ -203,7 +204,7 @@ class EditMyProfile extends Component
 
     public function render()
     {
-        $login = $this->login()->loadMissing(['client', 'role']);
+        $login = $this->login()->loadMissing('role');
 
         return view('starter.profile.edit-my-profile', [
             'login' => $login,

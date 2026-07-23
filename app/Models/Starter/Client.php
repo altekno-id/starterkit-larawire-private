@@ -4,7 +4,6 @@ namespace App\Models\Starter;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -32,21 +31,5 @@ class Client extends Model
         return [
             'approved_at' => 'datetime',
         ];
-    }
-
-    /**
-     * Get all login accounts belonging to this client.
-     */
-    public function logins(): HasMany
-    {
-        return $this->hasMany(ClientLogin::class);
-    }
-
-    /**
-     * Get all roles created by this client.
-     */
-    public function roles(): HasMany
-    {
-        return $this->hasMany(ClientRole::class);
     }
 }

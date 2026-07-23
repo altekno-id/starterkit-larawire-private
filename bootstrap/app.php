@@ -4,7 +4,9 @@ use App\Http\Middleware\StarterAdmin;
 use App\Http\Middleware\StarterAuthorize;
 use App\Http\Middleware\StarterEnsureActiveUser;
 use App\Http\Middleware\StarterForcePasswordChange;
+use App\Http\Middleware\StarterLockScreen;
 use App\Http\Middleware\StarterLogAccess;
+use App\Http\Middleware\StarterSecurityHeaders;
 use App\Models\Starter\ClientLogin;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Support\Starter\StarterNavigation;
@@ -32,12 +34,15 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(StarterSecurityHeaders::class);
+
         $middleware->alias([
             'starter.admin' => StarterAdmin::class,
             'starter.authorize' => StarterAuthorize::class,
             'starter.active' => StarterEnsureActiveUser::class,
             'starter.password-change' => StarterForcePasswordChange::class,
             'starter.logs' => StarterLogAccess::class,
+            'starter.lock' => StarterLockScreen::class,
         ]);
 
         $middleware->redirectGuestsTo(fn ($request) => StarterNavigation::authLoginUrl($request->fullUrl()));

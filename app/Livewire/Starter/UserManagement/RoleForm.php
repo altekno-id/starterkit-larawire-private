@@ -102,8 +102,6 @@ class RoleForm extends Component
             $this->roleForm['landing_menu_ids'],
         );
 
-        $clientId = $this->login()->client_id;
-
         $validated = $this->validate([
             'roleForm.code' => [
                 'required',
@@ -111,7 +109,6 @@ class RoleForm extends Component
                 'max:255',
                 'regex:/^[A-Za-z0-9_-]+$/',
                 Rule::unique('starter_client_roles', 'code')
-                    ->where(fn ($query) => $query->where('client_id', $clientId))
                     ->ignore($this->roleId),
             ],
             'roleForm.name' => ['required', 'string', 'max:255'],
@@ -228,7 +225,7 @@ class RoleForm extends Component
             403,
         );
 
-        return $login->loadMissing('client');
+        return $login;
     }
 
     private function firstValidationMessage(ValidationException $exception): string

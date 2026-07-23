@@ -16,10 +16,14 @@
             @enderror
         </div>
 
-        <label class="form-check mb-4">
-            <input type="checkbox" class="form-check-input" id="remember" wire:model="form.remember">
-            <span class="form-check-label">Ingat saya</span>
-        </label>
+        @if ($rememberMeEnabled)
+            <label class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="remember" wire:model="form.remember">
+                <span class="form-check-label">Ingat saya di perangkat ini</span>
+            </label>
+        @else
+            <div class="mb-4"></div>
+        @endif
 
         <div class="form-footer">
             <button class="btn btn-primary w-100" type="submit" wire:loading.attr="disabled">

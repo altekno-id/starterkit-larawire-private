@@ -11,6 +11,7 @@ use App\Contracts\Starter\ClientRoleInterface;
 use App\Http\Middleware\StarterAuthorize;
 use App\Http\Middleware\StarterEnsureActiveUser;
 use App\Http\Middleware\StarterForcePasswordChange;
+use App\Http\Middleware\StarterLockScreen;
 use App\Repositories\Starter\AppModRepository;
 use App\Repositories\Starter\AppRepository;
 use App\Repositories\Starter\AppRouteRepository;
@@ -76,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
         Livewire::addPersistentMiddleware([
             StarterEnsureActiveUser::class,
             StarterForcePasswordChange::class,
+            StarterLockScreen::class,
             StarterAuthorize::class,
         ]);
     }

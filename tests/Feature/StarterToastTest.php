@@ -35,14 +35,12 @@ function starterToastLogin(): ClientLogin
     ]);
 
     $role = ClientRole::query()->create([
-        'client_id' => $client->id,
         'code' => 'superuser',
         'name' => 'Superuser',
         'is_system' => true,
     ]);
 
     return ClientLogin::query()->create([
-        'client_id' => $client->id,
         'client_role_id' => $role->id,
         'name' => 'Aldhi Admin',
         'username' => 'aldhi-admin',
@@ -209,7 +207,6 @@ test('new regular user enters the assigned app before the required password form
         'is_landing_candidate' => true,
     ]);
     $role = ClientRole::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'code' => 'new_operator',
         'name' => 'New Operator',
     ]);
@@ -220,7 +217,6 @@ test('new regular user enters the assigned app before the required password form
         'app_menu_id' => $menu->id,
     ]);
     ClientLogin::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'client_role_id' => $role->id,
         'name' => 'New Operator Login',
         'username' => 'new-operator-login',
@@ -373,13 +369,11 @@ test('role and user lists paginate for larger datasets', function () {
 
     foreach (range(1, 12) as $index) {
         $role = ClientRole::query()->create([
-            'client_id' => $login->client_id,
             'code' => 'role_'.$index,
             'name' => 'Role '.str_pad((string) $index, 2, '0', STR_PAD_LEFT),
         ]);
 
         ClientLogin::query()->create([
-            'client_id' => $login->client_id,
             'client_role_id' => $role->id,
             'name' => 'User '.str_pad((string) $index, 2, '0', STR_PAD_LEFT),
             'username' => 'user-'.$index,
@@ -405,18 +399,15 @@ test('role and user lists paginate for larger datasets', function () {
 test('role list pins superuser first and hides it from non superuser logins', function () {
     $superuserLogin = starterToastLogin();
     $zuluRole = ClientRole::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'code' => 'zulu',
         'name' => 'Zulu Role',
     ]);
     $alphaRole = ClientRole::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'code' => 'alpha',
         'name' => 'Alpha Role',
         'can_manage_settings' => true,
     ]);
     $regularLogin = ClientLogin::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'client_role_id' => $alphaRole->id,
         'name' => 'Regular Admin',
         'username' => 'regular-admin',
@@ -455,7 +446,6 @@ test('role access summary opens an app and module detail modal', function () {
         'desc' => 'Read employee records.',
     ]);
     $role = ClientRole::query()->create([
-        'client_id' => $login->client_id,
         'code' => 'viewer',
         'name' => 'Viewer',
     ]);
@@ -577,13 +567,11 @@ test('global profile selects the app granted to a regular role', function () {
         'icon' => 'layout-dashboard',
     ]);
     $role = ClientRole::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'code' => 'operator',
         'name' => 'Operator',
     ]);
     $role->mods()->attach($module);
     $operator = ClientLogin::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'client_role_id' => $role->id,
         'name' => 'Operator Login',
         'username' => 'operator-context',
@@ -603,13 +591,11 @@ test('global profile selects the app granted to a regular role', function () {
 test('settings access can be delegated while system role and users stay private', function () {
     $superuserLogin = starterToastLogin();
     $managerRole = ClientRole::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'code' => 'settings_manager',
         'name' => 'Settings Manager',
         'can_manage_settings' => true,
     ]);
     $managerLogin = ClientLogin::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'client_role_id' => $managerRole->id,
         'name' => 'Settings Manager Login',
         'username' => 'settings-manager',
@@ -618,12 +604,10 @@ test('settings access can be delegated while system role and users stay private'
         'status' => 'active',
     ]);
     $operatorRole = ClientRole::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'code' => 'operator',
         'name' => 'Operator',
     ]);
     ClientLogin::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'client_role_id' => $operatorRole->id,
         'name' => 'Operator Login',
         'username' => 'operator-login',
@@ -681,14 +665,12 @@ test('user list pins the superuser account before alphabetically sorted users', 
     $superuserLogin = starterToastLogin();
     $superuserLogin->forceFill(['name' => 'Zulu Superuser'])->save();
     $regularRole = ClientRole::query()->create([
-        'client_id' => $superuserLogin->client_id,
         'code' => 'operator',
         'name' => 'Operator',
     ]);
 
     foreach (['Beta User', 'Alpha User'] as $index => $name) {
         ClientLogin::query()->create([
-            'client_id' => $superuserLogin->client_id,
             'client_role_id' => $regularRole->id,
             'name' => $name,
             'username' => 'operator-'.$index,
@@ -800,7 +782,6 @@ test('admin can update client profile from settings page', function () {
         });
 
     $this->assertDatabaseHas('starter_clients', [
-        'id' => $login->client_id,
         'name' => 'Updated Client',
         'email' => 'updated-client@example.test',
         'phone' => '08123456789',
@@ -856,7 +837,7 @@ test('client profile photo upload and reset are supported', function () {
                 && ($params['clientName'] ?? null) === 'Acme Client';
         });
 
-    $client = $login->client->fresh();
+    $client = Client::query()->firstOrFail();
     $logo = (string) $client->logo;
 
     expect($logo)->toStartWith("storage/starter/client-photos/{$client->id}/");
@@ -889,7 +870,7 @@ test('client profile photo upload and reset are supported', function () {
 test('client logo brands the sidebar and keeps arbitrary image proportions contained', function () {
     $login = starterToastLogin();
 
-    $login->client()->update([
+    Client::query()->firstOrFail()->update([
         'name' => 'Pertamina Patra Niaga',
         'logo' => 'storage/starter/client-photos/1/pertamina-wide.png',
     ]);
@@ -929,9 +910,7 @@ test('client profile settings route is visible to admin only', function () {
         ->assertSee('Simpan Profil Perusahaan');
 
     $operator = ClientLogin::query()->create([
-        'client_id' => $login->client_id,
         'client_role_id' => ClientRole::query()->create([
-            'client_id' => $login->client_id,
             'code' => 'operator',
             'name' => 'Operator',
         ])->id,
@@ -1027,7 +1006,6 @@ test('role save flashes starter toast for the redirected role list', function ()
         ->assertSeeHtml('data-message="Role berhasil disimpan."');
 
     $this->assertDatabaseHas('starter_client_roles', [
-        'client_id' => $login->client_id,
         'code' => 'operator',
         'can_manage_settings' => true,
     ]);
@@ -1165,7 +1143,6 @@ test('app anchor redirects to role default page', function () {
         'is_landing_candidate' => true,
     ]);
     $role = ClientRole::query()->create([
-        'client_id' => $login->client_id,
         'code' => 'operator',
         'name' => 'Operator',
     ]);
@@ -1221,7 +1198,6 @@ test('role users modal lists assigned users', function () {
     $login = starterToastLogin();
 
     ClientLogin::query()->create([
-        'client_id' => $login->client_id,
         'client_role_id' => $login->client_role_id,
         'name' => 'Second Admin',
         'username' => 'second-admin',
@@ -1247,14 +1223,13 @@ test('role users modal lists assigned users', function () {
 test('user management shows private account metadata and can reset password', function () {
     $login = starterToastLogin();
 
-    Client::query()->whereKey($login->client_id)->update([
+    Client::query()->firstOrFail()->update([
         'phone' => '08123456789',
         'pic_name' => 'Aldhi PIC',
         'account_status' => 'approved',
     ]);
 
     $operator = ClientLogin::query()->create([
-        'client_id' => $login->client_id,
         'client_role_id' => $login->client_role_id,
         'name' => 'Operator Login',
         'username' => 'operator-reset',
@@ -1306,7 +1281,6 @@ test('add user uses a dedicated page and previews selected role module access', 
         'desc' => 'Read employee records.',
     ]);
     $role = ClientRole::query()->create([
-        'client_id' => $login->client_id,
         'code' => 'viewer',
         'name' => 'Viewer',
     ]);
@@ -1335,7 +1309,6 @@ test('add user uses a dedicated page and previews selected role module access', 
 test('dedicated user page creates account with temporary password', function () {
     $login = starterToastLogin();
     $role = ClientRole::query()->create([
-        'client_id' => $login->client_id,
         'code' => 'operator',
         'name' => 'Operator',
     ]);
@@ -1356,7 +1329,6 @@ test('dedicated user page creates account with temporary password', function () 
         ->assertSeeHtml('data-temporary-credentials-dismiss');
 
     $this->assertDatabaseHas('starter_client_logins', [
-        'client_id' => $login->client_id,
         'client_role_id' => $role->id,
         'name' => 'New Operator',
         'username' => 'new-operator',
@@ -1368,7 +1340,6 @@ test('dedicated user page creates account with temporary password', function () 
 test('role deletion uses the shared confirmation modal', function () {
     $login = starterToastLogin();
     $role = ClientRole::query()->create([
-        'client_id' => $login->client_id,
         'code' => 'temporary',
         'name' => 'Temporary Role',
     ]);

@@ -18,14 +18,12 @@ function privateAuthLogin(array $attributes = []): ClientLogin
         'approved_at' => now(),
     ]);
     $role = ClientRole::query()->create([
-        'client_id' => $client->id,
         'code' => 'superuser',
         'name' => 'Superuser',
         'is_system' => true,
     ]);
 
     return ClientLogin::query()->create(array_merge([
-        'client_id' => $client->id,
         'client_role_id' => $role->id,
         'name' => 'Developer',
         'username' => 'superuser',

@@ -30,9 +30,9 @@ return new class extends Migration
             $table->string('source', 20)->default('web')->after('user_agent');
 
             $table->index(['action_id', 'sequence'], 'starter_logs_action_sequence_index');
-            $table->index(['client_id', 'action_key', 'created_at'], 'starter_logs_client_action_created_index');
-            $table->index(['client_id', 'table_name', 'created_at'], 'starter_logs_client_table_created_index');
-            $table->index(['client_id', 'app_key', 'created_at'], 'starter_logs_client_app_created_index');
+            $table->index(['action_key', 'created_at'], 'starter_logs_action_created_index');
+            $table->index(['table_name', 'created_at'], 'starter_logs_table_created_index');
+            $table->index(['app_key', 'created_at'], 'starter_logs_app_created_index');
         });
 
         Schema::table('starter_logs', function (Blueprint $table) {
@@ -59,9 +59,9 @@ return new class extends Migration
 
         Schema::table('starter_logs', function (Blueprint $table) {
             $table->dropIndex('starter_logs_action_sequence_index');
-            $table->dropIndex('starter_logs_client_action_created_index');
-            $table->dropIndex('starter_logs_client_table_created_index');
-            $table->dropIndex('starter_logs_client_app_created_index');
+            $table->dropIndex('starter_logs_action_created_index');
+            $table->dropIndex('starter_logs_table_created_index');
+            $table->dropIndex('starter_logs_app_created_index');
             $table->dropColumn([
                 'action_id',
                 'request_id',

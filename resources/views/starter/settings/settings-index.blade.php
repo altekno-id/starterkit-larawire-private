@@ -15,6 +15,11 @@
             'description' => 'Perbarui identitas dan kontak perusahaan.',
             'icon' => 'building',
         ],
+        'security' => [
+            'label' => 'Keamanan Sistem',
+            'description' => 'Atur login, lock screen, dan batas upload.',
+            'icon' => 'shield-check',
+        ],
     ];
     $activeSection = $sections[$section];
 @endphp
@@ -148,8 +153,10 @@
                         <livewire:starter.user-management.roles :embedded="true" key="settings-roles" />
                     @elseif ($section === 'users')
                         <livewire:starter.user-management.users :embedded="true" key="settings-users" />
-                    @else
+                    @elseif ($section === 'company')
                         <livewire:starter.settings.client-profile :embedded="true" key="settings-company" />
+                    @else
+                        <livewire:starter.settings.security-settings key="settings-security" />
                     @endif
                 </div>
             </div>

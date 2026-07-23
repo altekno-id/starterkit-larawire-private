@@ -183,6 +183,6 @@ class Roles extends Component
             403,
         );
 
-        return $login->loadMissing('client');
+        return $login;
     }
 }

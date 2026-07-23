@@ -5,6 +5,7 @@ namespace App\Livewire\Starter\Settings;
 use App\Models\Starter\App as StarterApp;
 use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
+use App\Models\Starter\ClientRole;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -18,7 +19,7 @@ class SettingsIndex extends Component
     public function mount(): void
     {
         $section = (string) request()->query('section', 'roles');
-        $this->section = in_array($section, ['roles', 'users', 'company'], true) ? $section : 'roles';
+        $this->section = in_array($section, ['roles', 'users', 'company', 'security'], true) ? $section : 'roles';
     }
 
     public function render()
@@ -30,12 +31,12 @@ class SettingsIndex extends Component
             403,
         );
 
-        $client = $login->loadMissing('client')->client;
+        $client = Client::query()->first();
         abort_unless($client instanceof Client, 403);
 
         $canSeeSystemAccounts = $login->role?->isSuperuser() ?? false;
-        $roleCountQuery = $client->roles();
-        $userCountQuery = $client->logins();
+        $roleCountQuery = ClientRole::query();
+        $userCountQuery = ClientLogin::query();
 
         if (! $canSeeSystemAccounts) {
             $roleCountQuery->where('is_system', false)->where('code', '!=', 'superuser');

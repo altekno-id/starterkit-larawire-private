@@ -194,7 +194,6 @@ class AuditLogService
         $action = $this->action($event, $auditableType, $actionLabel);
 
         DB::table('starter_logs')->insert([
-            'client_id' => $login->client_id,
             'client_login_id' => $login->getKey(),
             'actor_name' => $login->name,
             'actor_username' => $login->username,

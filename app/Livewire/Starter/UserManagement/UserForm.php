@@ -47,7 +47,6 @@ class UserForm extends Component
 
     public function save(): void
     {
-        $clientId = $this->login()->client_id;
         $validated = $this->validate([
             'userForm.name' => ['required', 'string', 'max:255'],
             'userForm.username' => [
@@ -60,7 +59,7 @@ class UserForm extends Component
             ],
             'userForm.role_id' => [
                 'required', 'integer',
-                Rule::exists('starter_client_roles', 'id')->where(fn ($query) => $query->where('client_id', $clientId)),
+                Rule::exists('starter_client_roles', 'id'),
             ],
             'userForm.status' => ['required', Rule::in(['active', 'inactive', 'locked'])],
         ])['userForm'];
@@ -120,6 +119,6 @@ class UserForm extends Component
             403,
         );
 
-        return $login->loadMissing('client');
+        return $login;
     }
 }

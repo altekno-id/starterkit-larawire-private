@@ -9,7 +9,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable([
-    'client_id',
     'client_role_id',
     'name',
     'username',
@@ -53,14 +52,6 @@ class ClientLogin extends Authenticatable
     public function isActive(): bool
     {
         return $this->status === 'active' && ($this->locked_until === null || $this->locked_until->isPast());
-    }
-
-    /**
-     * Get the client that owns this login account.
-     */
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
     }
 
     /**

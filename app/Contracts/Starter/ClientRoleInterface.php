@@ -2,7 +2,6 @@
 
 namespace App\Contracts\Starter;
 
-use App\Models\Starter\Client;
 use App\Models\Starter\AppMenu;
 use App\Models\Starter\ClientRole;
 use Illuminate\Support\Collection;
@@ -14,18 +13,18 @@ interface ClientRoleInterface
      * @param  array<int, string>  $withCount
      * @return Collection<int, ClientRole>
      */
-    public function forClient(Client $client, array $with = [], array $withCount = [], string $orderBy = 'name'): Collection;
+    public function all(array $with = [], array $withCount = [], string $orderBy = 'name'): Collection;
 
     /**
      * @param  array<int, string>  $with
      * @param  array<int, string>  $withCount
      */
-    public function findForClient(Client $client, int $id, array $with = [], array $withCount = []): ?ClientRole;
+    public function find(int $id, array $with = [], array $withCount = []): ?ClientRole;
 
     /**
      * @param  array<string, mixed>  $data
      */
-    public function createForClient(Client $client, array $data): ClientRole;
+    public function create(array $data): ClientRole;
 
     /**
      * @param  array<string, mixed>  $data

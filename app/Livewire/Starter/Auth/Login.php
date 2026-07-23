@@ -3,6 +3,7 @@
 namespace App\Livewire\Starter\Auth;
 
 use App\Services\Starter\AuthLoginService;
+use App\Services\Starter\StarterConfigService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -49,6 +50,8 @@ class Login extends Component
 
     public function render()
     {
-        return view('starter.auth.login');
+        return view('starter.auth.login', [
+            'rememberMeEnabled' => app(StarterConfigService::class)->boolean('security.remember_me_enabled'),
+        ]);
     }
 }

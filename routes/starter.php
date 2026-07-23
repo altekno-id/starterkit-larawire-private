@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Starter\Auth\TouchSessionActivityController;
+use App\Livewire\Starter\Auth\LockScreen;
 use App\Livewire\Starter\Logs\ActivityLogIndex;
 use App\Livewire\Starter\Profile\EditMyProfile;
 use App\Livewire\Starter\Settings\SettingsIndex;
@@ -7,8 +9,16 @@ use App\Livewire\Starter\UserManagement\RoleForm;
 use App\Livewire\Starter\UserManagement\UserForm;
 use Illuminate\Support\Facades\Route;
 
+Route::name('starter.')->middleware(['auth:web', 'starter.active'])->group(function (): void {
+    Route::livewire('/lock-screen', LockScreen::class)->name('lock-screen');
+
+    Route::post('/session/activity', TouchSessionActivityController::class)
+        ->middleware('starter.password-change')
+        ->name('session.activity');
+});
+
 Route::name('starter.')
-    ->middleware(['auth:web', 'starter.active', 'starter.password-change'])
+    ->middleware(['auth:web', 'starter.active', 'starter.password-change', 'starter.lock'])
     ->group(function (): void {
         Route::livewire('/profile/edit', EditMyProfile::class)->name('profile.edit');
 

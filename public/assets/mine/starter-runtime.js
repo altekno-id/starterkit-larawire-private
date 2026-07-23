@@ -434,6 +434,150 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
             this.toast(payload);
         });
     },
+    autoLockConfig() {
+        const enabled = document.querySelector('meta[name="starter-lock-screen-enabled"]')?.content === '1';
+        const timeoutSeconds = Number(document.querySelector('meta[name="starter-lock-screen-timeout"]')?.content || 0);
+        const lockUrl = document.querySelector('meta[name="starter-lock-screen-url"]')?.content;
+        const activityUrl = document.querySelector('meta[name="starter-session-activity-url"]')?.content;
+
+        if (! document.body?.hasAttribute('data-starter-app-shell') || ! enabled || timeoutSeconds < 60 || ! lockUrl) {
+            return null;
+        }
+
+        return {
+            activityUrl,
+            lockUrl,
+            timeoutMilliseconds: Math.min(timeoutSeconds, 86400) * 1000,
+        };
+    },
+    configureAutoLock() {
+        clearTimeout(this.autoLockTimer);
+        this.autoLockConfigValue = this.autoLockConfig();
+        this.autoLocking = false;
+
+        if (! this.autoLockConfigValue) {
+            return;
+        }
+
+        this.lastBrowserActivityAt = Date.now();
+        this.lastSessionTouchAt ??= Date.now();
+        this.scheduleAutoLock();
+        this.bindAutoLockActivity();
+    },
+    scheduleAutoLock() {
+        clearTimeout(this.autoLockTimer);
+
+        if (! this.autoLockConfigValue || document.hidden) {
+            return;
+        }
+
+        const elapsed = Date.now() - this.lastBrowserActivityAt;
+        const remaining = this.autoLockConfigValue.timeoutMilliseconds - elapsed;
+
+        if (remaining <= 0) {
+            this.performAutoLock();
+            return;
+        }
+
+        this.autoLockTimer = setTimeout(
+            () => this.performAutoLock(),
+            remaining,
+        );
+    },
+    bindAutoLockActivity() {
+        if (this.autoLockActivityBound) {
+            return;
+        }
+
+        ['keydown', 'pointerdown', 'touchstart', 'scroll'].forEach((eventName) => {
+            document.addEventListener(eventName, () => this.recordBrowserActivity(), {
+                capture: true,
+                passive: true,
+            });
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearTimeout(this.autoLockTimer);
+                return;
+            }
+
+            const elapsed = Date.now() - this.lastBrowserActivityAt;
+
+            if (this.autoLockConfigValue && elapsed >= this.autoLockConfigValue.timeoutMilliseconds) {
+                this.performAutoLock();
+                return;
+            }
+
+            this.recordBrowserActivity(true);
+        });
+
+        this.autoLockActivityBound = true;
+    },
+    recordBrowserActivity(forceTouch = false) {
+        if (! this.autoLockConfigValue || this.autoLocking) {
+            return;
+        }
+
+        this.lastBrowserActivityAt = Date.now();
+        this.scheduleAutoLock();
+
+        const now = Date.now();
+
+        if (! forceTouch && now - this.lastSessionTouchAt < 60000) {
+            return;
+        }
+
+        this.lastSessionTouchAt = now;
+        this.touchSessionActivity();
+    },
+    async touchSessionActivity() {
+        const activityUrl = this.autoLockConfigValue?.activityUrl;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        if (! activityUrl || ! csrfToken || this.autoLockTouching) {
+            return;
+        }
+
+        this.autoLockTouching = true;
+
+        try {
+            const response = await fetch(activityUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (response.status === 423) {
+                this.performAutoLock();
+                return;
+            }
+
+            if ([401, 419].includes(response.status) || response.redirected) {
+                window.location.assign(response.redirected ? response.url : this.authLoginUrl());
+            }
+        } catch (error) {
+            this.lastSessionTouchAt = 0;
+        } finally {
+            this.autoLockTouching = false;
+        }
+    },
+    performAutoLock() {
+        if (! this.autoLockConfigValue || this.autoLocking) {
+            return;
+        }
+
+        this.autoLocking = true;
+        clearTimeout(this.autoLockTimer);
+
+        const lockUrl = new URL(this.autoLockConfigValue.lockUrl, window.location.href);
+        lockUrl.searchParams.set('redirect', window.location.href);
+        this.navigate(lockUrl.href);
+    },
     bind() {
         if (this.bound) return;
 
@@ -579,6 +723,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         this.prepareDropdowns();
         this.prepareClientBranding();
         this.consumeFlashToasts();
+        this.configureAutoLock();
     },
 });
 

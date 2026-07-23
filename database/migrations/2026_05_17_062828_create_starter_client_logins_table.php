@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Starter\Client;
 use App\Models\Starter\ClientRole;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -26,11 +25,8 @@ return new class extends Migration
             $table->string('last_login_ip', 45)->nullable();
             $table->string('last_login_provider', 20)->nullable();
             $table->rememberToken();
-            $table->foreignIdFor(Client::class)->constrained('starter_clients')->cascadeOnDelete();
             $table->foreignIdFor(ClientRole::class)->constrained('starter_client_roles')->restrictOnDelete();
             $table->timestamps();
-
-            $table->index(['client_id', 'client_role_id']);
         });
     }
 

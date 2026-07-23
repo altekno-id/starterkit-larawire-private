@@ -3,7 +3,6 @@
 namespace App\Repositories\Starter;
 
 use App\Contracts\Starter\ClientLoginInterface;
-use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use Illuminate\Support\Collection;
 
@@ -17,27 +16,25 @@ class ClientLoginRepository implements ClientLoginInterface
             ->first();
     }
 
-    public function forClient(Client $client, array $with = [], string $orderBy = 'name'): Collection
+    public function all(array $with = [], string $orderBy = 'name'): Collection
     {
         return ClientLogin::query()
             ->with($with)
-            ->whereBelongsTo($client)
             ->orderBy($orderBy)
             ->get();
     }
 
-    public function findForClient(Client $client, int $id, array $with = []): ?ClientLogin
+    public function find(int $id, array $with = []): ?ClientLogin
     {
         return ClientLogin::query()
             ->with($with)
-            ->whereBelongsTo($client)
             ->whereKey($id)
             ->first();
     }
 
-    public function createForClient(Client $client, array $data): ClientLogin
+    public function create(array $data): ClientLogin
     {
-        return $client->logins()->create($data);
+        return ClientLogin::query()->create($data);
     }
 
     public function update(ClientLogin $login, array $data): ClientLogin

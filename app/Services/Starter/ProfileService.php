@@ -36,7 +36,7 @@ class ProfileService
     {
         $this->ensureAdmin($login);
 
-        return $this->clients->update($this->client($login), [
+        return $this->clients->update($this->clients->current(), [
             'name' => trim($data['name']),
             'email' => $this->nullableTrim($data['email'] ?? null),
             'phone' => $this->nullableTrim($data['phone'] ?? null),
@@ -61,15 +61,6 @@ class ProfileService
             'locked_until' => null,
             'remember_token' => Str::random(60),
         ]);
-    }
-
-    private function client(ClientLogin $login): Client
-    {
-        $client = $login->client;
-
-        abort_unless($client instanceof Client, 403);
-
-        return $client;
     }
 
     private function ensureAdmin(ClientLogin $login): void

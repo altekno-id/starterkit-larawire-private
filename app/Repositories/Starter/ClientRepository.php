@@ -7,6 +7,11 @@ use App\Models\Starter\Client;
 
 class ClientRepository implements ClientInterface
 {
+    public function current(): Client
+    {
+        return Client::query()->firstOrFail();
+    }
+
     public function update(Client $client, array $data): Client
     {
         $client->forceFill($data)->save();

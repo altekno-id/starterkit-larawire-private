@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="starter-auth-login-url" content="{{ \App\Support\Starter\StarterNavigation::authLoginUrl() }}">
     <title>{{ $title ?? 'Login' }} | {{ config('app.name') }}</title>
     <link rel="shortcut icon" href="{{ asset('assets/tabler/static/logo-small.svg') }}">
@@ -110,18 +111,24 @@
                             <a href="{{ url('/') }}" class="text-decoration-none" wire:navigate>
                                 <span class="starter-auth-mark">{{ str(config('app.name'))->substr(0, 1)->upper() }}</span>
                             </a>
-                            <div class="mt-3">
-                                <a href="{{ route('landing') }}" class="link-secondary d-inline-flex align-items-center gap-1" wire:navigate>
-                                    @include('templates.layouts.icon', ['name' => 'arrow-left', 'class' => 'icon-sm'])
-                                    Kembali ke landing page
-                                </a>
-                            </div>
+                            @if (($title ?? null) !== 'Layar Dikunci')
+                                <div class="mt-3">
+                                    <a href="{{ route('landing') }}" class="link-secondary d-inline-flex align-items-center gap-1" wire:navigate>
+                                        @include('templates.layouts.icon', ['name' => 'arrow-left', 'class' => 'icon-sm'])
+                                        Kembali ke landing page
+                                    </a>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="card card-md">
                             <div class="card-body">
                                 <h2 class="h2 text-center mb-2">{{ $title ?? 'Login' }}</h2>
-                                <p class="text-secondary text-center mb-4">Masukkan username dan password untuk melanjutkan.</p>
+                                <p class="text-secondary text-center mb-4">
+                                    {{ ($title ?? null) === 'Layar Dikunci'
+                                        ? 'Aplikasi dikunci untuk melindungi sesi Anda.'
+                                        : 'Masukkan username dan password untuk melanjutkan.' }}
+                                </p>
                                 @if (session('starter-auth-message'))
                                     <div class="alert alert-warning" role="alert">
                                         {{ session('starter-auth-message') }}

@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Starter\Client;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,10 +16,9 @@ return new class extends Migration
             $table->string('code');
             $table->string('name');
             $table->text('desc')->nullable();
-            $table->foreignIdFor(Client::class)->constrained('starter_clients')->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['client_id', 'code']);
+            $table->unique('code');
         });
     }
 

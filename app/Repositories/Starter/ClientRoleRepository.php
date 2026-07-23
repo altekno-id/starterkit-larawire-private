@@ -4,36 +4,33 @@ namespace App\Repositories\Starter;
 
 use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppMenu;
-use App\Models\Starter\Client;
 use App\Models\Starter\ClientRole;
 use App\Models\Starter\ClientRoleAppLanding;
 use Illuminate\Support\Collection;
 
 class ClientRoleRepository implements ClientRoleInterface
 {
-    public function forClient(Client $client, array $with = [], array $withCount = [], string $orderBy = 'name'): Collection
+    public function all(array $with = [], array $withCount = [], string $orderBy = 'name'): Collection
     {
         return ClientRole::query()
             ->with($with)
             ->withCount($withCount)
-            ->whereBelongsTo($client)
             ->orderBy($orderBy)
             ->get();
     }
 
-    public function findForClient(Client $client, int $id, array $with = [], array $withCount = []): ?ClientRole
+    public function find(int $id, array $with = [], array $withCount = []): ?ClientRole
     {
         return ClientRole::query()
             ->with($with)
             ->withCount($withCount)
-            ->whereBelongsTo($client)
             ->whereKey($id)
             ->first();
     }
 
-    public function createForClient(Client $client, array $data): ClientRole
+    public function create(array $data): ClientRole
     {
-        return $client->roles()->create($data);
+        return ClientRole::query()->create($data);
     }
 
     public function update(ClientRole $role, array $data): ClientRole

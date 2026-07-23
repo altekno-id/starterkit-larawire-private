@@ -185,7 +185,6 @@ class ActivityLogIndex extends Component
         $base = $this->viewerQuery();
         $actors = ClientLogin::query()
             ->with('role')
-            ->where('client_id', $login->client_id)
             ->when(! $login->role?->isSuperuser(), fn (Builder $query): Builder => $query->whereHas('role', fn (Builder $roleQuery): Builder => $roleQuery->where('is_system', false)))
             ->orderBy('name')
             ->get(['id', 'client_role_id', 'name', 'username']);
@@ -250,14 +249,13 @@ class ActivityLogIndex extends Component
     private function viewerQuery(): Builder
     {
         $login = $this->login();
-        $query = ActivityLog::query()->where('client_id', $login->client_id);
+        $query = ActivityLog::query();
 
         if ($login->role?->isSuperuser()) {
             return $query;
         }
 
         $protectedRoleIds = ClientRole::query()
-            ->where('client_id', $login->client_id)
             ->where(function (Builder $roleQuery): void {
                 $roleQuery->where('is_system', true)->orWhere('code', 'superuser');
             })
@@ -265,7 +263,6 @@ class ActivityLogIndex extends Component
             ->map(fn (int|string $id): string => (string) $id)
             ->all();
         $protectedUserIds = ClientLogin::query()
-            ->where('client_id', $login->client_id)
             ->whereIn('client_role_id', $protectedRoleIds)
             ->pluck('id')
             ->map(fn (int|string $id): string => (string) $id)

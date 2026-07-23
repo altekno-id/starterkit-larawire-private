@@ -6,7 +6,6 @@ use App\Contracts\Starter\AppModInterface;
 use App\Contracts\Starter\ClientLoginInterface;
 use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppMod;
-use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
 use Illuminate\Support\Collection;
@@ -25,7 +24,7 @@ class UserManagementUserService
     public function users(ClientLogin $login): Collection
     {
         return $this->clientLogins
-            ->forClient($this->client($login), ['role.mods.app', 'client'])
+            ->all(['role.mods.app'])
             ->when(
                 ! $login->role?->isSuperuser(),
                 fn (Collection $users): Collection => $users
@@ -38,7 +37,7 @@ class UserManagementUserService
     public function roles(ClientLogin $login): Collection
     {
         return $this->clientRoles
-            ->forClient($this->client($login), ['mods.app'])
+            ->all(['mods.app'])
             ->when(
                 ! $login->role?->isSuperuser(),
                 fn (Collection $roles): Collection => $roles
@@ -49,7 +48,7 @@ class UserManagementUserService
 
     public function findUser(ClientLogin $currentLogin, int $id): ClientLogin
     {
-        $login = $this->clientLogins->findForClient($this->client($currentLogin), $id, ['role.mods.app', 'client']);
+        $login = $this->clientLogins->find($id, ['role.mods.app']);
 
         abort_unless($login instanceof ClientLogin, 404);
         abort_if($login->role?->isSuperuser() && ! $currentLogin->role?->isSuperuser(), 404);
@@ -62,14 +61,13 @@ class UserManagementUserService
      */
     public function saveUser(ClientLogin $currentLogin, ?int $userLoginId, array $data): ClientLogin
     {
-        $client = $this->client($currentLogin);
-        $role = $this->clientRoles->findForClient($client, (int) $data['client_role_id']);
+        $role = $this->clientRoles->find((int) $data['client_role_id']);
 
         if (! $role instanceof ClientRole) {
             throw ValidationException::withMessages(['userForm.role_id' => 'Role tidak valid.']);
         }
 
-        $login = $userLoginId ? $this->clientLogins->findForClient($client, $userLoginId) : null;
+        $login = $userLoginId ? $this->clientLogins->find($userLoginId) : null;
 
         if ($userLoginId && ! $login instanceof ClientLogin) {
             abort(404);
@@ -110,7 +108,7 @@ class UserManagementUserService
             $actionLabel,
             fn (): ClientLogin => $login instanceof ClientLogin
                 ? $this->clientLogins->update($login, $payload)
-                : $this->clientLogins->createForClient($client, $payload),
+                : $this->clientLogins->create($payload),
         );
     }
 
@@ -142,13 +140,5 @@ class UserManagementUserService
     public function availableModules(): Collection
     {
         return $this->appMods->all(['app'], ['app_id', 'name']);
-    }
-
-    private function client(ClientLogin $login): Client
-    {
-        $client = $login->client;
-        abort_unless($client instanceof Client, 403);
-
-        return $client;
     }
 }

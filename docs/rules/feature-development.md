@@ -1,6 +1,15 @@
 # Menambah atau Mengubah Feature
 
-Gunakan checklist ini setelah issue plan disetujui.
+Gunakan checklist ini untuk setiap feature non-trivial pada project yang dibangun dari starterkit.
+
+## 0. Discovery berbasis bukti
+
+- Telusuri entry point, route, menu/module, Livewire/controller, service, model, migration, config, dan test existing yang berhubungan.
+- Periksa schema dan arti data existing sebelum merancang migration atau mengubah validation.
+- Catat requirement terkonfirmasi, kondisi existing, proposal, dan pertanyaan terbuka secara terpisah dalam issue.
+- Jangan mengasumsikan status, role, approval, nomor dokumen, ownership data, integrasi, atau failure behavior yang tidak dinyatakan user dan tidak ditemukan di project.
+- Tetapkan scope in/out, acceptance criteria, authorization, dampak data, audit log, dan rollback sebelum implementasi.
+- Bila user meminta langsung eksekusi, discovery dan issue tetap dibuat, lalu implementasi dapat dilanjutkan tanpa menunggu kecuali ada keputusan material yang belum jelas.
 
 ## 1. Tentukan ownership
 
@@ -12,6 +21,7 @@ Gunakan checklist ini setelah issue plan disetujui.
 ## 2. Persistence dan business flow
 
 - Buat migration/model/factory dengan Artisan bila ada tabel baru.
+- Ikuti seluruh aturan migration production-safe pada `code-style.md`; gunakan expand → backfill → contract untuk perubahan constraint/tipe yang berisiko.
 - Gunakan nama tabel bisnis yang jelas; prefix `starter_` hanya untuk infrastruktur starterkit.
 - Letakkan validasi dan authorization pada boundary action.
 - Letakkan flow lintas model dalam service dan `DB::transaction()`.
@@ -81,6 +91,6 @@ Dry run wajib diperiksa sebelum apply. Sync dapat menghapus metadata yang tidak 
 - Test business flow dan authorization.
 - Test Livewire action/validation.
 - Test route terdaftar dan route terlarang menghasilkan 403.
-- Test audit log create/update/delete.
+- Test audit log create/update/delete atau security event yang relevan.
 - Jalankan Pint dan test sesuai `testing.md`.
 - Bila UI berubah, lakukan pengujian browser pada ukuran desktop dan mobile yang relevan.

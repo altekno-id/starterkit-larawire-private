@@ -14,7 +14,8 @@ class ProfileService
 {
     public function __construct(
         private readonly ClientInterface $clients,
-        private readonly ClientLoginInterface $clientLogins
+        private readonly ClientLoginInterface $clientLogins,
+        private readonly AuditLogService $auditLogs,
     ) {}
 
     /**
@@ -48,6 +49,14 @@ class ProfileService
     public function changePassword(ClientLogin $login, string $currentPassword, string $password): void
     {
         if (! $login->password || ! Hash::check($currentPassword, $login->password)) {
+            $this->auditLogs->recordSecurityEvent(
+                'auth.password_change_failed',
+                'Perubahan password gagal',
+                target: $login,
+                actor: $login,
+                metadata: ['reason' => 'invalid_current_password'],
+            );
+
             throw ValidationException::withMessages([
                 'current_password' => 'Password saat ini tidak sesuai.',
             ]);
@@ -61,6 +70,13 @@ class ProfileService
             'locked_until' => null,
             'remember_token' => Str::random(60),
         ]);
+
+        $this->auditLogs->recordSecurityEvent(
+            'auth.password_changed',
+            'Password berhasil diubah',
+            target: $login,
+            actor: $login,
+        );
     }
 
     private function ensureAdmin(ClientLogin $login): void

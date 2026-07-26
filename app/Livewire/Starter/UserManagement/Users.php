@@ -48,7 +48,7 @@ class Users extends Component
 
     public function preparePasswordReset(int $id): void
     {
-        $login = $this->users()->findUser($this->login(), $id);
+        $login = $this->users()->findPasswordResetTarget($this->login(), $id);
         $this->passwordResetUserId = $login->id;
         $this->passwordResetUserName = $login->name;
         $this->passwordResetModalOpen = true;
@@ -67,7 +67,7 @@ class Users extends Component
             return;
         }
 
-        $login = $this->users()->findUser($this->login(), $this->passwordResetUserId);
+        $login = $this->users()->findPasswordResetTarget($this->login(), $this->passwordResetUserId);
         $this->showTemporaryPassword($login, $this->users()->resetPassword($this->login(), $login->id));
         $this->passwordResetUserId = null;
         $this->passwordResetUserName = '';

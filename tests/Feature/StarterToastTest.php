@@ -18,6 +18,7 @@ use App\Models\Starter\ClientRoleAppLanding;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -40,7 +41,7 @@ function starterToastLogin(): ClientLogin
         'is_system' => true,
     ]);
 
-    return ClientLogin::query()->create([
+    $login = ClientLogin::query()->create([
         'client_role_id' => $role->id,
         'name' => 'Aldhi Admin',
         'username' => 'aldhi-admin',
@@ -48,17 +49,21 @@ function starterToastLogin(): ClientLogin
         'password' => 'Secret12345',
         'status' => 'active',
     ]);
+
+    session(['auth.password_confirmed_at' => now()->timestamp]);
+
+    return $login;
 }
 
 test('profile update dispatches starter toast', function () {
     $login = starterToastLogin();
+    $login->forceFill(['profile_photo' => 'assets/mine/avatar.png'])->save();
 
     $this->actingAs($login);
 
     Livewire::test(EditMyProfile::class)
         ->set('accountForm.name', 'Aldhi Updated')
         ->set('accountForm.email', 'aldhi.updated@example.test')
-        ->set('accountForm.profile_photo', 'assets/mine/avatar.png')
         ->call('saveAccount')
         ->assertDispatched('starter-toast', function (string $event, array $params): bool {
             return $event === 'starter-toast'
@@ -132,6 +137,16 @@ test('profile password change keeps security tab active and validates credential
         ->call('showTab', 'security')
         ->assertSet('activeTab', 'security')
         ->assertSeeHtml('id="security" class="tab-pane fade show active"')
+        ->call('changePassword')
+        ->assertHasErrors([
+            'passwordForm.current_password',
+            'passwordForm.password',
+            'passwordForm.password_confirmation',
+        ])
+        ->assertSee('Password saat ini wajib diisi.')
+        ->assertSee('Password baru wajib diisi.')
+        ->assertSee('Konfirmasi password wajib diisi.')
+        ->assertDontSee('Current password wajib diisi.')
         ->set('passwordForm.current_password', 'WrongPassword123')
         ->set('passwordForm.password', 'ChangedPassword123')
         ->set('passwordForm.password_confirmation', 'ChangedPassword123')
@@ -160,6 +175,17 @@ test('profile password change keeps security tab active and validates credential
 
     expect(Hash::check('ChangedPassword123', $login->fresh()->password))->toBeTrue()
         ->and(Hash::check('Secret12345', $login->fresh()->password))->toBeFalse();
+
+    $this->assertDatabaseHas('starter_logs', [
+        'action_key' => 'auth.password_change_failed',
+        'event' => 'security',
+        'auditable_id' => (string) $login->id,
+    ]);
+    $this->assertDatabaseHas('starter_logs', [
+        'action_key' => 'auth.password_changed',
+        'event' => 'security',
+        'auditable_id' => (string) $login->id,
+    ]);
 });
 
 test('required password change returns the user to an authorized app', function () {
@@ -233,8 +259,10 @@ test('new regular user enters the assigned app before the required password form
         ->assertHasNoErrors()
         ->assertRedirect(route('app1.dashboard'));
 
+    $scheme = parse_url((string) config('app.url'), PHP_URL_SCHEME) ?: 'http';
+
     $this->get(route('app1.dashboard'))
-        ->assertRedirect('http://app1.'.config('app.domain').'/profile/edit?tab=security');
+        ->assertRedirect($scheme.'://app1.'.config('app.domain').'/profile/edit?tab=security');
 });
 
 test('application layout remains fluid through full hd width', function () {
@@ -751,6 +779,7 @@ test('profile route stays on current app subdomain', function () {
 
 test('admin can update client profile from settings page', function () {
     $login = starterToastLogin();
+    Client::query()->firstOrFail()->forceFill(['logo' => 'assets/mine/client-logo.png'])->save();
 
     $this->actingAs($login);
 
@@ -767,7 +796,6 @@ test('admin can update client profile from settings page', function () {
         ->set('clientForm.email', 'updated-client@example.test')
         ->set('clientForm.phone', '08123456789')
         ->set('clientForm.pic_name', 'Aldhi PIC')
-        ->set('clientForm.logo', 'assets/mine/client-logo.png')
         ->call('save')
         ->assertHasNoErrors()
         ->assertDispatched('starter-client-branding-updated', function (string $event, array $params): bool {
@@ -1220,8 +1248,40 @@ test('role users modal lists assigned users', function () {
         ->assertSee('second-admin@example.test');
 });
 
+test('superuser password reset is unavailable from user management', function () {
+    $login = starterToastLogin();
+    $operatorRole = ClientRole::query()->create([
+        'code' => 'operator_resettable',
+        'name' => 'Operator Resettable',
+    ]);
+    $operator = ClientLogin::query()->create([
+        'client_role_id' => $operatorRole->id,
+        'name' => 'Operator Resettable',
+        'username' => 'operator-resettable',
+        'email' => 'operator-resettable@example.test',
+        'password' => 'Secret12345',
+        'status' => 'active',
+    ]);
+
+    $this->actingAs($login);
+
+    Livewire::test(Users::class)
+        ->assertDontSeeHtml('wire:click="preparePasswordReset('.$login->id.')"')
+        ->assertSeeHtml('wire:click="preparePasswordReset('.$operator->id.')"');
+
+    Livewire::test(Users::class)
+        ->call('preparePasswordReset', $login->id)
+        ->assertForbidden();
+
+    expect(Hash::check('Secret12345', $login->fresh()->password))->toBeTrue();
+});
+
 test('user management shows private account metadata and can reset password', function () {
     $login = starterToastLogin();
+    $operatorRole = ClientRole::query()->create([
+        'code' => 'operator_password_reset',
+        'name' => 'Operator',
+    ]);
 
     Client::query()->firstOrFail()->update([
         'phone' => '08123456789',
@@ -1230,7 +1290,7 @@ test('user management shows private account metadata and can reset password', fu
     ]);
 
     $operator = ClientLogin::query()->create([
-        'client_role_id' => $login->client_role_id,
+        'client_role_id' => $operatorRole->id,
         'name' => 'Operator Login',
         'username' => 'operator-reset',
         'email' => 'operator@example.test',
@@ -1266,6 +1326,13 @@ test('user management shows private account metadata and can reset password', fu
         ->assertSeeHtml('data-temporary-credentials-dismiss');
 
     expect($operator->fresh()->must_change_password)->toBeTrue();
+
+    $this->assertDatabaseHas('starter_logs', [
+        'action_key' => 'auth.password_reset_by_admin',
+        'event' => 'security',
+        'client_login_id' => $login->id,
+        'auditable_id' => (string) $operator->id,
+    ]);
 });
 
 test('add user uses a dedicated page and previews selected role module access', function () {

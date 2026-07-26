@@ -38,11 +38,17 @@ Konfigurasi existing:
 - Ambil limit dari `StarterConfigService::uploadImageMaxKilobytes()`.
 - Validasi MIME, ukuran, dan jenis file di server.
 - Simpan nama file generated; jangan percaya nama/path dari user.
+- Jangan menyediakan field URL/path string untuk foto, avatar, atau logo. Form hanya mengirim file upload/reset intent; path file existing dan hasil penyimpanan baru tetap dimiliki server.
+- Penghapusan file lama hanya boleh memakai path yang berasal dari record server dan sudah diverifikasi berada pada storage/direktori yang diizinkan.
 - Preview/logo harus memakai `object-fit: contain` agar rasio tidak merusak layout.
 
 ## Baseline
 
 - CSRF wajib untuk action web.
-- Security headers diterapkan middleware global.
+- Security header sederhana diterapkan middleware global tanpa Content Security Policy.
+- HSTS hanya dikirim pada production HTTPS.
+- Login password yang berhasil dihitung sebagai konfirmasi terbaru agar user tidak diminta mengulang password pada navigasi pertama.
+- Area pengaturan sensitif wajib memakai middleware `password.confirm`, menerima login password yang baru berhasil sebagai konfirmasi terbaru, dan meminta verifikasi ulang setelah timeout.
+- Security event mengikuti `audit-logging.md`.
 - Production: `APP_DEBUG=false`, HTTPS, cookie secure, permission storage minimal.
 - Jangan log password, token, secret, credential, atau isi file.

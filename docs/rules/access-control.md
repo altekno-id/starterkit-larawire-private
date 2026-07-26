@@ -42,6 +42,8 @@ Capability global ditentukan pada form role dan disimpan di `starter_client_role
 - Action Livewire tetap harus memvalidasi dan mengotorisasi data yang dimanipulasi.
 - Jangan mengandalkan menu tersembunyi sebagai security.
 - Role/user Superuser tidak boleh terlihat, diedit, dipindahkan, atau dihapus oleh non-superuser.
+- Password akun Superuser tidak boleh di-reset dari User Management, termasuk ketika actor adalah Superuser itu sendiri. Superuser hanya mengubah password miliknya melalui Edit Profil Saya.
+- Larangan terhadap akun sistem harus ditegakkan pada UI dan service/action server; menyembunyikan tombol saja tidak cukup.
 
 ## Sinkronisasi
 

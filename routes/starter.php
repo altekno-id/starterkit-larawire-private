@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Starter\Auth\TouchSessionActivityController;
+use App\Livewire\Starter\Auth\ConfirmPassword;
 use App\Livewire\Starter\Auth\LockScreen;
 use App\Livewire\Starter\Logs\ActivityLogIndex;
 use App\Livewire\Starter\Profile\EditMyProfile;
@@ -8,6 +9,10 @@ use App\Livewire\Starter\Settings\SettingsIndex;
 use App\Livewire\Starter\UserManagement\RoleForm;
 use App\Livewire\Starter\UserManagement\UserForm;
 use Illuminate\Support\Facades\Route;
+
+Route::livewire('/confirm-password', ConfirmPassword::class)
+    ->middleware(['auth:web', 'starter.active', 'starter.password-change', 'starter.lock'])
+    ->name('password.confirm');
 
 Route::name('starter.')->middleware(['auth:web', 'starter.active'])->group(function (): void {
     Route::livewire('/lock-screen', LockScreen::class)->name('lock-screen');
@@ -27,12 +32,12 @@ Route::name('starter.')
             ->name('logs.index');
 
         Route::livewire('/settings', SettingsIndex::class)
-            ->middleware('starter.admin')
+            ->middleware(['starter.admin', 'password.confirm'])
             ->name('settings');
 
         Route::prefix('settings/roles')
             ->name('settings.roles.')
-            ->middleware('starter.admin')
+            ->middleware(['starter.admin', 'password.confirm'])
             ->group(function (): void {
                 Route::livewire('/create', RoleForm::class)->name('create');
                 Route::livewire('/{roleId}/edit', RoleForm::class)->name('edit');
@@ -40,7 +45,7 @@ Route::name('starter.')
 
         Route::prefix('user-management')
             ->name('user-management.')
-            ->middleware('starter.admin')
+            ->middleware(['starter.admin', 'password.confirm'])
             ->group(function (): void {
                 Route::get('/roles', fn () => redirect()->route('starter.settings', ['section' => 'roles']))->name('roles');
                 Route::livewire('/users/create', UserForm::class)->name('users.create');
@@ -49,6 +54,6 @@ Route::name('starter.')
             });
 
         Route::get('/client-profile', fn () => redirect()->route('starter.settings', ['section' => 'company']))
-            ->middleware('starter.admin')
+            ->middleware(['starter.admin', 'password.confirm'])
             ->name('client-profile');
     });

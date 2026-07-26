@@ -9,7 +9,7 @@
     <meta name="starter-auth-login-url" content="{{ \App\Support\Starter\StarterNavigation::authLoginUrl() }}">
     <title>{{ $title ?? 'Login' }} | {{ config('app.name') }}</title>
     <link rel="shortcut icon" href="{{ asset('assets/tabler/static/logo-small.svg') }}">
-    <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler.min.css') }}?v={{ filemtime(public_path('assets/tabler/dist/css/tabler.min.css')) }}">
     <style>
         .starter-auth-mark {
             align-items: center;
@@ -46,6 +46,22 @@
             min-width: 10rem;
         }
 
+        .input-group:has(> .input-group-text, > .btn) > .form-control.is-invalid {
+            background-image: none;
+            padding-right: .75rem;
+        }
+
+        .input-group:has(> .form-control.is-invalid, > .form-select.is-invalid) > .form-control.is-invalid,
+        .input-group:has(> .form-control.is-invalid, > .form-select.is-invalid) > .form-select.is-invalid,
+        .input-group:has(> .form-control.is-invalid, > .form-select.is-invalid) > .input-group-text,
+        .input-group:has(> .form-control.is-invalid, > .form-select.is-invalid) > .btn {
+            border-color: var(--tblr-form-invalid-border-color) !important;
+        }
+
+        .input-group-flat:has(> .form-control.is-invalid, > .form-select.is-invalid):focus-within {
+            box-shadow: 0 0 0 .25rem rgba(var(--tblr-danger-rgb), .25);
+        }
+
         [data-starter-livewire-loading] {
             filter: blur(2px);
             opacity: .55;
@@ -70,7 +86,7 @@
 </head>
 
 <body class="d-flex flex-column bg-body-tertiary">
-    <script src="{{ asset('assets/tabler/dist/js/tabler-theme.min.js') }}"></script>
+    <script src="{{ asset('assets/tabler/dist/js/tabler-theme.min.js') }}?v={{ filemtime(public_path('assets/tabler/dist/js/tabler-theme.min.js')) }}"></script>
     @include('templates.components.toast')
 
     <div class="starter-livewire-loader" data-starter-livewire-loader aria-label="Memproses permintaan" aria-hidden="true" role="status">
@@ -147,7 +163,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('assets/tabler/dist/js/tabler.min.js') }}" defer></script>
+    <script src="{{ asset('assets/tabler/dist/js/tabler.min.js') }}?v={{ filemtime(public_path('assets/tabler/dist/js/tabler.min.js')) }}" defer></script>
     <script src="{{ asset('assets/mine/starter-runtime.js') }}?v={{ filemtime(public_path('assets/mine/starter-runtime.js')) }}" data-navigate-once defer></script>
     @livewireScripts
 </body>

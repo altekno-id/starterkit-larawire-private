@@ -55,10 +55,10 @@
             <div class="card card-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <span class="avatar bg-purple-lt text-purple me-3">{{ $roleCount }}</span>
+                        <span class="avatar bg-purple-lt text-purple me-3">{{ \App\Support\Starter\StarterNumber::decimal($roleCount) }}</span>
                         <div>
                             <div class="text-secondary">Role</div>
-                            <div class="fw-semibold">{{ $roleCount }} role terdaftar</div>
+                            <div class="fw-semibold">{{ \App\Support\Starter\StarterNumber::decimal($roleCount) }} role terdaftar</div>
                         </div>
                     </div>
                 </div>
@@ -68,10 +68,10 @@
             <div class="card card-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <span class="avatar bg-green-lt text-green me-3">{{ $userCount }}</span>
+                        <span class="avatar bg-green-lt text-green me-3">{{ \App\Support\Starter\StarterNumber::decimal($userCount) }}</span>
                         <div>
                             <div class="text-secondary">User</div>
-                            <div class="fw-semibold">{{ $userCount }} akun dikelola</div>
+                            <div class="fw-semibold">{{ \App\Support\Starter\StarterNumber::decimal($userCount) }} akun dikelola</div>
                         </div>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                         </span>
                         <div>
                             <div class="text-secondary">Total Aplikasi</div>
-                            <div class="fw-semibold">{{ $appCount }} aplikasi tersedia</div>
+                            <div class="fw-semibold">{{ \App\Support\Starter\StarterNumber::decimal($appCount) }} aplikasi tersedia</div>
                         </div>
                     </div>
                 </div>

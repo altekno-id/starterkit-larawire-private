@@ -41,9 +41,7 @@
                     </button>
                 </div>
                 <div class="col-12">
-                    <input type="hidden" wire:model="clientForm.logo">
                     @error('clientPhotoUpload') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
-                    @error('clientForm.logo') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
                     <div class="text-secondary small mt-2" wire:loading wire:target="clientPhotoUpload">Mengunggah...</div>
                 </div>
             </div>

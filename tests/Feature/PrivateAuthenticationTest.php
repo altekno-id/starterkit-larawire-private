@@ -95,6 +95,8 @@ test('temporary password login opens the password form directly', function () {
         ->call('authenticate')
         ->assertRedirect(route('app1.dashboard'));
 
+    $scheme = parse_url((string) config('app.url'), PHP_URL_SCHEME) ?: 'http';
+
     $this->get(route('app1.dashboard'))
-        ->assertRedirect('http://app1.'.config('app.domain').'/profile/edit?tab=security');
+        ->assertRedirect($scheme.'://app1.'.config('app.domain').'/profile/edit?tab=security');
 });

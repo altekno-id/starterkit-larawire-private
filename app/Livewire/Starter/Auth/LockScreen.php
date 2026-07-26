@@ -3,6 +3,7 @@
 namespace App\Livewire\Starter\Auth;
 
 use App\Models\Starter\ClientLogin;
+use App\Services\Starter\AuditLogService;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Services\Starter\StarterConfigService;
 use App\Support\Starter\StarterNavigation;
@@ -45,6 +46,7 @@ class LockScreen extends Component
     public function unlock(
         StarterConfigService $configs,
         NavigationAuthorizedRedirectService $redirects,
+        AuditLogService $auditLogs,
     ): mixed {
         $this->validate([
             'password' => ['required', 'string'],
@@ -58,6 +60,14 @@ class LockScreen extends Component
         $decaySeconds = max(30, min(3600, $configs->integer('security.login_decay_seconds')));
 
         if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
+            $auditLogs->recordSecurityEvent(
+                'auth.screen_unlock_blocked',
+                'Unlock layar dibatasi sementara',
+                target: $login,
+                actor: $login,
+                metadata: ['reason' => 'rate_limited'],
+            );
+
             throw ValidationException::withMessages([
                 'password' => 'Terlalu banyak percobaan. Coba lagi dalam '.RateLimiter::availableIn($throttleKey).' detik.',
             ]);
@@ -66,6 +76,13 @@ class LockScreen extends Component
         if (! $login->password || ! Hash::check($this->password, $login->password)) {
             RateLimiter::hit($throttleKey, $decaySeconds);
             $this->reset('password');
+            $auditLogs->recordSecurityEvent(
+                'auth.screen_unlock_failed',
+                'Unlock layar gagal',
+                target: $login,
+                actor: $login,
+                metadata: ['reason' => 'invalid_password'],
+            );
 
             throw ValidationException::withMessages([
                 'password' => 'Password tidak sesuai.',
@@ -76,6 +93,12 @@ class LockScreen extends Component
         $intended = session()->pull('starter.lock.intended');
         $this->clearLockState();
         session()->regenerate();
+        $auditLogs->recordSecurityEvent(
+            'auth.screen_unlocked',
+            'Layar berhasil dibuka',
+            target: $login,
+            actor: $login,
+        );
 
         return $this->redirect($redirects->forLogin($login, null, $intended));
     }

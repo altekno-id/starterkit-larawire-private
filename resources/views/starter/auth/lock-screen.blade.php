@@ -26,6 +26,7 @@
                     autofocus
                     autocomplete="current-password"
                     placeholder="Masukkan password"
+                    @error('password') aria-invalid="true" aria-describedby="lock-screen-password-error" @enderror
                 >
                 <button
                     type="button"
@@ -36,10 +37,10 @@
                     <span x-show="! visible">@include('templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm'])</span>
                     <span x-show="visible" x-cloak>@include('templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm'])</span>
                 </button>
-                @error('password')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
             </div>
+            @error('password')
+                <div id="lock-screen-password-error" class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
         </div>
 
         <button class="btn btn-primary w-100" type="submit" wire:loading.attr="disabled">

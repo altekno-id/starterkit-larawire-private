@@ -55,7 +55,7 @@
         <div class="card-header">
             <div>
                 <h3 class="card-title">Daftar User</h3>
-                <p class="card-subtitle">Menampilkan {{ $users->firstItem() ?? 0 }}–{{ $users->lastItem() ?? 0 }} dari {{ $users->total() }} user</p>
+                <p class="card-subtitle">Menampilkan {{ \App\Support\Starter\StarterNumber::decimal($users->firstItem() ?? 0) }}–{{ \App\Support\Starter\StarterNumber::decimal($users->lastItem() ?? 0) }} dari {{ \App\Support\Starter\StarterNumber::decimal($users->total()) }} user</p>
             </div>
             <div class="card-actions">
                 <a
@@ -90,7 +90,7 @@
                             </td>
                             <td>
                                 <div>{{ $user->role?->name ?? '-' }}</div>
-                                <div class="small text-secondary">{{ $user->role?->isSuperuser() ? 'Akses penuh' : ($user->role?->mods?->count() ?? 0).' module' }}</div>
+                                <div class="small text-secondary">{{ $user->role?->isSuperuser() ? 'Akses penuh' : \App\Support\Starter\StarterNumber::decimal($user->role?->mods?->count() ?? 0).' module' }}</div>
                             </td>
                             <td>
                                 <span class="status {{ $user->status === 'active' ? 'status-green' : 'status-red' }} status-lite">{{ ['active' => 'Aktif', 'inactive' => 'Nonaktif', 'locked' => 'Terkunci'][$user->status] ?? $user->status }}</span>
@@ -100,11 +100,13 @@
                             <td>
                                 <div class="btn-list flex-nowrap">
                                     <a href="{{ route('starter.user-management.users.edit', $user->id) }}" class="btn btn-sm" data-starter-navigate>Edit</a>
-                                    <button
-                                        type="button"
-                                        class="btn btn-sm btn-outline-warning"
-                                        wire:click="preparePasswordReset({{ $user->id }})"
-                                    >Reset</button>
+                                    @if (! $user->role?->isSuperuser())
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-warning"
+                                            wire:click="preparePasswordReset({{ $user->id }})"
+                                        >Reset</button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

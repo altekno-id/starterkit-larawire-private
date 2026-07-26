@@ -21,7 +21,7 @@
         <div class="card-header">
             <div>
                 <h3 class="card-title">Daftar Role</h3>
-                <p class="card-subtitle">{{ $roleCount }} role terdaftar</p>
+                <p class="card-subtitle">{{ \App\Support\Starter\StarterNumber::decimal($roleCount) }} role terdaftar</p>
             </div>
             <div class="card-actions">
                 <a
@@ -48,7 +48,7 @@
                     >
                 </div>
                 <div class="col-12 col-lg-auto text-secondary small">
-                    Menampilkan {{ $roles->firstItem() ?? 0 }}–{{ $roles->lastItem() ?? 0 }} dari {{ $roles->total() }} role
+                    Menampilkan {{ \App\Support\Starter\StarterNumber::decimal($roles->firstItem() ?? 0) }}–{{ \App\Support\Starter\StarterNumber::decimal($roles->lastItem() ?? 0) }} dari {{ \App\Support\Starter\StarterNumber::decimal($roles->total()) }} role
                 </div>
             </div>
         </div>
@@ -133,9 +133,9 @@
                                     </span>
                                     <span class="min-w-0">
                                         <span class="starter-role-access-title d-block fw-semibold text-truncate">
-                                            {{ $role->isSuperuser() ? 'Akses penuh' : $roleAppCount.' app' }}
+                                            {{ $role->isSuperuser() ? 'Akses penuh' : \App\Support\Starter\StarterNumber::decimal($roleAppCount).' app' }}
                                         </span>
-                                        <span class="d-block small text-secondary fw-normal" data-role-module-count>{{ $roleModuleCount }} module</span>
+                                        <span class="d-block small text-secondary fw-normal" data-role-module-count>{{ \App\Support\Starter\StarterNumber::decimal($roleModuleCount) }} module</span>
                                     </span>
                                     @include('templates.layouts.icon', ['name' => 'chevron-right', 'class' => 'icon-sm text-secondary flex-shrink-0'])
                                 </button>
@@ -198,7 +198,7 @@
                     <div class="modal-header">
                         <div>
                             <h3 class="modal-title" id="role-users-modal-title">User dalam Role</h3>
-                            <div class="text-secondary small">{{ $roleUsersRoleName }} · {{ count($roleUsers) }} user</div>
+                            <div class="text-secondary small">{{ $roleUsersRoleName }} · {{ \App\Support\Starter\StarterNumber::decimal(count($roleUsers)) }} user</div>
                         </div>
                         <button type="button" class="btn-close" aria-label="Tutup" wire:click="closeRoleUsersModal"></button>
                     </div>
@@ -302,7 +302,7 @@
                                     <div class="d-flex align-items-center gap-2 bg-body-tertiary px-3 py-2 border-bottom">
                                         @include('templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm text-primary flex-shrink-0'])
                                         <div class="fw-semibold">{{ $app['name'] }}</div>
-                                        <span class="badge bg-secondary-lt ms-auto">{{ count($app['modules']) }} module</span>
+                                        <span class="badge bg-secondary-lt ms-auto">{{ \App\Support\Starter\StarterNumber::decimal(count($app['modules'])) }} module</span>
                                     </div>
                                     <div class="list-group list-group-flush">
                                         @foreach ($app['modules'] as $module)
@@ -331,7 +331,7 @@
                     </div>
                     <div class="modal-footer">
                         <div class="text-secondary small me-auto">
-                            {{ $roleAccessAppCount }} app · {{ $roleAccessModuleCount }} module
+                            {{ \App\Support\Starter\StarterNumber::decimal($roleAccessAppCount) }} app · {{ \App\Support\Starter\StarterNumber::decimal($roleAccessModuleCount) }} module
                         </div>
                         <button type="button" class="btn" wire:click="closeRoleAccessModal">Tutup</button>
                     </div>

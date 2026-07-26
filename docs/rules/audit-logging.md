@@ -46,6 +46,14 @@ Bulk query, pivot `sync`, raw SQL, dan operasi eksternal dapat membutuhkan `reco
 
 Lihat pemakaian nyata pada `UserManagementRoleService`.
 
+## Event keamanan
+
+- Gunakan `AuditLogService::recordSecurityEvent()` untuk aktivitas autentikasi/session, bukan menulis row log langsung.
+- Gunakan `action_key` stabil berawalan `auth.`, event `security`, actor bila sudah terautentikasi, dan target akun bila dapat dikenali dengan aman.
+- Catat login berhasil/gagal/dibatasi/dikunci, konfirmasi password berhasil/gagal/dibatasi, lock/unlock, perubahan/reset password, logout, dan penghentian session.
+- Metadata hanya memuat alasan aman, counter, atau konteks teknis minimum; credential dan nilai password lama/baru tidak boleh dicatat.
+- Tambahkan test untuk success dan failure state penting, termasuk actor/target serta ketiadaan data sensitif.
+
 ## Aturan implementasi
 
 - Business service menentukan `action_key` stabil berbentuk `<domain>.<aksi>`.

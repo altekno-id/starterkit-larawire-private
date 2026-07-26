@@ -36,7 +36,10 @@
 
 ## Aturan perubahan
 
+- Buktikan ownership dan source of truth feature existing sebelum menentukan file yang diubah.
 - Jangan edit metadata app/module/menu langsung di database.
 - Ubah config dan route di source code, validasi, lalu sync.
 - Database adalah runtime projection untuk authorization dan navigasi.
 - Route yang tidak memiliki module valid akan ditolak oleh `starter:sync`.
+- Jangan menduplikasi source of truth ke config, database, dan public state sekaligus. Pilih owner sesuai lapisan di atas dan turunkan projection/runtime state dari owner tersebut.
+- Jangan membuat repository, service, helper, event, atau abstraction baru hanya berdasarkan preferensi; ikuti boundary dan sibling existing, lalu tambah abstraction hanya bila ada kebutuhan lintas consumer yang nyata.

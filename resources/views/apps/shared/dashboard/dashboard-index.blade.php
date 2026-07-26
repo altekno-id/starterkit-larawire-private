@@ -41,10 +41,10 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <span class="avatar bg-info-lt text-info me-3">{{ $accessibleAppCount }}</span>
+                        <span class="avatar bg-info-lt text-info me-3">{{ \App\Support\Starter\StarterNumber::decimal($accessibleAppCount) }}</span>
                         <div>
                             <div class="text-secondary">Akses</div>
-                            <div class="h3 mb-0">{{ $accessibleAppCount }} app · {{ $sidebarModCount }} module</div>
+                            <div class="h3 mb-0">{{ \App\Support\Starter\StarterNumber::decimal($accessibleAppCount) }} app · {{ \App\Support\Starter\StarterNumber::decimal($sidebarModCount) }} module</div>
                         </div>
                     </div>
                 </div>

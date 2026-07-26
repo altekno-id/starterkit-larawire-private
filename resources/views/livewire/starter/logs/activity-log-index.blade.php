@@ -3,6 +3,7 @@
         'created' => ['label' => 'Dibuat', 'class' => 'bg-success-lt text-success'],
         'updated' => ['label' => 'Diubah', 'class' => 'bg-warning-lt text-warning'],
         'deleted' => ['label' => 'Dihapus', 'class' => 'bg-danger-lt text-danger'],
+        'security' => ['label' => 'Keamanan', 'class' => 'bg-primary-lt text-primary'],
     ];
     $activeFilterCount = collect([
         $search,
@@ -59,7 +60,7 @@
                         </span>
                         <div>
                             <div class="text-secondary">Total Perubahan</div>
-                            <div class="h2 mb-0">{{ number_format($totalChanges) }}</div>
+                            <div class="h2 mb-0">{{ \App\Support\Starter\StarterNumber::decimal($totalChanges) }}</div>
                         </div>
                     </div>
                 </div>
@@ -74,7 +75,7 @@
                         </span>
                         <div>
                             <div class="text-secondary">Perubahan Hari Ini</div>
-                            <div class="h2 mb-0">{{ number_format($todayChanges) }}</div>
+                            <div class="h2 mb-0">{{ \App\Support\Starter\StarterNumber::decimal($todayChanges) }}</div>
                         </div>
                     </div>
                 </div>
@@ -89,7 +90,7 @@
                         </span>
                         <div>
                             <div class="text-secondary">Pengguna Tercatat</div>
-                            <div class="h2 mb-0">{{ number_format($activeActorCount) }}</div>
+                            <div class="h2 mb-0">{{ \App\Support\Starter\StarterNumber::decimal($activeActorCount) }}</div>
                         </div>
                     </div>
                 </div>
@@ -105,7 +106,7 @@
             </div>
             <div class="card-actions">
                 @if ($activeFilterCount > 0)
-                    <span class="badge bg-primary-lt text-primary me-2">{{ $activeFilterCount }} filter aktif</span>
+                    <span class="badge bg-primary-lt text-primary me-2">{{ \App\Support\Starter\StarterNumber::decimal($activeFilterCount) }} filter aktif</span>
                 @endif
                 <button type="button" class="btn btn-sm" wire:click="resetFilters">
                     @include('templates.layouts.icon', ['name' => 'circle-x', 'class' => 'icon-sm me-1'])
@@ -134,12 +135,13 @@
                     <input id="log-date-to" type="date" class="form-control" wire:model.live="dateTo">
                 </div>
                 <div class="col-sm-6 col-xl-2">
-                    <label class="form-label" for="log-event">Jenis Perubahan</label>
+                    <label class="form-label" for="log-event">Jenis Aktivitas</label>
                     <select id="log-event" class="form-select" wire:model.live="eventFilter">
                         <option value="">Semua jenis</option>
                         <option value="created">Dibuat</option>
                         <option value="updated">Diubah</option>
                         <option value="deleted">Dihapus</option>
+                        <option value="security">Keamanan</option>
                     </select>
                 </div>
                 <div class="col-sm-6 col-xl-2">
@@ -231,7 +233,7 @@
             <div>
                 <h3 class="card-title">Riwayat Aktivitas</h3>
                 <p class="card-subtitle">
-                    Menampilkan {{ $actions->firstItem() ?? 0 }}–{{ $actions->lastItem() ?? 0 }} dari {{ $actions->total() }} aktivitas
+                    Menampilkan {{ \App\Support\Starter\StarterNumber::decimal($actions->firstItem() ?? 0) }}–{{ \App\Support\Starter\StarterNumber::decimal($actions->lastItem() ?? 0) }} dari {{ \App\Support\Starter\StarterNumber::decimal($actions->total()) }} aktivitas
                 </p>
             </div>
         </div>
@@ -274,7 +276,7 @@
                                         <span class="badge {{ $eventMeta['class'] }}">{{ $eventMeta['label'] }}</span>
                                     @endforeach
                                     <span class="small text-secondary">
-                                        {{ $action['changes_count'] }} perubahan · {{ $action['tables_count'] }} tabel
+                                        {{ \App\Support\Starter\StarterNumber::decimal($action['changes_count']) }} perubahan · {{ \App\Support\Starter\StarterNumber::decimal($action['tables_count']) }} tabel
                                     </span>
                                 </div>
                             </td>
@@ -315,7 +317,7 @@
                                     </div>
                                     <p class="empty-title">Belum ada aktivitas sesuai filter</p>
                                     <p class="empty-subtitle text-secondary">
-                                        Log akan muncul otomatis ketika user membuat, mengubah, atau menghapus data.
+                                        Log akan muncul otomatis ketika ada perubahan data atau aktivitas keamanan.
                                     </p>
                                     @if ($activeFilterCount > 0)
                                         <div class="empty-action">
@@ -360,8 +362,8 @@
                                     <div class="flex-fill min-w-0">
                                         <div class="d-flex flex-wrap align-items-center gap-2">
                                             <span class="fw-bold">{{ $firstLog->action_label }}</span>
-                                            <span class="badge bg-primary-lt text-primary">
-                                                {{ $selectedLogs->count() }} perubahan · {{ $selectedLogs->pluck('table_name')->filter()->unique()->count() }} tabel
+                                                <span class="badge bg-primary-lt text-primary">
+                                                    {{ \App\Support\Starter\StarterNumber::decimal($selectedLogs->count()) }} aktivitas · {{ \App\Support\Starter\StarterNumber::decimal($selectedLogs->pluck('table_name')->filter()->unique()->count()) }} tabel
                                             </span>
                                         </div>
                                         <div class="small text-secondary mt-1">
@@ -414,8 +416,8 @@
 
                             <div class="px-3 py-3 bg-body-tertiary">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <h4 class="mb-0">Perubahan Data</h4>
-                                    <span class="small text-secondary">{{ $selectedLogs->count() }} item</span>
+                                    <h4 class="mb-0">Rincian Aktivitas</h4>
+                                    <span class="small text-secondary">{{ \App\Support\Starter\StarterNumber::decimal($selectedLogs->count()) }} item</span>
                                 </div>
                                 <div class="vstack gap-2">
                                     @foreach ($selectedLogs as $log)

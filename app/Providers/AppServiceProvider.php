@@ -20,9 +20,11 @@ use App\Repositories\Starter\ClientRepository;
 use App\Repositories\Starter\ClientRoleRepository;
 use App\Services\Starter\AuditLogService;
 use App\Services\Starter\StarterContextService;
+use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -48,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Number::useLocale(str_replace('_', '-', (string) config('app.locale')));
         Model::preventSilentlyDiscardingAttributes($this->app->isLocal());
 
         Event::listen([
@@ -79,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
             StarterForcePasswordChange::class,
             StarterLockScreen::class,
             StarterAuthorize::class,
+            RequirePassword::class,
         ]);
     }
 }

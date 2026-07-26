@@ -105,9 +105,7 @@
                                     </button>
                                 </div>
                                 <div class="col-12">
-                                    <input type="hidden" wire:model="accountForm.profile_photo">
                                     @error('profilePhotoUpload') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
-                                    @error('accountForm.profile_photo') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
                                     <div class="text-secondary small mt-2" wire:loading wire:target="profilePhotoUpload">Mengunggah...</div>
                                 </div>
                             </div>
@@ -158,6 +156,7 @@
                                             class="form-control @error('passwordForm.current_password') is-invalid @enderror"
                                             wire:model="passwordForm.current_password"
                                             autocomplete="current-password"
+                                            @error('passwordForm.current_password') aria-invalid="true" aria-describedby="profile-current-password-error" @enderror
                                         >
                                         <span class="input-group-text">
                                             <button
@@ -176,7 +175,7 @@
                                             </button>
                                         </span>
                                     </div>
-                                    @error('passwordForm.current_password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                    @error('passwordForm.current_password') <div id="profile-current-password-error" class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label" for="profile-new-password">Password Baru</label>
@@ -188,6 +187,7 @@
                                             class="form-control @error('passwordForm.password') is-invalid @enderror"
                                             wire:model="passwordForm.password"
                                             autocomplete="new-password"
+                                            @error('passwordForm.password') aria-invalid="true" aria-describedby="profile-new-password-error" @enderror
                                         >
                                         <span class="input-group-text">
                                             <button
@@ -207,7 +207,7 @@
                                         </span>
                                     </div>
                                     <div class="form-hint">Minimal 10 karakter dengan huruf besar, huruf kecil, dan angka.</div>
-                                    @error('passwordForm.password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                    @error('passwordForm.password') <div id="profile-new-password-error" class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label" for="profile-password-confirmation">Konfirmasi Password</label>
@@ -219,6 +219,7 @@
                                             class="form-control @error('passwordForm.password_confirmation') is-invalid @enderror"
                                             wire:model="passwordForm.password_confirmation"
                                             autocomplete="new-password"
+                                            @error('passwordForm.password_confirmation') aria-invalid="true" aria-describedby="profile-password-confirmation-error" @enderror
                                         >
                                         <span class="input-group-text">
                                             <button
@@ -237,7 +238,7 @@
                                             </button>
                                         </span>
                                     </div>
-                                    @error('passwordForm.password_confirmation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                    @error('passwordForm.password_confirmation') <div id="profile-password-confirmation-error" class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                         </div>

@@ -26,14 +26,15 @@ php artisan test --compact
 - Livewire: render, validation, action, redirect, toast/modal event.
 - Route/menu/module: route name, middleware, `starter:sync --dry-run`, akses role.
 - UI JavaScript: test server metadata/endpoint dan browser test perilaku nyata.
-- Shared hosting/config: `php artisan optimize` harus berhasil.
+- Shared hosting/config: perintah production seperti `php artisan optimize` diuji hanya saat menyiapkan deployment pada environment production-like; jangan mengaktifkan config cache selama development rutin.
 
 ## Definition of done
 
-- Acceptance criteria issue terpenuhi.
+- Acceptance criteria issue terpenuhi untuk pekerjaan non-trivial.
 - Tidak ada TODO/TBD yang tidak dijelaskan.
 - Test relevan lulus.
 - Pint bersih.
 - Sync dry-run diperiksa jika route/config app berubah.
 - Browser test dilakukan jika UX berubah.
-- Issue memuat bukti verifikasi lalu dipindah ke archive sesuai workflow.
+- Tidak ada perubahan scope, dependency, config production, atau keputusan bisnis yang disisipkan tanpa dicatat/disetujui.
+- Issue memuat hasil aktual dan bukti verifikasi lalu dipindah ke archive sesuai workflow.

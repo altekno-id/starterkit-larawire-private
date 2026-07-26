@@ -1,17 +1,19 @@
 # Workflow Planning dan Issue
 
-Workflow ini berlaku saat starterkit dipakai untuk membangun project client.
+Workflow ini berlaku untuk feature, bugfix, refactor, dan pekerjaan teknis non-trivial pada project yang dibangun dari starterkit.
 
 ## Prinsip
 
-Feature, bugfix, refactor, atau pekerjaan teknis non-trivial dimulai dengan planning oleh model AI berkemampuan tinggi. Hasil planning adalah kontrak kerja yang cukup detail untuk dieksekusi programmer junior atau model AI murah tanpa menebak keputusan penting.
+Issue adalah kontrak kerja berbasis bukti. Isinya harus cukup lengkap agar model AI atau developer lain dapat mengeksekusi tanpa mengarang keputusan bisnis, struktur data, authorization, atau flow existing.
 
-Jika user hanya memberi prompt seperti “Tambahkan fitur A dengan flow berikut…”, planner harus:
+Sebelum membuat issue, planner wajib:
 
-1. memeriksa code dan data flow existing;
-2. membuat file issue;
-3. menjelaskan keputusan, risiko, dan acceptance criteria;
-4. menunggu persetujuan sebelum implementasi, kecuali user secara eksplisit meminta langsung eksekusi.
+1. menelusuri flow existing dan file terkait;
+2. memeriksa route/config/schema/test yang menjadi source of truth;
+3. memisahkan requirement terkonfirmasi, temuan existing, proposal, dan pertanyaan terbuka;
+4. menentukan scope, risiko, acceptance criteria, dan command verifikasi.
+
+Jika user hanya meminta planning, berhenti setelah issue siap direview. Jika user meminta langsung eksekusi, lanjutkan implementasi setelah issue dibuat selama tidak ada keputusan material yang belum jelas.
 
 ## Lokasi dan nama
 
@@ -57,11 +59,14 @@ docs/issues/archives/_done_feature_format_tanggal_seperti_migration.md
 - Command verifikasi.
 - Risiko, rollback, dan pertanyaan yang benar-benar belum diputuskan.
 
-Tidak boleh ada instruksi “buat seperti biasa”, “sesuaikan”, atau “dll.” pada bagian eksekusi.
+Setiap klaim kondisi existing harus menunjuk file/code/schema/test atau bukti command. Keputusan yang belum dikonfirmasi harus berlabel proposal atau pertanyaan terbuka. Tidak boleh ada instruksi “buat seperti biasa”, “sesuaikan”, “ikuti kebutuhan”, atau “dll.” pada bagian eksekusi.
 
 ## Eksekusi dan monitoring
 
-- Executor mengubah `status` dari `planned` → `in_progress`.
+- `planned`: kontrak kerja sudah lengkap tetapi implementasi belum dimulai.
+- `in_progress`: implementasi sedang berjalan; gunakan langsung setelah planning bila user meminta eksekusi.
+- `blocked`: ada keputusan material atau dependency eksternal yang benar-benar menghentikan pekerjaan, disertai bukti dan kebutuhan unblock.
+- `done`: seluruh acceptance criteria, implementasi, dan verifikasi selesai.
 - Checklist dicentang hanya setelah code dan test terkait selesai.
 - Jika blocked, tulis penyebab dan bukti; jangan menebak requirement.
 - Perubahan scope harus dicatat pada issue.
@@ -74,5 +79,3 @@ Tidak boleh ada instruksi “buat seperti biasa”, “sesuaikan”, atau “dll
 3. Set `status: done` dan tanggal selesai.
 4. Pindahkan file ke `docs/issues/archives/`.
 5. Tambahkan prefix `_done_`, jangan menghapus riwayat planning.
-
-Template berada di `docs/issues/templates/`.

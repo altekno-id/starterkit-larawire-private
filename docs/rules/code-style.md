@@ -26,6 +26,11 @@
 ## Database
 
 - Migration bersifat reversibel dan aman terhadap data existing.
+- Anggap setiap migration akan berjalan pada tabel production yang sudah besar dan berisi data.
+- Penambahan kolom wajib memilih nullable/default yang kompatibel, lalu backfill bertahap sebelum constraint diperketat.
+- Rename/drop/type change wajib memiliki analisis kompatibilitas, backup/rollback, dan tidak boleh menghapus data existing secara diam-diam.
+- Hindari operasi table rewrite atau backfill besar dalam satu transaksi bila berisiko timeout pada shared hosting.
+- Migration tidak boleh bergantung pada model yang dapat berubah; gunakan query builder/schema dengan nilai eksplisit.
 - Foreign key/index disesuaikan pola query.
 - Jangan menambah `client_id`; satu instalasi hanya satu perusahaan.
 - Prefix `starter_` dikhususkan untuk infrastruktur starterkit.
@@ -39,3 +44,5 @@ vendor/bin/pint --dirty --format agent
 ```
 
 Jangan membuat script verifikasi sementara jika Pest dapat membuktikan perilaku yang sama.
+
+Selama development jangan menjalankan `config:cache` atau `optimize`. Setelah mengubah `.env`/config lokal gunakan `php artisan optimize:clear` bila state pernah tercache.

@@ -19,15 +19,12 @@ class ClientProfile extends Component
 
     public bool $embedded = false;
 
-    /**
-     * @var array{name: string, email: string, phone: string, pic_name: string, logo: string}
-     */
+    /** @var array{name: string, email: string, phone: string, pic_name: string} */
     public array $clientForm = [
         'name' => '',
         'email' => '',
         'phone' => '',
         'pic_name' => '',
-        'logo' => '',
     ];
 
     public mixed $clientPhotoUpload = null;
@@ -49,18 +46,17 @@ class ClientProfile extends Component
             'clientForm.email' => ['nullable', 'email', 'max:255'],
             'clientForm.phone' => ['nullable', 'string', 'max:255'],
             'clientForm.pic_name' => ['nullable', 'string', 'max:255'],
-            'clientForm.logo' => ['nullable', 'string', 'max:255'],
             'clientPhotoUpload' => ['nullable', 'image', 'max:'.app(StarterConfigService::class)->uploadImageMaxKilobytes()],
         ], [], [
             'clientForm.name' => 'client name',
             'clientForm.email' => 'client email',
             'clientForm.phone' => 'phone',
             'clientForm.pic_name' => 'PIC name',
-            'clientForm.logo' => 'logo',
             'clientPhotoUpload' => 'logo upload',
         ])['clientForm'];
 
         $oldLogo = (string) $client->logo;
+        $validated['logo'] = $oldLogo;
 
         if ($this->clientPhotoUpload instanceof TemporaryUploadedFile) {
             $validated['logo'] = 'storage/'.$this->clientPhotoUpload->store(
@@ -78,7 +74,7 @@ class ClientProfile extends Component
         ]);
 
         if ($oldLogo && $oldLogo !== (string) $updatedClient->logo) {
-            $this->deleteStoredClientPhoto($oldLogo);
+            $this->deleteStoredClientPhoto($oldLogo, $client->id);
         }
 
         $this->clientPhotoUpload = null;
@@ -99,7 +95,7 @@ class ClientProfile extends Component
                 'logo' => null,
             ]);
 
-            $this->deleteStoredClientPhoto($oldLogo);
+            $this->deleteStoredClientPhoto($oldLogo, $client->id);
             $this->fillFromClient($updatedClient);
             $this->dispatchClientBrandingUpdated($updatedClient);
             $this->dispatch('starter-toast', type: 'success', message: 'Logo berhasil dikembalikan ke default.');
@@ -107,8 +103,7 @@ class ClientProfile extends Component
 
         $this->clientPhotoUpload = null;
         $this->clientPhotoReset = true;
-        $this->clientForm['logo'] = '';
-        $this->resetValidation(['clientPhotoUpload', 'clientForm.logo']);
+        $this->resetValidation('clientPhotoUpload');
     }
 
     public function render()
@@ -145,7 +140,6 @@ class ClientProfile extends Component
             'email' => (string) $client->email,
             'phone' => (string) $client->phone,
             'pic_name' => (string) $client->pic_name,
-            'logo' => (string) $client->logo,
         ];
     }
 
@@ -155,17 +149,11 @@ class ClientProfile extends Component
             return $this->clientPhotoUpload->temporaryUrl();
         }
 
-        $logo = trim((string) ($this->clientForm['logo'] ?? ''));
-
-        if ($logo !== '') {
-            return $this->logoUrl($logo);
-        }
-
         if ($this->clientPhotoReset) {
             return null;
         }
 
-        return null;
+        return $this->logoUrl($this->client()->logo);
     }
 
     private function dispatchClientBrandingUpdated(Client $client): void
@@ -203,9 +191,11 @@ class ClientProfile extends Component
             ->implode('');
     }
 
-    private function deleteStoredClientPhoto(string $logo): void
+    private function deleteStoredClientPhoto(string $logo, int $clientId): void
     {
-        if (! str_starts_with($logo, 'storage/')) {
+        $ownedPrefix = "storage/starter/client-photos/{$clientId}/";
+
+        if (! str_starts_with($logo, $ownedPrefix)) {
             return;
         }
 

@@ -56,6 +56,19 @@ class UserManagementUserService
         return $login;
     }
 
+    public function findPasswordResetTarget(ClientLogin $currentLogin, int $id): ClientLogin
+    {
+        $login = $this->findUser($currentLogin, $id);
+
+        abort_if(
+            $login->role?->isSuperuser(),
+            403,
+            'Password Superuser hanya dapat diubah melalui Edit Profil Saya.',
+        );
+
+        return $login;
+    }
+
     /**
      * @param  array{name: string, username: string, email: string, client_role_id: int|string, status: string, password?: string}  $data
      */
@@ -114,7 +127,7 @@ class UserManagementUserService
 
     public function resetPassword(ClientLogin $currentLogin, int $userLoginId): string
     {
-        $login = $this->findUser($currentLogin, $userLoginId);
+        $login = $this->findPasswordResetTarget($currentLogin, $userLoginId);
         $temporaryPassword = Str::password(16);
 
         app(AuditLogService::class)->withinAction('user.reset_password', 'Reset password user '.$login->name, function () use ($login, $temporaryPassword): void {
@@ -127,6 +140,14 @@ class UserManagementUserService
                 'remember_token' => Str::random(60),
             ]);
         });
+
+        app(AuditLogService::class)->recordSecurityEvent(
+            'auth.password_reset_by_admin',
+            'Password direset oleh administrator',
+            target: $login,
+            actor: $currentLogin,
+            metadata: ['must_change_password' => true],
+        );
 
         return $temporaryPassword;
     }

@@ -31,6 +31,12 @@ Gunakan `--no-sync` hanya jika file perlu dilengkapi sebelum metadata diterapkan
 7. Pastikan cookie/session domain mendukung root dan subdomain sesuai environment.
 8. Jalankan test generator, route, authorization, dan browser.
 
+## Navigasi lintas subdomain
+
+- URL root/auth/app dibentuk melalui named route dan `StarterNavigation`; jangan merangkai host atau URL login/logout secara manual di view.
+- Form logout selalu memakai method `POST`, CSRF, action route root yang valid, dan redirect tujuan yang lolos pemeriksaan safe redirect.
+- Uji login, session, lock screen, dan logout dari root domain serta app subdomain pada environment lokal dan domain production.
+
 ## Jangan dilakukan
 
 - Jangan menambah daftar app manual di provider: registry melakukan discovery.

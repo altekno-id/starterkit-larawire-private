@@ -56,6 +56,8 @@ test('manual lock screen validates password and returns to intended page', funct
         ->set('password', 'password-salah')
         ->call('unlock')
         ->assertHasErrors(['password'])
+        ->assertSee('aria-describedby="lock-screen-password-error"', false)
+        ->assertSee('id="lock-screen-password-error" class="invalid-feedback d-block"', false)
         ->set('password', 'Secret12345')
         ->call('unlock')
         ->assertHasNoErrors()

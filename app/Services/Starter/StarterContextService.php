@@ -268,7 +268,7 @@ class StarterContextService
 
     private function isCurrentUrl(?string $url): bool
     {
-        if (! $url || $url === 'javascript:void(0);') {
+        if (! $url || $url === '#') {
             return false;
         }
 
@@ -350,10 +350,10 @@ class StarterContextService
     {
         $routeName = $menu->route?->name;
 
-        return $routeName ? $this->routeUrl($routeName) : 'javascript:void(0);';
+        return $routeName ? $this->routeUrl($routeName) : '#';
     }
 
-    private function routeUrl(string $routeName, string $fallback = 'javascript:void(0);'): string
+    private function routeUrl(string $routeName, string $fallback = '#'): string
     {
         return Route::has($routeName) ? route($routeName) : $fallback;
     }

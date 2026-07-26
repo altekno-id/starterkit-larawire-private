@@ -23,12 +23,21 @@
                 </div>
             </details>
         @else
-            <a href="{{ $menu['url'] }}" class="nav-link" @if ($isActive) data-current="true" @endif @if ($menu['url'] !== 'javascript:void(0);') data-starter-navigate data-starter-menu-url="{{ $menu['url'] }}" @endif>
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    @include('templates.layouts.icon', ['name' => $icon])
+            @if ($menu['url'] === '#')
+                <span class="nav-link disabled" aria-disabled="true">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                        @include('templates.layouts.icon', ['name' => $icon])
+                    </span>
+                    <span class="nav-link-title">{{ $menu['label'] }}</span>
                 </span>
-                <span class="nav-link-title">{{ $menu['label'] }}</span>
-            </a>
+            @else
+                <a href="{{ $menu['url'] }}" class="nav-link" @if ($isActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ $menu['url'] }}">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                        @include('templates.layouts.icon', ['name' => $icon])
+                    </span>
+                    <span class="nav-link-title">{{ $menu['label'] }}</span>
+                </a>
+            @endif
         @endif
     </li>
 @elseif ($menu['hasChildren'])
@@ -43,7 +52,11 @@
         </div>
     </details>
 @else
-    <a href="{{ $menu['url'] }}" class="dropdown-item {{ $isActive ? 'active' : '' }}" @if ($isActive) data-current="true" @endif @if ($menu['url'] !== 'javascript:void(0);') data-starter-navigate data-starter-menu-url="{{ $menu['url'] }}" @endif>
-        {{ $menu['label'] }}
-    </a>
+    @if ($menu['url'] === '#')
+        <span class="dropdown-item disabled" aria-disabled="true">{{ $menu['label'] }}</span>
+    @else
+        <a href="{{ $menu['url'] }}" class="dropdown-item {{ $isActive ? 'active' : '' }}" @if ($isActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ $menu['url'] }}">
+            {{ $menu['label'] }}
+        </a>
+    @endif
 @endif

@@ -8,7 +8,9 @@ use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Throwable;
 
 class AuditLogService
 {
@@ -114,6 +116,39 @@ class AuditLogService
     }
 
     /**
+     * @param  array<string, mixed>  $metadata
+     */
+    public function recordSecurityEvent(
+        string $key,
+        string $label,
+        ?ClientLogin $target = null,
+        ?ClientLogin $actor = null,
+        array $metadata = [],
+    ): void {
+        if (! Schema::hasTable('starter_logs')) {
+            return;
+        }
+
+        try {
+            $this->insert(
+                login: $actor,
+                event: 'security',
+                auditableType: ClientLogin::class,
+                auditableId: $target ? (string) $target->getKey() : 'unknown',
+                auditableLabel: $target?->name ?? 'Akun tidak dikenal',
+                tableName: 'starter_client_logins',
+                oldValues: [],
+                newValues: [],
+                actionLabel: $label,
+                metadata: $this->sanitize($metadata),
+                actionKey: $key,
+            );
+        } catch (Throwable $exception) {
+            report($exception);
+        }
+    }
+
+    /**
      * @return array{0: array<string, mixed>, 1: array<string, mixed>}
      */
     private function modelChanges(string $event, Model $model): array
@@ -178,7 +213,7 @@ class AuditLogService
      * @param  array<string, mixed>  $metadata
      */
     private function insert(
-        ClientLogin $login,
+        ?ClientLogin $login,
         string $event,
         string $auditableType,
         string $auditableId,
@@ -188,15 +223,16 @@ class AuditLogService
         array $newValues,
         string $actionLabel,
         array $metadata = [],
+        ?string $actionKey = null,
     ): void {
         $request = app()->runningInConsole() ? null : request();
-        $role = $login->loadMissing('role')->role;
-        $action = $this->action($event, $auditableType, $actionLabel);
+        $role = $login?->loadMissing('role')->role;
+        $action = $this->action($event, $auditableType, $actionLabel, $actionKey);
 
         DB::table('starter_logs')->insert([
-            'client_login_id' => $login->getKey(),
-            'actor_name' => $login->name,
-            'actor_username' => $login->username,
+            'client_login_id' => $login?->getKey(),
+            'actor_name' => $login?->name,
+            'actor_username' => $login?->username,
             'actor_role' => $role?->name,
             'actor_is_superuser' => $role?->isSuperuser() ?? false,
             'action_id' => $action['id'],
@@ -226,12 +262,12 @@ class AuditLogService
     /**
      * @return array{id: string, key: string, label: string, sequence: int}
      */
-    private function action(string $event, string $auditableType, string $fallbackLabel): array
+    private function action(string $event, string $auditableType, string $fallbackLabel, ?string $actionKey = null): array
     {
         if ($this->actionContext === null) {
             return [
                 'id' => (string) Str::ulid(),
-                'key' => $this->defaultActionKey($event, $auditableType),
+                'key' => $actionKey ?? $this->defaultActionKey($event, $auditableType),
                 'label' => $fallbackLabel,
                 'sequence' => 1,
             ];

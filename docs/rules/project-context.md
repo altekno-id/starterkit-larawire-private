@@ -1,8 +1,10 @@
-# Konteks Project
+# Konteks Arsitektur Project Turunan
 
 ## Tujuan
 
-Starterkit ini adalah fondasi aplikasi internal perusahaan/client, bukan SaaS. Satu instalasi mewakili satu perusahaan yang tersimpan di `starter_clients`. Tabel bisnis, user, role, dan log tidak memakai `client_id` karena tidak ada tenant selection dalam satu instalasi.
+Project yang dibangun dari starterkit ini adalah aplikasi internal untuk satu perusahaan/client, bukan SaaS. Satu instalasi mewakili satu perusahaan yang tersimpan di `starter_clients`. Tabel bisnis, user, role, dan log tidak memakai `client_id` karena tidak ada tenant selection dalam satu instalasi.
+
+Seluruh file di `docs/rules/` adalah batas arsitektur dan standar implementasi project turunan. Perubahan terhadap prinsip inti hanya dilakukan bila requirement project memang berbeda dan dampaknya disetujui secara eksplisit.
 
 ## Prinsip utama
 
@@ -14,7 +16,7 @@ Starterkit ini adalah fondasi aplikasi internal perusahaan/client, bukan SaaS. S
 - Menu hanya navigasi menuju route module; menu bukan sumber otorisasi.
 - Superuser memiliki akses penuh, bersifat sistem, dan hanya terlihat saat login sebagai Superuser.
 - Pengaturan dan Log Aktivitas adalah menu global/statik. Keduanya dapat diberikan sebagai capability role.
-- Tidak ada register publik, forgot password mandiri, paket, payment, atau tenant SaaS.
+- Tidak ada register publik, forgot password mandiri, paket, payment, atau tenant SaaS kecuali project client secara eksplisit mengubah scope dan arsitekturnya.
 
 ## Stack
 
@@ -28,4 +30,4 @@ Starterkit ini adalah fondasi aplikasi internal perusahaan/client, bukan SaaS. S
 
 ## Data awal
 
-`php artisan starter:setup` menyiapkan tepat satu perusahaan, role sistem Superuser, dan user Superuser. Metadata app disinkronkan oleh `starter:sync`. Data contoh bisnis tidak boleh ditambahkan ke instalasi awal.
+`php artisan starter:setup` menyiapkan tepat satu perusahaan, role sistem Superuser, dan user Superuser. Metadata app disinkronkan oleh `starter:sync`. Data contoh bisnis tidak boleh ditambahkan ke instalasi production.

@@ -25,13 +25,10 @@ class EditMyProfile extends Component
 
     public string $activeTab = 'account-details';
 
-    /**
-     * @var array{name: string, email: string, profile_photo: string}
-     */
+    /** @var array{name: string, email: string} */
     public array $accountForm = [
         'name' => '',
         'email' => '',
-        'profile_photo' => '',
     ];
 
     public mixed $profilePhotoUpload = null;
@@ -69,16 +66,15 @@ class EditMyProfile extends Component
                 'max:255',
                 Rule::unique('starter_client_logins', 'email')->ignore($login->id),
             ],
-            'accountForm.profile_photo' => ['nullable', 'string', 'max:255'],
             'profilePhotoUpload' => ['nullable', 'image', 'max:'.app(StarterConfigService::class)->uploadImageMaxKilobytes()],
         ], [], [
             'accountForm.name' => 'display name',
             'accountForm.email' => 'email login',
-            'accountForm.profile_photo' => 'profile photo',
             'profilePhotoUpload' => 'profile photo upload',
         ])['accountForm'];
 
         $oldProfilePhoto = (string) $login->profile_photo;
+        $validated['profile_photo'] = $oldProfilePhoto;
 
         if ($this->profilePhotoUpload instanceof TemporaryUploadedFile) {
             $validated['profile_photo'] = 'storage/'.$this->profilePhotoUpload->store(
@@ -92,7 +88,7 @@ class EditMyProfile extends Component
             ->loadMissing('role');
 
         if ($oldProfilePhoto && $oldProfilePhoto !== (string) $updatedLogin->profile_photo) {
-            $this->deleteStoredProfilePhoto($oldProfilePhoto);
+            $this->deleteStoredProfilePhoto($oldProfilePhoto, $login->id);
         }
 
         $this->profilePhotoUpload = null;
@@ -122,7 +118,7 @@ class EditMyProfile extends Component
                 ])
                 ->loadMissing('role');
 
-            $this->deleteStoredProfilePhoto($oldProfilePhoto);
+            $this->deleteStoredProfilePhoto($oldProfilePhoto, $login->id);
 
             $this->dispatch('starter-account-updated',
                 avatarUrl: app(StarterContextService::class)->avatarUrl($updatedLogin),
@@ -135,8 +131,7 @@ class EditMyProfile extends Component
 
         $this->profilePhotoUpload = null;
         $this->profilePhotoReset = true;
-        $this->accountForm['profile_photo'] = self::DEFAULT_PROFILE_PHOTO;
-        $this->resetValidation(['profilePhotoUpload', 'accountForm.profile_photo']);
+        $this->resetValidation('profilePhotoUpload');
     }
 
     public function changePassword(): mixed
@@ -150,9 +145,9 @@ class EditMyProfile extends Component
             'passwordForm.password' => [...StarterPasswordRules::rules(), 'same:passwordForm.password_confirmation'],
             'passwordForm.password_confirmation' => ['required', 'string'],
         ], [], [
-            'passwordForm.current_password' => 'current password',
-            'passwordForm.password' => 'new password',
-            'passwordForm.password_confirmation' => 'password confirmation',
+            'passwordForm.current_password' => 'password saat ini',
+            'passwordForm.password' => 'password baru',
+            'passwordForm.password_confirmation' => 'konfirmasi password',
         ])['passwordForm'];
 
         try {
@@ -234,7 +229,6 @@ class EditMyProfile extends Component
         $this->accountForm = [
             'name' => (string) $login->name,
             'email' => (string) $login->email,
-            'profile_photo' => (string) $login->profile_photo,
         ];
     }
 
@@ -244,16 +238,6 @@ class EditMyProfile extends Component
             return $this->profilePhotoUpload->temporaryUrl();
         }
 
-        $profilePhoto = trim((string) ($this->accountForm['profile_photo'] ?? ''));
-
-        if ($profilePhoto !== '') {
-            if (str_starts_with($profilePhoto, 'http://') || str_starts_with($profilePhoto, 'https://') || str_starts_with($profilePhoto, '//')) {
-                return $profilePhoto;
-            }
-
-            return asset(ltrim($profilePhoto, '/'));
-        }
-
         if ($this->profilePhotoReset) {
             return asset(self::DEFAULT_PROFILE_PHOTO);
         }
@@ -261,9 +245,11 @@ class EditMyProfile extends Component
         return app(StarterContextService::class)->avatarUrl($login);
     }
 
-    private function deleteStoredProfilePhoto(string $profilePhoto): void
+    private function deleteStoredProfilePhoto(string $profilePhoto, int $loginId): void
     {
-        if (! str_starts_with($profilePhoto, 'storage/')) {
+        $ownedPrefix = "storage/starter/profile-photos/{$loginId}/";
+
+        if (! str_starts_with($profilePhoto, $ownedPrefix)) {
             return;
         }
 

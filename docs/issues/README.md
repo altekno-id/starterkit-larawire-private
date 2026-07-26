@@ -1,10 +1,9 @@
 # Daftar Pekerjaan
 
-Folder ini hanya berisi issue aktif dan folder pendukung.
+Folder ini menyimpan kontrak kerja non-trivial untuk project yang dibangun dari starterkit.
 
-- Planning: baca `../rules/issue-workflow.md`.
-- Mulai dari `templates/feature.md` atau `templates/bugfix.md`.
+- Sebelum membuat atau mengeksekusi issue, baca `../rules/issue-workflow.md`.
 - Nama issue aktif: `<jenis>_<slug>.md`.
 - Setelah selesai: pindahkan ke `archives/_done_<nama-asli>.md`.
-
-Status di file issue adalah sumber monitoring: `planned`, `approved`, `in_progress`, `blocked`, atau `done`.
+- Status di file issue menjadi sumber monitoring: `planned`, `in_progress`, `blocked`, atau `done`.
+- Tidak ada template terpisah; struktur dan isi wajib didefinisikan langsung oleh `issue-workflow.md`.

@@ -85,9 +85,8 @@ app/Rules/Apps/<Subdomain>/<Module>/
 app/Support/Apps/<Subdomain>/
 
 resources/views/apps/<subdomain>/<module>/
-resources/js/apps/<subdomain>/
-resources/css/apps/<subdomain>/
-public/assets/apps/<subdomain>/
+resources/views/apps/<subdomain>/<module>/assets/
+public/assets/apps/<subdomain>/vendor/
 lang/id/apps/<subdomain>/
 tests/Feature/Apps/<Subdomain>/
 database/migrations/apps/<subdomain>/
@@ -95,6 +94,7 @@ database/migrations/apps/<subdomain>/
 
 - Layer khusus hanya dibuat bila dipakai: `app/Http/Middleware/Apps/<Subdomain>/`, `app/Policies/Apps/<Subdomain>/`, `app/Jobs/Apps/<Subdomain>/`, `app/Events/Apps/<Subdomain>/`, `app/Listeners/Apps/<Subdomain>/`, `app/Notifications/Apps/<Subdomain>/`, dan `app/Console/Commands/Apps/<Subdomain>/`.
 - `config/apps/<subdomain>.php` dan `routes/apps/<subdomain>.php` sengaja tetap berupa file langsung karena dipakai oleh discovery starter. Isi dan class yang dirujuknya tetap mengikuti area `Apps/<Subdomain>`.
+- CSS/JS custom halaman berada di `resources/views/apps/<subdomain>/<module>/assets/<page>.css.blade.php` dan/atau `<page>.js.blade.php`, lalu hanya di-include oleh Blade pemiliknya. File vendor pihak ketiga yang tidak dapat ditulis sebagai Blade tetap lokal di `public/assets/apps/<subdomain>/vendor/`; tag pemuatan dan inisialisasinya tetap berada pada asset Blade halaman.
 - Landing root bukan feature app; tetap di `app/Livewire/Landing` dan `resources/views/landing`.
 - Migration app tidak diletakkan di root `database/migrations` atau di dalam folder module. Satu folder `<subdomain>` menampung seluruh riwayat migration app tersebut agar Laravel tetap dapat memuatnya otomatis dan ownership schema mudah ditelusuri.
 

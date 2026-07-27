@@ -74,7 +74,7 @@
                             class="form-control {{ $passwordErrorMessage ? 'is-invalid' : '' }}"
                             placeholder="{{ $passwordPlaceholder }}"
                             autocomplete="current-password"
-                            @if ($passwordModel) wire:model="{{ $passwordModel }}" @endif
+                            @if ($passwordModel) wire:model.defer="{{ $passwordModel }}" @endif
                         >
                         @if ($passwordErrorMessage)
                             <div class="invalid-feedback">{{ $passwordErrorMessage }}</div>

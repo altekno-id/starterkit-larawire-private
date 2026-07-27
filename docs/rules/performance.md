@@ -54,9 +54,13 @@ Aturan ini berlaku otomatis untuk starterkit dan seluruh project turunannya. Use
 
 ## Asset
 
-- Muat asset lokal minified secara langsung, satu kali per layout, dengan cache busting yang stabil.
-- Jangan memuat bundle, font, CSS, JavaScript, package, atau pipeline build yang tidak digunakan oleh template.
-- Script non-kritis memakai `defer`; script theme yang mencegah flash warna boleh berjalan sebelum body.
+- Asset global starter yang benar-benar dipakai semua halaman—Tabler, Livewire/Alpine, theme script, dan `starter-runtime.js`—tetap dilayani lokal dari `public/assets` dan dimuat satu kali oleh layout. Jangan memindahkan asset inti ke CDN atau menjadikannya dependency feature.
+- CSS/JS custom halaman app wajib berada dekat view pemilik: `resources/views/apps/<subdomain>/<module>/assets/<page>.css.blade.php` dan/atau `<page>.js.blade.php`. Blade utama hanya meng-include asset miliknya; jangan memasukkan asset halaman ke layout global atau halaman yang tidak memakainya.
+- Pada Livewire, CSS/dependency dimuat melalui `@assets` dan JavaScript inisialisasi melalui `@script`, sehingga asset hanya dipasang sekali dan lifecycle-nya aman saat render ulang. Blade non-Livewire memakai stack `page-styles` dan `page-scripts` yang disediakan layout.
+- Pecah asset Blade yang panjang menjadi partial di folder `assets/` yang sama. Jangan membuat file CSS/JS custom global terpisah hanya untuk kerapian. Asset vendor pihak ketiga tetap berupa file lokal/minified di `public/assets/apps/<subdomain>/vendor/` agar dapat di-cache browser; tag dan inisialisasinya tetap page-scoped.
+- Jangan memuat bundle, font, CSS, JavaScript, package, atau pipeline build yang tidak dipakai template. Script non-kritis memakai `defer`; script theme yang mencegah flash warna boleh berjalan sebelum body.
+- CDN dilarang untuk UI dasar atau library umum. Pengecualian hanya SDK pihak ketiga yang tidak dapat di-host sendiri, setelah alasan feature disetujui, versinya dikunci, dimuat `defer`, dan URL-nya tidak berasal dari input user.
+- Asset atau script halaman tidak boleh memakai `data-navigate-once`; atribut itu hanya untuk runtime global singleton. Asset versioned yang perlu memaksa reload saat berubah memakai `data-navigate-track`.
 - Production tidak membutuhkan Node/Vite server. Proses build hanya diperlukan bila source hasil build memang dipakai oleh view.
 
 ## Verifikasi

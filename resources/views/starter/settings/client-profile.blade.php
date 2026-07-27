@@ -50,19 +50,19 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Nama Perusahaan</label>
-                    <input type="text" class="form-control @error('clientForm.name') is-invalid @enderror" wire:model="clientForm.name">
+                    <input type="text" class="form-control @error('clientForm.name') is-invalid @enderror" wire:model.defer="clientForm.name">
                     @error('clientForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Nama PIC</label>
-                    <input type="text" class="form-control @error('clientForm.pic_name') is-invalid @enderror" wire:model="clientForm.pic_name">
+                    <input type="text" class="form-control @error('clientForm.pic_name') is-invalid @enderror" wire:model.defer="clientForm.pic_name">
                     @error('clientForm.pic_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Telepon</label>
-                    <input type="text" class="form-control @error('clientForm.phone') is-invalid @enderror" wire:model="clientForm.phone">
+                    <input type="text" class="form-control @error('clientForm.phone') is-invalid @enderror" wire:model.defer="clientForm.phone">
                     @error('clientForm.phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
             </div>
@@ -71,7 +71,7 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Email Perusahaan</label>
-                    <input type="email" class="form-control @error('clientForm.email') is-invalid @enderror" wire:model="clientForm.email">
+                    <input type="email" class="form-control @error('clientForm.email') is-invalid @enderror" wire:model.defer="clientForm.email">
                     @error('clientForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
             </div>

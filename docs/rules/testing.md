@@ -26,7 +26,8 @@ php artisan test --compact
 - Authorization: role diizinkan, role ditolak, dan perlindungan Superuser.
 - Livewire: render, validation, action, redirect, toast/modal event.
 - Route/menu/module: route name, middleware, `starter:sync --dry-run`, akses role.
-- UI JavaScript: test server metadata/endpoint dan browser test perilaku nyata.
+- UI JavaScript: test server metadata/endpoint dan browser test perilaku nyata. Pastikan asset halaman tidak termuat pada halaman lain, form normal tidak mengirim request ketika mengetik, dan navigasi masuk → pindah → kembali tidak menggandakan script, listener, modal, dropdown, atau instance library.
+- UI halaman: uji data kosong, sedikit, dan banyak sesuai relevansi. Pastikan pola komponen mengikuti contoh terdekat di `docs/template`, informasi utama mudah dipindai, status tidak hanya dibedakan oleh warna, dan desktop/mobile tetap proporsional.
 - Shared hosting/config: perintah production seperti `php artisan optimize` diuji hanya saat menyiapkan deployment pada environment production-like; jangan mengaktifkan config cache selama development rutin.
 - Security/session: login throttle per akun dan IP, trusted/untrusted host, safe redirect, security header, revokasi session setelah perubahan password, backward compatibility session existing, serta `starter:security-check` local/production.
 - Performance: pagination berjalan di database, query tidak bertambah per-row, input search dibatasi, bulk action tidak memuat seluruh tabel, dan layout/daftar kritis memiliki batas atas query bila relevan.

@@ -32,8 +32,11 @@ Gunakan checklist ini untuk setiap feature non-trivial pada project yang dibangu
 
 - Class: `app/Livewire/Apps/<AppStudly>/<ModuleStudly>/`.
 - View: `resources/views/apps/<app-key>/<module-key>/`.
+- CSS/JS custom halaman berada di `assets/<page>.css.blade.php` dan/atau `assets/<page>.js.blade.php` di samping view pemilik. Jangan memuat asset halaman dari layout global; ikuti lifecycle `@assets`/`@script` pada `ui-ux.md`.
 - Gunakan `#[Layout('layouts::app')]`.
 - State tetap di server; Alpine/JavaScript hanya untuk interaksi client yang tidak cocok menjadi request Livewire.
+- Form normal memakai `wire:model.defer` dan `wire:submit`; live request hanya untuk pengecualian yang diizinkan `ui-ux.md`.
+- Tentukan jenis dan volume data sebelum menata UI, lalu gunakan router `docs/template` pada `ui-ux.md` untuk membuka satu sampai tiga contoh Tabler terdekat. Gunakan tabel untuk data banyak yang perlu dibandingkan, dan card/list/detail untuk ringkasan atau data sedikit; jangan mendesain dari nol.
 - Gunakan komponen/markup Tabler dari referensi project; baca `ui-ux.md`.
 - Terapkan query, pagination, cache, dan batas resource dari `performance.md` tanpa menunggu user menyebutkannya.
 
@@ -97,3 +100,4 @@ Dry run wajib diperiksa sebelum apply. Sync dapat menghapus metadata yang tidak 
 - Test server-side pagination/query budget bila data feature dapat bertambah.
 - Jalankan Pint dan test sesuai `testing.md`.
 - Bila UI berubah, lakukan pengujian browser pada ukuran desktop dan mobile yang relevan.
+- Uji empty state serta data sedikit dan banyak bila halaman menampilkan data; pastikan komponen yang dipilih tetap padat, informatif, dan mudah dipindai.

@@ -22,7 +22,7 @@
                     x-bind:type="visible ? 'text' : 'password'"
                     class="form-control @error('password') is-invalid @enderror"
                     id="lock-screen-password"
-                    wire:model="password"
+                    wire:model.defer="password"
                     autofocus
                     autocomplete="current-password"
                     placeholder="Masukkan password"

@@ -152,7 +152,7 @@
                                         id="role-can-manage-settings"
                                         type="checkbox"
                                         class="form-check-input"
-                                        wire:model="roleForm.can_manage_settings"
+                                        wire:model.defer="roleForm.can_manage_settings"
                                         @disabled($isSuperuserRole)
                                         aria-describedby="role-settings-access-description"
                                     >
@@ -186,7 +186,7 @@
                                         id="role-can-view-logs"
                                         type="checkbox"
                                         class="form-check-input"
-                                        wire:model="roleForm.can_view_logs"
+                                        wire:model.defer="roleForm.can_view_logs"
                                         @disabled($isSuperuserRole)
                                         aria-describedby="role-logs-access-description"
                                     >
@@ -206,7 +206,7 @@
                                     type="text"
                                     class="form-control @error('roleForm.code') is-invalid @enderror"
                                     placeholder="contoh: supervisor"
-                                    wire:model="roleForm.code"
+                                    wire:model.defer="roleForm.code"
                                     @readonly($isSuperuserRole)
                                 >
                                 <div class="form-hint">Huruf kecil, angka, tanda hubung, atau underscore.</div>
@@ -218,7 +218,7 @@
                                     type="text"
                                     class="form-control @error('roleForm.name') is-invalid @enderror"
                                     placeholder="contoh: Supervisor Operasional"
-                                    wire:model="roleForm.name"
+                                    wire:model.defer="roleForm.name"
                                     @readonly($isSuperuserRole)
                                 >
                                 @error('roleForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -229,7 +229,7 @@
                                     class="form-control @error('roleForm.desc') is-invalid @enderror"
                                     rows="4"
                                     placeholder="Jelaskan tanggung jawab dan batasan akses role ini."
-                                    wire:model="roleForm.desc"
+                                    wire:model.defer="roleForm.desc"
                                     @readonly($isSuperuserRole)
                                 ></textarea>
                                 @error('roleForm.desc') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -354,7 +354,7 @@
                                                                         type="radio"
                                                                         class="form-check-input w-3 h-3 ms-n4"
                                                                         value="{{ $menu->id }}"
-                                                                        wire:model.live="roleForm.landing_menu_ids.{{ $appId }}"
+                                                                        wire:model.defer="roleForm.landing_menu_ids.{{ $appId }}"
                                                                         @disabled($isSuperuserRole)
                                                                     >
                                                                     <span class="form-check-label small">

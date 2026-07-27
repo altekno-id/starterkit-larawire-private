@@ -2,7 +2,7 @@
     <form wire:submit="authenticate" autocomplete="on">
         <div class="mb-3">
             <label class="form-label" for="username">Username</label>
-            <input type="text" class="form-control @error('form.username') is-invalid @enderror" id="username" wire:model="form.username" placeholder="Username" autofocus autocomplete="username">
+            <input type="text" class="form-control @error('form.username') is-invalid @enderror" id="username" wire:model.defer="form.username" placeholder="Username" autofocus autocomplete="username">
             @error('form.username')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -10,7 +10,7 @@
 
         <div class="mb-2">
             <label class="form-label" for="password">Password</label>
-            <input type="password" class="form-control @error('form.password') is-invalid @enderror" id="password" wire:model="form.password" placeholder="Password" autocomplete="current-password">
+            <input type="password" class="form-control @error('form.password') is-invalid @enderror" id="password" wire:model.defer="form.password" placeholder="Password" autocomplete="current-password">
             @error('form.password')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -18,7 +18,7 @@
 
         @if ($rememberMeEnabled)
             <label class="form-check mb-4">
-                <input type="checkbox" class="form-check-input" id="remember" wire:model="form.remember">
+                <input type="checkbox" class="form-check-input" id="remember" wire:model.defer="form.remember">
                 <span class="form-check-label">Ingat saya di perangkat ini</span>
             </label>
         @else

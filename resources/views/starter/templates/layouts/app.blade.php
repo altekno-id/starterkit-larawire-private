@@ -295,6 +295,7 @@
             display: block;
         }
     </style>
+    @stack('page-styles')
     @livewireStyles
 </head>
 
@@ -437,6 +438,7 @@
     <script src="{{ asset('assets/tabler/dist/js/tabler.min.js') }}?v={{ filemtime(public_path('assets/tabler/dist/js/tabler.min.js')) }}" defer></script>
     <script src="{{ asset('assets/starter/js/starter-runtime.js') }}?v={{ filemtime(public_path('assets/starter/js/starter-runtime.js')) }}" data-navigate-once defer></script>
     @livewireScripts
+    @stack('page-scripts')
 </body>
 
 </html>

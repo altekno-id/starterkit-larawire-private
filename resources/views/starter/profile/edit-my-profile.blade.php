@@ -130,12 +130,12 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label" for="profile-display-name">Nama Tampilan</label>
-                                    <input type="text" id="profile-display-name" class="form-control @error('accountForm.name') is-invalid @enderror" wire:model="accountForm.name" autocomplete="name">
+                                    <input type="text" id="profile-display-name" class="form-control @error('accountForm.name') is-invalid @enderror" wire:model.defer="accountForm.name" autocomplete="name">
                                     @error('accountForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="profile-email">Email Login</label>
-                                    <input type="email" id="profile-email" class="form-control @error('accountForm.email') is-invalid @enderror" wire:model="accountForm.email" autocomplete="email">
+                                    <input type="email" id="profile-email" class="form-control @error('accountForm.email') is-invalid @enderror" wire:model.defer="accountForm.email" autocomplete="email">
                                     @error('accountForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
@@ -179,7 +179,7 @@
                                             type="password"
                                             id="profile-current-password"
                                             class="form-control @error('passwordForm.current_password') is-invalid @enderror"
-                                            wire:model="passwordForm.current_password"
+                                            wire:model.defer="passwordForm.current_password"
                                             autocomplete="current-password"
                                             @error('passwordForm.current_password') aria-invalid="true" aria-describedby="profile-current-password-error" @enderror
                                         >
@@ -210,7 +210,7 @@
                                             type="password"
                                             id="profile-new-password"
                                             class="form-control @error('passwordForm.password') is-invalid @enderror"
-                                            wire:model="passwordForm.password"
+                                            wire:model.defer="passwordForm.password"
                                             autocomplete="new-password"
                                             @error('passwordForm.password') aria-invalid="true" aria-describedby="profile-new-password-error" @enderror
                                         >
@@ -242,7 +242,7 @@
                                             type="password"
                                             id="profile-password-confirmation"
                                             class="form-control @error('passwordForm.password_confirmation') is-invalid @enderror"
-                                            wire:model="passwordForm.password_confirmation"
+                                            wire:model.defer="passwordForm.password_confirmation"
                                             autocomplete="new-password"
                                             @error('passwordForm.password_confirmation') aria-invalid="true" aria-describedby="profile-password-confirmation-error" @enderror
                                         >

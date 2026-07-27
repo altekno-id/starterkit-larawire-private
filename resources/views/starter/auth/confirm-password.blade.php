@@ -22,7 +22,7 @@
                     x-bind:type="visible ? 'text' : 'password'"
                     class="form-control @error('password') is-invalid @enderror"
                     id="confirm-password"
-                    wire:model="password"
+                    wire:model.defer="password"
                     autofocus
                     autocomplete="current-password"
                     placeholder="Masukkan password saat ini"

@@ -41,23 +41,23 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label" for="user-name">Nama Tampilan</label>
-                                <input type="text" id="user-name" class="form-control @error('userForm.name') is-invalid @enderror" wire:model="userForm.name" autocomplete="name">
+                                <input type="text" id="user-name" class="form-control @error('userForm.name') is-invalid @enderror" wire:model.defer="userForm.name" autocomplete="name">
                                 @error('userForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label" for="user-username">Username</label>
-                                <input type="text" id="user-username" class="form-control @error('userForm.username') is-invalid @enderror" wire:model="userForm.username" autocomplete="username">
+                                <input type="text" id="user-username" class="form-control @error('userForm.username') is-invalid @enderror" wire:model.defer="userForm.username" autocomplete="username">
                                 @error('userForm.username') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label" for="user-email">Email</label>
-                                <input type="email" id="user-email" class="form-control @error('userForm.email') is-invalid @enderror" wire:model="userForm.email" autocomplete="email">
+                                <input type="email" id="user-email" class="form-control @error('userForm.email') is-invalid @enderror" wire:model.defer="userForm.email" autocomplete="email">
                                 <div class="form-hint">Digunakan untuk notifikasi dan persiapan reset password mandiri.</div>
                                 @error('userForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label" for="user-status">Status</label>
-                                <select id="user-status" class="form-select @error('userForm.status') is-invalid @enderror" wire:model="userForm.status">
+                                <select id="user-status" class="form-select @error('userForm.status') is-invalid @enderror" wire:model.defer="userForm.status">
                                     <option value="active">Aktif</option>
                                     <option value="inactive">Nonaktif</option>
                                     <option value="locked">Terkunci</option>

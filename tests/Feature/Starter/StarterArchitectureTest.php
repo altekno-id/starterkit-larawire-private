@@ -97,3 +97,31 @@ test('app migration folders are registered dynamically for artisan migration com
         File::deleteDirectory($migrationDirectory);
     }
 });
+
+test('layouts expose page-scoped asset stacks', function () {
+    $layouts = [
+        resource_path('views/starter/templates/layouts/app.blade.php'),
+        resource_path('views/starter/templates/layouts/auth.blade.php'),
+        resource_path('views/starter/templates/layouts/landing.blade.php'),
+    ];
+
+    foreach ($layouts as $layout) {
+        expect(File::get($layout), $layout)
+            ->toContain("@stack('page-styles')")
+            ->toContain("@stack('page-scripts')");
+    }
+});
+
+test('starter form fields defer ordinary Livewire updates', function () {
+    $ordinaryBindings = collect(File::allFiles(resource_path('views/starter')))
+        ->flatMap(function ($file): array {
+            preg_match_all('/<(?:input|select|textarea)\\b(?:(?!>).)*\\bwire:model="[^"]+"[^>]*>/s', $file->getContents(), $matches);
+
+            return $matches[0];
+        })
+        ->reject(fn (string $tag): bool => preg_match('/\\btype="file"/', $tag) === 1)
+        ->values()
+        ->all();
+
+    expect($ordinaryBindings)->toBe([]);
+});

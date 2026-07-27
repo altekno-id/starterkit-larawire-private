@@ -12,7 +12,7 @@
     @else
         <div class="alert alert-info mb-3" role="note">
             <div class="d-flex gap-2">
-                @include('templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm flex-shrink-0 mt-1'])
+                @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm flex-shrink-0 mt-1'])
                 <div>
                     <div class="fw-semibold">Akun dikelola oleh Superuser</div>
                     <div class="small">User tidak dapat melakukan register atau reset password sendiri.</div>
@@ -37,7 +37,7 @@
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-8">
-                    <input type="search" class="form-control" placeholder="Cari nama, username, email, atau role" wire:model.live.debounce.250ms="search">
+                    <input type="search" class="form-control" maxlength="100" placeholder="Cari nama, username, email, atau role" wire:model.live.debounce.350ms="search">
                 </div>
                 <div class="col-md-4">
                     <select class="form-select" wire:model.live="statusFilter">
@@ -64,7 +64,7 @@
                     data-user-create-location="content"
                     data-starter-navigate
                 >
-                    @include('templates.layouts.icon', ['name' => 'user-plus', 'class' => 'icon-sm me-1'])
+                    @include('starter.templates.layouts.icon', ['name' => 'user-plus', 'class' => 'icon-sm me-1'])
                     Tambah User
                 </a>
             </div>
@@ -90,7 +90,7 @@
                             </td>
                             <td>
                                 <div>{{ $user->role?->name ?? '-' }}</div>
-                                <div class="small text-secondary">{{ $user->role?->isSuperuser() ? 'Akses penuh' : \App\Support\Starter\StarterNumber::decimal($user->role?->mods?->count() ?? 0).' module' }}</div>
+                                <div class="small text-secondary">{{ $user->role?->isSuperuser() ? 'Akses penuh' : \App\Support\Starter\StarterNumber::decimal($user->role?->mods_count ?? 0).' module' }}</div>
                             </td>
                             <td>
                                 <span class="status {{ $user->status === 'active' ? 'status-green' : 'status-red' }} status-lite">{{ ['active' => 'Aktif', 'inactive' => 'Nonaktif', 'locked' => 'Terkunci'][$user->status] ?? $user->status }}</span>
@@ -125,7 +125,7 @@
         @endif
     </div>
 
-    @include('templates.components.danger-modal', [
+    @include('starter.templates.components.danger-modal', [
         'id' => 'reset-user-password-modal',
         'title' => 'Reset password user?',
         'message' => filled($passwordResetUserName)

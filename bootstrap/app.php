@@ -1,76 +1,27 @@
 <?php
 
-use App\Http\Middleware\StarterAdmin;
-use App\Http\Middleware\StarterAuthorize;
-use App\Http\Middleware\StarterEnsureActiveUser;
-use App\Http\Middleware\StarterForcePasswordChange;
-use App\Http\Middleware\StarterLockScreen;
-use App\Http\Middleware\StarterLogAccess;
-use App\Http\Middleware\StarterSecurityHeaders;
-use App\Models\Starter\ClientLogin;
-use App\Services\Starter\NavigationAuthorizedRedirectService;
-use App\Support\Starter\StarterNavigation;
-use App\Support\Starter\StarterRouteRegistrar;
-use Illuminate\Auth\AuthenticationException;
+use App\Support\Starter\StarterBootstrap;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
-        using: function () {
-            Route::middleware('web')
-                ->group(base_path('routes/starter.php'));
+        using: function (): void {
+            StarterBootstrap::registerRoutes();
 
             Route::middleware('web')
                 ->domain(config('app.domain'))
                 ->group(base_path('routes/web.php'));
-
-            StarterRouteRegistrar::registerAll();
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append(StarterSecurityHeaders::class);
-
-        $middleware->alias([
-            'starter.admin' => StarterAdmin::class,
-            'starter.authorize' => StarterAuthorize::class,
-            'starter.active' => StarterEnsureActiveUser::class,
-            'starter.password-change' => StarterForcePasswordChange::class,
-            'starter.logs' => StarterLogAccess::class,
-            'starter.lock' => StarterLockScreen::class,
-        ]);
-
-        $middleware->redirectGuestsTo(fn ($request) => StarterNavigation::authLoginUrl($request->fullUrl()));
-        $middleware->redirectUsersTo(function ($request): string {
-            $login = $request->user();
-
-            return $login instanceof ClientLogin
-                ? app(NavigationAuthorizedRedirectService::class)->forLogin($login, $request->query('redirect'))
-                : url('/');
-        });
+        StarterBootstrap::configureMiddleware($middleware);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (AuthenticationException $exception, Request $request) {
-            $loginUrl = StarterNavigation::authLoginUrl($request->fullUrl());
-
-            if ($request->headers->get('X-Livewire-Navigate') === '1') {
-                return response()
-                    ->view('templates.session-expired', ['loginUrl' => $loginUrl])
-                    ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-            }
-
-            if ($request->headers->get('X-Livewire') === '1') {
-                return response()->json([
-                    'message' => $exception->getMessage(),
-                    'redirect' => $loginUrl,
-                ], 401);
-            }
-
-            return null;
-        });
-    })->create();
+        StarterBootstrap::configureExceptions($exceptions);
+    })
+    ->create();

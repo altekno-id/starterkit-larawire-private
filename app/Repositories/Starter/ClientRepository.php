@@ -12,10 +12,10 @@ class ClientRepository implements ClientInterface
         return Client::query()->firstOrFail();
     }
 
-    public function update(Client $client, array $data): Client
+    public function updateProfile(Client $client, array $data): Client
     {
         $client->forceFill($data)->save();
 
-        return $client->refresh();
+        return $client;
     }
 }

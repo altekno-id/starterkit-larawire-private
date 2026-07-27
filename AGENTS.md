@@ -14,9 +14,17 @@ Dokumen ini adalah kontrak eksekusi untuk setiap model AI yang mengembangkan pro
 
 Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal project atau ketika konteks percakapan hilang.
 
+## Kontrak default feature
+
+- User/developer cukup menjelaskan kebutuhan bisnis, flow, data, dan role yang relevan. Jangan meminta mereka mengulang standar teknis starterkit.
+- Secara otomatis terapkan authorization, validation, proteksi injection/mass-assignment, server-side pagination untuk data yang dapat tumbuh, query efisien, audit log, transaksi, locale/format, pola Livewire/Alpine, UI state, migration production-safe, dan test sesuai rule pemilik.
+- Seluruh feature untuk app/subdomain wajib mengikuti struktur `Apps/<Subdomain>` pada layer yang dipakai. Baca `docs/rules/architecture.md` sebelum membuat file feature app baru; jangan mencampurnya dengan folder Starter atau root project.
+- Migration feature app wajib berada di `database/migrations/apps/<subdomain>/`, bukan root `database/migrations`; folder tersebut dimuat otomatis saat perintah Artisan migration berjalan.
+- Bila sebuah standar tidak relevan, lewati tanpa menambah code seremonial. Bila requirement meminta deviasi, jelaskan risiko dan minta keputusan eksplisit.
+
 ## Kontrak anti-asumsi
 
-- Sebelum merencanakan atau mengubah code, telusuri flow existing dari route/menu → Livewire/controller → service → model/migration → test/config terkait.
+- Sebelum merencanakan atau mengubah code, telusuri flow existing dari route/menu → Livewire/controller → service → interface/repository → model/migration → test/config terkait.
 - Nyatakan sesuatu sebagai kondisi existing hanya setelah dibuktikan dari code, schema, config, test, atau output command. Jangan mengarang route, tabel, kolom, role, status, config key, integration, atau business rule.
 - Pisahkan requirement terkonfirmasi, temuan existing, proposal teknis, dan pertanyaan terbuka. Proposal tidak boleh ditulis seolah-olah keputusan user.
 - Jika keputusan bisnis/authorization/data yang tidak dapat ditemukan akan mengubah hasil secara material, hentikan bagian yang bergantung padanya dan minta keputusan; jangan memilih diam-diam.
@@ -30,7 +38,6 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 
 | Jika tugas menyangkut | Baca hanya |
 |---|---|
-| Planning feature/bug/refactor non-trivial | `docs/rules/issue-workflow.md` |
 | Menambah/mengubah feature dalam app | `docs/rules/feature-development.md` |
 | App atau subdomain baru | `docs/rules/app-subdomain.md` |
 | Route, menu, module, atau role | `docs/rules/access-control.md` |
@@ -38,6 +45,7 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 | Livewire, form, tabel, modal, loader | `docs/rules/ui-ux.md` |
 | Konfigurasi, upload, login, lock screen | `docs/rules/security-and-config.md` |
 | PHP/Laravel conventions | `docs/rules/code-style.md` |
+| Query, pagination, cache, bulk action, atau asset | `docs/rules/performance.md` |
 | Locale, angka, tanggal, atau currency | `docs/rules/localization-and-formatting.md` |
 | Pengujian dan definition of done | `docs/rules/testing.md` |
 | Shared hosting/deployment | `docs/rules/deployment.md` |
@@ -46,16 +54,14 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 ## Cara kerja hemat token
 
 1. Cari file terkait dengan `rg`; baca sibling terdekat sebelum mengubah code.
-2. Untuk implementasi issue, baca issue aktif, file yang disebut di dalamnya, dan rule yang relevan.
+2. Untuk implementasi, baca file flow existing dan rule yang relevan; jangan membuat artefak planning di repository kecuali diminta.
 3. Jangan membaca seluruh `docs/template/tabler-components`. Cari komponen dengan `rg`, lalu buka 1–3 referensi terdekat.
-4. Jangan menyalin ulang aturan umum ke issue. Tulis keputusan bisnis dan kontrak implementasi yang spesifik pada pekerjaan tersebut.
-5. Jangan membuat dokumentasi baru selain issue yang diwajibkan workflow atau perubahan rule yang memang diminta.
+4. Jangan menyalin ulang aturan umum ke dokumen feature.
+5. Jangan membuat issue/archive atau dokumentasi planning di repository kecuali diminta eksplisit.
 
 ## Aturan eksekusi
 
-- Feature, bugfix, refactor, atau perubahan teknis non-trivial dimulai dari issue berbasis bukti di `docs/issues`; lihat `docs/rules/issue-workflow.md`.
 - Perubahan trivial seperti typo/dokumentasi murni dapat langsung dikerjakan bila tidak mengubah business flow, authorization, data, API, atau deployment.
-- Jika user meminta langsung eksekusi, buat/update issue lalu lanjut implementasi tanpa menunggu approval tambahan selama tidak ada keputusan material yang belum jelas.
 - Jika user hanya meminta planning/review/diagnosis, jangan mengubah code atau state di luar artefak planning yang diminta.
 - Gunakan `php artisan make:* --no-interaction` untuk file Laravel.
 - Migration wajib aman untuk data production dan data existing; jangan mengandalkan database kosong.
@@ -63,3 +69,10 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 - Setelah mengubah PHP, jalankan `vendor/bin/pint --dirty --format agent`.
 - Jalankan test terfokus lebih dahulu, lalu suite yang relevan.
 - Jangan menghapus test tanpa persetujuan.
+
+## Evolusi rules
+
+- Sebelum mengeksekusi code, nilai apakah instruksi baru dari user/developer bersifat reusable dan cocok menjadi standar starterkit atau project turunannya.
+- Jika cocok, minta konfirmasi singkat sebelum eksekusi. Setelah disetujui, perbarui rule pemilik yang paling relevan dalam perubahan yang sama tanpa menunggu permintaan lanjutan.
+- Jangan menjadikan keputusan bisnis sekali pakai, detail satu feature, nilai rahasia, atau workaround sementara sebagai rule global.
+- Tulis rule secara umum, ringkas, dapat dieksekusi, dan tidak menduplikasi rule lain. Jika bertentangan dengan rule existing, jelaskan konflik dan minta keputusan eksplisit sebelum menggantinya.

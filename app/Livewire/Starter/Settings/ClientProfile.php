@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Starter\Settings;
 
+use App\Contracts\Starter\ClientInterface;
 use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
+use App\Services\Starter\AuthenticatedLoginService;
 use App\Services\Starter\ProfileService;
 use App\Services\Starter\StarterConfigService;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +18,14 @@ use Livewire\WithFileUploads;
 class ClientProfile extends Component
 {
     use WithFileUploads;
+
+    private ClientInterface $clients;
+
+    private ProfileService $profiles;
+
+    private StarterConfigService $configs;
+
+    private AuthenticatedLoginService $authenticatedLogins;
 
     public bool $embedded = false;
 
@@ -30,6 +40,18 @@ class ClientProfile extends Component
     public mixed $clientPhotoUpload = null;
 
     public bool $clientPhotoReset = false;
+
+    public function boot(
+        ClientInterface $clients,
+        ProfileService $profiles,
+        StarterConfigService $configs,
+        AuthenticatedLoginService $authenticatedLogins,
+    ): void {
+        $this->clients = $clients;
+        $this->profiles = $profiles;
+        $this->configs = $configs;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
 
     public function mount(bool $embedded = false): void
     {
@@ -46,7 +68,12 @@ class ClientProfile extends Component
             'clientForm.email' => ['nullable', 'email', 'max:255'],
             'clientForm.phone' => ['nullable', 'string', 'max:255'],
             'clientForm.pic_name' => ['nullable', 'string', 'max:255'],
-            'clientPhotoUpload' => ['nullable', 'image', 'max:'.app(StarterConfigService::class)->uploadImageMaxKilobytes()],
+            'clientPhotoUpload' => [
+                'nullable',
+                'image',
+                'dimensions:max_width=4096,max_height=4096',
+                'max:'.$this->configs->uploadImageMaxKilobytes(),
+            ],
         ], [], [
             'clientForm.name' => 'client name',
             'clientForm.email' => 'client email',
@@ -65,7 +92,7 @@ class ClientProfile extends Component
             );
         }
 
-        $updatedClient = app(ProfileService::class)->updateClientProfile($this->login(), [
+        $updatedClient = $this->profiles->updateClientProfile($this->login(), [
             'name' => $validated['name'],
             'email' => $validated['email'] ?? null,
             'phone' => $validated['phone'] ?? null,
@@ -90,7 +117,7 @@ class ClientProfile extends Component
         $oldLogo = (string) $client->logo;
 
         if ($oldLogo) {
-            $updatedClient = app(ProfileService::class)->updateClientProfile($this->login(), [
+            $updatedClient = $this->profiles->updateClientProfile($this->login(), [
                 ...$this->clientForm,
                 'logo' => null,
             ]);
@@ -108,29 +135,23 @@ class ClientProfile extends Component
 
     public function render()
     {
+        $client = $this->client();
+
         return view('starter.settings.client-profile', [
-            'client' => $this->client(),
-            'clientLogoPreviewUrl' => $this->clientLogoPreviewUrl(),
+            'client' => $client,
+            'clientLogoPreviewUrl' => $this->clientLogoPreviewUrl($client),
             'clientInitials' => $this->clientInitials(),
         ])->title('Profil Perusahaan');
     }
 
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-
-        abort_unless($login instanceof ClientLogin && ($login->loadMissing('role')->role?->canManageSettings() ?? false), 403);
-
-        return $login;
+        return $this->authenticatedLogins->settingsManager();
     }
 
     private function client(): Client
     {
-        $client = Client::query()->first();
-
-        abort_unless($client instanceof Client, 403);
-
-        return $client;
+        return $this->clients->current();
     }
 
     private function fillFromClient(Client $client): void
@@ -143,7 +164,7 @@ class ClientProfile extends Component
         ];
     }
 
-    private function clientLogoPreviewUrl(): ?string
+    private function clientLogoPreviewUrl(Client $client): ?string
     {
         if ($this->clientPhotoUpload instanceof TemporaryUploadedFile) {
             return $this->clientPhotoUpload->temporaryUrl();
@@ -153,28 +174,25 @@ class ClientProfile extends Component
             return null;
         }
 
-        return $this->logoUrl($this->client()->logo);
+        return $this->logoUrl($client);
     }
 
     private function dispatchClientBrandingUpdated(Client $client): void
     {
         $this->dispatch(
             'starter-client-branding-updated',
-            logoUrl: $this->logoUrl($client->logo),
+            logoUrl: $this->logoUrl($client),
             clientName: $client->name,
         );
     }
 
-    private function logoUrl(?string $logo): ?string
+    private function logoUrl(Client $client): ?string
     {
-        $logo = trim((string) $logo);
+        $logo = trim((string) $client->logo);
+        $ownedPrefix = "storage/starter/client-photos/{$client->id}/";
 
-        if ($logo === '') {
+        if ($logo === '' || ! str_starts_with($logo, $ownedPrefix)) {
             return null;
-        }
-
-        if (str_starts_with($logo, 'http://') || str_starts_with($logo, 'https://') || str_starts_with($logo, '//')) {
-            return $logo;
         }
 
         return asset(ltrim($logo, '/'));

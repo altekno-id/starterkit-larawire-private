@@ -8,7 +8,7 @@
             </div>
             <div class="col-auto">
                 <a href="{{ route('starter.settings', ['section' => 'users']) }}" class="btn" data-starter-navigate>
-                    @include('templates.layouts.icon', ['name' => 'arrow-left', 'class' => 'icon-sm me-1'])
+                    @include('starter.templates.layouts.icon', ['name' => 'arrow-left', 'class' => 'icon-sm me-1'])
                     Kembali ke Users
                 </a>
             </div>
@@ -82,11 +82,11 @@
                     <div class="card-footer">
                         <div class="btn-list justify-content-end">
                             <a href="{{ route('starter.settings', ['section' => 'users']) }}" class="btn" data-starter-navigate>
-                                @include('templates.layouts.icon', ['name' => 'arrow-left', 'class' => 'icon-sm me-1'])
+                                @include('starter.templates.layouts.icon', ['name' => 'arrow-left', 'class' => 'icon-sm me-1'])
                                 Batal dan Kembali
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                @include('templates.layouts.icon', ['name' => 'check', 'class' => 'icon-sm me-1'])
+                                @include('starter.templates.layouts.icon', ['name' => 'check', 'class' => 'icon-sm me-1'])
                                 Simpan User
                             </button>
                         </div>
@@ -113,7 +113,7 @@
                         @if (! $selectedRole)
                             <div class="empty py-4">
                                 <div class="empty-icon">
-                                    @include('templates.layouts.icon', ['name' => 'shield-lock'])
+                                    @include('starter.templates.layouts.icon', ['name' => 'shield-lock'])
                                 </div>
                                 <p class="empty-title">Pilih role</p>
                                 <p class="empty-subtitle text-secondary">Akses app dan module dari role akan ditampilkan di sini.</p>

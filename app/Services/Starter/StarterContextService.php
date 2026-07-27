@@ -5,10 +5,12 @@ namespace App\Services\Starter;
 use App\Contracts\Starter\AppInterface;
 use App\Contracts\Starter\AppModInterface;
 use App\Contracts\Starter\ClientInterface;
+use App\Contracts\Starter\ClientLoginInterface;
 use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\App;
 use App\Models\Starter\AppMenu;
 use App\Models\Starter\AppMod;
+use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -21,6 +23,7 @@ class StarterContextService
         private readonly AppModInterface $appMods,
         private readonly ClientRoleInterface $clientRoles,
         private readonly ClientInterface $clients,
+        private readonly ClientLoginInterface $clientLogins,
         private readonly StarterConfigService $configs,
     ) {}
 
@@ -49,13 +52,14 @@ class StarterContextService
         $login = auth()->user();
         $login = $login instanceof ClientLogin ? $login : null;
 
-        $login?->loadMissing('role');
+        $login = $login ? $this->clientLogins->loadRole($login) : null;
         $client = $login ? $this->clients->current() : null;
+        $modIds = $this->authorizedModIds($login);
 
-        $accessibleApps = $this->accessibleApps($login);
+        $accessibleApps = $this->accessibleApps($login, $modIds);
         $currentApp = $this->resolveCurrentApp($accessibleApps);
         $currentAppKey = $currentApp?->subdomain ?? 'landing';
-        $sidebarMods = $this->sidebarMods($login, $currentApp);
+        $sidebarMods = $this->sidebarMods($login, $currentApp, $modIds);
         $sidebarPayload = $this->sidebarPayload($sidebarMods);
 
         $lockScreenEnabled = $this->configs->boolean('security.lock_screen_enabled');
@@ -71,7 +75,7 @@ class StarterContextService
             'loginAvatarUrl' => $this->avatarUrl($login),
             'loginRoleName' => $login?->role?->name,
             'clientName' => $client?->name,
-            'clientLogoUrl' => $this->clientLogoUrl($client?->logo),
+            'clientLogoUrl' => $this->clientLogoUrl($client),
             'currentApp' => $currentApp,
             'currentAppKey' => $currentAppKey,
             'currentAppName' => $currentApp?->name,
@@ -119,9 +123,11 @@ class StarterContextService
     private function resolveCurrentApp(EloquentCollection $accessibleApps): ?App
     {
         $requestedAppKey = $this->requestedAppKey();
-        $requestedApp = $requestedAppKey ? $this->apps->findBySubdomain($requestedAppKey) : null;
+        $requestedApp = $requestedAppKey
+            ? $accessibleApps->firstWhere('subdomain', $requestedAppKey)
+            : null;
 
-        if ($requestedApp instanceof App && $accessibleApps->contains(fn (App $app): bool => $app->is($requestedApp))) {
+        if ($requestedApp instanceof App) {
             $this->rememberCurrentApp($requestedApp);
 
             return $requestedApp;
@@ -157,7 +163,7 @@ class StarterContextService
     /**
      * @return EloquentCollection<int, App>
      */
-    private function accessibleApps(?ClientLogin $login): EloquentCollection
+    private function accessibleApps(?ClientLogin $login, ?Collection $modIds): EloquentCollection
     {
         if (! $login) {
             return new EloquentCollection;
@@ -167,11 +173,7 @@ class StarterContextService
             return $this->apps->allOrderedByName();
         }
 
-        $modIds = $login->role
-            ? $this->clientRoles->modIds($login->role)
-            : collect();
-
-        if ($modIds->isEmpty()) {
+        if (! $modIds || $modIds->isEmpty()) {
             return new EloquentCollection;
         }
 
@@ -181,7 +183,7 @@ class StarterContextService
     /**
      * @return EloquentCollection<int, AppMod>
      */
-    private function sidebarMods(?ClientLogin $login, ?App $currentApp): EloquentCollection
+    private function sidebarMods(?ClientLogin $login, ?App $currentApp, ?Collection $modIds): EloquentCollection
     {
         if (! $login || ! $currentApp) {
             return new EloquentCollection;
@@ -200,13 +202,31 @@ class StarterContextService
             return $this->appMods->forApp($currentApp, $with);
         }
 
-        $modIds = $login->role
-            ? $this->clientRoles->modIds($login->role)
-            : collect();
-
-        return $modIds->isEmpty()
+        return ! $modIds || $modIds->isEmpty()
             ? new EloquentCollection
             : $this->appMods->forApp($currentApp, $with, $modIds->all());
+    }
+
+    /**
+     * Null means the authenticated role has full access.
+     *
+     * @return Collection<int, int>|null
+     */
+    private function authorizedModIds(?ClientLogin $login): ?Collection
+    {
+        if (! $login) {
+            return null;
+        }
+
+        if (! $login->role) {
+            return collect();
+        }
+
+        if ($login->role->hasFullAccess()) {
+            return null;
+        }
+
+        return $this->clientRoles->modIds($login->role);
     }
 
     /**
@@ -293,29 +313,27 @@ class StarterContextService
 
     public function avatarUrl(?ClientLogin $login): string
     {
-        $photo = $login?->profile_photo;
+        $photo = trim((string) $login?->profile_photo);
+        $ownedPrefix = $login ? "storage/starter/profile-photos/{$login->id}/" : null;
 
-        if (! $photo) {
-            return asset('assets/mine/avatar.png');
+        if ($photo === 'assets/starter/images/avatar.png') {
+            return asset($photo);
         }
 
-        if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://') || str_starts_with($photo, '//')) {
-            return $photo;
+        if ($photo === '' || ! $ownedPrefix || ! str_starts_with($photo, $ownedPrefix)) {
+            return asset('assets/starter/images/avatar.png');
         }
 
         return asset(ltrim($photo, '/'));
     }
 
-    private function clientLogoUrl(?string $logo): ?string
+    private function clientLogoUrl(?Client $client): ?string
     {
-        $logo = trim((string) $logo);
+        $logo = trim((string) $client?->logo);
+        $ownedPrefix = $client ? "storage/starter/client-photos/{$client->id}/" : null;
 
-        if ($logo === '') {
+        if ($logo === '' || ! $ownedPrefix || ! str_starts_with($logo, $ownedPrefix)) {
             return null;
-        }
-
-        if (str_starts_with($logo, 'http://') || str_starts_with($logo, 'https://') || str_starts_with($logo, '//')) {
-            return $logo;
         }
 
         return asset(ltrim($logo, '/'));

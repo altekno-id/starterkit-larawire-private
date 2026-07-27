@@ -15,6 +15,11 @@ class AppRepository implements AppInterface
             ->first();
     }
 
+    public function countRegistered(): int
+    {
+        return App::query()->count();
+    }
+
     public function allOrderedByName(): EloquentCollection
     {
         return App::query()

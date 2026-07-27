@@ -9,6 +9,7 @@ use App\Models\Starter\ClientLogin;
 use App\Support\Starter\StarterAppRegistry;
 use App\Support\Starter\StarterNavigation;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Throwable;
 
@@ -16,7 +17,8 @@ class NavigationAuthorizedRedirectService
 {
     public function __construct(
         private readonly AppRouteInterface $appRoutes,
-        private readonly ClientRoleInterface $clientRoles
+        private readonly ClientRoleInterface $clientRoles,
+        private readonly Router $router,
     ) {}
 
     public function forLogin(ClientLogin $login, ?string $redirect = null, ?string $intended = null): string
@@ -123,14 +125,13 @@ class NavigationAuthorizedRedirectService
             return $this->canAccessRouteName($login, $dashboardRoute);
         }
 
-        return $login->canAccessRoute($routeName);
+        return $this->appRoutes->viewerCanAccessNamedRoute($login, $routeName);
     }
 
     private function routeNameFromUrl(string $url): ?string
     {
         try {
-            $routeName = app('router')
-                ->getRoutes()
+            $routeName = $this->router->getRoutes()
                 ->match(Request::create($url, 'GET'))
                 ->getName();
 

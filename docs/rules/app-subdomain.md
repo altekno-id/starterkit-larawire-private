@@ -31,9 +31,16 @@ Gunakan `--no-sync` hanya jika file perlu dilengkapi sebelum metadata diterapkan
 7. Pastikan cookie/session domain mendukung root dan subdomain sesuai environment.
 8. Jalankan test generator, route, authorization, dan browser.
 
+## Migration app
+
+- Saat app memerlukan tabel, letakkan migration di `database/migrations/apps/<subdomain>/`. Folder dibuat otomatis oleh `make:migration` bila belum ada dan akan dimuat otomatis oleh starter saat `php artisan migrate` dijalankan.
+- Gunakan nama tabel berpola `{subdomain}_{module}_{entity}` dan buat model tanpa flag `-m`, lalu migration dengan path eksplisit. Lihat `code-style.md` untuk perintah dan aturan production-safe.
+- Satu deployment tetap menjalankan semua migration pending dari seluruh app lewat `php artisan migrate`; pemisahan folder adalah ownership source code, bukan database atau proses deployment terpisah.
+
 ## Navigasi lintas subdomain
 
 - URL root/auth/app dibentuk melalui named route dan `StarterNavigation`; jangan merangkai host atau URL login/logout secara manual di view.
+- `APP_URL` harus menunjuk root domain yang sama dengan `APP_DOMAIN`; middleware trusted hosts otomatis mengizinkan root dan app subdomain tanpa daftar manual.
 - Form logout selalu memakai method `POST`, CSRF, action route root yang valid, dan redirect tujuan yang lolos pemeriksaan safe redirect.
 - Uji login, session, lock screen, dan logout dari root domain serta app subdomain pada environment lokal dan domain production.
 
@@ -42,4 +49,4 @@ Gunakan `--no-sync` hanya jika file perlu dilengkapi sebelum metadata diterapkan
 - Jangan menambah daftar app manual di provider: registry melakukan discovery.
 - Jangan membuat app hanya dengan config atau hanya dengan route; keduanya wajib ada.
 - Jangan memakai route name dengan prefix app/module yang berbeda.
-- Jangan membuat route app global di `routes/starter.php`.
+- Jangan membuat route app global di `routes/starter/global.php` atau `routes/starter/web.php`.

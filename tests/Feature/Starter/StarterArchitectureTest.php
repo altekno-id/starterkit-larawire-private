@@ -1,0 +1,99 @@
+<?php
+
+use Illuminate\Support\Facades\File;
+
+test('presentation layer does not own persistence queries', function () {
+    $files = [
+        ...File::allFiles(app_path('Livewire')),
+        ...File::allFiles(app_path('Http/Controllers')),
+    ];
+
+    expect($files)->not->toBeEmpty();
+
+    foreach ($files as $file) {
+        $contents = $file->getContents();
+        $source = $file->getRelativePathname();
+
+        expect($contents, $source)
+            ->not->toMatch('/[A-Z][A-Za-z0-9_]*::query\s*\(/')
+            ->not->toMatch('/\bDB::/')
+            ->not->toMatch('/->(?:load|loadMissing)\s*\(/')
+            ->not->toMatch('/\bapp\s*\(/');
+    }
+});
+
+test('services keep model query construction in repositories', function () {
+    $files = File::allFiles(app_path('Services'));
+
+    expect($files)->not->toBeEmpty();
+
+    foreach ($files as $file) {
+        $contents = $file->getContents();
+        $source = $file->getRelativePathname();
+
+        expect($contents, $source)
+            ->not->toMatch('/[A-Z][A-Za-z0-9_]*::query\s*\(/')
+            ->not->toMatch('/->(?:load|loadMissing)\s*\(/')
+            ->not->toMatch('/\bapp\s*\(/');
+    }
+});
+
+test('starter infrastructure remains isolated from project extension folders', function () {
+    $rootMigrationNames = collect(File::files(database_path('migrations')))
+        ->map->getFilename()
+        ->filter(fn (string $name): bool => str_contains($name, 'starter')
+            || str_contains($name, 'x_packages')
+            || str_contains($name, 'x_password_reset_tokens')
+            || str_contains($name, 'drop_sessions_table_for_file_session_driver'))
+        ->values()
+        ->all();
+    $rootFeatureTestNames = collect(File::files(base_path('tests/Feature')))
+        ->map->getFilename()
+        ->filter(fn (string $name): bool => str_contains($name, 'Starter') || $name === 'PrivateAuthenticationTest.php')
+        ->values()
+        ->all();
+    $misplacedMiddleware = collect(File::allFiles(app_path('Http/Middleware')))
+        ->map->getPathname()
+        ->filter(fn (string $path): bool => str_starts_with(basename($path), 'Starter'))
+        ->reject(fn (string $path): bool => str_contains($path, '/Http/Middleware/Starter/'))
+        ->values()
+        ->all();
+    $misplacedRules = collect(File::allFiles(app_path('Rules')))
+        ->map->getPathname()
+        ->filter(fn (string $path): bool => str_starts_with(basename($path), 'Starter'))
+        ->reject(fn (string $path): bool => str_contains($path, '/Rules/Starter/'))
+        ->values()
+        ->all();
+
+    expect($misplacedMiddleware)->toBe([])
+        ->and($misplacedRules)->toBe([])
+        ->and($rootMigrationNames)->toBe([])
+        ->and(File::exists(resource_path('views/livewire/starter')))->toBeFalse()
+        ->and(File::exists(resource_path('views/templates')))->toBeFalse()
+        ->and(File::exists(resource_path('views/errors')))->toBeFalse()
+        ->and(File::exists(resource_path('views/landing/index.blade.php')))->toBeTrue()
+        ->and(File::exists(resource_path('views/starter/landing')))->toBeFalse()
+        ->and(File::exists(base_path('routes/starter/global.php')))->toBeTrue()
+        ->and(File::exists(base_path('routes/starter/web.php')))->toBeTrue()
+        ->and(File::exists(base_path('routes/starter.php')))->toBeFalse()
+        ->and(File::exists(public_path('assets/starter/js/starter-runtime.js')))->toBeTrue()
+        ->and(File::exists(public_path('assets/starter/images/avatar.png')))->toBeTrue()
+        ->and($rootFeatureTestNames)->toBe([]);
+});
+
+test('app migration folders are registered dynamically for artisan migration commands', function () {
+    $subdomain = 'architecture-test-app';
+    $migrationDirectory = database_path("migrations/apps/{$subdomain}");
+
+    File::ensureDirectoryExists($migrationDirectory);
+
+    try {
+        $this->refreshApplication();
+
+        expect($this->app->make('migrator')->paths())
+            ->toContain($migrationDirectory)
+            ->toContain(database_path('migrations/starter'));
+    } finally {
+        File::deleteDirectory($migrationDirectory);
+    }
+});

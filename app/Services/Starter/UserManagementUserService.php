@@ -8,47 +8,51 @@ use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppMod;
 use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class UserManagementUserService
 {
+    /** @var Collection<int, AppMod>|null */
+    private ?Collection $availableModulesCache = null;
+
     public function __construct(
         private readonly ClientLoginInterface $clientLogins,
         private readonly ClientRoleInterface $clientRoles,
         private readonly AppModInterface $appMods,
+        private readonly AuditLogService $auditLogs,
     ) {}
 
-    /** @return Collection<int, ClientLogin> */
-    public function users(ClientLogin $login): Collection
-    {
-        return $this->clientLogins
-            ->all(['role.mods.app'])
-            ->when(
-                ! $login->role?->isSuperuser(),
-                fn (Collection $users): Collection => $users
-                    ->reject(fn (ClientLogin $user): bool => $user->role?->isSuperuser() ?? false)
-                    ->values(),
-            );
+    /**
+     * @return LengthAwarePaginator<int, ClientLogin>
+     */
+    public function paginateUsers(
+        ClientLogin $login,
+        string $search,
+        string $status,
+        int $perPage = 10,
+        string $pageName = 'usersPage',
+    ): LengthAwarePaginator {
+        return $this->clientLogins->paginateForViewer(
+            $login,
+            str($search)->trim()->limit(100, '')->toString(),
+            $status,
+            $perPage,
+            $pageName,
+        );
     }
 
     /** @return Collection<int, ClientRole> */
     public function roles(ClientLogin $login): Collection
     {
-        return $this->clientRoles
-            ->all(['mods.app'])
-            ->when(
-                ! $login->role?->isSuperuser(),
-                fn (Collection $roles): Collection => $roles
-                    ->reject(fn (ClientRole $role): bool => $role->isSuperuser())
-                    ->values(),
-            );
+        return $this->clientRoles->allAssignableForViewer($login);
     }
 
     public function findUser(ClientLogin $currentLogin, int $id): ClientLogin
     {
-        $login = $this->clientLogins->find($id, ['role.mods.app']);
+        $login = $this->clientLogins->findForManagement($id);
 
         abort_unless($login instanceof ClientLogin, 404);
         abort_if($login->role?->isSuperuser() && ! $currentLogin->role?->isSuperuser(), 404);
@@ -74,13 +78,13 @@ class UserManagementUserService
      */
     public function saveUser(ClientLogin $currentLogin, ?int $userLoginId, array $data): ClientLogin
     {
-        $role = $this->clientRoles->find((int) $data['client_role_id']);
+        $role = $this->clientRoles->findBasicById((int) $data['client_role_id']);
 
         if (! $role instanceof ClientRole) {
             throw ValidationException::withMessages(['userForm.role_id' => 'Role tidak valid.']);
         }
 
-        $login = $userLoginId ? $this->clientLogins->find($userLoginId) : null;
+        $login = $userLoginId ? $this->clientLogins->findForManagement($userLoginId) : null;
 
         if ($userLoginId && ! $login instanceof ClientLogin) {
             abort(404);
@@ -116,12 +120,12 @@ class UserManagementUserService
         $actionKey = $login instanceof ClientLogin ? 'user.update' : 'user.create';
         $actionLabel = ($login instanceof ClientLogin ? 'Mengubah user ' : 'Membuat user ').$payload['name'];
 
-        return app(AuditLogService::class)->withinAction(
+        return $this->auditLogs->withinAction(
             $actionKey,
             $actionLabel,
             fn (): ClientLogin => $login instanceof ClientLogin
-                ? $this->clientLogins->update($login, $payload)
-                : $this->clientLogins->create($payload),
+                ? $this->clientLogins->updateUser($login, $payload)
+                : $this->clientLogins->createUser($payload),
         );
     }
 
@@ -130,18 +134,19 @@ class UserManagementUserService
         $login = $this->findPasswordResetTarget($currentLogin, $userLoginId);
         $temporaryPassword = Str::password(16);
 
-        app(AuditLogService::class)->withinAction('user.reset_password', 'Reset password user '.$login->name, function () use ($login, $temporaryPassword): void {
-            $this->clientLogins->update($login, [
+        $this->auditLogs->withinAction('user.reset_password', 'Reset password user '.$login->name, function () use ($login, $temporaryPassword): void {
+            $this->clientLogins->updateUser($login, [
                 'password' => $temporaryPassword,
                 'must_change_password' => true,
                 'password_changed_at' => now(),
                 'failed_login_count' => 0,
                 'locked_until' => null,
                 'remember_token' => Str::random(60),
+                'auth_version' => max(1, (int) $login->auth_version) + 1,
             ]);
         });
 
-        app(AuditLogService::class)->recordSecurityEvent(
+        $this->auditLogs->recordSecurityEvent(
             'auth.password_reset_by_admin',
             'Password direset oleh administrator',
             target: $login,
@@ -154,12 +159,12 @@ class UserManagementUserService
 
     public function appCount(): int
     {
-        return $this->appMods->all(['app'])->pluck('app_id')->filter()->unique()->count();
+        return $this->appMods->accessStats()['apps'];
     }
 
     /** @return Collection<int, AppMod> */
     public function availableModules(): Collection
     {
-        return $this->appMods->all(['app'], ['app_id', 'name']);
+        return $this->availableModulesCache ??= $this->appMods->allForUserAccessPreview();
     }
 }

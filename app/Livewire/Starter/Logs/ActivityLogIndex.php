@@ -2,10 +2,11 @@
 
 namespace App\Livewire\Starter\Logs;
 
+use App\Contracts\Starter\ActivityLogInterface;
 use App\Models\Starter\ActivityLog;
 use App\Models\Starter\ClientLogin;
-use App\Models\Starter\ClientRole;
-use Illuminate\Database\Eloquent\Builder;
+use App\Services\Starter\AuthenticatedLoginService;
+use App\Support\Starter\ActivityLogFilters;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -42,11 +43,21 @@ class ActivityLogIndex extends Component
 
     public int $perPage = 25;
 
-    public bool $advancedFiltersOpen = false;
-
     public bool $detailModalOpen = false;
 
     public ?string $selectedActionId = null;
+
+    private ActivityLogInterface $activityLogs;
+
+    private AuthenticatedLoginService $authenticatedLogins;
+
+    public function boot(
+        ActivityLogInterface $activityLogs,
+        AuthenticatedLoginService $authenticatedLogins,
+    ): void {
+        $this->activityLogs = $activityLogs;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
 
     public function mount(): void
     {
@@ -65,11 +76,6 @@ class ActivityLogIndex extends Component
         }
     }
 
-    public function toggleAdvancedFilters(): void
-    {
-        $this->advancedFiltersOpen = ! $this->advancedFiltersOpen;
-    }
-
     public function resetFilters(): void
     {
         $this->reset([
@@ -84,7 +90,6 @@ class ActivityLogIndex extends Component
             'actionFilter',
         ]);
         $this->perPage = 25;
-        $this->advancedFiltersOpen = false;
         $this->setDefaultDates();
         $this->resetPage('logsPage');
     }
@@ -92,7 +97,7 @@ class ActivityLogIndex extends Component
     public function showActionDetail(string $actionId): void
     {
         abort_unless(preg_match('/^[0-9A-HJKMNP-TV-Z]{26}$/i', $actionId) === 1, 404);
-        abort_unless($this->viewerQuery()->where('action_id', $actionId)->exists(), 404);
+        abort_unless($this->activityLogs->actionExistsForViewer($this->login(), $actionId), 404);
 
         $this->selectedActionId = $actionId;
         $this->detailModalOpen = true;
@@ -107,46 +112,31 @@ class ActivityLogIndex extends Component
     public function render()
     {
         $login = $this->login();
-        $filteredQuery = $this->filteredQuery();
-        $actionPage = (clone $filteredQuery)
-            ->select('action_id')
-            ->selectRaw('MAX(created_at) as last_activity_at')
-            ->selectRaw('COUNT(*) as changes_count')
-            ->selectRaw('COUNT(DISTINCT table_name) as tables_count')
-            ->groupBy('action_id')
-            ->orderByDesc('last_activity_at')
-            ->paginate($this->perPage, ['*'], 'logsPage');
-
+        $actionPage = $this->activityLogs->paginateActionsForViewer(
+            $login,
+            $this->filters(),
+            $this->perPage,
+            'logsPage',
+        );
         $actionIds = $actionPage->getCollection()->pluck('action_id');
-        $entries = $actionIds->isEmpty()
-            ? collect()
-            : $this->viewerQuery()
-                ->whereIn('action_id', $actionIds)
-                ->orderBy('sequence')
-                ->orderBy('id')
-                ->get()
-                ->groupBy('action_id');
+        $entries = $this->activityLogs->entriesGroupedByActionForViewer($login, $actionIds);
 
         $actionPage->setCollection($actionPage->getCollection()->map(
             fn (ActivityLog $summary): array => $this->actionSummary($summary, $entries->get($summary->action_id, collect()), $login),
         ));
 
-        $allLogs = $this->viewerQuery();
+        $metrics = $this->activityLogs->metricsForViewer($login);
         $selectedLogs = $this->selectedActionId
-            ? $this->viewerQuery()
-                ->where('action_id', $this->selectedActionId)
-                ->orderBy('sequence')
-                ->orderBy('id')
-                ->get()
+            ? $this->activityLogs->entriesForActionForViewer($login, $this->selectedActionId)
             : collect();
 
-        return view('livewire.starter.logs.activity-log-index', [
+        return view('starter.logs.activity-log-index', [
             'actions' => $actionPage,
             'selectedLogs' => $selectedLogs,
-            'filterOptions' => $this->filterOptions($login),
-            'totalChanges' => (clone $allLogs)->count(),
-            'todayChanges' => (clone $allLogs)->whereDate('created_at', today())->count(),
-            'activeActorCount' => (clone $allLogs)->whereNotNull('client_login_id')->distinct('client_login_id')->count('client_login_id'),
+            'filterOptions' => $this->activityLogs->filterOptionsForViewer($login),
+            'totalChanges' => $metrics['total_changes'],
+            'todayChanges' => $metrics['today_changes'],
+            'activeActorCount' => $metrics['active_actor_count'],
         ]);
     }
 
@@ -177,128 +167,9 @@ class ActivityLogIndex extends Component
         ];
     }
 
-    /**
-     * @return array{actors: Collection<int, ClientLogin>, roles: Collection<int, string>, apps: Collection<int, string>, tables: Collection<int, string>, routes: Collection<int, string>}
-     */
-    private function filterOptions(ClientLogin $login): array
-    {
-        $base = $this->viewerQuery();
-        $actors = ClientLogin::query()
-            ->with('role')
-            ->when(! $login->role?->isSuperuser(), fn (Builder $query): Builder => $query->whereHas('role', fn (Builder $roleQuery): Builder => $roleQuery->where('is_system', false)))
-            ->orderBy('name')
-            ->get(['id', 'client_role_id', 'name', 'username']);
-
-        return [
-            'actors' => $actors,
-            'roles' => $this->distinctOptions(clone $base, 'actor_role'),
-            'apps' => $this->distinctOptions(clone $base, 'app_key'),
-            'tables' => $this->distinctOptions(clone $base, 'table_name'),
-            'routes' => $this->distinctOptions(clone $base, 'route_name'),
-        ];
-    }
-
-    /**
-     * @return Collection<int, string>
-     */
-    private function distinctOptions(Builder $query, string $column): Collection
-    {
-        return $query
-            ->whereNotNull($column)
-            ->where($column, '!=', '')
-            ->distinct()
-            ->orderBy($column)
-            ->pluck($column)
-            ->values();
-    }
-
-    private function filteredQuery(): Builder
-    {
-        $query = $this->viewerQuery();
-        $search = trim($this->search);
-
-        if ($search !== '') {
-            $query->where(function (Builder $searchQuery) use ($search): void {
-                $searchQuery
-                    ->where('action_label', 'like', "%{$search}%")
-                    ->orWhere('action_key', 'like', "%{$search}%")
-                    ->orWhere('action_id', 'like', "%{$search}%")
-                    ->orWhere('actor_name', 'like', "%{$search}%")
-                    ->orWhere('actor_username', 'like', "%{$search}%")
-                    ->orWhere('auditable_label', 'like', "%{$search}%")
-                    ->orWhere('auditable_id', 'like', "%{$search}%")
-                    ->orWhere('table_name', 'like', "%{$search}%")
-                    ->orWhere('route_name', 'like', "%{$search}%")
-                    ->orWhere('ip_address', 'like', "%{$search}%");
-            });
-        }
-
-        return $query
-            ->when($this->validDate($this->dateFrom), fn (Builder $dateQuery): Builder => $dateQuery->whereDate('created_at', '>=', $this->dateFrom))
-            ->when($this->validDate($this->dateTo), fn (Builder $dateQuery): Builder => $dateQuery->whereDate('created_at', '<=', $this->dateTo))
-            ->when($this->eventFilter !== '', fn (Builder $eventQuery): Builder => $eventQuery->where('event', $this->eventFilter))
-            ->when($this->actorFilter !== '', fn (Builder $actorQuery): Builder => $actorQuery->where('client_login_id', (int) $this->actorFilter))
-            ->when($this->roleFilter !== '', fn (Builder $roleQuery): Builder => $roleQuery->where('actor_role', $this->roleFilter))
-            ->when($this->appFilter !== '', fn (Builder $appQuery): Builder => $appQuery->where('app_key', $this->appFilter))
-            ->when($this->tableFilter !== '', fn (Builder $tableQuery): Builder => $tableQuery->where('table_name', $this->tableFilter))
-            ->when($this->routeFilter !== '', fn (Builder $routeQuery): Builder => $routeQuery->where('route_name', $this->routeFilter))
-            ->when(trim($this->ipFilter) !== '', fn (Builder $ipQuery): Builder => $ipQuery->where('ip_address', 'like', '%'.trim($this->ipFilter).'%'))
-            ->when(trim($this->actionFilter) !== '', fn (Builder $actionQuery): Builder => $actionQuery->where('action_id', 'like', '%'.trim($this->actionFilter).'%'));
-    }
-
-    private function viewerQuery(): Builder
-    {
-        $login = $this->login();
-        $query = ActivityLog::query();
-
-        if ($login->role?->isSuperuser()) {
-            return $query;
-        }
-
-        $protectedRoleIds = ClientRole::query()
-            ->where(function (Builder $roleQuery): void {
-                $roleQuery->where('is_system', true)->orWhere('code', 'superuser');
-            })
-            ->pluck('id')
-            ->map(fn (int|string $id): string => (string) $id)
-            ->all();
-        $protectedUserIds = ClientLogin::query()
-            ->whereIn('client_role_id', $protectedRoleIds)
-            ->pluck('id')
-            ->map(fn (int|string $id): string => (string) $id)
-            ->all();
-
-        return $query->whereNot(function (Builder $protectedQuery) use ($protectedRoleIds, $protectedUserIds): void {
-            $protectedQuery
-                ->when($protectedRoleIds !== [], function (Builder $roleQuery) use ($protectedRoleIds): void {
-                    $roleQuery->where(function (Builder $targetQuery) use ($protectedRoleIds): void {
-                        $targetQuery
-                            ->where('auditable_type', ClientRole::class)
-                            ->whereIn('auditable_id', $protectedRoleIds);
-                    });
-                })
-                ->when($protectedUserIds !== [], function (Builder $userQuery) use ($protectedRoleIds, $protectedUserIds): void {
-                    $method = $protectedRoleIds === [] ? 'where' : 'orWhere';
-                    $userQuery->{$method}(function (Builder $targetQuery) use ($protectedUserIds): void {
-                        $targetQuery
-                            ->where('auditable_type', ClientLogin::class)
-                            ->whereIn('auditable_id', $protectedUserIds);
-                    });
-                });
-        });
-    }
-
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-
-        abort_unless(
-            $login instanceof ClientLogin
-                && ($login->loadMissing('role')->role?->canViewLogs() ?? false),
-            403,
-        );
-
-        return $login;
+        return $this->authenticatedLogins->logViewer();
     }
 
     private function setDefaultDates(): void
@@ -307,9 +178,21 @@ class ActivityLogIndex extends Component
         $this->dateTo = now()->toDateString();
     }
 
-    private function validDate(string $date): bool
+    private function filters(): ActivityLogFilters
     {
-        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) === 1;
+        return ActivityLogFilters::fromInput(
+            search: $this->search,
+            dateFrom: $this->dateFrom,
+            dateTo: $this->dateTo,
+            event: $this->eventFilter,
+            actor: $this->actorFilter,
+            role: $this->roleFilter,
+            app: $this->appFilter,
+            table: $this->tableFilter,
+            route: $this->routeFilter,
+            ipPrefix: $this->ipFilter,
+            actionPrefix: $this->actionFilter,
+        );
     }
 
     /**

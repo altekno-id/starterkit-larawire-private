@@ -3,33 +3,58 @@
 namespace App\Contracts\Starter;
 
 use App\Models\Starter\AppMenu;
+use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 interface ClientRoleInterface
 {
     /**
-     * @param  array<int, string>  $with
-     * @param  array<int, string>  $withCount
      * @return Collection<int, ClientRole>
      */
-    public function all(array $with = [], array $withCount = [], string $orderBy = 'name'): Collection;
+    public function allAssignableForViewer(ClientLogin $viewer): Collection;
 
     /**
-     * @param  array<int, string>  $with
-     * @param  array<int, string>  $withCount
+     * @return LengthAwarePaginator<int, ClientRole>
      */
-    public function find(int $id, array $with = [], array $withCount = []): ?ClientRole;
+    public function paginateForViewer(
+        ClientLogin $viewer,
+        string $search,
+        int $perPage,
+        string $pageName,
+    ): LengthAwarePaginator;
+
+    public function findBasicById(int $id): ?ClientRole;
+
+    public function findForManagement(int $id): ?ClientRole;
+
+    /**
+     * @return Collection<int, ClientLogin>
+     */
+    public function clientLogins(ClientRole $role): Collection;
 
     /**
      * @param  array<string, mixed>  $data
      */
-    public function create(array $data): ClientRole;
+    public function createRole(array $data): ClientRole;
 
     /**
      * @param  array<string, mixed>  $data
      */
-    public function update(ClientRole $role, array $data): ClientRole;
+    public function updateRole(ClientRole $role, array $data): ClientRole;
+
+    public function countForViewer(ClientLogin $viewer): int;
+
+    /**
+     * @return array{
+     *     module_ids: list<int>,
+     *     landing_menu_ids: array<int, int>,
+     *     can_manage_settings: bool,
+     *     can_view_logs: bool
+     * }
+     */
+    public function accessSnapshot(ClientRole $role): array;
 
     /**
      * @param  array<int, int>  $moduleIds
@@ -54,5 +79,5 @@ interface ClientRoleInterface
 
     public function hasClientLogins(ClientRole $role): bool;
 
-    public function delete(ClientRole $role): void;
+    public function deleteRole(ClientRole $role): void;
 }

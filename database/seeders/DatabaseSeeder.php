@@ -11,6 +11,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Private client provisioning is intentionally performed by starter:setup.
+        // Register application-specific seeders here.
     }
 }

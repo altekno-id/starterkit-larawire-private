@@ -10,15 +10,58 @@ use Illuminate\Support\Collection;
 
 class AppModRepository implements AppModInterface
 {
-    public function all(array $with = [], array $orderBy = ['id']): Collection
+    public function allForUserAccessPreview(): Collection
     {
-        $query = AppMod::query()->with($with);
+        return AppMod::query()
+            ->with('app')
+            ->orderBy('app_id')
+            ->orderBy('name')
+            ->get();
+    }
 
-        foreach ($orderBy as $column) {
-            $query->orderBy($column);
-        }
+    public function allForRoleAccessManagement(): Collection
+    {
+        return AppMod::query()
+            ->with([
+                'app',
+                'menus' => function ($query): void {
+                    $query
+                        ->with('route')
+                        ->whereNotNull('app_route_id')
+                        ->orderBy('order');
+                },
+            ])
+            ->orderBy('app_id')
+            ->orderBy('name')
+            ->get();
+    }
 
-        return $query->get();
+    public function forIdsWithNavigableMenus(array $ids): Collection
+    {
+        return AppMod::query()
+            ->with([
+                'app',
+                'menus' => function ($query): void {
+                    $query
+                        ->with('route')
+                        ->whereNotNull('app_route_id')
+                        ->orderBy('order');
+                },
+            ])
+            ->whereIn('id', $ids)
+            ->get();
+    }
+
+    public function accessStats(): array
+    {
+        $stats = AppMod::query()
+            ->selectRaw('COUNT(*) as modules_count, COUNT(DISTINCT app_id) as apps_count')
+            ->first();
+
+        return [
+            'apps' => (int) ($stats?->apps_count ?? 0),
+            'modules' => (int) ($stats?->modules_count ?? 0),
+        ];
     }
 
     public function forApp(App $app, array $with = [], array $onlyIds = []): EloquentCollection

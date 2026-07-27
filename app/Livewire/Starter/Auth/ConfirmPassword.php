@@ -4,6 +4,7 @@ namespace App\Livewire\Starter\Auth;
 
 use App\Models\Starter\ClientLogin;
 use App\Services\Starter\AuditLogService;
+use App\Services\Starter\AuthenticatedLoginService;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Services\Starter\StarterConfigService;
 use Illuminate\Support\Facades\Hash;
@@ -19,16 +20,34 @@ class ConfirmPassword extends Component
 {
     public string $password = '';
 
+    private NavigationAuthorizedRedirectService $redirects;
+
+    private AuthenticatedLoginService $authenticatedLogins;
+
+    public function boot(
+        NavigationAuthorizedRedirectService $redirects,
+        AuthenticatedLoginService $authenticatedLogins,
+    ): void {
+        $this->redirects = $redirects;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
+
     public function confirm(
         StarterConfigService $configs,
         NavigationAuthorizedRedirectService $redirects,
         AuditLogService $auditLogs,
     ): mixed {
-        $this->validate([
-            'password' => ['required', 'string'],
-        ], [], [
-            'password' => 'password',
-        ]);
+        try {
+            $this->validate([
+                'password' => ['required', 'string', 'max:1024'],
+            ], [], [
+                'password' => 'password',
+            ]);
+        } catch (ValidationException $exception) {
+            $this->reset('password');
+
+            throw $exception;
+        }
 
         $login = $this->login();
         $throttleKey = 'confirm-password|'.$login->getKey().'|'.request()->ip();
@@ -36,6 +55,7 @@ class ConfirmPassword extends Component
         $decaySeconds = max(30, min(3600, $configs->integer('security.login_decay_seconds')));
 
         if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
+            $this->reset('password');
             $auditLogs->recordSecurityEvent(
                 'auth.password_confirmation_blocked',
                 'Konfirmasi password dibatasi sementara',
@@ -66,6 +86,7 @@ class ConfirmPassword extends Component
         }
 
         RateLimiter::clear($throttleKey);
+        $this->reset('password');
         session()->passwordConfirmed();
         $intended = session()->pull('url.intended');
 
@@ -81,18 +102,13 @@ class ConfirmPassword extends Component
 
     public function render()
     {
-        return view('livewire.starter.auth.confirm-password', [
-            'cancelUrl' => app(NavigationAuthorizedRedirectService::class)
-                ->firstAuthorizedUrl($this->login()),
+        return view('starter.auth.confirm-password', [
+            'cancelUrl' => $this->redirects->firstAuthorizedUrl($this->login()),
         ]);
     }
 
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-
-        abort_unless($login instanceof ClientLogin, 403);
-
-        return $login->loadMissing('role');
+        return $this->authenticatedLogins->current();
     }
 }

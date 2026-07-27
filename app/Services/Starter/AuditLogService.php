@@ -2,11 +2,14 @@
 
 namespace App\Services\Starter;
 
+use App\Contracts\Starter\ClientLoginInterface;
 use App\Models\Starter\ActivityLog;
 use App\Models\Starter\ClientLogin;
 use Closure;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -31,6 +34,11 @@ class AuditLogService
     private ?array $actionContext = null;
 
     private ?string $requestId = null;
+
+    public function __construct(
+        private readonly Application $application,
+        private readonly ClientLoginInterface $clientLogins,
+    ) {}
 
     public function withinAction(string $key, string $label, Closure $callback): mixed
     {
@@ -225,8 +233,8 @@ class AuditLogService
         array $metadata = [],
         ?string $actionKey = null,
     ): void {
-        $request = app()->runningInConsole() ? null : request();
-        $role = $login?->loadMissing('role')->role;
+        $request = $this->application->runningInConsole() ? null : request();
+        $role = $login ? $this->clientLogins->loadRole($login)->role : null;
         $action = $this->action($event, $auditableType, $actionLabel, $actionKey);
 
         DB::table('starter_logs')->insert([
@@ -257,6 +265,9 @@ class AuditLogService
             'source' => $this->source($request),
             'created_at' => now(),
         ]);
+
+        Cache::forget(ActivityLog::FILTER_OPTIONS_CACHE_KEY.'.superuser');
+        Cache::forget(ActivityLog::FILTER_OPTIONS_CACHE_KEY.'.delegated');
     }
 
     /**
@@ -331,7 +342,7 @@ class AuditLogService
 
     private function source(mixed $request): string
     {
-        if (app()->runningInConsole()) {
+        if ($this->application->runningInConsole()) {
             return 'console';
         }
 

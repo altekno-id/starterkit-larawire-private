@@ -9,6 +9,8 @@ interface AppInterface
 {
     public function findBySubdomain(string $subdomain): ?App;
 
+    public function countRegistered(): int;
+
     /**
      * @return EloquentCollection<int, App>
      */

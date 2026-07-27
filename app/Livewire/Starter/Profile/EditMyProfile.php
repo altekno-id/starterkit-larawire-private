@@ -3,7 +3,8 @@
 namespace App\Livewire\Starter\Profile;
 
 use App\Models\Starter\ClientLogin;
-use App\Rules\StarterPasswordRules;
+use App\Rules\Starter\StarterPasswordRules;
+use App\Services\Starter\AuthenticatedLoginService;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Services\Starter\ProfileService;
 use App\Services\Starter\StarterConfigService;
@@ -21,7 +22,17 @@ class EditMyProfile extends Component
 {
     use WithFileUploads;
 
-    private const DEFAULT_PROFILE_PHOTO = 'assets/mine/avatar.png';
+    private const DEFAULT_PROFILE_PHOTO = 'assets/starter/images/avatar.png';
+
+    private ProfileService $profiles;
+
+    private StarterConfigService $configs;
+
+    private StarterContextService $context;
+
+    private NavigationAuthorizedRedirectService $redirects;
+
+    private AuthenticatedLoginService $authenticatedLogins;
 
     public string $activeTab = 'account-details';
 
@@ -43,6 +54,20 @@ class EditMyProfile extends Component
         'password' => '',
         'password_confirmation' => '',
     ];
+
+    public function boot(
+        ProfileService $profiles,
+        StarterConfigService $configs,
+        StarterContextService $context,
+        NavigationAuthorizedRedirectService $redirects,
+        AuthenticatedLoginService $authenticatedLogins,
+    ): void {
+        $this->profiles = $profiles;
+        $this->configs = $configs;
+        $this->context = $context;
+        $this->redirects = $redirects;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
 
     public function mount(): void
     {
@@ -66,7 +91,12 @@ class EditMyProfile extends Component
                 'max:255',
                 Rule::unique('starter_client_logins', 'email')->ignore($login->id),
             ],
-            'profilePhotoUpload' => ['nullable', 'image', 'max:'.app(StarterConfigService::class)->uploadImageMaxKilobytes()],
+            'profilePhotoUpload' => [
+                'nullable',
+                'image',
+                'dimensions:max_width=4096,max_height=4096',
+                'max:'.$this->configs->uploadImageMaxKilobytes(),
+            ],
         ], [], [
             'accountForm.name' => 'display name',
             'accountForm.email' => 'email login',
@@ -83,9 +113,7 @@ class EditMyProfile extends Component
             );
         }
 
-        $updatedLogin = app(ProfileService::class)
-            ->updateProfile($login, $validated)
-            ->loadMissing('role');
+        $updatedLogin = $this->profiles->updateProfile($login, $validated);
 
         if ($oldProfilePhoto && $oldProfilePhoto !== (string) $updatedLogin->profile_photo) {
             $this->deleteStoredProfilePhoto($oldProfilePhoto, $login->id);
@@ -95,7 +123,7 @@ class EditMyProfile extends Component
         $this->profilePhotoReset = false;
         $this->fillFromLogin($updatedLogin);
         $this->dispatch('starter-account-updated',
-            avatarUrl: app(StarterContextService::class)->avatarUrl($updatedLogin),
+            avatarUrl: $this->context->avatarUrl($updatedLogin),
             name: $updatedLogin->name,
             roleName: $updatedLogin->role?->name ?? 'Role',
         );
@@ -110,18 +138,16 @@ class EditMyProfile extends Component
         $oldProfilePhoto = (string) $login->profile_photo;
 
         if ($oldProfilePhoto) {
-            $updatedLogin = app(ProfileService::class)
-                ->updateProfile($login, [
-                    'name' => $login->name,
-                    'email' => $login->email,
-                    'profile_photo' => self::DEFAULT_PROFILE_PHOTO,
-                ])
-                ->loadMissing('role');
+            $updatedLogin = $this->profiles->updateProfile($login, [
+                'name' => $login->name,
+                'email' => $login->email,
+                'profile_photo' => self::DEFAULT_PROFILE_PHOTO,
+            ]);
 
             $this->deleteStoredProfilePhoto($oldProfilePhoto, $login->id);
 
             $this->dispatch('starter-account-updated',
-                avatarUrl: app(StarterContextService::class)->avatarUrl($updatedLogin),
+                avatarUrl: $this->context->avatarUrl($updatedLogin),
                 name: $updatedLogin->name,
                 roleName: $updatedLogin->role?->name ?? 'Role',
             );
@@ -140,23 +166,31 @@ class EditMyProfile extends Component
         $login = $this->login();
         $passwordChangeWasRequired = $login->must_change_password;
 
-        $validated = $this->validate([
-            'passwordForm.current_password' => ['required', 'string'],
-            'passwordForm.password' => [...StarterPasswordRules::rules(), 'same:passwordForm.password_confirmation'],
-            'passwordForm.password_confirmation' => ['required', 'string'],
-        ], [], [
-            'passwordForm.current_password' => 'password saat ini',
-            'passwordForm.password' => 'password baru',
-            'passwordForm.password_confirmation' => 'konfirmasi password',
-        ])['passwordForm'];
+        try {
+            $validated = $this->validate([
+                'passwordForm.current_password' => ['required', 'string', 'max:1024'],
+                'passwordForm.password' => [...StarterPasswordRules::rules(), 'same:passwordForm.password_confirmation'],
+                'passwordForm.password_confirmation' => ['required', 'string', 'max:255'],
+            ], [], [
+                'passwordForm.current_password' => 'password saat ini',
+                'passwordForm.password' => 'password baru',
+                'passwordForm.password_confirmation' => 'konfirmasi password',
+            ])['passwordForm'];
+        } catch (ValidationException $exception) {
+            $this->reset('passwordForm');
+
+            throw $exception;
+        }
 
         try {
-            app(ProfileService::class)->changePassword(
+            $updatedLogin = $this->profiles->changePassword(
                 $login,
                 $validated['current_password'],
                 $validated['password'],
             );
         } catch (ValidationException $exception) {
+            $this->reset('passwordForm');
+
             foreach ($exception->errors()['current_password'] ?? [] as $message) {
                 $this->addError('passwordForm.current_password', $message);
             }
@@ -166,6 +200,9 @@ class EditMyProfile extends Component
             return null;
         }
 
+        session()->put('starter.auth_version', $updatedLogin->auth_version);
+        session()->regenerate();
+        session()->passwordConfirmed();
         $this->reset('passwordForm');
 
         if ($passwordChangeWasRequired) {
@@ -175,7 +212,7 @@ class EditMyProfile extends Component
             ]);
 
             return $this->redirect(
-                app(NavigationAuthorizedRedirectService::class)->firstAuthorizedUrl($login->fresh(['role'])),
+                $this->redirects->firstAuthorizedUrl($updatedLogin),
             );
         }
 
@@ -184,37 +221,20 @@ class EditMyProfile extends Component
         return null;
     }
 
-    public function showTab(string $tab): void
-    {
-        if ($this->login()->must_change_password) {
-            $this->activeTab = 'security';
-
-            return;
-        }
-
-        if (in_array($tab, ['account-details', 'security'], true)) {
-            $this->activeTab = $tab;
-        }
-    }
-
     public function render()
     {
-        $login = $this->login()->loadMissing('role');
+        $login = $this->login();
 
         return view('starter.profile.edit-my-profile', [
             'login' => $login,
-            'loginAvatarUrl' => app(StarterContextService::class)->avatarUrl($login),
+            'loginAvatarUrl' => $this->context->avatarUrl($login),
             'profilePhotoPreviewUrl' => $this->profilePhotoPreviewUrl($login),
         ])->title('Edit Profil Saya');
     }
 
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-
-        abort_unless($login instanceof ClientLogin, 403);
-
-        return $login;
+        return $this->authenticatedLogins->current();
     }
 
     private function firstValidationMessage(ValidationException $exception): string
@@ -242,7 +262,7 @@ class EditMyProfile extends Component
             return asset(self::DEFAULT_PROFILE_PHOTO);
         }
 
-        return app(StarterContextService::class)->avatarUrl($login);
+        return $this->context->avatarUrl($login);
     }
 
     private function deleteStoredProfilePhoto(string $profilePhoto, int $loginId): void

@@ -23,14 +23,16 @@
 - `STARTER_SUPERUSER_PASSWORD` wajib password kuat saat setup/reset
 - `APP_LOCALE=id`, `APP_FALLBACK_LOCALE=id`, dan `APP_FAKER_LOCALE=id_ID`
 
-Cookie lintas subdomain harus diuji pada domain nyata. Gunakan `SESSION_DOMAIN` yang sesuai bila session perlu dibagi antara root, auth, dan app subdomain.
+Biarkan `SESSION_DOMAIN=null` untuk deployment normal. Konfigurasi session otomatis memakai `.<APP_DOMAIN>`, sehingga cookie dapat digunakan oleh root, auth, dan app subdomain. Override `SESSION_DOMAIN` hanya bila deployment membutuhkan scope cookie yang berbeda. Cookie lintas subdomain tetap wajib diuji pada domain nyata.
 
 ## Urutan deploy
 
 ```bash
 composer install --no-dev --optimize-autoloader
+php artisan starter:security-check
 php artisan migrate --force
 php artisan starter:setup --company="Nama Perusahaan"
+php artisan starter:sync --dry-run
 php artisan starter:sync --force
 php artisan storage:link
 php artisan livewire:publish --assets --no-interaction
@@ -38,6 +40,8 @@ php artisan optimize
 ```
 
 Jangan menjalankan `starter:setup --reset-password` pada deploy rutin.
+
+`starter:security-check` tidak mengubah state dan memvalidasi APP key, session encryption, HTTP-only/SameSite cookie, kesesuaian `APP_URL`/`APP_DOMAIN`, serta requirement production seperti HTTPS, debug off, secure cookie, password default, extension `intl`, dan permission runtime. Pada production, `starter:setup` juga menjalankan check ini otomatis.
 
 `php artisan optimize` hanya untuk production. Selama development jangan memakai `config:cache`; gunakan config langsung agar perubahan `.env` terbaca dan jalankan `php artisan optimize:clear` bila cache pernah dibuat.
 
@@ -48,6 +52,7 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
 - `/up` sehat.
 - root landing, auth subdomain, dan setiap app subdomain dapat dibuka.
 - login, remember me, auto-lock/unlock, logout.
+- session perangkat lama terputus setelah perubahan/reset password.
 - role/module/menu sesuai hasil sync.
 - upload logo dan file berjalan.
 - log create/update/delete terbentuk.

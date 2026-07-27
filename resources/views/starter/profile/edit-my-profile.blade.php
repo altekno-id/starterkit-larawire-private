@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ activeTab: @js($activeTab) }">
     <div class="page-header d-print-none mt-0 mb-3" aria-label="Header halaman">
         <div class="row g-2 align-items-center">
             <div class="col">
@@ -12,7 +12,7 @@
         <div class="alert alert-warning mb-3" role="alert">
             <div class="d-flex gap-3">
                 <span class="alert-icon flex-shrink-0">
-                    @include('templates.layouts.icon', ['name' => 'alert-triangle', 'class' => 'm-0'])
+                    @include('starter.templates.layouts.icon', ['name' => 'alert-triangle', 'class' => 'm-0'])
                 </span>
                 <div>
                     <h3 class="alert-title">Password sementara harus diganti</h3>
@@ -44,19 +44,28 @@
                     <div class="list-group list-group-transparent mb-4" id="profile-settings-tabs" role="tablist">
                         <a
                             href="#account-details"
-                            class="list-group-item list-group-item-action d-flex align-items-center {{ $activeTab === 'account-details' ? 'active' : '' }} {{ $login->must_change_password ? 'disabled' : '' }}"
-                            @unless ($login->must_change_password) data-bs-toggle="list" wire:click="showTab('account-details')" @endunless
+                            class="list-group-item list-group-item-action d-flex align-items-center {{ $login->must_change_password ? 'disabled' : '' }}"
+                            @unless ($login->must_change_password) x-on:click.prevent="activeTab = 'account-details'" @endunless
+                            x-bind:class="{ active: activeTab === 'account-details' }"
                             role="tab"
                             aria-controls="account-details"
-                            aria-selected="{{ $activeTab === 'account-details' ? 'true' : 'false' }}"
+                            x-bind:aria-selected="activeTab === 'account-details'"
                             aria-disabled="{{ $login->must_change_password ? 'true' : 'false' }}"
                             @if ($login->must_change_password) tabindex="-1" @endif
                         >
-                            @include('templates.layouts.icon', ['name' => 'user-circle', 'class' => 'me-2'])
+                            @include('starter.templates.layouts.icon', ['name' => 'user-circle', 'class' => 'me-2'])
                             Detail Akun
                         </a>
-                        <a href="#security" class="list-group-item list-group-item-action d-flex align-items-center {{ $activeTab === 'security' ? 'active' : '' }}" data-bs-toggle="list" wire:click="showTab('security')" role="tab" aria-controls="security" aria-selected="{{ $activeTab === 'security' ? 'true' : 'false' }}">
-                            @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'me-2'])
+                        <a
+                            href="#security"
+                            class="list-group-item list-group-item-action d-flex align-items-center"
+                            x-on:click.prevent="activeTab = 'security'"
+                            x-bind:class="{ active: activeTab === 'security' }"
+                            role="tab"
+                            aria-controls="security"
+                            x-bind:aria-selected="activeTab === 'security'"
+                        >
+                            @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'me-2'])
                             Keamanan
                             @if ($login->must_change_password)
                                 <span class="badge bg-warning-lt text-warning ms-auto">Wajib</span>
@@ -84,7 +93,15 @@
 
             <div class="col-12 col-lg-9 d-flex flex-column">
                 <div class="tab-content flex-grow-1">
-                    <form id="account-details" class="tab-pane fade {{ $activeTab === 'account-details' ? 'show active' : '' }}" role="tabpanel" wire:submit="saveAccount">
+                    <form
+                        id="account-details"
+                        class="tab-pane fade"
+                        x-bind:class="{ 'show active': activeTab === 'account-details' }"
+                        x-show="activeTab === 'account-details'"
+                        x-cloak
+                        role="tabpanel"
+                        wire:submit="saveAccount"
+                    >
                         <div class="card-body">
                             <h2 class="mb-4">Akun Saya</h2>
                             <h3 class="card-title">Detail Profil</h3>
@@ -126,14 +143,14 @@
                         <div class="card-footer bg-transparent">
                             <div class="btn-list justify-content-end">
                                 <button type="submit" class="btn btn-primary">
-                                    @include('templates.layouts.icon', ['name' => 'check', 'class' => 'me-1'])
+                                    @include('starter.templates.layouts.icon', ['name' => 'check', 'class' => 'me-1'])
                                     Simpan Akun
                                 </button>
                             </div>
                         </div>
                     </form>
 
-                    @include('templates.components.danger-modal', [
+                    @include('starter.templates.components.danger-modal', [
                         'id' => 'delete-profile-photo-modal',
                         'title' => 'Hapus foto profil?',
                         'message' => 'Foto profil saat ini akan diganti dengan foto default.',
@@ -141,7 +158,15 @@
                         'confirmAction' => 'resetProfilePhoto',
                         'dismissOnConfirm' => true,
                     ])
-                    <form id="security" class="tab-pane fade {{ $activeTab === 'security' ? 'show active' : '' }}" role="tabpanel" wire:submit="changePassword">
+                    <form
+                        id="security"
+                        class="tab-pane fade"
+                        x-bind:class="{ 'show active': activeTab === 'security' }"
+                        x-show="activeTab === 'security'"
+                        x-cloak
+                        role="tabpanel"
+                        wire:submit="changePassword"
+                    >
                         <div class="card-body">
                             <h2 class="mb-4">Akun Saya</h2>
                             <h3 class="card-title">Keamanan</h3>
@@ -167,10 +192,10 @@
                                                 x-bind:aria-label="visible ? 'Sembunyikan Password Saat Ini' : 'Tampilkan Password Saat Ini'"
                                             >
                                                 <span x-show="! visible">
-                                                    @include('templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm m-0'])
+                                                    @include('starter.templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm m-0'])
                                                 </span>
                                                 <span x-show="visible" style="display: none;">
-                                                    @include('templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm m-0'])
+                                                    @include('starter.templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm m-0'])
                                                 </span>
                                             </button>
                                         </span>
@@ -198,10 +223,10 @@
                                                 x-bind:aria-label="visible ? 'Sembunyikan Password Baru' : 'Tampilkan Password Baru'"
                                             >
                                                 <span x-show="! visible">
-                                                    @include('templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm m-0'])
+                                                    @include('starter.templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm m-0'])
                                                 </span>
                                                 <span x-show="visible" style="display: none;">
-                                                    @include('templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm m-0'])
+                                                    @include('starter.templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm m-0'])
                                                 </span>
                                             </button>
                                         </span>
@@ -230,10 +255,10 @@
                                                 x-bind:aria-label="visible ? 'Sembunyikan Konfirmasi Password' : 'Tampilkan Konfirmasi Password'"
                                             >
                                                 <span x-show="! visible">
-                                                    @include('templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm m-0'])
+                                                    @include('starter.templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm m-0'])
                                                 </span>
                                                 <span x-show="visible" style="display: none;">
-                                                    @include('templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm m-0'])
+                                                    @include('starter.templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm m-0'])
                                                 </span>
                                             </button>
                                         </span>
@@ -245,7 +270,7 @@
                         <div class="card-footer bg-transparent">
                             <div class="btn-list justify-content-end">
                                 <button type="submit" class="btn btn-primary">
-                                    @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'me-1'])
+                                    @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'me-1'])
                                     Ubah Password
                                 </button>
                             </div>

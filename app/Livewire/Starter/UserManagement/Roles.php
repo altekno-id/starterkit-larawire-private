@@ -3,9 +3,8 @@
 namespace App\Livewire\Starter\UserManagement;
 
 use App\Models\Starter\ClientLogin;
+use App\Services\Starter\AuthenticatedLoginService;
 use App\Services\Starter\UserManagementRoleService;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -14,6 +13,10 @@ use Livewire\WithPagination;
 class Roles extends Component
 {
     use WithPagination;
+
+    private UserManagementRoleService $roleService;
+
+    private AuthenticatedLoginService $authenticatedLogins;
 
     public bool $embedded = false;
 
@@ -44,6 +47,14 @@ class Roles extends Component
 
     public int $roleAccessModuleCount = 0;
 
+    public function boot(
+        UserManagementRoleService $roleService,
+        AuthenticatedLoginService $authenticatedLogins,
+    ): void {
+        $this->roleService = $roleService;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
+
     /**
      * @var array<int, array{name: string, modules: array<int, array{name: string, code: string, desc: string}>}>
      */
@@ -61,10 +72,11 @@ class Roles extends Component
 
     public function showRoleUsers(int $id): void
     {
-        $role = $this->roles()->findRole($this->login(), $id)->load('clientLogins');
+        $role = $this->roles()->findRole($this->login(), $id);
+        $roleUsers = $this->roles()->roleUsers($role);
 
         $this->roleUsersRoleName = $role->name;
-        $this->roleUsers = $role->clientLogins
+        $this->roleUsers = $roleUsers
             ->map(fn (ClientLogin $login): array => [
                 'name' => $login->name,
                 'email' => $login->email,
@@ -133,56 +145,24 @@ class Roles extends Component
     public function render()
     {
         $login = $this->login();
-        $visibleRoles = $this->roles()->roles($login);
-        $superuserRole = $visibleRoles->first(fn ($role): bool => $role->isSuperuser());
-        $allRoles = $visibleRoles
-            ->reject(fn ($role): bool => $role->isSuperuser())
-            ->sortBy(fn ($role): string => $role->name, SORT_NATURAL | SORT_FLAG_CASE)
-            ->when($superuserRole, fn ($roles) => $roles->prepend($superuserRole))
-            ->values();
-        $search = Str::of($this->search)->trim()->lower()->toString();
-        $filteredRoles = $search === ''
-            ? $allRoles
-            : $allRoles->filter(function ($role) use ($search): bool {
-                return Str::of($role->name)->lower()->contains($search)
-                    || Str::of($role->code)->lower()->contains($search)
-                    || Str::of((string) $role->desc)->lower()->contains($search);
-            });
-        $currentPage = $this->getPage(pageName: 'rolesPage');
-        $perPage = 10;
-        $roles = new LengthAwarePaginator(
-            $filteredRoles->forPage($currentPage, $perPage)->values(),
-            $filteredRoles->count(),
-            $perPage,
-            $currentPage,
-            [
-                'path' => request()->url(),
-                'pageName' => 'rolesPage',
-            ],
-        );
+        $roles = $this->roles()->paginateRoles($login, $this->search);
+        $moduleStats = $this->roles()->moduleStats();
 
         return view('starter.user-management.roles', [
             'roles' => $roles,
-            'roleCount' => $allRoles->count(),
-            'totalAppCount' => $this->roles()->availableModules()->pluck('app_id')->filter()->unique()->count(),
-            'totalModuleCount' => $this->roles()->availableModules()->count(),
+            'roleCount' => $roles->total(),
+            'totalAppCount' => $moduleStats['apps'],
+            'totalModuleCount' => $moduleStats['modules'],
         ])->title('Manajemen Role');
     }
 
     private function roles(): UserManagementRoleService
     {
-        return app(UserManagementRoleService::class);
+        return $this->roleService;
     }
 
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-        abort_unless(
-            $login instanceof ClientLogin
-                && ($login->loadMissing('role')->role?->canManageSettings() ?? false),
-            403,
-        );
-
-        return $login;
+        return $this->authenticatedLogins->settingsManager();
     }
 }

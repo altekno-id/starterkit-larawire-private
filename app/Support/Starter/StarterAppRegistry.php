@@ -4,6 +4,9 @@ namespace App\Support\Starter;
 
 class StarterAppRegistry
 {
+    /** @var list<string>|null */
+    private static ?array $discoveredKeys = null;
+
     /**
      * Discover runnable starter apps from config/apps/*.php.
      *
@@ -14,7 +17,7 @@ class StarterAppRegistry
      */
     public static function keys(): array
     {
-        return collect(glob(config_path('apps/*.php')) ?: [])
+        return self::$discoveredKeys ??= collect(glob(config_path('apps/*.php')) ?: [])
             ->map(function (string $path): string {
                 return pathinfo($path, PATHINFO_FILENAME);
             })

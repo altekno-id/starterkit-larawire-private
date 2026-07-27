@@ -5,7 +5,7 @@
                 <div class="p-3 border-bottom">
                     <div class="d-flex align-items-center gap-3">
                         <span class="avatar bg-primary-lt text-primary">
-                            @include('templates.layouts.icon', ['name' => 'shield-lock', 'class' => 'icon'])
+                            @include('starter.templates.layouts.icon', ['name' => 'shield-lock', 'class' => 'icon'])
                         </span>
                         <div>
                             <h3 class="card-title mb-1">Sesi dan Lock Screen</h3>
@@ -58,7 +58,7 @@
                 <div class="p-3 border-bottom">
                     <div class="d-flex align-items-center gap-3">
                         <span class="avatar bg-orange-lt text-orange">
-                            @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'icon'])
+                            @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'icon'])
                         </span>
                         <div>
                             <h3 class="card-title mb-1">Proteksi Login</h3>
@@ -98,7 +98,7 @@
                 <div class="p-3 border-bottom">
                     <div class="d-flex align-items-center gap-3">
                         <span class="avatar bg-azure-lt text-azure">
-                            @include('templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon'])
+                            @include('starter.templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon'])
                         </span>
                         <div>
                             <h3 class="card-title mb-1">Kebijakan Upload</h3>
@@ -128,7 +128,7 @@
     <div class="d-flex justify-content-end pt-4 mt-4 border-top">
         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="save">
             <span wire:loading.remove wire:target="save">
-                @include('templates.layouts.icon', ['name' => 'check', 'class' => 'icon'])
+                @include('starter.templates.layouts.icon', ['name' => 'check', 'class' => 'icon'])
                 Simpan Konfigurasi
             </span>
             <span wire:loading wire:target="save">Menyimpan...</span>

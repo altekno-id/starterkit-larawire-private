@@ -80,14 +80,14 @@
         <div class="card-footer bg-transparent mt-auto">
             <div class="btn-list justify-content-end">
                 <button type="submit" class="btn btn-primary">
-                    @include('templates.layouts.icon', ['name' => 'check', 'class' => 'me-1'])
+                    @include('starter.templates.layouts.icon', ['name' => 'check', 'class' => 'me-1'])
                     Simpan Profil Perusahaan
                 </button>
             </div>
         </div>
     </form>
 
-    @include('templates.components.danger-modal', [
+    @include('starter.templates.components.danger-modal', [
         'id' => 'delete-client-photo-modal',
         'title' => 'Hapus logo?',
         'message' => 'Logo saat ini akan diganti dengan logo default.',

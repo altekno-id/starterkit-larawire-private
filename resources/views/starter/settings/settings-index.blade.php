@@ -82,7 +82,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <span class="avatar bg-azure-lt text-azure me-3">
-                            @include('templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm'])
+                            @include('starter.templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm'])
                         </span>
                         <div>
                             <div class="text-secondary">Total Aplikasi</div>
@@ -100,7 +100,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <span class="avatar avatar-md bg-primary-lt text-primary">
-                            @include('templates.layouts.icon', ['name' => 'settings', 'class' => 'icon'])
+                            @include('starter.templates.layouts.icon', ['name' => 'settings', 'class' => 'icon'])
                         </span>
                         <div class="overflow-hidden">
                             <div class="fw-semibold">Pusat Pengaturan</div>
@@ -118,7 +118,7 @@
                                 data-starter-navigate
                             >
                                 <span class="mt-1 flex-shrink-0">
-                                    @include('templates.layouts.icon', ['name' => $sectionItem['icon'], 'class' => 'icon-sm'])
+                                    @include('starter.templates.layouts.icon', ['name' => $sectionItem['icon'], 'class' => 'icon-sm'])
                                 </span>
                                 <span>
                                     <span class="d-block fw-semibold">{{ $sectionItem['label'] }}</span>
@@ -130,7 +130,7 @@
 
                     <div class="alert alert-info mt-4 mb-0" role="note">
                         <div class="d-flex gap-2">
-                            @include('templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm flex-shrink-0 mt-1'])
+                            @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm flex-shrink-0 mt-1'])
                             <div class="small">
                                 Perubahan akses dan akun tercatat otomatis dalam audit log.
                             </div>

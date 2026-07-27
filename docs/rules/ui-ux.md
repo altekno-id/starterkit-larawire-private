@@ -37,7 +37,7 @@ rg -l "form-selectgroup|form-check" docs/template | head
 ## Livewire
 
 - Gunakan `wire:model.blur` atau `wire:model.defer` untuk input biasa; jangan request pada setiap ketikan tanpa kebutuhan.
-- Search/filter live dapat memakai debounce yang masuk akal.
+- Search/filter live memakai debounce sekitar 300–500 ms bila menjalankan query dan tetap dibatasi server-side.
 - Action yang mengirim request menampilkan loader global dan blur area melalui `starter-runtime.js`.
 - Request perubahan input biasa tidak boleh memunculkan loader action.
 - Modal harus ditutup/diselesaikan sebelum loader mengambil fokus agar tidak bertumpuk.
@@ -51,6 +51,7 @@ Gunakan JavaScript/Alpine hanya untuk interaksi client seperti password visibili
 - Gunakan Alpine untuk toggle, show/hide, tab visual, dropdown, copy-to-clipboard, preview lokal, dan state presentasi kecil.
 - Jangan memakai `wire:click`/public property untuk interaksi yang tidak membutuhkan server.
 - Gunakan Livewire hanya ketika perlu membaca/menulis data, validasi server, authorization, transaksi, atau audit log.
+- Daftar Livewire yang dapat bertambah mengikuti server-side query/pagination dan batas resource pada `performance.md`.
 - Hindari inline script manual yang tersebar; gunakan Alpine atau file JavaScript lokal agar interaksi tetap ringan dan mudah dirawat.
 
 ## Asset Template
@@ -63,7 +64,7 @@ Gunakan JavaScript/Alpine hanya untuk interaksi client seperti password visibili
 
 ## Error Page
 
-- Error `400`, `401`, `403`, `404`, `405`, `408`, `419`, `422`, `429`, `500`, `503`, serta fallback `4xx`/`5xx` memakai layout lokal `resources/views/errors/layout.blade.php` dan desain Tabler yang konsisten.
+- Error `400`, `401`, `403`, `404`, `405`, `408`, `419`, `422`, `429`, `500`, `503`, serta fallback `4xx`/`5xx` memakai layout lokal `resources/views/starter/errors/layout.blade.php` dan desain Tabler yang konsisten.
 - Error page memakai asset lokal, `noindex`, Bahasa Indonesia, kode status, dan aksi kembali yang aman; jangan tampilkan stack trace, exception message internal, path server, query, atau credential.
 - Uji view spesifik/fallback dan minimal satu response exception nyata dengan `APP_DEBUG=false`.
 

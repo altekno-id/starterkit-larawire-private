@@ -3,35 +3,42 @@
 namespace App\Contracts\Starter;
 
 use App\Models\Starter\ClientLogin;
-use Illuminate\Support\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface ClientLoginInterface
 {
-    /**
-     * @param  array<int, string>  $with
-     */
-    public function findByColumn(string $column, mixed $value, array $with = []): ?ClientLogin;
+    public function findByUsername(string $username): ?ClientLogin;
 
     /**
-     * @param  array<int, string>  $with
-     * @return Collection<int, ClientLogin>
+     * @return LengthAwarePaginator<int, ClientLogin>
      */
-    public function all(array $with = [], string $orderBy = 'name'): Collection;
+    public function paginateForViewer(
+        ClientLogin $viewer,
+        string $search,
+        string $status,
+        int $perPage,
+        string $pageName,
+    ): LengthAwarePaginator;
 
-    /**
-     * @param  array<int, string>  $with
-     */
-    public function find(int $id, array $with = []): ?ClientLogin;
+    public function findBasicById(int $id): ?ClientLogin;
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function create(array $data): ClientLogin;
+    public function findForManagement(int $id): ?ClientLogin;
 
     /**
      * @param  array<string, mixed>  $data
      */
-    public function update(ClientLogin $login, array $data): ClientLogin;
+    public function createUser(array $data): ClientLogin;
 
-    public function delete(ClientLogin $login): void;
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateUser(ClientLogin $login, array $data): ClientLogin;
+
+    public function refreshWithRole(ClientLogin $login): ClientLogin;
+
+    public function loadRole(ClientLogin $login): ClientLogin;
+
+    public function countForViewer(ClientLogin $viewer): int;
+
+    public function revokeRememberTokens(): int;
 }

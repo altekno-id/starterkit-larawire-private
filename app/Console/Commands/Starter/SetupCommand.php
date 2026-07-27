@@ -5,10 +5,12 @@ namespace App\Console\Commands\Starter;
 use App\Models\Starter\Client;
 use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
-use App\Rules\StarterPasswordRules;
+use App\Rules\Starter\StarterPasswordRules;
+use App\Services\Starter\AuditLogService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class SetupCommand extends Command
@@ -21,8 +23,19 @@ class SetupCommand extends Command
 
     protected $description = 'Set up the private client and built-in Superuser account';
 
+    public function __construct(
+        private readonly AuditLogService $auditLogs,
+    ) {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
+        if (app()->isProduction()
+            && $this->call('starter:security-check') !== self::SUCCESS) {
+            return self::FAILURE;
+        }
+
         $username = str($this->option('username') ?: config('starter.superuser.username'))->lower()->trim()->toString();
         $email = str($this->option('email') ?: config('starter.superuser.email'))->lower()->trim()->toString();
         $companyName = trim((string) ($this->option('company') ?: config('app.name')));
@@ -84,10 +97,23 @@ class SetupCommand extends Command
             if ($password !== null) {
                 $login->password = $password;
                 $login->password_changed_at = now();
+                $login->remember_token = Str::random(60);
+                $login->auth_version = $login->exists
+                    ? max(1, (int) $login->auth_version) + 1
+                    : 1;
             }
 
             $login->save();
         });
+
+        if ($password !== null && $existingLogin instanceof ClientLogin) {
+            $this->auditLogs->recordSecurityEvent(
+                'auth.password_reset_by_setup',
+                'Password Superuser direset melalui setup',
+                target: $existingLogin->fresh(),
+                metadata: ['reason' => 'setup_reset'],
+            );
+        }
 
         if ($this->call('starter:sync', ['--force' => true]) !== self::SUCCESS) {
             return self::FAILURE;

@@ -4,6 +4,7 @@ namespace App\Livewire\Starter\Auth;
 
 use App\Models\Starter\ClientLogin;
 use App\Services\Starter\AuditLogService;
+use App\Services\Starter\AuthenticatedLoginService;
 use App\Services\Starter\NavigationAuthorizedRedirectService;
 use App\Services\Starter\StarterConfigService;
 use App\Support\Starter\StarterNavigation;
@@ -20,15 +21,24 @@ class LockScreen extends Component
 {
     public string $password = '';
 
-    public function mount(StarterConfigService $configs): mixed
+    private AuthenticatedLoginService $authenticatedLogins;
+
+    public function boot(AuthenticatedLoginService $authenticatedLogins): void
     {
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
+
+    public function mount(
+        StarterConfigService $configs,
+        NavigationAuthorizedRedirectService $redirects,
+    ): mixed {
         $login = $this->login();
 
         if (! $configs->boolean('security.lock_screen_enabled')) {
             $this->clearLockState();
 
             return $this->redirect(
-                app(NavigationAuthorizedRedirectService::class)->firstAuthorizedUrl($login),
+                $redirects->firstAuthorizedUrl($login),
             );
         }
 
@@ -48,11 +58,17 @@ class LockScreen extends Component
         NavigationAuthorizedRedirectService $redirects,
         AuditLogService $auditLogs,
     ): mixed {
-        $this->validate([
-            'password' => ['required', 'string'],
-        ], [], [
-            'password' => 'password',
-        ]);
+        try {
+            $this->validate([
+                'password' => ['required', 'string', 'max:1024'],
+            ], [], [
+                'password' => 'password',
+            ]);
+        } catch (ValidationException $exception) {
+            $this->reset('password');
+
+            throw $exception;
+        }
 
         $login = $this->login();
         $throttleKey = 'lock-screen|'.$login->getKey().'|'.request()->ip();
@@ -60,6 +76,7 @@ class LockScreen extends Component
         $decaySeconds = max(30, min(3600, $configs->integer('security.login_decay_seconds')));
 
         if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
+            $this->reset('password');
             $auditLogs->recordSecurityEvent(
                 'auth.screen_unlock_blocked',
                 'Unlock layar dibatasi sementara',
@@ -90,6 +107,7 @@ class LockScreen extends Component
         }
 
         RateLimiter::clear($throttleKey);
+        $this->reset('password');
         $intended = session()->pull('starter.lock.intended');
         $this->clearLockState();
         session()->regenerate();
@@ -112,11 +130,7 @@ class LockScreen extends Component
 
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-
-        abort_unless($login instanceof ClientLogin, 403);
-
-        return $login->loadMissing('role');
+        return $this->authenticatedLogins->current();
     }
 
     private function clearLockState(): void

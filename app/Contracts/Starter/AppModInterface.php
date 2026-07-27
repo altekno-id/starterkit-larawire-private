@@ -10,11 +10,25 @@ use Illuminate\Support\Collection;
 interface AppModInterface
 {
     /**
-     * @param  array<int, string>  $with
-     * @param  array<int, string>  $orderBy
      * @return Collection<int, AppMod>
      */
-    public function all(array $with = [], array $orderBy = ['id']): Collection;
+    public function allForUserAccessPreview(): Collection;
+
+    /**
+     * @return Collection<int, AppMod>
+     */
+    public function allForRoleAccessManagement(): Collection;
+
+    /**
+     * @param  array<int, int>  $ids
+     * @return Collection<int, AppMod>
+     */
+    public function forIdsWithNavigableMenus(array $ids): Collection;
+
+    /**
+     * @return array{apps: int, modules: int}
+     */
+    public function accessStats(): array;
 
     /**
      * @param  array<int, string>  $with

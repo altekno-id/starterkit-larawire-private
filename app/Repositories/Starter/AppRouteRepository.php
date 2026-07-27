@@ -4,10 +4,28 @@ namespace App\Repositories\Starter;
 
 use App\Contracts\Starter\AppRouteInterface;
 use App\Models\Starter\AppRoute;
+use App\Models\Starter\ClientLogin;
 use Illuminate\Support\Collection;
 
 class AppRouteRepository implements AppRouteInterface
 {
+    public function viewerCanAccessNamedRoute(ClientLogin $viewer, string $routeName): bool
+    {
+        $role = $viewer->loadMissing('role')->role;
+
+        if (! $role) {
+            return false;
+        }
+
+        return AppRoute::query()
+            ->where('name', $routeName)
+            ->when(! $role->hasFullAccess(), fn ($query) => $query->whereHas(
+                'mod.roles',
+                fn ($roleQuery) => $roleQuery->whereKey($role->id),
+            ))
+            ->exists();
+    }
+
     public function nameForGetUriAndAppSubdomain(string $uri, string $appSubdomain): ?string
     {
         return AppRoute::query()

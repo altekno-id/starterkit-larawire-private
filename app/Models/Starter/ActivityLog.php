@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ActivityLog extends Model
 {
+    public const FILTER_OPTIONS_CACHE_KEY = 'starter.activity-log.filter-options';
+
     public $timestamps = false;
 
     protected $table = 'starter_logs';

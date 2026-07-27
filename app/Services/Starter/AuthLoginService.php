@@ -11,6 +11,10 @@ use Illuminate\Validation\ValidationException;
 
 class AuthLoginService
 {
+    private const DUMMY_PASSWORD_HASH = '$2y$12$iyXo7zsds4flChs1YKIM5.JJUzRpsY2ncVulkOwgEd6IdqQrRsMkO';
+
+    private const SESSION_AUTH_VERSION = 'starter.auth_version';
+
     public function __construct(
         private readonly ClientLoginInterface $clientLogins,
         private readonly NavigationAuthorizedRedirectService $redirects,
@@ -22,32 +26,45 @@ class AuthLoginService
     public function attempt(string $username, string $password, bool $remember = false, ?string $redirect = null): string
     {
         $username = str($username)->lower()->trim()->toString();
-        $throttleKey = $username.'|'.request()->ip();
-
+        $ipAddress = (string) request()->ip();
+        $accountThrottleKey = $this->accountThrottleKey($username, $ipAddress);
+        $ipThrottleKey = $this->ipThrottleKey($ipAddress);
         $maxAttempts = max(1, min(20, $this->configs->integer('security.login_max_attempts')));
+        $maxIpAttempts = min(100, $maxAttempts * 5);
         $decaySeconds = max(30, min(3600, $this->configs->integer('security.login_decay_seconds')));
 
-        if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
+        if (RateLimiter::tooManyAttempts($accountThrottleKey, $maxAttempts)
+            || RateLimiter::tooManyAttempts($ipThrottleKey, $maxIpAttempts)) {
             $this->auditLogs->recordSecurityEvent(
                 'auth.login_blocked',
                 'Login dibatasi sementara',
-                metadata: ['reason' => 'rate_limited'],
+                metadata: [
+                    'reason' => 'rate_limited',
+                    'scope' => RateLimiter::tooManyAttempts($ipThrottleKey, $maxIpAttempts)
+                        ? 'ip'
+                        : 'account',
+                ],
             );
 
             throw ValidationException::withMessages([
-                'form.username' => 'Terlalu banyak percobaan login. Coba lagi dalam '.RateLimiter::availableIn($throttleKey).' detik.',
+                'form.username' => 'Terlalu banyak percobaan login. Coba lagi dalam '.max(
+                    RateLimiter::availableIn($accountThrottleKey),
+                    RateLimiter::availableIn($ipThrottleKey),
+                ).' detik.',
             ]);
         }
 
-        $login = $this->clientLogins->findByColumn('username', $username, ['role']);
+        $login = $this->clientLogins->findByUsername($username);
+        $passwordMatches = Hash::check($password, $login?->password ?: self::DUMMY_PASSWORD_HASH);
 
-        if (! $login || ! $login->password || ! Hash::check($password, $login->password)) {
-            RateLimiter::hit($throttleKey, $decaySeconds);
+        if (! $login || ! $login->password || ! $passwordMatches) {
+            RateLimiter::hit($accountThrottleKey, $decaySeconds);
+            RateLimiter::hit($ipThrottleKey, $decaySeconds);
             $failedLoginCount = null;
 
             if ($login) {
                 $failedLoginCount = $login->failed_login_count + 1;
-                $this->clientLogins->update($login, [
+                $this->clientLogins->updateUser($login, [
                     'failed_login_count' => $failedLoginCount,
                     'locked_until' => $failedLoginCount >= $maxAttempts
                         ? now()->addSeconds($decaySeconds)
@@ -100,11 +117,11 @@ class AuthLoginService
             ]);
         }
 
-        RateLimiter::clear($throttleKey);
+        RateLimiter::clear($accountThrottleKey);
 
         Auth::login($login, $remember && $this->configs->boolean('security.remember_me_enabled'));
 
-        $this->clientLogins->update($login, [
+        $this->clientLogins->updateUser($login, [
             'last_login_at' => now(),
             'last_login_ip' => request()->ip(),
             'failed_login_count' => 0,
@@ -115,10 +132,11 @@ class AuthLoginService
             request()->session()->regenerate();
             request()->session()->forget(['starter.locked', 'starter.lock.intended']);
             request()->session()->put('starter.last_activity_at', now()->timestamp);
+            request()->session()->put(self::SESSION_AUTH_VERSION, max(1, (int) $login->auth_version));
             request()->session()->passwordConfirmed();
         }
 
-        $authenticatedLogin = $login->fresh('role');
+        $authenticatedLogin = $this->clientLogins->refreshWithRole($login);
         $this->auditLogs->recordSecurityEvent(
             'auth.login_succeeded',
             'Login berhasil',
@@ -135,5 +153,15 @@ class AuthLoginService
             $redirect,
             session()->pull('url.intended'),
         );
+    }
+
+    private function accountThrottleKey(string $username, string $ipAddress): string
+    {
+        return 'login-account:'.hash('sha256', $username.'|'.$ipAddress);
+    }
+
+    private function ipThrottleKey(string $ipAddress): string
+    {
+        return 'login-ip:'.hash('sha256', $ipAddress);
     }
 }

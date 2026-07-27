@@ -2,6 +2,7 @@
 
 namespace App\Services\Starter;
 
+use App\Contracts\Starter\StarterConfigInterface;
 use App\Models\Starter\StarterConfig;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +23,10 @@ class StarterConfigService
 
     private ?bool $tableExists = null;
 
+    public function __construct(
+        private readonly StarterConfigInterface $configs,
+    ) {}
+
     public function value(string $key): bool|int|string|null
     {
         $fallback = self::DEFAULTS[$key] ?? null;
@@ -33,7 +38,7 @@ class StarterConfigService
         $value = Cache::rememberForever(
             self::CACHE_PREFIX.$key,
             fn (): bool|int|string|null => $this->resolveValue(
-                StarterConfig::query()->where('key', $key)->first(),
+                $this->configs->findByKey($key),
                 $fallback,
             ),
         );
@@ -62,8 +67,8 @@ class StarterConfigService
     public function update(array $values): void
     {
         foreach ($values as $key => $value) {
-            $config = StarterConfig::query()->where('key', $key)->firstOrFail();
-            $config->update(['value' => $this->serializeValue($value, $config->type)]);
+            $config = $this->configs->findByKeyOrFail($key);
+            $this->configs->updateValue($config, $this->serializeValue($value, $config->type));
             $this->forget($key);
         }
     }

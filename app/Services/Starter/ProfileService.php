@@ -23,11 +23,13 @@ class ProfileService
      */
     public function updateProfile(ClientLogin $login, array $data): ClientLogin
     {
-        return $this->clientLogins->update($login, [
+        $updatedLogin = $this->clientLogins->updateUser($login, [
             'name' => trim($data['name']),
             'email' => str($data['email'])->lower()->trim()->toString(),
             'profile_photo' => $this->nullableTrim($data['profile_photo'] ?? null),
         ]);
+
+        return $this->clientLogins->refreshWithRole($updatedLogin);
     }
 
     /**
@@ -37,7 +39,7 @@ class ProfileService
     {
         $this->ensureAdmin($login);
 
-        return $this->clients->update($this->clients->current(), [
+        return $this->clients->updateProfile($this->clients->current(), [
             'name' => trim($data['name']),
             'email' => $this->nullableTrim($data['email'] ?? null),
             'phone' => $this->nullableTrim($data['phone'] ?? null),
@@ -46,7 +48,7 @@ class ProfileService
         ]);
     }
 
-    public function changePassword(ClientLogin $login, string $currentPassword, string $password): void
+    public function changePassword(ClientLogin $login, string $currentPassword, string $password): ClientLogin
     {
         if (! $login->password || ! Hash::check($currentPassword, $login->password)) {
             $this->auditLogs->recordSecurityEvent(
@@ -62,26 +64,30 @@ class ProfileService
             ]);
         }
 
-        $this->clientLogins->update($login, [
+        $updatedLogin = $this->clientLogins->updateUser($login, [
             'password' => $password,
             'must_change_password' => false,
             'password_changed_at' => now(),
             'failed_login_count' => 0,
             'locked_until' => null,
             'remember_token' => Str::random(60),
+            'auth_version' => max(1, (int) $login->auth_version) + 1,
         ]);
 
         $this->auditLogs->recordSecurityEvent(
             'auth.password_changed',
             'Password berhasil diubah',
-            target: $login,
-            actor: $login,
+            target: $updatedLogin,
+            actor: $updatedLogin,
         );
+
+        return $this->clientLogins->refreshWithRole($updatedLogin);
     }
 
     private function ensureAdmin(ClientLogin $login): void
     {
-        abort_unless($login->loadMissing('role')->role?->canManageSettings(), 403);
+        $login = $this->clientLogins->loadRole($login);
+        abort_unless($login->role?->canManageSettings(), 403);
     }
 
     private function nullableTrim(?string $value): ?string

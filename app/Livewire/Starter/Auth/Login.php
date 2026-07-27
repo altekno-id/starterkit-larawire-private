@@ -4,6 +4,7 @@ namespace App\Livewire\Starter\Auth;
 
 use App\Services\Starter\AuthLoginService;
 use App\Services\Starter\StarterConfigService;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -12,6 +13,8 @@ use Livewire\Component;
 #[Title('Login')]
 class Login extends Component
 {
+    private StarterConfigService $configs;
+
     /**
      * @var array{username: string, password: string, remember: bool}
      */
@@ -23,6 +26,11 @@ class Login extends Component
 
     public string $redirect = '';
 
+    public function boot(StarterConfigService $configs): void
+    {
+        $this->configs = $configs;
+    }
+
     public function mount(): void
     {
         $this->redirect = request()->query('redirect', '');
@@ -30,20 +38,28 @@ class Login extends Component
 
     public function authenticate(AuthLoginService $loginService)
     {
-        $this->validate([
-            'form.username' => ['required', 'string', 'max:255'],
-            'form.password' => ['required', 'string'],
-        ], [], [
-            'form.username' => 'username',
-            'form.password' => 'password',
-        ]);
+        try {
+            $this->validate([
+                'form.username' => ['required', 'string', 'max:255'],
+                'form.password' => ['required', 'string', 'max:1024'],
+            ], [], [
+                'form.username' => 'username',
+                'form.password' => 'password',
+            ]);
 
-        $target = $loginService->attempt(
-            username: $this->form['username'],
-            password: $this->form['password'],
-            remember: $this->form['remember'],
-            redirect: $this->redirect,
-        );
+            $target = $loginService->attempt(
+                username: $this->form['username'],
+                password: $this->form['password'],
+                remember: $this->form['remember'],
+                redirect: $this->redirect,
+            );
+        } catch (ValidationException $exception) {
+            $this->form['password'] = '';
+
+            throw $exception;
+        }
+
+        $this->form['password'] = '';
 
         return $this->redirect($target);
     }
@@ -51,7 +67,7 @@ class Login extends Component
     public function render()
     {
         return view('starter.auth.login', [
-            'rememberMeEnabled' => app(StarterConfigService::class)->boolean('security.remember_me_enabled'),
+            'rememberMeEnabled' => $this->configs->boolean('security.remember_me_enabled'),
         ]);
     }
 }

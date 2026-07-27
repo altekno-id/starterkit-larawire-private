@@ -7,7 +7,7 @@
 
     <div class="alert alert-info" role="status">
         <div class="d-flex gap-2">
-            @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1'])
+            @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1'])
             <div>
                 Sesi login tetap aktif. Masukkan password untuk membuka kembali aplikasi.
             </div>
@@ -34,8 +34,8 @@
                     x-on:click="visible = ! visible"
                     x-bind:aria-label="visible ? 'Sembunyikan Password' : 'Tampilkan Password'"
                 >
-                    <span x-show="! visible">@include('templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm'])</span>
-                    <span x-show="visible" x-cloak>@include('templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm'])</span>
+                    <span x-show="! visible">@include('starter.templates.layouts.icon', ['name' => 'eye', 'class' => 'icon-sm'])</span>
+                    <span x-show="visible" x-cloak>@include('starter.templates.layouts.icon', ['name' => 'eye-off', 'class' => 'icon-sm'])</span>
                 </button>
             </div>
             @error('password')
@@ -45,7 +45,7 @@
 
         <button class="btn btn-primary w-100" type="submit" wire:loading.attr="disabled">
             <span wire:loading.remove wire:target="unlock">
-                @include('templates.layouts.icon', ['name' => 'lock', 'class' => 'icon'])
+                @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'icon'])
                 Buka Aplikasi
             </span>
             <span wire:loading wire:target="unlock">Memeriksa...</span>

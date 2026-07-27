@@ -46,6 +46,8 @@ Bulk query, pivot `sync`, raw SQL, dan operasi eksternal dapat membutuhkan `reco
 
 Lihat pemakaian nyata pada `UserManagementRoleService`.
 
+Untuk bulk action, utamakan satu query/chunk yang aman dan satu audit summary dengan jumlah serta scope record. Jangan memaksa event model per-row bila menghasilkan ribuan query/log identik dan tidak menambah nilai audit.
+
 ## Event keamanan
 
 - Gunakan `AuditLogService::recordSecurityEvent()` untuk aktivitas autentikasi/session, bukan menulis row log langsung.

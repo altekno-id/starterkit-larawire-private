@@ -16,20 +16,93 @@
 4. **Presentation**
    - Full-page Livewire component di `app/Livewire/Apps/<App>/<Module>/`.
    - Blade di `resources/views/apps/<app-key>/<module>/`.
-   - Layout utama `resources/views/templates/layouts/app.blade.php`.
+   - Layout utama `resources/views/starter/templates/layouts/app.blade.php`.
 5. **Domain/data**
    - Model untuk persistence.
    - Service untuk business flow, transaksi, dan aksi lintas model.
-   - Contract/repository dipakai bila memang ada boundary/query abstraction; ikuti sibling terdekat.
+   - Interface/contract mendefinisikan kebutuhan persistence/query yang stabil.
+   - Repository mengimplementasikan contract dan menjadi pemilik query/persistence reusable per domain.
 6. **Cross-cutting**
    - `AuditLogService`: log create/update/delete.
    - `StarterConfigService`: konfigurasi dinamis.
    - `StarterContextService`: app aktif, sidebar, branding, dan data layout.
 
+## Pola default module bisnis
+
+Alur dependency default untuk feature bisnis:
+
+```text
+Livewire/Controller → Service → Repository Interface → Repository → Model/Database
+```
+
+Tanggung jawab setiap layer:
+
+- **Livewire/Controller** menangani input transport, validasi bentuk request, authorization awal, pemanggilan use case, dan response/redirect. Jangan menaruh query atau business flow di view/component.
+- **Service** menangani use case dan business rule, authorization defensif yang bergantung pada data, transaksi, koordinasi beberapa repository, audit grouping, serta side effect. Service tidak boleh berisi detail SQL, pagination manual, atau markup/UI.
+- **Repository interface** adalah kontrak minimal yang benar-benar dibutuhkan consumer. Signature wajib typed dan memakai nama bisnis; jangan menyalin seluruh API Eloquent ke interface.
+- **Repository** memiliki query, filter, sort, aggregate, pagination database, eager loading, locking, dan bulk persistence yang reusable untuk satu domain. Repository tidak boleh membaca `request()`, `auth()`, session, atau menampilkan response/UI.
+- **Model** memiliki mapping tabel, cast, relation, accessor/mutator, dan invariant model yang kecil. Model bukan tempat orchestration use case.
+
+Ketentuan konsistensi dan performa:
+
+- Module bisnis baru yang memiliki persistence memakai interface dan repository domain sebagai boundary default.
+- Tambahkan service bila terdapat mutation, business rule, transaksi, audit grouping, authorization berbasis data, side effect, atau koordinasi lebih dari satu operasi. Jangan membuat service yang hanya meneruskan satu pemanggilan repository tanpa logic.
+- Read-only sederhana boleh memanggil repository interface langsung dari Livewire/controller bila tidak memiliki business logic. Begitu flow berkembang, pindahkan orchestration ke service tanpa memindahkan query keluar repository.
+- Dilarang membuat `BaseRepository`/`GenericRepository` dengan CRUD universal, magic filter, atau method `all()` yang menjadi jalan pintas memuat data tanpa batas.
+- Method repository harus intention-revealing seperti `paginateForViewer()`, `findActiveByUsername()`, atau `countByStatus()`, bukan wrapper generik `query()`/`execute()`.
+- Jangan mengembalikan `Builder` dari contract kecuali composition tersebut memang menjadi kontrak domain yang teruji. Utamakan model, collection terbatas, paginator, scalar aggregate, atau DTO/read model yang typed.
+- Perubahan schema/query diserap di repository selama kontrak use case tidak berubah. Interface berubah hanya ketika kebutuhan consumer berubah, bukan karena detail implementasi database berubah.
+- Gunakan constructor injection dan daftarkan seluruh binding interface → repository secara terpusat di service provider. Hindari `app()` service locator pada code domain baru bila dependency dapat diinjeksi.
+- Terapkan seluruh batas pagination, select minimal, eager loading, query budget, cache, dan bulk operation dari `performance.md` di dalam repository.
+- Test repository membuktikan bentuk query, scope data, pagination, dan batas query; test service membuktikan business rule, transaksi, authorization, audit, dan rollback.
+
+## Isolasi starterkit dan project turunan
+
+- Seluruh PHP milik starterkit wajib berada pada subfolder/namespace `Starter` di layer masing-masing: Commands, Contracts, Controllers, Middleware, Livewire, Models, Repositories, Rules, Services, dan Support.
+- Binding, listener, migration loader, view path, dan persistent middleware starter dimiliki `app/Providers/Starter/StarterServiceProvider.php`. `AppServiceProvider` disediakan tetap bersih untuk binding project turunan.
+- Seluruh migration starter berada di `database/migrations/starter`. Migration feature app berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
+- Seluruh Blade internal starter berada di `resources/views/starter`, termasuk `errors`, `templates`, auth, profile, settings, log, dan user management.
+- Landing adalah area kustom project dan wajib berada di `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder Starter.
+- Route internal starter berada di `routes/starter`; `routes/web.php` disediakan untuk landing dan route project root-domain.
+- Test internal starter berada di `tests/Feature/Starter`; test feature project berada di `tests/Feature/Apps/<App>` atau folder domain project.
+- Asset internal starter berada di `public/assets/starter`; jangan menaruh asset starter baru di folder project yang generik.
+- File standar framework seperti `config/auth.php`, `config/session.php`, dan `config/livewire.php` tetap pada lokasi Laravel karena dibaca langsung oleh framework. Isolasi dilakukan pada ownership dan referensinya, bukan dengan memindahkan file standar secara paksa.
+
+## Struktur feature app/subdomain
+
+- Setiap feature bisnis milik app/subdomain wajib berada di area `Apps/<Subdomain>` pada layer yang dipakai; jangan membuat feature app di folder `Starter`, root layer, atau app/subdomain lain.
+- Gunakan `<Subdomain>` dalam PascalCase untuk namespace/path PHP, misalnya `Spmb`; gunakan `<subdomain>` lowercase untuk route, config, view, translation, dan asset, misalnya `spmb`.
+- Buat hanya folder yang benar-benar dibutuhkan feature. Jangan membuat seluruh tree kosong sebagai formalitas.
+
+```text
+app/Livewire/Apps/<Subdomain>/<Module>/
+app/Http/Controllers/Apps/<Subdomain>/<Module>/
+app/Services/Apps/<Subdomain>/<Module>/
+app/Contracts/Apps/<Subdomain>/<Module>/
+app/Repositories/Apps/<Subdomain>/<Module>/
+app/Models/Apps/<Subdomain>/
+app/Rules/Apps/<Subdomain>/<Module>/
+app/Support/Apps/<Subdomain>/
+
+resources/views/apps/<subdomain>/<module>/
+resources/js/apps/<subdomain>/
+resources/css/apps/<subdomain>/
+public/assets/apps/<subdomain>/
+lang/id/apps/<subdomain>/
+tests/Feature/Apps/<Subdomain>/
+database/migrations/apps/<subdomain>/
+```
+
+- Layer khusus hanya dibuat bila dipakai: `app/Http/Middleware/Apps/<Subdomain>/`, `app/Policies/Apps/<Subdomain>/`, `app/Jobs/Apps/<Subdomain>/`, `app/Events/Apps/<Subdomain>/`, `app/Listeners/Apps/<Subdomain>/`, `app/Notifications/Apps/<Subdomain>/`, dan `app/Console/Commands/Apps/<Subdomain>/`.
+- `config/apps/<subdomain>.php` dan `routes/apps/<subdomain>.php` sengaja tetap berupa file langsung karena dipakai oleh discovery starter. Isi dan class yang dirujuknya tetap mengikuti area `Apps/<Subdomain>`.
+- Landing root bukan feature app; tetap di `app/Livewire/Landing` dan `resources/views/landing`.
+- Migration app tidak diletakkan di root `database/migrations` atau di dalam folder module. Satu folder `<subdomain>` menampung seluruh riwayat migration app tersebut agar Laravel tetap dapat memuatnya otomatis dan ownership schema mudah ditelusuri.
+
 ## Registrasi route
 
-- `routes/starter.php` didaftarkan tanpa domain dan tersedia pada semua subdomain untuk Profile, Pengaturan, Log Aktivitas, lock screen, dan endpoint session.
-- `routes/web.php` hanya didaftarkan pada root `APP_DOMAIN`.
+- `routes/starter/global.php` didaftarkan tanpa domain dan tersedia pada semua subdomain untuk Profile, Pengaturan, Log Aktivitas, lock screen, dan endpoint session.
+- `routes/starter/web.php` hanya didaftarkan pada root `APP_DOMAIN` untuk autentikasi starter.
+- `routes/web.php` hanya memuat landing dan route project root-domain.
 - `StarterRouteRegistrar` memasang `routes/apps/<app-key>.php` pada `<app-key>.<APP_DOMAIN>`.
 - File app harus memakai nama route `<app-key>.<module-code>.<action>`.
 - Route `<app-key>.anchor` adalah pengecualian untuk redirect awal app.
@@ -42,4 +115,4 @@
 - Database adalah runtime projection untuk authorization dan navigasi.
 - Route yang tidak memiliki module valid akan ditolak oleh `starter:sync`.
 - Jangan menduplikasi source of truth ke config, database, dan public state sekaligus. Pilih owner sesuai lapisan di atas dan turunkan projection/runtime state dari owner tersebut.
-- Jangan membuat repository, service, helper, event, atau abstraction baru hanya berdasarkan preferensi; ikuti boundary dan sibling existing, lalu tambah abstraction hanya bila ada kebutuhan lintas consumer yang nyata.
+- Jangan membuat helper/event/abstraction tambahan hanya berdasarkan preferensi. Interface dan repository mengikuti pola default domain di atas; layer lain tetap harus memiliki tanggung jawab nyata dan mengikuti sibling existing.

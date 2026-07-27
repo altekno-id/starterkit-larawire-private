@@ -24,6 +24,7 @@ use Illuminate\Notifications\Notifiable;
     'last_login_at',
     'last_login_ip',
     'remember_token',
+    'auth_version',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class ClientLogin extends Authenticatable
@@ -46,6 +47,7 @@ class ClientLogin extends Authenticatable
             'locked_until' => 'datetime',
             'must_change_password' => 'boolean',
             'password' => 'hashed',
+            'auth_version' => 'integer',
         ];
     }
 
@@ -60,21 +62,5 @@ class ClientLogin extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(ClientRole::class, 'client_role_id');
-    }
-
-    /**
-     * Determine if this login can access a module.
-     */
-    public function canAccessMod(AppMod|string|int $mod): bool
-    {
-        return $this->role?->canAccessMod($mod) ?? false;
-    }
-
-    /**
-     * Determine if this login can access a named route.
-     */
-    public function canAccessRoute(AppRoute|string $route): bool
-    {
-        return $this->role?->canAccessRoute($route) ?? false;
     }
 }

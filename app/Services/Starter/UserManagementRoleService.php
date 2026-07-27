@@ -7,6 +7,7 @@ use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppMod;
 use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -14,29 +15,43 @@ use Illuminate\Validation\ValidationException;
 
 class UserManagementRoleService
 {
+    /** @var Collection<int, AppMod>|null */
+    private ?Collection $availableModulesCache = null;
+
     public function __construct(
         private readonly ClientRoleInterface $clientRoles,
-        private readonly AppModInterface $appMods
+        private readonly AppModInterface $appMods,
+        private readonly AuditLogService $auditLogs,
     ) {}
 
     /**
-     * @return Collection<int, ClientRole>
+     * @return LengthAwarePaginator<int, ClientRole>
      */
-    public function roles(ClientLogin $login): Collection
+    public function paginateRoles(
+        ClientLogin $login,
+        string $search,
+        int $perPage = 10,
+        string $pageName = 'rolesPage',
+    ): LengthAwarePaginator {
+        return $this->clientRoles->paginateForViewer(
+            $login,
+            str($search)->trim()->limit(100, '')->toString(),
+            $perPage,
+            $pageName,
+        );
+    }
+
+    /**
+     * @return array{apps: int, modules: int}
+     */
+    public function moduleStats(): array
     {
-        return $this->clientRoles
-            ->all(['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins'])
-            ->when(
-                ! $login->role?->isSuperuser(),
-                fn (Collection $roles): Collection => $roles
-                    ->reject(fn (ClientRole $role): bool => $role->isSuperuser())
-                    ->values(),
-            );
+        return $this->appMods->accessStats();
     }
 
     public function findRole(ClientLogin $login, int $id): ClientRole
     {
-        $role = $this->clientRoles->find($id, ['mods.app', 'landings.menu.route', 'landings.menu.mod.app'], ['clientLogins']);
+        $role = $this->clientRoles->findForManagement($id);
 
         abort_unless($role instanceof ClientRole, 404);
         abort_if($role->isSuperuser() && ! $login->role?->isSuperuser(), 404);
@@ -45,19 +60,19 @@ class UserManagementRoleService
     }
 
     /**
+     * @return Collection<int, ClientLogin>
+     */
+    public function roleUsers(ClientRole $role): Collection
+    {
+        return $this->clientRoles->clientLogins($role);
+    }
+
+    /**
      * @return Collection<int, AppMod>
      */
     public function availableModules(): Collection
     {
-        return $this->appMods->all([
-            'app',
-            'menus' => function ($query): void {
-                $query
-                    ->with('route')
-                    ->whereNotNull('app_route_id')
-                    ->orderBy('order');
-            },
-        ], ['app_id', 'name']);
+        return $this->availableModulesCache ??= $this->appMods->allForRoleAccessManagement();
     }
 
     /**
@@ -74,9 +89,9 @@ class UserManagementRoleService
         $actionKey = $roleId ? 'role.update' : 'role.create';
         $actionLabel = ($roleId ? 'Mengubah role ' : 'Membuat role ').trim($data['name']);
 
-        return app(AuditLogService::class)->withinAction($actionKey, $actionLabel, function () use ($roleId, $data, $moduleIds, $landings, $code): ClientRole {
+        return $this->auditLogs->withinAction($actionKey, $actionLabel, function () use ($roleId, $data, $moduleIds, $landings, $code): ClientRole {
             return DB::transaction(function () use ($roleId, $data, $moduleIds, $landings, $code): ClientRole {
-                $role = $roleId ? $this->clientRoles->find($roleId) : null;
+                $role = $roleId ? $this->clientRoles->findBasicById($roleId) : null;
 
                 if ($roleId && ! $role instanceof ClientRole) {
                     abort(404);
@@ -88,10 +103,14 @@ class UserManagementRoleService
                     ]);
                 }
 
-                $oldModuleIds = $role?->mods()->pluck('starter_app_mods.id')->map(fn ($id): int => (int) $id)->all() ?? [];
-                $oldLandings = $role?->landings()->pluck('app_menu_id', 'app_id')->map(fn ($id): int => (int) $id)->all() ?? [];
-                $oldCanManageSettings = $role?->can_manage_settings ?? false;
-                $oldCanViewLogs = $role?->can_view_logs ?? false;
+                $oldAccess = $role instanceof ClientRole
+                    ? $this->clientRoles->accessSnapshot($role)
+                    : [
+                        'module_ids' => [],
+                        'landing_menu_ids' => [],
+                        'can_manage_settings' => false,
+                        'can_view_logs' => false,
+                    ];
 
                 $payload = [
                     'code' => $code,
@@ -102,21 +121,21 @@ class UserManagementRoleService
                 ];
 
                 $role = $role instanceof ClientRole
-                    ? $this->clientRoles->update($role, $payload)
-                    : $this->clientRoles->create($payload);
+                    ? $this->clientRoles->updateRole($role, $payload)
+                    : $this->clientRoles->createRole($payload);
 
                 $this->clientRoles->syncMods($role, $moduleIds);
                 $this->clientRoles->syncLandings($role, $landings);
 
-                app(AuditLogService::class)->recordManual(
+                $this->auditLogs->recordManual(
                     'updated',
                     ClientRole::class,
                     $role->id,
                     [
-                        'module_ids' => $oldModuleIds,
-                        'landing_menu_ids' => $oldLandings,
-                        'can_manage_settings' => $oldCanManageSettings,
-                        'can_view_logs' => $oldCanViewLogs,
+                        'module_ids' => $oldAccess['module_ids'],
+                        'landing_menu_ids' => $oldAccess['landing_menu_ids'],
+                        'can_manage_settings' => $oldAccess['can_manage_settings'],
+                        'can_view_logs' => $oldAccess['can_view_logs'],
                     ],
                     [
                         'module_ids' => $moduleIds,
@@ -129,7 +148,7 @@ class UserManagementRoleService
                     metadata: ['operation' => 'sync_role_access'],
                 );
 
-                return $role->load('mods.app', 'landings.menu.route', 'landings.menu.mod.app')->loadCount('clientLogins');
+                return $this->clientRoles->findForManagement($role->id) ?? $role;
             });
         });
     }
@@ -150,11 +169,11 @@ class UserManagementRoleService
             ]);
         }
 
-        app(AuditLogService::class)->withinAction('role.delete', 'Menghapus role '.$role->name, function () use ($role): void {
+        $this->auditLogs->withinAction('role.delete', 'Menghapus role '.$role->name, function () use ($role): void {
             DB::transaction(function () use ($role): void {
                 $this->clientRoles->detachLandings($role);
                 $this->clientRoles->detachMods($role);
-                $this->clientRoles->delete($role);
+                $this->clientRoles->deleteRole($role);
             });
         });
     }
@@ -189,18 +208,7 @@ class UserManagementRoleService
             return [];
         }
 
-        $mods = AppMod::query()
-            ->with([
-                'app',
-                'menus' => function ($query): void {
-                    $query
-                        ->with('route')
-                        ->whereNotNull('app_route_id')
-                        ->orderBy('order');
-                },
-            ])
-            ->whereIn('id', $moduleIds)
-            ->get();
+        $mods = $this->appMods->forIdsWithNavigableMenus($moduleIds);
 
         $landings = [];
 

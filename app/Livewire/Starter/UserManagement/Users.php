@@ -3,9 +3,8 @@
 namespace App\Livewire\Starter\UserManagement;
 
 use App\Models\Starter\ClientLogin;
+use App\Services\Starter\AuthenticatedLoginService;
 use App\Services\Starter\UserManagementUserService;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -15,6 +14,10 @@ class Users extends Component
 {
     use WithPagination;
 
+    private UserManagementUserService $userService;
+
+    private AuthenticatedLoginService $authenticatedLogins;
+
     public bool $embedded = false;
 
     public string $search = '';
@@ -22,6 +25,14 @@ class Users extends Component
     public string $statusFilter = '';
 
     public ?string $temporaryPassword = null;
+
+    public function boot(
+        UserManagementUserService $userService,
+        AuthenticatedLoginService $authenticatedLogins,
+    ): void {
+        $this->userService = $userService;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
 
     public ?string $temporaryPasswordUsername = null;
 
@@ -84,37 +95,10 @@ class Users extends Component
     public function render()
     {
         $login = $this->login();
-        $search = Str::lower(trim($this->search));
-        $visibleUsers = $this->users()
-            ->users($login)
-            ->when(
-                ! $login->role?->isSuperuser(),
-                fn ($users) => $users->reject(fn (ClientLogin $user): bool => $user->role?->isSuperuser() ?? false),
-            );
-        $filteredUsers = $visibleUsers
-            ->when($search !== '', fn ($users) => $users->filter(fn (ClientLogin $user): bool => Str::contains(Str::lower($user->name.' '.$user->username.' '.$user->email.' '.$user->role?->name), $search)
-            ))
-            ->when($this->statusFilter !== '', fn ($users) => $users->where('status', $this->statusFilter));
-        $superuserLogins = $filteredUsers
-            ->filter(fn (ClientLogin $user): bool => $user->role?->isSuperuser() ?? false)
-            ->sortBy(fn (ClientLogin $user): string => $user->name, SORT_NATURAL | SORT_FLAG_CASE);
-        $regularLogins = $filteredUsers
-            ->reject(fn (ClientLogin $user): bool => $user->role?->isSuperuser() ?? false)
-            ->sortBy(fn (ClientLogin $user): string => $user->name, SORT_NATURAL | SORT_FLAG_CASE);
-        $filteredUsers = $superuserLogins
-            ->concat($regularLogins)
-            ->values();
-        $currentPage = $this->getPage(pageName: 'usersPage');
-        $perPage = 10;
-        $users = new LengthAwarePaginator(
-            $filteredUsers->forPage($currentPage, $perPage)->values(),
-            $filteredUsers->count(),
-            $perPage,
-            $currentPage,
-            [
-                'path' => request()->url(),
-                'pageName' => 'usersPage',
-            ],
+        $users = $this->users()->paginateUsers(
+            $login,
+            $this->search,
+            $this->statusFilter,
         );
 
         return view('starter.user-management.users', [
@@ -131,18 +115,11 @@ class Users extends Component
 
     private function users(): UserManagementUserService
     {
-        return app(UserManagementUserService::class);
+        return $this->userService;
     }
 
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-        abort_unless(
-            $login instanceof ClientLogin
-                && ($login->loadMissing('role')->role?->canManageSettings() ?? false),
-            403,
-        );
-
-        return $login;
+        return $this->authenticatedLogins->settingsManager();
     }
 }

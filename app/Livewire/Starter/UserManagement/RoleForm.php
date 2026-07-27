@@ -3,6 +3,7 @@
 namespace App\Livewire\Starter\UserManagement;
 
 use App\Models\Starter\ClientLogin;
+use App\Services\Starter\AuthenticatedLoginService;
 use App\Services\Starter\UserManagementRoleService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -13,12 +14,11 @@ use Livewire\Component;
 #[Layout('layouts::app')]
 class RoleForm extends Component
 {
-    public ?int $roleId = null;
+    private UserManagementRoleService $roleService;
 
-    /**
-     * @var array<int, string>
-     */
-    public array $expandedModuleAppKeys = [];
+    private AuthenticatedLoginService $authenticatedLogins;
+
+    public ?int $roleId = null;
 
     public ?int $deleteRoleId = null;
 
@@ -38,6 +38,14 @@ class RoleForm extends Component
         'module_ids' => [],
         'landing_menu_ids' => [],
     ];
+
+    public function boot(
+        UserManagementRoleService $roleService,
+        AuthenticatedLoginService $authenticatedLogins,
+    ): void {
+        $this->roleService = $roleService;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
 
     public function mount(?int $roleId = null): void
     {
@@ -59,27 +67,6 @@ class RoleForm extends Component
                 $landing->app_id => (string) $landing->app_menu_id,
             ])->all(),
         ];
-    }
-
-    public function toggleModuleApp(string $appKey): void
-    {
-        $this->expandedModuleAppKeys = in_array($appKey, $this->expandedModuleAppKeys, true)
-            ? array_values(array_diff($this->expandedModuleAppKeys, [$appKey]))
-            : [...$this->expandedModuleAppKeys, $appKey];
-    }
-
-    public function expandAllModuleApps(): void
-    {
-        $this->expandedModuleAppKeys = $this->moduleAppKeys();
-    }
-
-    public function toggleAllModuleApps(): void
-    {
-        $moduleAppKeys = $this->moduleAppKeys();
-
-        $this->expandedModuleAppKeys = array_diff($moduleAppKeys, $this->expandedModuleAppKeys) === []
-            ? []
-            : $moduleAppKeys;
     }
 
     public function updatedRoleFormCode(string $value): void
@@ -205,7 +192,7 @@ class RoleForm extends Component
         $modules = $this->roles()->availableModules()
             ->groupBy(fn ($mod): string => $mod->app?->name ?? 'Tanpa App');
 
-        return view('livewire.starter.user-management.role-form', [
+        return view('starter.user-management.role-form', [
             'selectedRole' => $selectedRole,
             'modules' => $modules,
         ])->title($this->roleId === null ? 'Tambah Role' : 'Edit Role');
@@ -213,37 +200,17 @@ class RoleForm extends Component
 
     private function roles(): UserManagementRoleService
     {
-        return app(UserManagementRoleService::class);
+        return $this->roleService;
     }
 
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-        abort_unless(
-            $login instanceof ClientLogin
-                && ($login->loadMissing('role')->role?->canManageSettings() ?? false),
-            403,
-        );
-
-        return $login;
+        return $this->authenticatedLogins->settingsManager();
     }
 
     private function firstValidationMessage(ValidationException $exception): string
     {
         return collect($exception->errors())->flatten()->first() ?? 'Data tidak valid.';
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function moduleAppKeys(): array
-    {
-        return $this->roles()
-            ->availableModules()
-            ->groupBy(fn ($mod): string => 'app-'.($mod->app_id ?? 'none'))
-            ->keys()
-            ->values()
-            ->all();
     }
 
     /**

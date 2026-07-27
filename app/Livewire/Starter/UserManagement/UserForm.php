@@ -3,6 +3,7 @@
 namespace App\Livewire\Starter\UserManagement;
 
 use App\Models\Starter\ClientLogin;
+use App\Services\Starter\AuthenticatedLoginService;
 use App\Services\Starter\UserManagementUserService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -12,6 +13,10 @@ use Livewire\Component;
 #[Layout('layouts::app')]
 class UserForm extends Component
 {
+    private UserManagementUserService $userService;
+
+    private AuthenticatedLoginService $authenticatedLogins;
+
     public ?int $userLoginId = null;
 
     public ?string $temporaryPassword = null;
@@ -26,6 +31,14 @@ class UserForm extends Component
         'role_id' => '',
         'status' => 'active',
     ];
+
+    public function boot(
+        UserManagementUserService $userService,
+        AuthenticatedLoginService $authenticatedLogins,
+    ): void {
+        $this->userService = $userService;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
 
     public function mount(?int $userLoginId = null): void
     {
@@ -107,18 +120,11 @@ class UserForm extends Component
 
     private function users(): UserManagementUserService
     {
-        return app(UserManagementUserService::class);
+        return $this->userService;
     }
 
     private function login(): ClientLogin
     {
-        $login = auth()->user();
-        abort_unless(
-            $login instanceof ClientLogin
-                && ($login->loadMissing('role')->role?->canManageSettings() ?? false),
-            403,
-        );
-
-        return $login;
+        return $this->authenticatedLogins->settingsManager();
     }
 }

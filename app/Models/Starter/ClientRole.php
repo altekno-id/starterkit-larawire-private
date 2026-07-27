@@ -79,42 +79,4 @@ class ClientRole extends Model
     {
         return $this->isSuperuser() || $this->can_view_logs;
     }
-
-    /**
-     * Determine if this role can access a module.
-     */
-    public function canAccessMod(AppMod|string|int $mod): bool
-    {
-        if ($this->hasFullAccess()) {
-            return true;
-        }
-
-        return $this->mods()
-            ->when($mod instanceof AppMod, function ($query) use ($mod) {
-                $query->whereKey($mod->getKey());
-            })
-            ->when(is_int($mod), function ($query) use ($mod) {
-                $query->whereKey($mod);
-            })
-            ->when(is_string($mod), function ($query) use ($mod) {
-                $query->where('code', $mod);
-            })
-            ->exists();
-    }
-
-    /**
-     * Determine if this role can access a named route.
-     */
-    public function canAccessRoute(AppRoute|string $route): bool
-    {
-        if ($this->hasFullAccess()) {
-            return true;
-        }
-
-        $route = is_string($route)
-            ? AppRoute::query()->where('name', $route)->first()
-            : $route;
-
-        return $route instanceof AppRoute && $this->canAccessMod($route->app_mod_id);
-    }
 }

@@ -14,7 +14,7 @@ return [
     */
 
     'component_locations' => [
-        resource_path('views/templates/components'),
+        resource_path('views/starter/templates/components'),
         resource_path('views/components'),
         resource_path('views/livewire'),
     ],
@@ -31,7 +31,7 @@ return [
     */
 
     'component_namespaces' => [
-        'layouts' => resource_path('views/templates/layouts'),
+        'layouts' => resource_path('views/starter/templates/layouts'),
         'pages' => resource_path('views/pages'),
     ],
 
@@ -131,7 +131,7 @@ return [
 
     'temporary_file_upload' => [
         'disk' => env('LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK'), // Example: 'local', 's3'             | Default: 'default'
-        'rules' => null,                                      // Example: ['file', 'mimes:png,jpg'] | Default: ['required', 'file', 'max:12288'] (12MB)
+        'rules' => ['required', 'file', 'max:10240'],          // Absolute temporary-upload ceiling; feature rules may be stricter.
         'directory' => null,                                  // Example: 'tmp'                     | Default: 'livewire-tmp'
         'middleware' => null,                                 // Example: 'throttle:5,1'            | Default: 'throttle:60,1'
         'preview_mimes' => [                                  // Supported file types for temporary pre-signed file URLs...

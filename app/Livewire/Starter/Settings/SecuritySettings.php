@@ -3,13 +3,15 @@
 namespace App\Livewire\Starter\Settings;
 
 use App\Models\Starter\ClientLogin;
-use App\Services\Starter\AuditLogService;
+use App\Services\Starter\AuthenticatedLoginService;
+use App\Services\Starter\SecuritySettingsService;
 use App\Services\Starter\StarterConfigService;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class SecuritySettings extends Component
 {
+    private AuthenticatedLoginService $authenticatedLogins;
+
     /**
      * @var array{
      *     remember_me_enabled: bool,
@@ -29,6 +31,11 @@ class SecuritySettings extends Component
         'max_image_size_kb' => 2048,
     ];
 
+    public function boot(AuthenticatedLoginService $authenticatedLogins): void
+    {
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
+
     public function mount(StarterConfigService $configs): void
     {
         $this->authorizeSettings();
@@ -42,9 +49,9 @@ class SecuritySettings extends Component
         ];
     }
 
-    public function save(StarterConfigService $configs, AuditLogService $auditLogs): void
+    public function save(SecuritySettingsService $securitySettings): void
     {
-        $this->authorizeSettings();
+        $login = $this->authorizeSettings();
 
         $validated = $this->validate([
             'securityForm.remember_me_enabled' => ['boolean'],
@@ -62,24 +69,7 @@ class SecuritySettings extends Component
             'securityForm.max_image_size_kb' => 'ukuran maksimum gambar',
         ])['securityForm'];
 
-        $auditLogs->withinAction('config.security.update', 'Mengubah konfigurasi keamanan', function () use ($configs, $validated): void {
-            DB::transaction(function () use ($configs, $validated): void {
-                $configs->update([
-                    'security.remember_me_enabled' => (bool) $validated['remember_me_enabled'],
-                    'security.lock_screen_enabled' => (bool) $validated['lock_screen_enabled'],
-                    'security.lock_screen_timeout_minutes' => (int) $validated['lock_screen_timeout_minutes'],
-                    'security.login_max_attempts' => (int) $validated['login_max_attempts'],
-                    'security.login_decay_seconds' => (int) $validated['login_decay_seconds'],
-                    'uploads.max_image_size_kb' => (int) $validated['max_image_size_kb'],
-                ]);
-
-                if (! $validated['remember_me_enabled']) {
-                    ClientLogin::query()
-                        ->whereNotNull('remember_token')
-                        ->eachById(fn (ClientLogin $login) => $login->update(['remember_token' => null]));
-                }
-            });
-        });
+        $securitySettings->update($login, $validated);
 
         $this->dispatch('starter-toast', type: 'success', message: 'Konfigurasi keamanan berhasil disimpan.');
     }
@@ -91,14 +81,8 @@ class SecuritySettings extends Component
         return view('starter.settings.security-settings');
     }
 
-    private function authorizeSettings(): void
+    private function authorizeSettings(): ClientLogin
     {
-        $login = auth()->user();
-
-        abort_unless(
-            $login instanceof ClientLogin
-                && ($login->loadMissing('role')->role?->canManageSettings() ?? false),
-            403,
-        );
+        return $this->authenticatedLogins->settingsManager();
     }
 }

@@ -9,7 +9,7 @@
                 </div>
                 <div class="col-auto">
                     <a href="{{ route('starter.settings.roles.create') }}" class="btn btn-primary" data-starter-navigate>
-                        @include('templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
+                        @include('starter.templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
                         Tambah Role
                     </a>
                 </div>
@@ -30,7 +30,7 @@
                     data-role-create-location="content"
                     data-starter-navigate
                 >
-                    @include('templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
+                    @include('starter.templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
                     Tambah Role
                 </a>
             </div>
@@ -42,9 +42,10 @@
                     <input
                         type="search"
                         class="form-control"
+                        maxlength="100"
                         placeholder="Cari nama, kode, atau deskripsi role"
                         aria-label="Cari role"
-                        wire:model.live.debounce.250ms="search"
+                        wire:model.live.debounce.350ms="search"
                     >
                 </div>
                 <div class="col-12 col-lg-auto text-secondary small">
@@ -84,7 +85,7 @@
                                         class="avatar avatar-sm flex-shrink-0 {{ $role->isSuperuser() ? 'bg-danger-lt text-danger' : 'bg-primary-lt text-primary' }}"
                                         data-role-avatar
                                     >
-                                        @include('templates.layouts.icon', ['name' => $role->isSuperuser() ? 'shield-check' : 'shield-lock', 'class' => 'm-0'])
+                                        @include('starter.templates.layouts.icon', ['name' => $role->isSuperuser() ? 'shield-check' : 'shield-lock', 'class' => 'm-0'])
                                     </span>
                                     <div class="overflow-hidden">
                                         <div class="d-flex align-items-center gap-2">
@@ -94,13 +95,13 @@
                                             @endif
                                             @if (! $role->isSuperuser() && $role->canManageSettings())
                                                 <span class="badge bg-azure-lt text-azure">
-                                                    @include('templates.layouts.icon', ['name' => 'settings', 'class' => 'icon-sm me-1'])
+                                                    @include('starter.templates.layouts.icon', ['name' => 'settings', 'class' => 'icon-sm me-1'])
                                                     Pengaturan
                                                 </span>
                                             @endif
                                             @if (! $role->isSuperuser() && $role->canViewLogs())
                                                 <span class="badge bg-purple-lt text-purple">
-                                                    @include('templates.layouts.icon', ['name' => 'history', 'class' => 'icon-sm me-1'])
+                                                    @include('starter.templates.layouts.icon', ['name' => 'history', 'class' => 'icon-sm me-1'])
                                                     Log
                                                 </span>
                                             @endif
@@ -129,7 +130,7 @@
                                     data-role-access-trigger
                                 >
                                     <span class="avatar avatar-xs rounded {{ $role->isSuperuser() ? 'bg-success-lt text-success' : 'bg-primary-lt text-primary' }} flex-shrink-0">
-                                        @include('templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm m-0'])
+                                        @include('starter.templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm m-0'])
                                     </span>
                                     <span class="min-w-0">
                                         <span class="starter-role-access-title d-block fw-semibold text-truncate">
@@ -137,7 +138,7 @@
                                         </span>
                                         <span class="d-block small text-secondary fw-normal" data-role-module-count>{{ \App\Support\Starter\StarterNumber::decimal($roleModuleCount) }} module</span>
                                     </span>
-                                    @include('templates.layouts.icon', ['name' => 'chevron-right', 'class' => 'icon-sm text-secondary flex-shrink-0'])
+                                    @include('starter.templates.layouts.icon', ['name' => 'chevron-right', 'class' => 'icon-sm text-secondary flex-shrink-0'])
                                 </button>
                             </td>
                             <td>
@@ -170,7 +171,7 @@
                             <td colspan="4">
                                 <div class="empty py-5">
                                     <div class="empty-icon">
-                                        @include('templates.layouts.icon', ['name' => 'users-group'])
+                                        @include('starter.templates.layouts.icon', ['name' => 'users-group'])
                                     </div>
                                     <p class="empty-title">Role tidak ditemukan</p>
                                     <p class="empty-subtitle text-secondary">Coba kata kunci lain atau buat role baru.</p>
@@ -250,7 +251,7 @@
                         @if ($roleAccessIsFull)
                             <div class="alert alert-success" role="note">
                                 <div class="d-flex gap-2">
-                                    @include('templates.layouts.icon', ['name' => 'shield-check', 'class' => 'icon-sm flex-shrink-0 mt-1'])
+                                    @include('starter.templates.layouts.icon', ['name' => 'shield-check', 'class' => 'icon-sm flex-shrink-0 mt-1'])
                                     <div>
                                         <div class="fw-semibold">Akses penuh role default</div>
                                         <div class="small">Superuser otomatis dapat mengakses seluruh app dan module yang terdaftar.</div>
@@ -264,7 +265,7 @@
                                 <div class="list-group list-group-flush">
                                     <div class="list-group-item">
                                         <div class="d-flex gap-2">
-                                            @include('templates.layouts.icon', ['name' => $roleAccessCanManageSettings ? 'settings' : 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1 '.($roleAccessCanManageSettings ? 'text-azure' : 'text-secondary')])
+                                            @include('starter.templates.layouts.icon', ['name' => $roleAccessCanManageSettings ? 'settings' : 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1 '.($roleAccessCanManageSettings ? 'text-azure' : 'text-secondary')])
                                             <div>
                                                 <div class="fw-semibold">
                                                     {{ $roleAccessCanManageSettings ? 'Dapat mengakses Pengaturan' : 'Tidak dapat mengakses Pengaturan' }}
@@ -279,7 +280,7 @@
                                     </div>
                                     <div class="list-group-item">
                                         <div class="d-flex gap-2">
-                                            @include('templates.layouts.icon', ['name' => $roleAccessCanViewLogs ? 'history' : 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1 '.($roleAccessCanViewLogs ? 'text-purple' : 'text-secondary')])
+                                            @include('starter.templates.layouts.icon', ['name' => $roleAccessCanViewLogs ? 'history' : 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1 '.($roleAccessCanViewLogs ? 'text-purple' : 'text-secondary')])
                                             <div>
                                                 <div class="fw-semibold">
                                                     {{ $roleAccessCanViewLogs ? 'Dapat melihat Log Aktivitas' : 'Tidak dapat melihat Log Aktivitas' }}
@@ -300,7 +301,7 @@
                             @forelse ($roleAccessApps as $app)
                                 <div class="border rounded overflow-hidden">
                                     <div class="d-flex align-items-center gap-2 bg-body-tertiary px-3 py-2 border-bottom">
-                                        @include('templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm text-primary flex-shrink-0'])
+                                        @include('starter.templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm text-primary flex-shrink-0'])
                                         <div class="fw-semibold">{{ $app['name'] }}</div>
                                         <span class="badge bg-secondary-lt ms-auto">{{ \App\Support\Starter\StarterNumber::decimal(count($app['modules'])) }} module</span>
                                     </div>
@@ -321,7 +322,7 @@
                             @empty
                                 <div class="empty py-4">
                                     <div class="empty-icon">
-                                        @include('templates.layouts.icon', ['name' => 'shield-lock'])
+                                        @include('starter.templates.layouts.icon', ['name' => 'shield-lock'])
                                     </div>
                                     <p class="empty-title">Belum ada akses module</p>
                                     <p class="empty-subtitle text-secondary">Role ini belum memiliki app atau module yang dapat diakses.</p>

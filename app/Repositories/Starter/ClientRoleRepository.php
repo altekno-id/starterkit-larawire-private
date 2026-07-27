@@ -4,40 +4,120 @@ namespace App\Repositories\Starter;
 
 use App\Contracts\Starter\ClientRoleInterface;
 use App\Models\Starter\AppMenu;
+use App\Models\Starter\ClientLogin;
 use App\Models\Starter\ClientRole;
 use App\Models\Starter\ClientRoleAppLanding;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class ClientRoleRepository implements ClientRoleInterface
 {
-    public function all(array $with = [], array $withCount = [], string $orderBy = 'name'): Collection
+    public function allAssignableForViewer(ClientLogin $viewer): Collection
     {
         return ClientRole::query()
-            ->with($with)
-            ->withCount($withCount)
-            ->orderBy($orderBy)
+            ->with('mods.app')
+            ->when(! $viewer->role?->isSuperuser(), fn (Builder $query): Builder => $query
+                ->where('is_system', false)
+                ->where('code', '!=', 'superuser'))
+            ->orderBy('name')
             ->get();
     }
 
-    public function find(int $id, array $with = [], array $withCount = []): ?ClientRole
+    public function paginateForViewer(
+        ClientLogin $viewer,
+        string $search,
+        int $perPage,
+        string $pageName,
+    ): LengthAwarePaginator {
+        $query = ClientRole::query()
+            ->with([
+                'mods' => fn ($moduleQuery) => $moduleQuery
+                    ->select(['starter_app_mods.id', 'starter_app_mods.app_id']),
+            ])
+            ->withCount('clientLogins');
+
+        if (! $viewer->role?->isSuperuser()) {
+            $query
+                ->where('is_system', false)
+                ->where('code', '!=', 'superuser');
+        }
+
+        if ($search !== '') {
+            $term = '%'.$search.'%';
+            $query->where(function (Builder $searchQuery) use ($term): void {
+                $searchQuery
+                    ->where('name', 'like', $term)
+                    ->orWhere('code', 'like', $term)
+                    ->orWhere('desc', 'like', $term);
+            });
+        }
+
+        return $query
+            ->orderByRaw("CASE WHEN is_system = 1 OR code = 'superuser' THEN 0 ELSE 1 END")
+            ->orderBy('name')
+            ->orderBy('id')
+            ->paginate($perPage, ['*'], $pageName);
+    }
+
+    public function findBasicById(int $id): ?ClientRole
     {
         return ClientRole::query()
-            ->with($with)
-            ->withCount($withCount)
             ->whereKey($id)
             ->first();
     }
 
-    public function create(array $data): ClientRole
+    public function findForManagement(int $id): ?ClientRole
+    {
+        return ClientRole::query()
+            ->with(['mods.app', 'landings.menu.route', 'landings.menu.mod.app'])
+            ->withCount('clientLogins')
+            ->whereKey($id)
+            ->first();
+    }
+
+    public function clientLogins(ClientRole $role): Collection
+    {
+        return $role->clientLogins()
+            ->orderBy('name')
+            ->get(['id', 'client_role_id', 'name', 'email']);
+    }
+
+    public function createRole(array $data): ClientRole
     {
         return ClientRole::query()->create($data);
     }
 
-    public function update(ClientRole $role, array $data): ClientRole
+    public function updateRole(ClientRole $role, array $data): ClientRole
     {
         $role->forceFill($data)->save();
 
-        return $role->refresh();
+        return $role;
+    }
+
+    public function countForViewer(ClientLogin $viewer): int
+    {
+        return ClientRole::query()
+            ->when(! $viewer->role?->isSuperuser(), fn (Builder $query): Builder => $query
+                ->where('is_system', false)
+                ->where('code', '!=', 'superuser'))
+            ->count();
+    }
+
+    public function accessSnapshot(ClientRole $role): array
+    {
+        return [
+            'module_ids' => $role->mods()
+                ->pluck('starter_app_mods.id')
+                ->map(fn (int|string $id): int => (int) $id)
+                ->all(),
+            'landing_menu_ids' => $role->landings()
+                ->pluck('app_menu_id', 'app_id')
+                ->map(fn (int|string $id): int => (int) $id)
+                ->all(),
+            'can_manage_settings' => (bool) $role->can_manage_settings,
+            'can_view_logs' => (bool) $role->can_view_logs,
+        ];
     }
 
     public function syncMods(ClientRole $role, array $moduleIds): void
@@ -97,7 +177,7 @@ class ClientRoleRepository implements ClientRoleInterface
         return $role->clientLogins()->exists();
     }
 
-    public function delete(ClientRole $role): void
+    public function deleteRole(ClientRole $role): void
     {
         $role->delete();
     }

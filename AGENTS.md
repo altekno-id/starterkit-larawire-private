@@ -59,7 +59,7 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 | Pengujian dan definition of done | `docs/rules/testing.md` |
 | Shared hosting/deployment | `docs/rules/deployment.md` |
 | Hubungan layer dan source of truth | `docs/rules/architecture.md` |
-| Install/update clone starterkit atau extension project | `docs/installation-git-clone.md` |
+| Install/update clone starterkit atau extension project | `README.md` |
 
 ## Profil baca minimum
 

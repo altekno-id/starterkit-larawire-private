@@ -2,7 +2,9 @@
 
 ## Prasyarat
 
-- Pada mode clone, folder `<laravel>/starterkit` tersedia dari repository core dan autoload/provider/bootstrap connector telah terpasang sesuai `docs/installation-git-clone.md`.
+- Pada mode clone, folder `<laravel>/starterkit` tersedia dari repository core
+  dan autoload/provider/bootstrap connector telah terpasang sesuai `README.md`
+  root starterkit.
 - PHP yang kompatibel dengan dependency project serta extension Laravel tersedia.
 - Extension `intl` tersedia untuk format angka/currency berbasis locale.
 - Document root diarahkan ke folder `public`.

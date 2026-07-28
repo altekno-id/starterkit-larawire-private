@@ -1,70 +1,259 @@
 # Laravel Private Starterkit
 
-Repository source starterkit internal yang di-clone ke dalam project Laravel. Repository ini **bukan aplikasi Laravel mandiri**, bukan Composer package, dan bukan Git submodule.
+Repository source starterkit internal yang di-clone ke dalam project Laravel.
+Repository ini **bukan aplikasi Laravel mandiri**, bukan Composer package, dan
+bukan Git submodule.
+
+README ini adalah satu-satunya panduan penggunaan manual untuk developer.
+Aturan implementasi developer dan AI tetap berada di [`AGENTS.md`](AGENTS.md)
+beserta file tematik di `docs/rules/`.
 
 ## Isi repository
 
 ```text
 starterkit/
 ├── install.php                   # bootstrap installer pertama
-├── src/                          # runtime PHP dengan namespace Altekno\StarterKit
+├── src/                          # runtime PHP namespace Altekno\StarterKit
 ├── config/                       # config auth dan starter
 ├── database/migrations/starter/  # schema inti starterkit
 ├── routes/starter/               # route autentikasi dan pengaturan
-├── resources/views/starter/      # Livewire views, layout, error page
+├── resources/views/starter/      # Livewire view, layout, dan error page
 ├── public/assets/                # asset core yang dipublish ke host
-├── docs/                         # rules dan atlas referensi UI
-└── examples/                     # snippet connector, bukan Laravel app
+├── docs/rules/                   # aturan implementasi developer dan AI
+├── docs/template/                # atlas referensi UI
+└── examples/                     # connector untuk fallback manual
 ```
 
-Tidak ada `artisan`, `bootstrap/`, `app/`, dependency vendor, database development, atau app contoh di repository ini. Seluruh command dijalankan dari root Laravel host.
+Tidak ada `artisan`, shell `bootstrap/`, folder `app/`, dependency `vendor`,
+database development, landing project, atau app contoh di repository ini.
+Seluruh command Composer dan Artisan dijalankan dari root Laravel host.
 
-## Instalasi
+## Instalasi cepat
 
-### Instalasi baru yang direkomendasikan
+### 1. Siapkan Laravel host
 
-Dari root project Laravel yang sudah dibuat dan sudah memiliki `vendor/`:
+Gunakan project Laravel yang sudah selesai dibuat dan memiliki dependency dasar
+(`vendor/`). Pastikan `.env` tersedia, lalu isi:
+
+- `APP_NAME`;
+- `APP_URL` dengan URL aplikasi yang sebenarnya;
+- koneksi database yang akan digunakan.
+
+Untuk MySQL atau MariaDB, buat database lebih dahulu dan pastikan credential
+`.env` dapat digunakan. Jika Laravel host berasal dari clone Git dan belum
+memiliki `vendor/`, jalankan:
+
+```bash
+composer install
+```
+
+### 2. Clone dan jalankan installer
+
+Jalankan tepat dari root Laravel host:
 
 ```bash
 git clone https://github.com/altekno-id/starterkit-larawire-private-tabler.git starterkit
 php starterkit/install.php --company="Nama Aplikasi"
 ```
 
-Selesai. Tidak ada folder core yang perlu dicopy dan tidak ada file Laravel
-yang perlu diedit manual pada instalasi standar. Bootstrap installer akan:
+Selesai. Pada instalasi Laravel standar tidak ada file core yang perlu dicopy
+dan tidak ada file Laravel yang perlu diedit manual.
 
-- mengabaikan `/starterkit/` dari Git project;
-- memasang dependency runtime yang belum tersedia;
-- menghubungkan Composer autoload, provider, route, middleware, dan exception;
-- menambahkan environment key yang belum ada dengan default aman ke `.env` dan
-  `.env.example`, tanpa menimpa credential atau identitas project;
-- menjalankan `composer dump-autoload`, generate `APP_KEY` bila masih kosong;
-- meneruskan proses ke `php artisan starterkit:install`;
-- memasang bahasa sesuai `APP_LOCALE`, publish asset, migration, setup Superuser,
-  sinkronisasi registry, dan pemeriksaan keamanan.
+Jika `APP_DOMAIN` belum tersedia, installer menurunkannya dari host pada
+`APP_URL`. Nilai environment yang sudah ada—termasuk credential, identitas
+aplikasi, dan akun setup—tidak ditimpa.
 
-Sebelum menjalankan installer, isi koneksi database pada `.env` bila project
-tidak memakai database default Laravel. `APP_URL` juga harus memakai URL lokal
-atau production yang sebenarnya; `APP_DOMAIN` diturunkan otomatis dari URL itu
-jika key tersebut belum tersedia.
+## Opsi installer
 
-Perintah `php artisan starterkit:install` tersedia setelah bootstrap pertama dan
-idempotent untuk melanjutkan instalasi yang terputus. Command ini melakukan
-sinkronisasi registry dengan `--force`; update rutin tetap mengikuti prosedur
-dry-run di bawah. Jika `bootstrap/app.php` sudah dikustomisasi, installer akan
-berhenti tanpa menimpanya dan menunjukkan connector yang perlu digabungkan.
+```text
+--company=          Nama internal aplikasi/client
+--email=            Email notifikasi Superuser
+--username=         Username Superuser
+--skip-migration    Pasang connector tanpa mengakses database
+```
 
-Panduan lengkap, daftar file yang disentuh, troubleshooting, instalasi manual,
-dan update tersedia di [Instalasi Starterkit melalui Git Clone](docs/installation-git-clone.md).
+Contoh ketika database belum siap:
 
-## Ownership
+```bash
+php starterkit/install.php --company="Nama Aplikasi" --skip-migration
+
+# Setelah database siap:
+php artisan starterkit:install --company="Nama Aplikasi"
+```
+
+Untuk production, isi `STARTER_SUPERUSER_PASSWORD` dengan password kuat pada
+`.env` sebelum instalasi database. Password development tidak boleh dipakai pada
+production.
+
+## Apa yang dilakukan installer
+
+Installer memasang connector minimum secara otomatis:
+
+| File/area Laravel host | Perubahan |
+|---|---|
+| `.gitignore` | Menambahkan `/starterkit/` |
+| `composer.json` | Menambahkan namespace `Altekno\StarterKit\` dan auto-publish asset |
+| `composer.lock` dan `vendor/` | Memasang `livewire/livewire` serta `laravel-lang/common` bila belum tersedia |
+| `bootstrap/providers.php` | Mendaftarkan `StarterServiceProvider` tanpa menghapus provider project |
+| `bootstrap/app.php` | Menghubungkan route, middleware, dan exception starterkit |
+| `.env` | Menambahkan key yang belum tersedia dan menormalkan nilai keamanan wajib |
+| `.env.example` | Mencerminkan environment key tanpa nilai rahasia |
+| `lang/<APP_LOCALE>` | Memasang bahasa sesuai `APP_LOCALE` melalui Laravel Lang |
+| `public/assets/starter` dan `public/assets/tabler` | Mempublish asset core; bukan tempat edit |
+| database | Menjalankan migration dan setup awal secara idempotent |
+
+Installer juga melakukan:
+
+- generate `APP_KEY` jika masih kosong;
+- setup perusahaan dan akun Superuser;
+- sinkronisasi registry app, module, route, dan menu;
+- pemeriksaan konfigurasi keamanan.
+
+## Mengapa instalasi pertama bukan command Artisan?
+
+Tepat setelah clone, Composer Laravel host belum mengenal namespace starterkit
+dan provider belum terdaftar. Artisan belum mungkin menemukan
+`starterkit:install`.
+
+`php starterkit/install.php` memasang bootstrap teknis tersebut, lalu otomatis
+menjalankan:
+
+```bash
+php artisan starterkit:install --company="Nama Aplikasi"
+```
+
+Setelah instalasi pertama, command Artisan tersedia dan idempotent untuk
+melanjutkan instalasi yang terputus. Command tersebut melakukan sinkronisasi
+registry dengan `--force`; update rutin tetap mengikuti alur dry-run pada bagian
+Update starterkit.
+
+## Keamanan terhadap project existing
+
+Installer tidak memaksa menimpa project:
+
+- connector yang sudah benar dilewati;
+- dependency yang sudah tersedia tidak di-update tanpa kebutuhan;
+- credential dan identitas environment existing dipertahankan;
+- data dan akun existing tidak dihapus;
+- migration dan setup memakai operasi Laravel yang idempotent;
+- `bootstrap/app.php` yang sudah dikustomisasi tidak ditimpa otomatis.
+
+Jika `bootstrap/app.php` berisi API, broadcasting, middleware, exception, atau
+routing khusus yang tidak dikenali, installer berhenti sebelum menimpanya.
+Gunakan fallback manual berikut, lalu jalankan installer kembali.
+
+## Fallback manual untuk bootstrap yang sudah dikustomisasi
+
+Bagian ini bukan alur instalasi normal.
+
+### Composer
+
+```bash
+composer require livewire/livewire laravel-lang/common
+```
+
+Gabungkan `starterkit/examples/composer-autoload.json` ke `composer.json` host.
+Pastikan mapping berikut tersedia:
+
+```json
+"Altekno\\StarterKit\\": "starterkit/src/"
+```
+
+Tambahkan command berikut pada `scripts.post-autoload-dump`:
+
+```json
+"@php artisan starter:publish-assets --ansi"
+```
+
+### Provider
+
+Tambahkan `StarterServiceProvider::class` ke `bootstrap/providers.php` tanpa
+menghapus provider project. Acuan utuh tersedia pada:
+
+```text
+starterkit/examples/providers.php
+```
+
+### Bootstrap aplikasi
+
+Gabungkan tiga connector dari `starterkit/examples/bootstrap-app.php` ke
+`bootstrap/app.php` host:
+
+- `StarterBootstrap::registerRoutes()`;
+- `StarterBootstrap::configureMiddleware($middleware)`;
+- `StarterBootstrap::configureExceptions($exceptions)`.
+
+Pertahankan konfigurasi API, broadcasting, exception, dan middleware project.
+Route web project harus tetap didaftarkan pada `config('app.domain')` agar tidak
+menangkap root route milik app subdomain.
+
+### Environment
+
+Gabungkan key dari `starterkit/examples/env.example` ke `.env` dan
+`.env.example`. Nilai rahasia hanya boleh berada di `.env`.
+
+Selesaikan instalasi:
+
+```bash
+composer dump-autoload
+php artisan starterkit:install --company="Nama Aplikasi"
+```
+
+## Batas kepemilikan code
 
 - Folder clone hanya boleh berubah untuk improvement universal starterkit.
-- Feature, model, migration, UI, route, dan rule khusus project berada di repository Laravel host.
-- Project memakai extension contract untuk menyisipkan UI tanpa mengubah Blade core.
-- `master` selalu menjadi baseline kompatibel yang dipakai seluruh project tim.
+- Feature project dilarang mengubah file di dalam clone.
+- Feature, model, migration, UI, route, dan rule khusus project berada di
+  repository Laravel host.
+- Project memakai extension contract untuk menyisipkan UI tanpa mengubah Blade
+  core.
+- Branch `master` starterkit selalu menjadi baseline kompatibel untuk seluruh
+  project tim.
 
-## Update pada project pemakai
+Area feature milik Laravel host:
+
+```text
+app/
+config/apps/
+database/migrations/apps/
+resources/views/apps/
+resources/views/extensions/starter/
+resources/views/landing/
+routes/apps/
+routes/web.php
+tests/
+```
+
+Source core tidak dicopy ke area tersebut. Laravel membacanya langsung dari
+clone sehingga update core cukup dilakukan melalui Git pull.
+
+## Extension UI project
+
+Extension opsional berada di repository Laravel host:
+
+```text
+resources/views/extensions/starter/
+├── header-actions/index.blade.php
+├── profile-menu/index.blade.php
+└── layout/
+    ├── head.blade.php
+    └── body-end.blade.php
+```
+
+- `header-actions/index.blade.php`: aksi project pada top bar; menerima
+  `$compact` untuk mode mobile/desktop.
+- `profile-menu/index.blade.php`: menu project pada dropdown profil sebelum
+  divider Logout.
+- `layout/head.blade.php`: metadata atau asset project yang benar-benar global.
+- `layout/body-end.blade.php`: script project yang benar-benar global.
+
+Sidebar tetap memakai app/module/menu registry agar authorization konsisten.
+Setiap extension wajib mengotorisasi targetnya sendiri dan mengikuti markup
+template aktif.
+
+## Update starterkit
+
+Setelah perubahan starterkit di-merge ke `master`, jalankan dari Laravel host:
 
 ```bash
 cd starterkit
@@ -81,7 +270,86 @@ php artisan starter:security-check
 php artisan test --compact
 ```
 
-`composer dump-autoload` otomatis menjalankan `starter:publish-assets`. Periksa
-hasil dry-run sebelum sync dengan `--force`.
+`composer dump-autoload` otomatis menjalankan `starter:publish-assets`, tetapi
+command publish eksplisit tetap aman. Periksa hasil `starter:sync --dry-run`
+sebelum menjalankan sync dengan `--force`.
 
-Aturan utama developer dan AI berada di [AGENTS.md](AGENTS.md).
+Migration tidak boleh menghapus atau merusak data existing. Jangan mengubah file
+clone untuk kebutuhan satu project; improvement universal dibuat melalui branch
+dan pull request starterkit.
+
+## Deployment shared hosting
+
+Bootstrap installer dijalankan saat development atau provisioning, bukan pada
+setiap request production. Upload Laravel host beserta clone `starterkit`,
+tetapi jangan upload `.git`, `.env` lokal, `node_modules`, atau artifact
+development.
+
+Pada server:
+
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan starter:publish-assets
+php artisan starter:sync --dry-run
+php artisan starter:sync --force
+php artisan starter:security-check --production
+```
+
+Pastikan:
+
+- `APP_ENV=production`;
+- `APP_DEBUG=false`;
+- `APP_URL` menggunakan HTTPS dan sesuai `APP_DOMAIN`;
+- `SESSION_SECURE_COOKIE=true`;
+- `STARTER_SUPERUSER_PASSWORD` tidak memakai password development;
+- `storage/` dan `bootstrap/cache/` writable;
+- document root mengarah ke folder `public`;
+- root domain dan app subdomain mengarah ke instalasi yang sama.
+
+Starterkit tidak membutuhkan daemon, reverse proxy, symlink core, atau
+konfigurasi server khusus. Config cache tidak wajib; selama development jangan
+mengaktifkannya.
+
+## Troubleshooting ringkas
+
+### `starterkit:install` tidak ditemukan
+
+Gunakan bootstrap pertama:
+
+```bash
+php starterkit/install.php --company="Nama Aplikasi"
+```
+
+### Database belum siap
+
+```bash
+php starterkit/install.php --company="Nama Aplikasi" --skip-migration
+```
+
+Setelah credential dan database siap:
+
+```bash
+php artisan starterkit:install --company="Nama Aplikasi"
+```
+
+### `bootstrap/app.php` ditolak installer
+
+File tersebut sudah dikustomisasi. Gabungkan
+`starterkit/examples/bootstrap-app.php` sesuai bagian fallback manual; installer
+sengaja tidak menimpa konfigurasi project yang tidak dikenali.
+
+### Asset tidak sinkron setelah update
+
+```bash
+composer dump-autoload
+php artisan starter:publish-assets
+```
+
+### Config development pernah tercache
+
+```bash
+php artisan optimize:clear
+```
+
+Jangan menjalankan `config:cache` atau `optimize` selama development rutin.

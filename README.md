@@ -49,8 +49,10 @@ atau production yang sebenarnya; `APP_DOMAIN` diturunkan otomatis dari URL itu
 jika key tersebut belum tersedia.
 
 Perintah `php artisan starterkit:install` tersedia setelah bootstrap pertama dan
-aman dijalankan kembali. Jika `bootstrap/app.php` sudah dikustomisasi, installer
-akan berhenti tanpa menimpanya dan menunjukkan connector yang perlu digabungkan.
+idempotent untuk melanjutkan instalasi yang terputus. Command ini melakukan
+sinkronisasi registry dengan `--force`; update rutin tetap mengikuti prosedur
+dry-run di bawah. Jika `bootstrap/app.php` sudah dikustomisasi, installer akan
+berhenti tanpa menimpanya dan menunjukkan connector yang perlu digabungkan.
 
 Panduan lengkap, daftar file yang disentuh, troubleshooting, instalasi manual,
 dan update tersedia di [Instalasi Starterkit melalui Git Clone](docs/installation-git-clone.md).
@@ -71,9 +73,11 @@ git pull --ff-only origin master
 
 cd ..
 composer dump-autoload
-php artisan starterkit:install
+php artisan starter:publish-assets
+php artisan migrate --force
 php artisan starter:sync --dry-run
 php artisan starter:sync --force
+php artisan starter:security-check
 php artisan test --compact
 ```
 

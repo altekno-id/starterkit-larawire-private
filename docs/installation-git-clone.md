@@ -47,7 +47,9 @@ php artisan starterkit:install --company="Nama Aplikasi"
 ```
 
 Perintah Artisan tersebut idempotent dan dapat dijalankan ulang untuk
-menyelesaikan instalasi yang terputus atau memastikan instalasi tetap lengkap.
+menyelesaikan instalasi yang terputus. Command ini menjalankan sinkronisasi
+registry dengan `--force`, sehingga update rutin tetap memakai alur dry-run pada
+bagian Update Starterkit.
 
 Opsi yang tersedia:
 
@@ -244,16 +246,18 @@ git pull --ff-only origin master
 
 cd ..
 composer dump-autoload
-php artisan starterkit:install
+php artisan starter:publish-assets
+php artisan migrate --force
 php artisan starter:sync --dry-run
 php artisan starter:sync --force
+php artisan starter:security-check
 php artisan test --compact
 ```
 
-`starterkit:install` tidak menghapus data existing. Periksa hasil dry-run sebelum
-menjalankan sync dengan `--force`. Jangan mengubah file clone untuk kebutuhan
-satu project; improvement universal dibuat melalui branch dan pull request
-starterkit.
+Migration tidak menghapus data existing dan perubahan schema wajib mengikuti
+rule production-safe. Periksa hasil dry-run sebelum menjalankan sync dengan
+`--force`. Jangan mengubah file clone untuk kebutuhan satu project; improvement
+universal dibuat melalui branch dan pull request starterkit.
 
 ## Deployment shared hosting
 

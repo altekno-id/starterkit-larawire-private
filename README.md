@@ -6,6 +6,7 @@ Repository source starterkit internal yang di-clone ke dalam project Laravel. Re
 
 ```text
 starterkit/
+├── install.php                   # bootstrap installer pertama
 ├── src/                          # runtime PHP dengan namespace Altekno\StarterKit
 ├── config/                       # config auth dan starter
 ├── database/migrations/starter/  # schema inti starterkit
@@ -20,13 +21,39 @@ Tidak ada `artisan`, `bootstrap/`, `app/`, dependency vendor, database developme
 
 ## Instalasi
 
-Dari root project Laravel:
+### Instalasi baru yang direkomendasikan
+
+Dari root project Laravel yang sudah dibuat dan sudah memiliki `vendor/`:
 
 ```bash
 git clone https://github.com/altekno-id/starterkit-larawire-private-tabler.git starterkit
+php starterkit/install.php --company="Nama Aplikasi"
 ```
 
-Folder `starterkit/` wajib diabaikan oleh Git host. Ikuti [panduan instalasi](docs/installation-git-clone.md) untuk memasang dependency runtime, autoload, provider, bootstrap, environment, asset, dan migration.
+Selesai. Tidak ada folder core yang perlu dicopy dan tidak ada file Laravel
+yang perlu diedit manual pada instalasi standar. Bootstrap installer akan:
+
+- mengabaikan `/starterkit/` dari Git project;
+- memasang dependency runtime yang belum tersedia;
+- menghubungkan Composer autoload, provider, route, middleware, dan exception;
+- menambahkan environment key yang belum ada dengan default aman ke `.env` dan
+  `.env.example`, tanpa menimpa credential atau identitas project;
+- menjalankan `composer dump-autoload`, generate `APP_KEY` bila masih kosong;
+- meneruskan proses ke `php artisan starterkit:install`;
+- memasang bahasa sesuai `APP_LOCALE`, publish asset, migration, setup Superuser,
+  sinkronisasi registry, dan pemeriksaan keamanan.
+
+Sebelum menjalankan installer, isi koneksi database pada `.env` bila project
+tidak memakai database default Laravel. `APP_URL` juga harus memakai URL lokal
+atau production yang sebenarnya; `APP_DOMAIN` diturunkan otomatis dari URL itu
+jika key tersebut belum tersedia.
+
+Perintah `php artisan starterkit:install` tersedia setelah bootstrap pertama dan
+aman dijalankan kembali. Jika `bootstrap/app.php` sudah dikustomisasi, installer
+akan berhenti tanpa menimpanya dan menunjukkan connector yang perlu digabungkan.
+
+Panduan lengkap, daftar file yang disentuh, troubleshooting, instalasi manual,
+dan update tersedia di [Instalasi Starterkit melalui Git Clone](docs/installation-git-clone.md).
 
 ## Ownership
 
@@ -44,12 +71,13 @@ git pull --ff-only origin master
 
 cd ..
 composer dump-autoload
-php artisan migrate --force
+php artisan starterkit:install
 php artisan starter:sync --dry-run
 php artisan starter:sync --force
 php artisan test --compact
 ```
 
-`composer dump-autoload` dapat dikonfigurasi untuk otomatis menjalankan `starter:publish-assets`. Periksa hasil dry-run sebelum sync dengan `--force`.
+`composer dump-autoload` otomatis menjalankan `starter:publish-assets`. Periksa
+hasil dry-run sebelum sync dengan `--force`.
 
 Aturan utama developer dan AI berada di [AGENTS.md](AGENTS.md).

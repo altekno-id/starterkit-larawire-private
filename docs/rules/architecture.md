@@ -59,7 +59,12 @@ Ketentuan konsistensi dan performa:
 ## Isolasi starterkit dan project turunan
 
 - Pada mode Git clone, source core berada di `<laravel>/starterkit` sebagai repository mandiri dan diabaikan oleh Git project host. Feature project dilarang mengubah file clone; improvement universal wajib melalui branch dan PR repository starterkit.
-- Connector host dibatasi pada autoload namespace `Altekno\StarterKit\` dari `starterkit/src`, registrasi `StarterServiceProvider`, pemanggilan `StarterBootstrap`, environment, dan asset publish. Detail instalasi ada pada `docs/installation-git-clone.md`.
+- Connector host dibatasi pada autoload namespace `Altekno\StarterKit\` dari
+  `starterkit/src`, registrasi `StarterServiceProvider`, pemanggilan
+  `StarterBootstrap`, environment, dan asset publish. Pada Laravel host standar
+  seluruh connector dipasang idempotent oleh `php starterkit/install.php`;
+  integrasi manual hanya untuk `bootstrap/app.php` yang sudah dikustomisasi.
+  Detail instalasi ada pada `docs/installation-git-clone.md`.
 - Seluruh PHP milik starterkit wajib berada pada subfolder/namespace `Starter` di layer masing-masing: Commands, Contracts, Controllers, Middleware, Livewire, Models, Repositories, Rules, Services, dan Support.
 - Binding, alias Livewire, listener, migration loader, view path, dan persistent middleware starter dimiliki `src/Providers/Starter/StarterServiceProvider.php`. `AppServiceProvider` host tetap bersih untuk binding project turunan.
 - Seluruh migration core berada di `starterkit/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.

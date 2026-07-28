@@ -13,7 +13,11 @@ Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan se
 - Metadata app, module, route, dan menu didefinisikan di source code lalu disinkronkan ke database.
 - UI menggunakan Bahasa Indonesia, kecuali istilah familiar seperti username, password, email, role, dan module.
 - Selama development jangan aktifkan config cache; gunakan config cache hanya pada deployment production.
-- Root clone starterkit hanya boleh memiliki source core, migration inti, route inti, view inti, asset, contoh connector, dokumentasi, dan rules. Jangan menambahkan shell Laravel seperti `artisan`, `bootstrap/`, `app/`, `vendor/`, database development, landing project, atau app contoh.
+- Root clone starterkit hanya boleh memiliki bootstrap installer `install.php`,
+  source core, migration inti, route inti, view inti, asset, contoh connector,
+  dokumentasi, dan rules. Jangan menambahkan shell Laravel seperti `artisan`,
+  `bootstrap/`, `app/`, `vendor/`, database development, landing project, atau
+  app contoh.
 
 Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal project atau ketika konteks percakapan hilang.
 
@@ -93,6 +97,10 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 ## Aturan eksekusi
 
 - Pada project pemakai, folder clone `starterkit/` adalah core read-only untuk feature project. Perubahan di dalamnya hanya untuk improvement universal melalui branch/PR starterkit.
+- Instalasi standar wajib memakai `php starterkit/install.php`, lalu command
+  idempotent `php artisan starterkit:install`; jangan meminta developer menyalin
+  source core atau mengedit connector satu per satu jika bootstrap host masih
+  memakai struktur Laravel standar.
 - Perubahan trivial seperti typo/dokumentasi murni dapat langsung dikerjakan bila tidak mengubah business flow, authorization, data, API, atau deployment.
 - Jika user hanya meminta planning/review/diagnosis, jangan mengubah code atau state di luar artefak planning yang diminta.
 - Jalankan `php artisan make:* --no-interaction` dari root Laravel host untuk file project.

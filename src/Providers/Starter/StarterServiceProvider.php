@@ -3,6 +3,7 @@
 namespace Altekno\StarterKit\Providers\Starter;
 
 use Altekno\StarterKit\Console\Commands\Starter\AdminCommand;
+use Altekno\StarterKit\Console\Commands\Starter\InstallCommand;
 use Altekno\StarterKit\Console\Commands\Starter\MakeAppCommand;
 use Altekno\StarterKit\Console\Commands\Starter\PublishAssetsCommand;
 use Altekno\StarterKit\Console\Commands\Starter\SecurityCheckCommand;
@@ -86,6 +87,7 @@ class StarterServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 AdminCommand::class,
+                InstallCommand::class,
                 MakeAppCommand::class,
                 PublishAssetsCommand::class,
                 SecurityCheckCommand::class,

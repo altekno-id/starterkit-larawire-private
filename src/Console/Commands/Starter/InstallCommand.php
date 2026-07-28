@@ -16,7 +16,7 @@ class InstallCommand extends Command
         {--email= : Superuser notification email}
         {--username= : Superuser username}
         {--skip-migration : Skip database migration}
-        {--app=app1 : First app code/subdomain}
+        {--app=keuangan : First app code/subdomain}
         {--app-name= : Human-readable first app name}
         {--skip-default-app : Install without creating the first app}
         {--force : Confirm that this is a fresh installation and allow the database reset}';
@@ -255,7 +255,7 @@ PHP.PHP_EOL);
         }
 
         $this->components->info(
-            "First app [{$app}] created with dashboard module and Dashboard submenu structure.",
+            "First app [{$app}] created with dashboard module and Contoh Menu structure.",
         );
 
         return self::SUCCESS;

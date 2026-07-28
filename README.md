@@ -151,12 +151,16 @@ Installer akan memandu developer melalui pertanyaan berikut:
 
 1. Konfirmasi bahwa seluruh tabel dan data boleh di-reset. Hanya jawaban `y`
    yang melanjutkan proses.
-2. Kode/subdomain App pertama, misalnya `layanan` atau `app1`.
+2. Kode/subdomain App pertama, misalnya `keuangan` atau `kepegawaian`.
 3. Nama App yang tampil pada aplikasi.
 
 Input kode App boleh dikosongkan. Jika dikosongkan, installer tetap menyelesaikan
 setup tanpa App pertama. Landing kemudian menampilkan panduan tentang App,
 module, menu, submenu, contoh struktur, dan command pembuatannya.
+
+App pertama yang dibuat installer membawa contoh navigasi yang sengaja mudah
+diganti: `Contoh Menu` dengan child `Contoh Submenu 1` dan
+`Contoh Submenu 2`.
 
 Setelah pertanyaan selesai, installer menangani dependency, connector,
 environment, APP key, bahasa, asset, migration, Superuser, landing, registry,

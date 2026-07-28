@@ -8,25 +8,67 @@ yang membutuhkan code pada project yang dibangun dari starterkit.
 Setiap prompt yang meminta pembuatan atau perubahan feature wajib berhenti pada
 tahap spesifikasi sebelum mengubah code:
 
-1. Lakukan discovery minimum berbasis source existing dan rule terkait.
-2. Buat satu file `issues/<feature-slug>.md` di root Laravel host. Jangan membuat
+1. Untuk module baru, validasi kontrak navigasi minimum pada bagian
+   **Requirement module baru** di bawah. Jika belum lengkap, arahkan developer
+   melengkapi prompt dan jangan membuat issue atau code.
+2. Lakukan discovery minimum berbasis source existing dan rule terkait.
+3. Buat satu file `issues/<feature-slug>.md` di root Laravel host. Jangan membuat
    folder template, archive, atau issue tambahan untuk feature yang sama.
-3. Isi ringkas tetapi implementable: tujuan, scope in/out, flow, ownership
+4. Isi ringkas tetapi implementable: tujuan, scope in/out, flow, ownership
    app/module, file/layer terdampak, data dan migration, authorization,
    validation, audit, performa, UI/interaksi, test, acceptance criteria, risiko,
    serta keputusan yang masih dibutuhkan.
-4. Referensikan rule starterkit yang berlaku tanpa menyalin seluruh isinya.
-5. Jangan membuat migration, model, service, repository, Livewire, route, view,
+5. Referensikan rule starterkit yang berlaku tanpa menyalin seluruh isinya.
+6. Jangan membuat migration, model, service, repository, Livewire, route, view,
    atau code feature lain pada giliran yang sama.
-6. Setelah file dibuat, beri respons bahwa detail teknis sudah siap untuk dibaca
+7. Setelah file dibuat, beri respons bahwa detail teknis sudah siap untuk dibaca
    ulang. Jelaskan bahwa implementasi berikutnya dapat memakai model yang lebih
    hemat/rendah karena konteks teknis telah dikunci oleh file tersebut.
-7. Tunggu persetujuan eksplisit user sebelum implementasi.
+8. Tunggu persetujuan eksplisit user sebelum implementasi.
 
 Gerbang ini berlaku untuk setiap feature, module, CRUD, workflow, halaman
 bisnis, atau perubahan perilaku feature yang diminta user. Bugfix, diagnosis,
 refactor kecil, maintenance, security patch, dan dokumentasi tidak membuat
 issue otomatis kecuali diminta.
+
+### Requirement module baru
+
+Developer wajib menyebutkan secara eksplisit:
+
+- App/subdomain pemilik module;
+- nama atau code module;
+- struktur navigasi: menu single atau menu parent dengan child;
+- label menu single, atau label parent dan seluruh label child secara berurutan;
+- menu/child yang menjadi halaman awal.
+
+Jangan menebak struktur menu dari nama feature dan jangan langsung membuat
+issue atau code jika informasi tersebut belum lengkap. Respons pertama harus
+singkat, menjelaskan hubungan module sebagai batas akses dan menu sebagai
+navigasi, menyebut data yang kurang, lalu memberikan pola prompt yang dapat
+langsung dilengkapi developer.
+
+Contoh menu single:
+
+```text
+Buat module laporan pada App keuangan.
+Menu single: Laporan Keuangan.
+Halaman awal: Laporan Keuangan.
+[lanjutkan dengan kebutuhan bisnis, data, flow, dan role]
+```
+
+Contoh menu dengan child:
+
+```text
+Buat module transaksi pada App keuangan.
+Parent menu: Transaksi.
+Child: Daftar Transaksi, Tambah Transaksi.
+Halaman awal: Daftar Transaksi.
+[lanjutkan dengan kebutuhan bisnis, data, flow, dan role]
+```
+
+Jika developer hanya menulis “buat module transaksi”, respons yang benar adalah
+mengarahkan format di atas dan meminta informasi yang kurang. Jangan memaksakan
+module, route, menu, atau flow hasil asumsi.
 
 ## 1. Discovery berbasis bukti
 

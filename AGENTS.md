@@ -28,6 +28,11 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
   mengubah code feature, lalu minta user membaca dan menyetujui detail teknis.
   Setelah file selesai, respons wajib menyebut bahwa eksekusi dapat dilanjutkan
   dengan model yang lebih hemat/rendah karena konteks teknis sudah dikunci.
+- Permintaan module baru belum boleh masuk gerbang spesifikasi bila developer
+  belum menyebut App pemilik, nama module, dan struktur menu (single atau parent
+  beserta child). Respons pertama wajib menjelaskan informasi yang kurang dan
+  memberi contoh prompt yang benar; detailnya mengikuti
+  `docs/rules/feature-development.md`.
 - Secara otomatis terapkan authorization, validation, proteksi injection/mass-assignment, server-side pagination untuk data yang dapat tumbuh, query efisien, audit log, transaksi, locale/format, pola Livewire/Alpine, UI state, migration production-safe, dan test sesuai rule pemilik.
 - Seluruh feature untuk app/subdomain wajib mengikuti struktur `Apps/<Subdomain>` pada layer yang dipakai. Baca `docs/rules/architecture.md` sebelum membuat file feature app baru; jangan mencampurnya dengan folder Starter atau root project.
 - Migration feature app wajib berada di `database/migrations/apps/<subdomain>/`, bukan root `database/migrations`; folder tersebut dimuat otomatis saat perintah Artisan migration berjalan.

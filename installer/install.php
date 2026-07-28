@@ -277,7 +277,7 @@ function withDefaultAppSelection(array $arguments): array
     output('');
 
     while (true) {
-        fwrite(STDOUT, 'Kode/subdomain app pertama (contoh: app1, kosong = lewati): ');
+        fwrite(STDOUT, 'Kode/subdomain app pertama (contoh: keuangan, kosong = lewati): ');
         $answer = fgets(STDIN);
         $app = $answer === false ? '' : strtolower(trim($answer));
 

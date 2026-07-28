@@ -12,10 +12,10 @@ Contoh:
 
 ```text
 role: operator
-  -> app1.pegawai
-     -> app1.pegawai.index
-     -> app1.pegawai.show
-  -> app2.dashboard
+  -> kepegawaian.pegawai
+     -> kepegawaian.pegawai.index
+     -> kepegawaian.pegawai.show
+  -> keuangan.dashboard
 ```
 
 Jika Operator membutuhkan page read-only yang berbeda dari Administrator, buat module seperti `pegawai_view` dengan route/view sendiri. Jangan menumpuk conditional role pada page CRUD penuh.
@@ -49,7 +49,7 @@ Capability global ditentukan pada form role dan disimpan di `starter_client_role
 
 `starter:sync` memetakan module dari segmen kedua nama route. Karena itu:
 
-- benar: `app1.pegawai.index`
-- salah: `app1.data-pegawai.index` jika code config adalah `pegawai`
+- benar: `kepegawaian.pegawai.index`
+- salah: `kepegawaian.data-pegawai.index` jika code config adalah `pegawai`
 
 Selalu dry run sebelum sync yang menulis database.

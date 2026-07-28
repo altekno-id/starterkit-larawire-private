@@ -58,16 +58,16 @@ class StarterAppScaffolder
                     'name' => 'Dashboard',
                     'desc' => 'Ringkasan aplikasi.',
                     'menus' => [[
-                        'label' => 'Dashboard',
+                        'label' => 'Contoh Menu',
                         'icon' => 'layout-dashboard',
                         'children' => [
                             [
-                                'label' => 'Submenu 1',
+                                'label' => 'Contoh Submenu 1',
                                 'route' => "{$subdomain}.dashboard",
                                 'landing' => true,
                             ],
                             [
-                                'label' => 'Submenu 2',
+                                'label' => 'Contoh Submenu 2',
                                 'route' => "{$subdomain}.dashboard.submenu-two",
                             ],
                         ],
@@ -93,8 +93,8 @@ class {$className}DashboardIndex extends Component
     public function render()
     {
         \$section = request()->routeIs('{$subdomain}.dashboard.submenu-two')
-            ? 'Submenu 2'
-            : 'Submenu 1';
+            ? 'Contoh Submenu 2'
+            : 'Contoh Submenu 1';
 
         return view('{$viewName}', compact('section'))
             ->title((string) config('{$appConfigKey}.name').' - '.\$section);
@@ -123,6 +123,16 @@ it('registers the {$subdomain} dashboard route', function () {
 it('uses the standard page header spacing', function () {
     expect(file_get_contents(resource_path('views/apps/{$subdomain}/dashboard/{$subdomain}-dashboard-index.blade.php')))
         ->toContain('page-header d-print-none mt-0 mb-3');
+});
+
+it('ships an explicit example menu structure', function () {
+    \$menus = config('apps.{$subdomain}.mods.dashboard.menus');
+
+    expect(\$menus)->toHaveCount(1)
+        ->and(\$menus[0]['label'])->toBe('Contoh Menu')
+        ->and(\$menus[0]['children'])->toHaveCount(2)
+        ->and(\$menus[0]['children'][0]['label'])->toBe('Contoh Submenu 1')
+        ->and(\$menus[0]['children'][1]['label'])->toBe('Contoh Submenu 2');
 });
 PHP.PHP_EOL,
         ];

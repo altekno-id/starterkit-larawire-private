@@ -162,6 +162,11 @@
             transition: opacity .16s ease;
         }
 
+        .starter-slot-area > [wire\:id] > .page-header {
+            margin-bottom: 1rem;
+            margin-top: 0;
+        }
+
         .starter-content-container {
             max-width: 1680px;
             width: 100%;

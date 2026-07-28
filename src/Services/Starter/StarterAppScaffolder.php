@@ -103,11 +103,11 @@ class {$className}DashboardIndex extends Component
 PHP.PHP_EOL,
             resource_path("views/apps/{$subdomain}/dashboard/{$subdomain}-dashboard-index.blade.php") => <<<BLADE
 <div>
-    <div class="page-header">
+    <div class="page-header d-print-none mt-0 mb-3" aria-label="Header halaman">
         <div class="page-pretitle">{{ config('{$appConfigKey}.name') }}</div>
         <h2 class="page-title">{{ \$section }}</h2>
     </div>
-    <div class="card mt-3"><div class="card-body">{{ config('{$appConfigKey}.desc') }}</div></div>
+    <div class="card"><div class="card-body">{{ config('{$appConfigKey}.desc') }}</div></div>
 </div>
 BLADE.PHP_EOL,
             base_path("tests/Feature/Apps/{$className}/{$className}DashboardTest.php") => <<<PHP
@@ -118,6 +118,11 @@ use Illuminate\Support\Facades\Route;
 it('registers the {$subdomain} dashboard route', function () {
     expect(Route::has('{$subdomain}.dashboard'))->toBeTrue()
         ->and(Route::has('{$subdomain}.dashboard.submenu-two'))->toBeTrue();
+});
+
+it('uses the standard page header spacing', function () {
+    expect(file_get_contents(resource_path('views/apps/{$subdomain}/dashboard/{$subdomain}-dashboard-index.blade.php')))
+        ->toContain('page-header d-print-none mt-0 mb-3');
 });
 PHP.PHP_EOL,
         ];

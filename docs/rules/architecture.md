@@ -62,10 +62,10 @@ Ketentuan konsistensi dan performa:
 - Connector host dibatasi pada autoload namespace `Altekno\StarterKit\` dari `starterkit/src`, registrasi `StarterServiceProvider`, pemanggilan `StarterBootstrap`, environment, dan asset publish. Detail instalasi ada pada `docs/installation-git-clone.md`.
 - Seluruh PHP milik starterkit wajib berada pada subfolder/namespace `Starter` di layer masing-masing: Commands, Contracts, Controllers, Middleware, Livewire, Models, Repositories, Rules, Services, dan Support.
 - Binding, alias Livewire, listener, migration loader, view path, dan persistent middleware starter dimiliki `src/Providers/Starter/StarterServiceProvider.php`. `AppServiceProvider` host tetap bersih untuk binding project turunan.
-- Seluruh migration starter berada di `database/migrations/starter`. Migration feature app berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
+- Seluruh migration core berada di `starterkit/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
 - Seluruh Blade internal starter berada di `resources/views/starter`, termasuk `errors`, `templates`, auth, profile, settings, log, dan user management.
-- Landing adalah area kustom project dan wajib berada di `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder Starter.
-- Route internal starter berada di `routes/starter`; `routes/web.php` disediakan untuk landing dan route project root-domain.
+- Landing adalah area kustom project host dan wajib berada di `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder clone starterkit.
+- Route internal starter berada di `starterkit/routes/starter`; `routes/web.php` milik host memuat landing dan route project root-domain.
 - Test internal starter berada di `tests/Feature/Starter`; test feature project berada di `tests/Feature/Apps/<App>` atau folder domain project.
 - Asset internal starter berada di `public/assets/starter`; jangan menaruh asset starter baru di folder project yang generik.
 - File standar framework seperti `config/auth.php`, `config/session.php`, dan `config/livewire.php` tetap pada lokasi Laravel karena dibaca langsung oleh framework. Isolasi dilakukan pada ownership dan referensinya, bukan dengan memindahkan file standar secara paksa.

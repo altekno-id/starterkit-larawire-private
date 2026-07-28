@@ -22,9 +22,13 @@ Tambahkan ke `.gitignore` repository project:
 
 ## 2. Dependency dan autoload
 
-Dependency minimum host harus mencakup dependency runtime yang tercatat pada `starterkit/composer.json`, terutama Livewire dan paket locale.
+Starterkit tidak memiliki Composer project sendiri. Dependency runtime dipasang dan dikunci oleh Laravel host:
 
-Tambahkan mapping `Altekno\\StarterKit\\` pada `composer.json` Laravel host:
+```bash
+composer require livewire/livewire laravel-lang/common
+```
+
+Gunakan versi terbaru yang kompatibel dengan Laravel host. Tambahkan mapping `Altekno\\StarterKit\\` pada `composer.json` host:
 
 ```json
 "autoload": {
@@ -37,7 +41,9 @@ Tambahkan mapping `Altekno\\StarterKit\\` pada `composer.json` Laravel host:
 }
 ```
 
-Jalankan:
+Tambahkan `starter:publish-assets` pada akhir script `post-autoload-dump` agar asset selalu sinkron setelah install, update, atau perubahan autoload. Snippet minimal tersedia di `starterkit/examples/composer-autoload.json`.
+
+Jalankan dari root Laravel host:
 
 ```bash
 composer dump-autoload
@@ -47,7 +53,7 @@ Project memakai namespace `App\...`, sedangkan seluruh class inti memakai `Altek
 
 ## 3. Provider
 
-Tambahkan provider starter pada `bootstrap/providers.php`:
+Tambahkan provider starter pada `bootstrap/providers.php`. Acuan lengkap tersedia di `starterkit/examples/providers.php`:
 
 ```php
 <?php
@@ -86,11 +92,11 @@ Pada middleware dan exception:
 })
 ```
 
-Route root project tetap didaftarkan dari `routes/web.php` milik host. Contoh utuh dapat dilihat pada `starterkit/bootstrap/app.php`.
+Route root project tetap didaftarkan dari `routes/web.php` milik host. Contoh connector utuh tersedia di `starterkit/examples/bootstrap-app.php`; salin strukturnya lalu pertahankan konfigurasi exception/API milik project bila ada.
 
 ## 5. Environment
 
-Gunakan environment Laravel host. Nilai minimum:
+Gunakan environment Laravel host. Nilai minimum juga tersedia pada `starterkit/examples/env.example`:
 
 ```env
 APP_DOMAIN=example.test
@@ -115,8 +121,10 @@ STARTER_SUPERUSER_PASSWORD=
 
 ## 6. Install dan setup
 
+Semua command berikut dijalankan dari root Laravel host, bukan dari dalam clone:
+
 ```bash
-php artisan starter:publish-assets
+composer dump-autoload
 php artisan migrate
 php artisan starter:setup --company="Nama Aplikasi"
 php artisan starter:security-check

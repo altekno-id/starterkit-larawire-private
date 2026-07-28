@@ -8,3 +8,5 @@ Dokumentasi ini dibuat berlapis agar AI atau developer tidak perlu memuat seluru
 - `template/`: referensi template UI; cari komponen yang dibutuhkan, jangan dibaca seluruhnya.
 
 Source code tetap menjadi sumber kebenaran terakhir. Jika dokumentasi berbeda dengan code yang berjalan, verifikasi code dan perbarui dokumentasi dalam perubahan yang sama.
+
+Repository starterkit bukan aplikasi Laravel standalone. Semua contoh command Laravel dijalankan dari root project host.

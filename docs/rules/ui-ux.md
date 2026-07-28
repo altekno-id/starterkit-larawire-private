@@ -1,32 +1,17 @@
-# UI/UX Livewire dan Tabler
+# UI/UX Livewire dan Template UI
 
 ## Source UI
 
-Gunakan Tabler yang sudah tersedia. Urutan referensi:
-
-1. Contoh ringkas project: `docs/template/*.html`.
-2. Preview lengkap: `docs/template/tabler-components/preview/pages/`.
-3. Potongan komponen: `docs/template/tabler-components/shared/includes/`.
-4. Dokumentasi komponen: `docs/template/tabler-components/docs/ui/`.
-
-Jangan membuka seluruh folder. Tentukan kebutuhan halaman dahulu, lalu gunakan router berikut.
-
-| Kebutuhan UI | Referensi pertama |
-|---|---|
-| Struktur halaman, dashboard, ringkasan, card | `docs/template/layout-and-cards.html` |
-| Daftar banyak data, filter, sort, pagination | `docs/template/tables-and-pagination.html` |
-| Form, filter, input group, pilihan | `docs/template/forms-and-filters.html` |
-| Modal, toast, alert, konfirmasi | `docs/template/feedback-and-modals.html` |
-| Tab, empty state, state sekunder | `docs/template/tabs-and-empty.html` |
-| Login dan autentikasi | `docs/template/auth.html` |
+Gunakan template UI aktif yang sudah tersedia. `docs/template/template.md` adalah atlas pencarian lengkap dan tidak mengikat untuk seluruh HTML di `docs/template`; pakai atlas untuk menemukan kandidat lintas konteks, bukan sebagai daftar keputusan desain yang kaku.
 
 Prosedur wajib dan hemat token:
 
-1. Tentukan tujuan halaman, jenis data, volume data, status, serta aksi utama user.
-2. Buka hanya satu sampai tiga HTML dari router yang relevan.
-3. Cari markup/kelas spesifik dengan `rg`, lalu baca potongan terdekat dan gunakan pola Tabler tersebut.
-4. Jika contoh curated belum mencukupi, baru cari `preview/pages`, `shared/includes`, atau dokumentasi Tabler sesuai urutan di atas.
-5. Jangan membaca seluruh `docs/template/tabler-components` atau membuat katalog duplikat hanya untuk memahami semua pilihan komponen.
+1. Tentukan tujuan halaman, jenis/volume data, status, aksi utama user, serta interaksi yang diperlukan.
+2. Cari atlas dengan kombinasi konteks dan komponen menggunakan `rg`; jangan hanya mencari nama komponen yang sudah diasumsikan.
+3. Pilih tiga sampai lima kandidat, termasuk alternatif lintas konteks bila relevan; lalu buka hanya satu sampai tiga HTML sumber terdekat.
+4. Cari markup/kelas spesifik pada sumber terpilih, bandingkan hierarki informasi dan kepadatan, lalu komposisikan pola template UI yang tepat.
+5. Jika kandidat atlas belum cukup, cari `preview/pages`, `shared/includes`, atau dokumentasi template secara terarah.
+6. Jangan membaca seluruh `template.md`, `docs/template/tabler-components`, atau membuat katalog tambahan untuk satu kebutuhan halaman.
 
 Contoh pencarian:
 
@@ -34,12 +19,13 @@ Contoh pencarian:
 rg -l "modal|modal-dialog" docs/template | head
 rg -l "table-responsive|pagination" docs/template | head
 rg -l "form-selectgroup|form-check" docs/template | head
+rg -n "invoice|table|status" docs/template/template.md
 ```
 
 ## Prinsip
 
-- Setiap halaman wajib memakai contoh/markup Tabler terdekat dari `docs/template`; jangan membuat desain atau komponen baru hanya berdasarkan selera.
-- Gunakan komponen/markup Tabler existing sebelum membuat komponen custom. Bila padanan persis tidak tersedia, komposisikan card, list group, badge, table, dropdown, modal, alert, empty state, dan utility Tabler terdekat—jangan membangun design system baru.
+- Setiap halaman wajib memakai contoh/markup template UI aktif terdekat dari `docs/template`; gunakan atlas untuk membandingkan kandidat dan jangan membuat desain atau komponen baru hanya berdasarkan selera.
+- Gunakan komponen/markup template UI existing sebelum membuat komponen custom. Bila padanan persis tidak tersedia, komposisikan card, list group, badge, table, dropdown, modal, alert, empty state, dan utility template terdekat—jangan membangun design system baru.
 - Layout content fluid sampai Full HD dan dibatasi secara wajar untuk layar sangat besar.
 - Halaman harus padat, informatif, mudah dipindai, dan profesional tanpa terasa sesak. Hindari card besar berisi sedikit data, whitespace berlebihan, tombol tersebar tanpa hierarki, serta detail panjang yang tidak mendukung keputusan user.
 - Page header menjelaskan konteks; satu aksi utama paling menonjol di header atau area konteks, sedangkan aksi sekunder dikelompokkan secara jelas atau ditempatkan pada dropdown.
@@ -48,7 +34,7 @@ rg -l "form-selectgroup|form-check" docs/template | head
 - Destructive action memakai confirm modal, bukan browser alert.
 - Detail sekunder memakai modal ringkas dan proporsional.
 - Tabel dipakai untuk banyak data sejenis yang perlu dipindai atau dibandingkan; gunakan pagination database, filter, status badge, aksi per baris, dan kolom yang benar-benar membantu keputusan. Jangan mengubah tabel besar menjadi kumpulan card hanya demi mobile.
-- Card ringkas, statistik, list group, atau key-value dipakai untuk ringkasan, sedikit data, dan detail satu entitas. Riwayat/perubahan memakai timeline, tabel log, atau list kronologis sesuai contoh Tabler.
+- Card ringkas, statistik, list group, atau key-value dipakai untuk ringkasan, sedikit data, dan detail satu entitas. Riwayat/perubahan memakai timeline, tabel log, atau list kronologis sesuai contoh template UI aktif.
 - Pilihan sedikit memakai radio, checkbox, select group, atau segmented control; pilihan besar memakai pencarian/autocomplete server-side atau tabel selector, bukan dropdown panjang.
 - Prioritaskan identitas, status, waktu penting, angka ringkas, dan aksi pada tampilan awal; detail sekunder dipindahkan ke halaman detail atau modal ringkas.
 - Empty state harus memberi penjelasan kondisi dan next action. Status proses wajib memiliki teks/badge selain warna.
@@ -56,7 +42,7 @@ rg -l "form-selectgroup|form-check" docs/template | head
 - Pesan validasi wajib memakai Bahasa Indonesia dan nama field yang terlihat oleh user; jangan tampilkan nama property internal, nested key, atau label field berbahasa Inggris.
 - Sebelum membuat toast, alert, modal konfirmasi/hapus/password, loader, icon, atau pola feedback baru, cari dan gunakan komponen yang sudah tersedia di `resources/views/starter/templates/` bila sesuai kebutuhan.
 - Validasi pada `input-group` harus mewarnai border input dan seluruh addon/button sebagai satu control utuh; ikon validasi background pada input di dalam group disembunyikan agar tidak bertabrakan dengan trailing control.
-- `input-group` invalid yang sedang fokus wajib mempertahankan border dan focus ring merah; state `focus-within` bawaan Tabler tidak boleh mengembalikannya menjadi biru.
+- `input-group` invalid yang sedang fokus wajib mempertahankan border dan focus ring merah; state `focus-within` bawaan template tidak boleh mengembalikannya menjadi biru.
 - Pada varian `input-group-flat`, letakkan `invalid-feedback` sebagai sibling setelah penutup `input-group` dengan `d-block`, bukan sebagai child group. Hubungkan input dan pesan memakai `aria-invalid` serta `aria-describedby` agar focus ring tidak membungkus pesan dan rounded corner addon tetap benar.
 
 ## Livewire
@@ -79,13 +65,13 @@ Gunakan JavaScript/Alpine hanya untuk interaksi client seperti password visibili
 - Gunakan Livewire hanya ketika perlu membaca/menulis data, validasi server, authorization, transaksi, atau audit log.
 - Daftar Livewire yang dapat bertambah mengikuti server-side query/pagination dan batas resource pada `performance.md`.
 - Hindari script tersebar di markup halaman. Simpan CSS/JS custom pada Blade asset yang berdekatan dengan halaman pemilik; gunakan `@assets` untuk dependency dan `@script` untuk inisialisasi Livewire.
-- Pilih Tabler/Alpine lebih dahulu, lalu library vanilla lokal. Jangan menambah jQuery kecuali library yang diperlukan memang tidak memiliki alternatif layak dan kompatibilitasnya telah dibuktikan.
+- Pilih komponen template UI/Alpine lebih dahulu, lalu library vanilla lokal. Jangan menambah jQuery kecuali library yang diperlukan memang tidak memiliki alternatif layak dan kompatibilitasnya telah dibuktikan.
 - Library jQuery harus lokal dan page-scoped: urutan `jQuery → library → inisialisasi`, memakai `defer` tanpa `async`, tidak boleh menjadi asset global starter, dan DOM yang dimanipulasinya harus diisolasi dengan `wire:ignore` bila dikelola Livewire.
 - Library tidak boleh mengambil alih router, memanipulasi DOM global, atau memasang listener/observer/timer berulang. Inisialisasi harus idempotent dan membersihkan instance atau listener ketika halaman ditinggalkan bila diperlukan.
 
 ## Asset Template
 
-- Asset inti Tabler/runtime/Livewire dilayani dari file lokal di `public`; jangan menambah CDN atau dependency network untuk UI dasar.
+- Asset inti template UI/runtime/Livewire dilayani dari file lokal di `public`; jangan menambah CDN atau dependency network untuk UI dasar.
 - CSS utama dimuat di `<head>`, script theme yang mencegah flash warna dijalankan sebelum body dirender, dan JavaScript interaktif dimuat sekali di akhir body dengan `defer` bila memungkinkan. Layout menyediakan stack `page-styles` dan `page-scripts` untuk Blade non-Livewire.
 - Gunakan `asset()` dengan cache-busting versi file untuk asset statik. Jangan memuat bundle yang sama lebih dari sekali dalam satu layout.
 - Asset custom Livewire mengikuti konvensi `assets/<page>.css.blade.php` dan `assets/<page>.js.blade.php` di samping view pemilik. Jangan menaruhnya di layout atau folder asset global; library vendor tetap lokal pada folder `public/assets/apps/<subdomain>/vendor/`.
@@ -94,7 +80,7 @@ Gunakan JavaScript/Alpine hanya untuk interaksi client seperti password visibili
 
 ## Error Page
 
-- Error `400`, `401`, `403`, `404`, `405`, `408`, `419`, `422`, `429`, `500`, `503`, serta fallback `4xx`/`5xx` memakai layout lokal `resources/views/starter/errors/layout.blade.php` dan desain Tabler yang konsisten.
+- Error `400`, `401`, `403`, `404`, `405`, `408`, `419`, `422`, `429`, `500`, `503`, serta fallback `4xx`/`5xx` memakai layout lokal `resources/views/starter/errors/layout.blade.php` dan desain template UI aktif yang konsisten.
 - Error page memakai asset lokal, `noindex`, Bahasa Indonesia, kode status, dan aksi kembali yang aman; jangan tampilkan stack trace, exception message internal, path server, query, atau credential.
 - Uji view spesifik/fallback dan minimal satu response exception nyata dengan `APP_DEBUG=false`.
 

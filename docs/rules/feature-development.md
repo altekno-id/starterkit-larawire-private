@@ -36,8 +36,8 @@ Gunakan checklist ini untuk setiap feature non-trivial pada project yang dibangu
 - Gunakan `#[Layout('layouts::app')]`.
 - State tetap di server; Alpine/JavaScript hanya untuk interaksi client yang tidak cocok menjadi request Livewire.
 - Form normal memakai `wire:model.defer` dan `wire:submit`; live request hanya untuk pengecualian yang diizinkan `ui-ux.md`.
-- Tentukan jenis dan volume data sebelum menata UI, lalu gunakan router `docs/template` pada `ui-ux.md` untuk membuka satu sampai tiga contoh Tabler terdekat. Gunakan tabel untuk data banyak yang perlu dibandingkan, dan card/list/detail untuk ringkasan atau data sedikit; jangan mendesain dari nol.
-- Gunakan komponen/markup Tabler dari referensi project; baca `ui-ux.md`.
+- Tentukan jenis dan volume data sebelum menata UI, lalu cari `docs/template/template.md` berdasarkan konteks dan komponen untuk membandingkan beberapa kandidat template UI. Buka satu sampai tiga HTML sumber yang paling relevan, termasuk contoh lintas konteks bila membantu; gunakan tabel untuk data banyak yang perlu dibandingkan, dan card/list/detail untuk ringkasan atau data sedikit. Jangan mendesain dari nol.
+- Gunakan komponen/markup template UI aktif dari referensi project; baca `ui-ux.md`.
 - Terapkan query, pagination, cache, dan batas resource dari `performance.md` tanpa menunggu user menyebutkannya.
 
 ## 4. Route
@@ -80,7 +80,7 @@ Tambahkan module di `config/apps/<app-key>.php`:
 - `route` menu harus ada dan dimiliki module yang sama.
 - `landing => true` wajib menunjuk route dan menentukan halaman awal module/app.
 - Parent menu tanpa route dapat memakai `children`.
-- Icon memakai nama Tabler tanpa prefix.
+- Icon mengikuti icon set yang tersedia pada template UI aktif; jangan mengasumsikan nama atau prefix tertentu tanpa memeriksa source aktual.
 
 ## 6. Sync
 

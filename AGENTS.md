@@ -5,7 +5,7 @@ Dokumen ini adalah kontrak eksekusi untuk setiap model AI yang mengembangkan pro
 ## Konteks wajib
 
 - Project private/internal company, bukan SaaS.
-- Laravel 13, PHP 8.4, Livewire 4, Pest 4, dan Tabler.
+- PHP, Laravel, Livewire, dan Pest mengikuti versi terbaru yang kompatibel serta sudah dikunci oleh dependency project. Template UI mengikuti aset/template aktif project; jangan mengasumsikan brand, versi, API, atau icon set tertentu tanpa memeriksa source aktual.
 - Hak akses berbasis module: satu role dapat mengakses banyak module; route dan menu mengikuti module.
 - Superuser adalah akun sistem tersembunyi bagi non-superuser dan tidak boleh diubah/dihapus.
 - Metadata app, module, route, dan menu didefinisikan di source code lalu disinkronkan ke database.
@@ -21,7 +21,7 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 - Seluruh feature untuk app/subdomain wajib mengikuti struktur `Apps/<Subdomain>` pada layer yang dipakai. Baca `docs/rules/architecture.md` sebelum membuat file feature app baru; jangan mencampurnya dengan folder Starter atau root project.
 - Migration feature app wajib berada di `database/migrations/apps/<subdomain>/`, bukan root `database/migrations`; folder tersebut dimuat otomatis saat perintah Artisan migration berjalan.
 - Asset CSS/JS custom halaman app wajib berada pada Blade asset yang berdekatan dengan view pemiliknya. Gunakan Alpine untuk UI kecil, Livewire hanya untuk kebutuhan server, dan `wire:model.defer` untuk form normal; baca `ui-ux.md` serta `performance.md` sebelum membuat interaksi atau memakai library baru.
-- UI wajib berangkat dari contoh terdekat di `docs/template`, bukan desain/komponen buatan sendiri. Pilih komponen berdasarkan konteks, jenis, dan volume data agar halaman padat, informatif, responsif, serta profesional.
+- UI wajib berangkat dari contoh terdekat di `docs/template`. Gunakan `docs/template/template.md` sebagai atlas pencarian yang tidak mengikat: cari beberapa kandidat lintas konteks, buka satu sampai tiga sumber HTML, lalu pilih/komposisikan pola template UI aktif yang paling tepat. Jangan membuat desain/komponen hanya berdasarkan selera. Pilih komponen berdasarkan konteks, jenis, dan volume data agar halaman padat, informatif, responsif, serta profesional.
 - Bila sebuah standar tidak relevan, lewati tanpa menambah code seremonial. Bila requirement meminta deviasi, jelaskan risiko dan minta keputusan eksplisit.
 
 ## Kontrak anti-asumsi
@@ -53,11 +53,36 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 | Shared hosting/deployment | `docs/rules/deployment.md` |
 | Hubungan layer dan source of truth | `docs/rules/architecture.md` |
 
+## Profil baca minimum
+
+Profil ini menentukan titik mulai pembacaan, bukan izin untuk mengabaikan rule lain yang tersentuh oleh requirement. Tambahkan rule pemilik setiap kali perubahan menyentuh topiknya.
+
+| Jenis tugas | Baca minimum | Tambahkan bila tersentuh |
+|---|---|---|
+| Bug/refactor kecil pada area yang sudah dikenal | `AGENTS.md`, sibling code/test, dan rule pemilik area | `testing.md` untuk perubahan perilaku; rule lain sesuai dampak |
+| Feature CRUD pada app existing | `feature-development.md`, `architecture.md`, `audit-logging.md`, `testing.md` | `code-style.md` bila model/migration; `performance.md` bila daftar/query; `ui-ux.md` bila UI/interaksi |
+| Halaman atau interaksi UI | `ui-ux.md`, `testing.md`, dan pencarian atlas template | `performance.md` untuk daftar/asset/library; `security-and-config.md` untuk upload, sesi, atau kredensial |
+| Schema, migration, atau perubahan data | `feature-development.md`, `code-style.md`, `testing.md` | `audit-logging.md` untuk mutation bisnis; `performance.md` untuk query/index |
+| App/subdomain baru | `app-subdomain.md`, `architecture.md`, `access-control.md`, `testing.md` | `deployment.md` dan `security-and-config.md` bila domain/session/config berubah |
+| Konfigurasi, autentikasi, security, atau deployment | `security-and-config.md`, `deployment.md`, `testing.md` | `access-control.md`, `audit-logging.md`, atau `app-subdomain.md` sesuai dampak |
+
+## Prioritas rule
+
+Jika terjadi benturan atau ketidakjelasan, gunakan urutan berikut di dalam repository:
+
+1. Instruksi platform/developer dan keputusan eksplisit user untuk tugas saat ini.
+2. Requirement bisnis, authorization, keamanan, dan integritas data yang telah terkonfirmasi.
+3. Konteks arsitektur project serta rule pemilik yang paling spesifik untuk area tersebut.
+4. Source of truth existing—schema, config, route, test, dan implementasi sibling yang telah dibuktikan.
+5. Konvensi umum, contoh template UI, dan preferensi implementasi.
+
+Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat lebih tinggi. Jika dua aturan setingkat benar-benar bertentangan, hentikan bagian yang terdampak, jelaskan konflik, dan minta keputusan; jangan memilih diam-diam.
+
 ## Cara kerja hemat token
 
 1. Cari file terkait dengan `rg`; baca sibling terdekat sebelum mengubah code.
 2. Untuk implementasi, baca file flow existing dan rule yang relevan; jangan membuat artefak planning di repository kecuali diminta.
-3. Jangan membaca seluruh `docs/template/tabler-components`. Cari komponen dengan `rg`, lalu buka 1–3 referensi terdekat.
+3. Untuk UI, cari `docs/template/template.md` dengan `rg` berdasarkan konteks dan komponen, lalu buka 1–3 HTML sumber yang paling relevan. Jangan membaca seluruh atlas atau `docs/template/tabler-components`.
 4. Jangan menyalin ulang aturan umum ke dokumen feature.
 5. Jangan membuat issue/archive atau dokumentasi planning di repository kecuali diminta eksplisit.
 

@@ -54,7 +54,7 @@ Aturan ini berlaku otomatis untuk starterkit dan seluruh project turunannya. Use
 
 ## Asset
 
-- Asset global starter yang benar-benar dipakai semua halaman—Tabler, Livewire/Alpine, theme script, dan `starter-runtime.js`—tetap dilayani lokal dari `public/assets` dan dimuat satu kali oleh layout. Jangan memindahkan asset inti ke CDN atau menjadikannya dependency feature.
+- Asset global starter yang benar-benar dipakai semua halaman—template UI aktif, Livewire/Alpine, theme script, dan `starter-runtime.js`—tetap dilayani lokal dari `public/assets` dan dimuat satu kali oleh layout. Jangan memindahkan asset inti ke CDN atau menjadikannya dependency feature.
 - CSS/JS custom halaman app wajib berada dekat view pemilik: `resources/views/apps/<subdomain>/<module>/assets/<page>.css.blade.php` dan/atau `<page>.js.blade.php`. Blade utama hanya meng-include asset miliknya; jangan memasukkan asset halaman ke layout global atau halaman yang tidak memakainya.
 - Pada Livewire, CSS/dependency dimuat melalui `@assets` dan JavaScript inisialisasi melalui `@script`, sehingga asset hanya dipasang sekali dan lifecycle-nya aman saat render ulang. Blade non-Livewire memakai stack `page-styles` dan `page-scripts` yang disediakan layout.
 - Pecah asset Blade yang panjang menjadi partial di folder `assets/` yang sama. Jangan membuat file CSS/JS custom global terpisah hanya untuk kerapian. Asset vendor pihak ketiga tetap berupa file lokal/minified di `public/assets/apps/<subdomain>/vendor/` agar dapat di-cache browser; tag dan inisialisasinya tetap page-scoped.

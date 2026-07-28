@@ -20,11 +20,8 @@ Seluruh file di `docs/rules/` adalah batas arsitektur dan standar implementasi p
 
 ## Stack
 
-- PHP 8.4
-- Laravel 13
-- Livewire 4
-- Pest 4 / PHPUnit 12
-- Tabler UI
+- PHP, Laravel, Livewire, serta Pest/PHPUnit mengikuti versi terbaru yang kompatibel dan terkunci pada dependency project.
+- Template UI mengikuti aset aktif project; nama, icon set, dan API komponennya harus dibuktikan dari source/template yang tersedia.
 - Session dan cache berbasis file
 - Queue default `sync`, sesuai target shared hosting
 

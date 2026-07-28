@@ -2,7 +2,7 @@
 
 ## Prasyarat
 
-- PHP 8.4 dan extension Laravel tersedia.
+- PHP yang kompatibel dengan dependency project serta extension Laravel tersedia.
 - Extension `intl` tersedia untuk format angka/currency berbasis locale.
 - Document root diarahkan ke folder `public`.
 - Root domain dan setiap subdomain app diarahkan ke instalasi yang sama.
@@ -46,6 +46,17 @@ Jangan menjalankan `starter:setup --reset-password` pada deploy rutin.
 `php artisan optimize` hanya untuk production. Selama development jangan memakai `config:cache`; gunakan config langsung agar perubahan `.env` terbaca dan jalankan `php artisan optimize:clear` bila cache pernah dibuat.
 
 Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel dan asset statik existing; jangan menambah kebutuhan service, daemon, reverse proxy, atau konfigurasi web server khusus tanpa requirement feature dan persetujuan eksplisit.
+
+## Audit dependency berkala
+
+- User/developer menjalankan audit dependency secara manual dan berkala, terutama sebelum release atau setelah perubahan dependency:
+
+  ```bash
+  composer audit --locked --no-dev --format=summary --no-interaction
+  ```
+
+- Audit bukan langkah otomatis setiap feature, test rutin, atau deploy biasa agar tidak menambah kebutuhan network maupun token.
+- AI hanya menjalankannya bila user meminta, pada security review, atau ketika dependency diubah. Jika ada temuan, laporkan ringkas package/advisory yang terdampak; jangan mengubah atau memperbarui dependency tanpa persetujuan eksplisit.
 
 ## Verifikasi
 

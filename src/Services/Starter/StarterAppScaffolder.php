@@ -48,6 +48,7 @@ class StarterAppScaffolder
     {
         $description ??= "Aplikasi internal {$name}.";
         $viewName = "apps.{$subdomain}.dashboard.{$subdomain}-dashboard-index";
+        $appConfigKey = "apps.{$subdomain}";
         $config = var_export([
             'name' => $name,
             'desc' => $description,
@@ -96,19 +97,19 @@ class {$className}DashboardIndex extends Component
             : 'Submenu 1';
 
         return view('{$viewName}', compact('section'))
-            ->title('{$name} - '.\$section);
+            ->title((string) config('{$appConfigKey}.name').' - '.\$section);
     }
 }
-PHP,
+PHP.PHP_EOL,
             resource_path("views/apps/{$subdomain}/dashboard/{$subdomain}-dashboard-index.blade.php") => <<<BLADE
 <div>
     <div class="page-header">
-        <div class="page-pretitle">{$name}</div>
+        <div class="page-pretitle">{{ config('{$appConfigKey}.name') }}</div>
         <h2 class="page-title">{{ \$section }}</h2>
     </div>
-    <div class="card mt-3"><div class="card-body">{$description}</div></div>
+    <div class="card mt-3"><div class="card-body">{{ config('{$appConfigKey}.desc') }}</div></div>
 </div>
-BLADE,
+BLADE.PHP_EOL,
             base_path("tests/Feature/Apps/{$className}/{$className}DashboardTest.php") => <<<PHP
 <?php
 
@@ -118,7 +119,7 @@ it('registers the {$subdomain} dashboard route', function () {
     expect(Route::has('{$subdomain}.dashboard'))->toBeTrue()
         ->and(Route::has('{$subdomain}.dashboard.submenu-two'))->toBeTrue();
 });
-PHP,
+PHP.PHP_EOL,
         ];
     }
 
@@ -127,10 +128,10 @@ PHP,
         return <<<PHP
 <?php
 
-use App\Livewire\Apps\\{$className}\Dashboard\\{$className}DashboardIndex;
 use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Services\Starter\NavigationAuthorizedRedirectService;
 use Altekno\StarterKit\Support\Starter\StarterNavigation;
+use App\Livewire\Apps\\{$className}\Dashboard\\{$className}DashboardIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', function () {
@@ -155,6 +156,6 @@ Route::name('{$subdomain}.')->group(function () {
         });
     });
 });
-PHP;
+PHP.PHP_EOL;
     }
 }

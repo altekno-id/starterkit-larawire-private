@@ -1,5 +1,16 @@
 # App dan Subdomain Baru
 
+## App pertama saat instalasi
+
+- Installer interaktif menanyakan kode/subdomain dan nama App pertama setelah
+  konfirmasi reset database.
+- Input kode boleh dikosongkan. Instalasi tanpa App tetap valid; root landing,
+  autentikasi, profil, pengaturan, user/role, dan log tetap dapat digunakan.
+- Tanpa App, redirect setelah login jatuh ke halaman global pertama yang
+  diizinkan dan landing onboarding menjadi petunjuk pembuatan App.
+- Jangan membuat App dummy hanya agar instalasi berhasil. Buat App pertama saat
+  boundary bisnis dan subdomainnya sudah diketahui.
+
 ## Generator resmi
 
 ```bash

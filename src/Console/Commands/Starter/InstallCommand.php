@@ -6,6 +6,7 @@ use Altekno\StarterKit\Services\Starter\StarterAppScaffolder;
 use Altekno\StarterKit\Support\Starter\StarterRouteRegistrar;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Throwable;
 
 class InstallCommand extends Command
@@ -15,6 +16,9 @@ class InstallCommand extends Command
         {--email= : Superuser notification email}
         {--username= : Superuser username}
         {--skip-migration : Skip database migration}
+        {--app=app1 : First app code/subdomain}
+        {--app-name= : Human-readable first app name}
+        {--skip-default-app : Install without creating the first app}
         {--force : Confirm that this is a fresh installation and allow the database reset}';
 
     protected $description = 'Install the starterkit on a fresh Laravel host and rebuild its database';
@@ -200,32 +204,58 @@ PHP.PHP_EOL);
     private function installDefaultApp(StarterAppScaffolder $scaffolder): int
     {
         if ((glob(config_path('apps/*.php')) ?: []) !== []) {
-            $this->components->info('Project app registry already exists; default app1 was not created.');
+            $this->components->info('Project app registry already exists; the first app was not created.');
 
             return self::SUCCESS;
         }
 
-        try {
-            $created = $scaffolder->create(
-                'app1',
-                'App 1',
-                'Aplikasi awal starterkit.',
-                'apps',
+        if ($this->option('skip-default-app')) {
+            $this->components->info(
+                'First app skipped. The default landing page contains an app setup guide.',
             );
-        } catch (Throwable $exception) {
-            $this->components->error("Unable to create default app1: {$exception->getMessage()}");
+
+            return self::SUCCESS;
+        }
+
+        $app = strtolower(trim((string) $this->option('app')));
+
+        if (preg_match('/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/', $app) !== 1) {
+            $this->components->error(
+                'First app code must contain lowercase letters, numbers, or internal hyphens only.',
+            );
 
             return self::FAILURE;
         }
 
-        StarterRouteRegistrar::register('app1');
+        $name = trim((string) ($this->option('app-name') ?: Str::headline($app)));
+
+        if ($name === '' || mb_strlen($name) > 255) {
+            $this->components->error('First app name must contain between 1 and 255 characters.');
+
+            return self::FAILURE;
+        }
+
+        try {
+            $created = $scaffolder->create(
+                $app,
+                $name,
+                null,
+                'apps',
+            );
+        } catch (Throwable $exception) {
+            $this->components->error("Unable to create first app: {$exception->getMessage()}");
+
+            return self::FAILURE;
+        }
+
+        StarterRouteRegistrar::register($app);
 
         foreach ($created as $path) {
             $this->line('Created '.str_replace(base_path().'/', '', $path));
         }
 
         $this->components->info(
-            'Default app1 created with dashboard module and Dashboard submenu structure.',
+            "First app [{$app}] created with dashboard module and Dashboard submenu structure.",
         );
 
         return self::SUCCESS;
@@ -298,19 +328,182 @@ PHP.PHP_EOL;
     private function landingViewContents(): string
     {
         return <<<'BLADE'
-<main class="page">
-    <section class="page-wrapper">
-        <div class="container-tight py-6">
-            <div class="text-center">
-                <h1 class="display-5 fw-bold mb-3">Ini landing page</h1>
-                <p class="text-secondary mb-4">{{ config('app.name') }}</p>
+@php($hasStarterApps = \Altekno\StarterKit\Support\Starter\StarterAppRegistry::keys() !== [])
 
+<main class="page min-vh-100 bg-light">
+    <header class="navbar navbar-expand-md d-print-none">
+        <div class="container-xl">
+            <div class="navbar-brand navbar-brand-autodark">
+                {{ config('app.name') }}
+            </div>
+
+            <div class="navbar-nav flex-row order-md-last">
                 <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary" wire:navigate>
                     Login
                 </a>
             </div>
         </div>
-    </section>
+    </header>
+
+    @if ($hasStarterApps)
+        <section class="page-wrapper">
+            <div class="container-tight py-6">
+                <div class="text-center">
+                    <h1 class="display-5 fw-bold mb-3">Ini landing page</h1>
+                    <p class="text-secondary mb-4">{{ config('app.name') }}</p>
+
+                    <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary" wire:navigate>
+                        Masuk ke aplikasi
+                    </a>
+                </div>
+            </div>
+        </section>
+    @else
+        <section class="page-wrapper">
+            <div class="page-header d-print-none">
+                <div class="container-xl">
+                    <div class="row g-3 align-items-center">
+                        <div class="col">
+                            <div class="page-pretitle">Panduan awal project</div>
+                            <h1 class="page-title">Starterkit siap, tetapi belum ada App</h1>
+                            <p class="text-secondary mt-2 mb-0">
+                                Halaman ini membantu developer memahami struktur navigasi sebelum membuat fitur pertama.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <div class="container-xl">
+                    <div class="alert alert-info" role="alert">
+                        Project tetap dapat membuka landing, login, profil, pengaturan, user, role, dan log aktivitas tanpa App.
+                        Dashboard bisnis baru tersedia setelah App pertama dibuat.
+                    </div>
+
+                    <div class="row row-cards mb-4">
+                        <div class="col-sm-6 col-xl-3">
+                            <article class="card h-100">
+                                <div class="card-body">
+                                    <span class="badge bg-primary-lt mb-3">1</span>
+                                    <h2 class="card-title">App</h2>
+                                    <p class="text-secondary mb-0">
+                                        Area fitur tingkat atas. Setiap App memiliki kode, subdomain, module, route, dan menu sendiri.
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <article class="card h-100">
+                                <div class="card-body">
+                                    <span class="badge bg-primary-lt mb-3">2</span>
+                                    <h2 class="card-title">Module</h2>
+                                    <p class="text-secondary mb-0">
+                                        Kelompok kemampuan di dalam App sekaligus unit pemberian hak akses kepada role.
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <article class="card h-100">
+                                <div class="card-body">
+                                    <span class="badge bg-primary-lt mb-3">3</span>
+                                    <h2 class="card-title">Menu</h2>
+                                    <p class="text-secondary mb-0">
+                                        Navigasi utama milik module. Menu dapat langsung menuju route atau menjadi kelompok navigasi.
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <article class="card h-100">
+                                <div class="card-body">
+                                    <span class="badge bg-primary-lt mb-3">4</span>
+                                    <h2 class="card-title">Submenu</h2>
+                                    <p class="text-secondary mb-0">
+                                        Menu anak untuk memisahkan halaman dalam satu kelompok tanpa membuat module baru.
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="row row-cards">
+                        <div class="col-lg-5">
+                            <article class="card h-100">
+                                <div class="card-header">
+                                    <h2 class="card-title">Contoh struktur</h2>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="steps steps-vertical mb-0">
+                                        <li class="step-item">
+                                            <div class="h4 m-0">App: layanan</div>
+                                            <div class="text-secondary">Subdomain: layanan.example.com</div>
+                                        </li>
+                                        <li class="step-item">
+                                            <div class="h4 m-0">Module: pengaduan</div>
+                                            <div class="text-secondary">Batas hak akses untuk fitur pengaduan.</div>
+                                        </li>
+                                        <li class="step-item">
+                                            <div class="h4 m-0">Menu: Pengaduan</div>
+                                            <div class="text-secondary">Kelompok navigasi pada sidebar.</div>
+                                        </li>
+                                        <li class="step-item">
+                                            <div class="h4 m-0">Submenu: Daftar dan Buat Aduan</div>
+                                            <div class="text-secondary">Masing-masing terhubung ke named route.</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="col-lg-7">
+                            <article class="card h-100">
+                                <div class="card-header">
+                                    <h2 class="card-title">Membuat App pertama</h2>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-secondary">
+                                        Jalankan dari root Laravel. Gunakan <code>--no-sync</code> agar source dapat diperiksa sebelum diterapkan ke database.
+                                    </p>
+                                    <pre class="bg-dark text-white rounded p-3 overflow-auto"><code>php artisan starter:make-app layanan --name="Layanan" --no-sync</code></pre>
+
+                                    <p class="fw-semibold mt-4 mb-2">Generator menyiapkan:</p>
+                                    <div class="list-group list-group-flush mb-4">
+                                        <div class="list-group-item px-0"><code>config/apps/layanan.php</code> — definisi App, module, dan menu.</div>
+                                        <div class="list-group-item px-0"><code>routes/apps/layanan.php</code> — route pada subdomain App.</div>
+                                        <div class="list-group-item px-0"><code>app/Livewire/Apps/Layanan/</code> — komponen server.</div>
+                                        <div class="list-group-item px-0"><code>resources/views/apps/layanan/</code> — tampilan App.</div>
+                                        <div class="list-group-item px-0"><code>tests/Feature/Apps/Layanan/</code> — test awal.</div>
+                                    </div>
+
+                                    <p class="text-secondary mb-2">
+                                        Setelah source sesuai kebutuhan, periksa perubahan registry lalu terapkan:
+                                    </p>
+                                    <pre class="bg-dark text-white rounded p-3 overflow-auto mb-0"><code>php artisan starter:sync layanan --dry-run
+php artisan starter:sync layanan --force</code></pre>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
+                            <div class="flex-fill">
+                                <h2 class="card-title mb-1">Single App atau Multi App?</h2>
+                                <p class="text-secondary mb-0">
+                                    Keduanya didukung. Satu instalasi berbagi login dan pengaturan global, sedangkan setiap App memisahkan subdomain, module, route, menu, dan code fiturnya.
+                                </p>
+                            </div>
+                            <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary" wire:navigate>
+                                Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
 </main>
 BLADE.PHP_EOL;
     }

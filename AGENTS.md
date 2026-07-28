@@ -111,8 +111,11 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
   khusus yang baru melalui `php starterkit/installer/install.php`. Installer
   wajib memeriksa source target, menjelaskan bahwa `migrate:fresh` menghapus
   seluruh tabel/data, dan berhenti sebelum mutation kecuali developer
-  mengonfirmasi dengan `y`. Jangan memakai `starterkit:install` untuk update,
-  deploy rutin, project berjalan, atau database existing.
+  mengonfirmasi dengan `y`. Installer wajib menanyakan kode/subdomain dan nama
+  App pertama serta menerima input kosong untuk instalasi tanpa App. Tanpa App,
+  landing onboarding wajib menjelaskan App, module, menu, submenu, generator,
+  struktur source, dan alur sync. Jangan memakai `starterkit:install` untuk
+  update, deploy rutin, project berjalan, atau database existing.
 - Jangan meminta developer menyalin source core atau mengedit connector satu per
   satu pada instalasi Laravel fresh yang masih memakai struktur standar.
 - Setelah membuat `issues/<feature-slug>.md`, jangan langsung mengeksekusi code.

@@ -73,7 +73,10 @@ Ketentuan konsistensi dan performa:
 - Landing adalah area kustom project host dan wajib berada di
   `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder clone
   starterkit. Installer membuat landing minimum hanya bila project belum
-  memiliki root landing; setelah itu ownership sepenuhnya milik project.
+  memiliki root landing. Ketika instalasi tidak membuat App pertama, landing
+  minimum berfungsi sebagai onboarding yang menjelaskan hierarki App → Module →
+  Menu → Submenu, generator, lokasi source, dan alur sync. Setelah dibuat,
+  ownership landing sepenuhnya milik project.
 - Route internal starter berada di `starterkit/routes/starter`; `routes/web.php` milik host memuat landing dan route project root-domain.
 - Test internal starter berada di `tests/Feature/Starter`; test feature project berada di `tests/Feature/Apps/<App>` atau folder domain project.
 - Asset internal starter berada di `public/assets/starter`; jangan menaruh asset starter baru di folder project yang generik.

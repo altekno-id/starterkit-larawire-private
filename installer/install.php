@@ -23,6 +23,8 @@ try {
         }
     }
 
+    $arguments = withDefaultAppSelection($arguments);
+
     $composerPath = $hostRoot.'/composer.json';
     $providersPath = $hostRoot.'/bootstrap/providers.php';
     $bootstrapPath = $hostRoot.'/bootstrap/app.php';
@@ -250,6 +252,88 @@ function hasArgument(array $arguments, string $argument): bool
     return in_array($argument, $arguments, true);
 }
 
+/**
+ * @param  list<string>  $arguments
+ * @return list<string>
+ */
+function withDefaultAppSelection(array $arguments): array
+{
+    $skipDefaultApp = hasArgument($arguments, '--skip-default-app');
+    $app = argumentValue($arguments, '--app');
+
+    if ($skipDefaultApp && $app !== null) {
+        throw new RuntimeException(
+            'Gunakan salah satu: --app=<kode> atau --skip-default-app, bukan keduanya.',
+        );
+    }
+
+    if ($skipDefaultApp || $app !== null) {
+        return $arguments;
+    }
+
+    output('PENGATURAN APP PERTAMA');
+    output('App adalah batas fitur tingkat atas yang dapat memakai subdomain sendiri.');
+    output('Kosongkan input jika project belum membutuhkan app pertama.');
+    output('');
+
+    while (true) {
+        fwrite(STDOUT, 'Kode/subdomain app pertama (contoh: app1, kosong = lewati): ');
+        $answer = fgets(STDIN);
+        $app = $answer === false ? '' : strtolower(trim($answer));
+
+        if ($app === '') {
+            $arguments[] = '--skip-default-app';
+            output('App pertama dilewati. Landing onboarding akan menjelaskan cara membuatnya nanti.');
+            output('');
+
+            return $arguments;
+        }
+
+        if (preg_match('/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/', $app) === 1) {
+            break;
+        }
+
+        output('Kode tidak valid. Gunakan huruf kecil, angka, atau tanda hubung internal.');
+    }
+
+    $defaultName = defaultAppName($app);
+    fwrite(STDOUT, "Nama app [{$defaultName}]: ");
+    $answer = fgets(STDIN);
+    $name = $answer === false || trim($answer) === ''
+        ? $defaultName
+        : trim($answer);
+
+    $arguments[] = "--app={$app}";
+    $arguments[] = "--app-name={$name}";
+    output("App pertama akan dibuat: {$name} ({$app}).");
+    output('');
+
+    return $arguments;
+}
+
+/**
+ * @param  list<string>  $arguments
+ */
+function argumentValue(array $arguments, string $option): ?string
+{
+    $prefix = $option.'=';
+
+    foreach ($arguments as $argument) {
+        if (str_starts_with($argument, $prefix)) {
+            return substr($argument, strlen($prefix));
+        }
+    }
+
+    return null;
+}
+
+function defaultAppName(string $app): string
+{
+    $words = preg_replace('/(?<=\D)(?=\d)|(?<=\d)(?=\D)/', ' ', str_replace('-', ' ', $app));
+
+    return ucwords((string) $words);
+}
+
 function confirmFreshDatabaseReset(): void
 {
     output('');
@@ -328,7 +412,7 @@ function connectedProviders(string $contents): string
     if (! str_contains($contents, 'return [')) {
         throw new RuntimeException(
             'bootstrap/providers.php tidak memakai struktur Laravel yang didukung. '
-            .'Lihat fallback manual pada starterkit/README.md.',
+            .'Gunakan project Laravel fresh sesuai starterkit/README.md.',
         );
     }
 
@@ -437,7 +521,6 @@ function mergeEnvironment(string $path): void
         'SESSION_DOMAIN' => 'null',
         'STARTER_SUPERUSER_USERNAME' => 'superuser',
         'STARTER_SUPERUSER_EMAIL' => 'developer@example.test',
-        'STARTER_SUPERUSER_PASSWORD' => '',
         'AUTH_PASSWORD_RESET_TOKEN_TABLE' => 'x_password_reset_tokens',
     ];
 
@@ -452,6 +535,11 @@ function mergeEnvironment(string $path): void
         $contents = setEnvironmentValue($contents, $key, $value);
     }
 
+    $contents = setEnvironmentValueIfEmpty(
+        $contents,
+        'STARTER_SUPERUSER_PASSWORD',
+        'rahasia123',
+    );
     $contents = setEnvironmentDefault($contents, 'SESSION_SAME_SITE', 'lax');
 
     writeIfChanged($path, rtrim($contents).PHP_EOL);
@@ -490,6 +578,15 @@ function setEnvironmentDefault(string $contents, string $key, string $value): st
     }
 
     return setEnvironmentValue($contents, $key, $value);
+}
+
+function setEnvironmentValueIfEmpty(string $contents, string $key, string $value): string
+{
+    $current = environmentValueFromContents($contents, $key);
+
+    return $current === ''
+        ? setEnvironmentValue($contents, $key, $value)
+        : $contents;
 }
 
 /**

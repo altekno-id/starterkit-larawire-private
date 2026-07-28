@@ -107,10 +107,14 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 - Folder `starterkit/installer/` hanya dimiliki bootstrap instalasi. Setelah
   setup berhasil, developer dan AI feature wajib mengabaikannya; baca atau ubah
   folder tersebut hanya saat tugas memang menyangkut installer.
-- Instalasi standar wajib memakai `php starterkit/installer/install.php`, lalu command
-  idempotent `php artisan starterkit:install`; jangan meminta developer menyalin
-  source core atau mengedit connector satu per satu jika bootstrap host masih
-  memakai struktur Laravel standar.
+- Instalasi standar hanya boleh dilakukan pada Laravel fresh dengan database
+  khusus yang baru melalui `php starterkit/installer/install.php`. Installer
+  wajib memeriksa source target, menjelaskan bahwa `migrate:fresh` menghapus
+  seluruh tabel/data, dan berhenti sebelum mutation kecuali developer
+  mengonfirmasi dengan `y`. Jangan memakai `starterkit:install` untuk update,
+  deploy rutin, project berjalan, atau database existing.
+- Jangan meminta developer menyalin source core atau mengedit connector satu per
+  satu pada instalasi Laravel fresh yang masih memakai struktur standar.
 - Setelah membuat `issues/<feature-slug>.md`, jangan langsung mengeksekusi code.
   Beri tahu user bahwa detail teknis siap diperiksa dan tunggu persetujuan
   eksplisit untuk melanjutkan implementasi.

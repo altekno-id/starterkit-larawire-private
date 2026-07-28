@@ -14,12 +14,21 @@ class InstallCommand extends Command
         {--company= : Internal company/client name}
         {--email= : Superuser notification email}
         {--username= : Superuser username}
-        {--skip-migration : Skip database migration}';
+        {--skip-migration : Skip database migration}
+        {--force : Confirm that this is a fresh installation and allow the database reset}';
 
-    protected $description = 'Finish an idempotent starterkit installation on the Laravel host';
+    protected $description = 'Install the starterkit on a fresh Laravel host and rebuild its database';
 
     public function handle(StarterAppScaffolder $appScaffolder): int
     {
+        if (! $this->option('skip-migration')
+            && ! $this->option('force')
+            && ! $this->confirmFreshDatabaseReset()) {
+            $this->components->warn('Installation cancelled. The database was not reset.');
+
+            return self::FAILURE;
+        }
+
         if ($this->call('starter:publish-assets') !== self::SUCCESS) {
             return self::FAILURE;
         }
@@ -46,7 +55,7 @@ class InstallCommand extends Command
             return self::SUCCESS;
         }
 
-        if ($this->call('migrate', ['--force' => true]) !== self::SUCCESS) {
+        if ($this->call('migrate:fresh', ['--force' => true]) !== self::SUCCESS) {
             return self::FAILURE;
         }
 
@@ -68,6 +77,20 @@ class InstallCommand extends Command
         $this->info('Starterkit installation completed successfully.');
 
         return self::SUCCESS;
+    }
+
+    private function confirmFreshDatabaseReset(): bool
+    {
+        $this->newLine();
+        $this->components->warn(
+            'Fresh installation only: migrate:fresh will delete every table and all data '
+            .'from the database configured in .env.',
+        );
+
+        return $this->confirm(
+            'Continue only if this is a new Laravel project with a dedicated new database?',
+            false,
+        );
     }
 
     private function installLocale(): int

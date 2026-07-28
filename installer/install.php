@@ -13,6 +13,15 @@ $arguments = array_slice($argv, 1);
 
 try {
     assertLaravelHost($hostRoot, $starterRoot);
+    assertFreshLaravelInstallation($hostRoot);
+
+    if (! hasArgument($arguments, '--skip-migration')) {
+        confirmFreshDatabaseReset();
+
+        if (! hasArgument($arguments, '--force')) {
+            $arguments[] = '--force';
+        }
+    }
 
     $composerPath = $hostRoot.'/composer.json';
     $providersPath = $hostRoot.'/bootstrap/providers.php';
@@ -153,6 +162,115 @@ function assertLaravelHost(string $hostRoot, string $starterRoot): void
             "Folder clone wajib bernama 'starterkit', saat ini: ".basename($starterRoot),
         );
     }
+}
+
+function assertFreshLaravelInstallation(string $hostRoot): void
+{
+    $bootstrapPath = $hostRoot.'/bootstrap/app.php';
+    $composerPath = $hostRoot.'/composer.json';
+    $providersPath = $hostRoot.'/bootstrap/providers.php';
+    $violations = [];
+
+    if (! isFreshLaravelBootstrap(readRequiredFile($bootstrapPath))) {
+        $violations[] = 'bootstrap/app.php sudah dikustomisasi';
+    }
+
+    $composer = readJson($composerPath);
+
+    if (isset($composer['autoload']['psr-4'][STARTER_NAMESPACE])) {
+        $violations[] = 'starterkit sudah terhubung pada composer.json';
+    }
+
+    if (str_contains(readRequiredFile($providersPath), 'StarterServiceProvider::class')) {
+        $violations[] = 'StarterServiceProvider sudah terdaftar';
+    }
+
+    foreach ([
+        'app/Livewire',
+        'config/apps',
+        'database/migrations/apps',
+        'resources/views/apps',
+        'routes/apps',
+    ] as $directory) {
+        if (directoryHasFiles($hostRoot.'/'.$directory)) {
+            $violations[] = "{$directory} sudah berisi code project";
+        }
+    }
+
+    $allowedMigrations = [
+        '0001_01_01_000000_create_users_table.php',
+        '0001_01_01_000001_create_cache_table.php',
+        '0001_01_01_000002_create_jobs_table.php',
+    ];
+    $migrationFiles = glob($hostRoot.'/database/migrations/*.php') ?: [];
+    $unexpectedMigrations = array_values(array_filter(
+        $migrationFiles,
+        fn (string $path): bool => ! in_array(basename($path), $allowedMigrations, true),
+    ));
+
+    if ($unexpectedMigrations !== []) {
+        $violations[] = 'database/migrations memiliki migration di luar bawaan Laravel fresh';
+    }
+
+    if ($violations === []) {
+        return;
+    }
+
+    throw new RuntimeException(
+        "Installer hanya boleh dijalankan pada project Laravel fresh.\n- "
+        .implode("\n- ", $violations)
+        ."\nGunakan alur update pada README untuk project yang sudah memakai starterkit.",
+    );
+}
+
+function directoryHasFiles(string $path): bool
+{
+    if (! is_dir($path)) {
+        return false;
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $item) {
+        if ($item->isFile()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @param  list<string>  $arguments
+ */
+function hasArgument(array $arguments, string $argument): bool
+{
+    return in_array($argument, $arguments, true);
+}
+
+function confirmFreshDatabaseReset(): void
+{
+    output('');
+    output('PERINGATAN INSTALASI AWAL');
+    output('Starterkit hanya boleh dipasang pada project Laravel fresh dengan database khusus yang baru.');
+    output('Proses ini menjalankan migrate:fresh: SEMUA TABEL DAN DATA pada database di .env akan dihapus.');
+    output('Jangan lanjutkan jika database pernah dipakai oleh aplikasi lain atau memiliki data penting.');
+    output('');
+    fwrite(STDOUT, 'Lanjutkan instalasi dan reset database? Ketik y untuk lanjut [y/N]: ');
+
+    $answer = fgets(STDIN);
+
+    if ($answer !== false && strtolower(trim($answer)) === 'y') {
+        output('');
+
+        return;
+    }
+
+    output('');
+    output('Instalasi dibatalkan. Tidak ada file project atau database yang diubah.');
+    exit(0);
 }
 
 /**

@@ -58,6 +58,8 @@ Ketentuan konsistensi dan performa:
 
 ## Isolasi starterkit dan project turunan
 
+- Pada mode Git clone, source core berada di `<laravel>/starterkit` sebagai repository mandiri dan diabaikan oleh Git project host. Feature project dilarang mengubah file clone; improvement universal wajib melalui branch dan PR repository starterkit.
+- Connector host dibatasi pada autoload `starterkit/app`, registrasi `StarterServiceProvider`, pemanggilan `StarterBootstrap`, environment, dan asset publish. Detail instalasi ada pada `docs/installation-git-clone.md`.
 - Seluruh PHP milik starterkit wajib berada pada subfolder/namespace `Starter` di layer masing-masing: Commands, Contracts, Controllers, Middleware, Livewire, Models, Repositories, Rules, Services, dan Support.
 - Binding, listener, migration loader, view path, dan persistent middleware starter dimiliki `app/Providers/Starter/StarterServiceProvider.php`. `AppServiceProvider` disediakan tetap bersih untuk binding project turunan.
 - Seluruh migration starter berada di `database/migrations/starter`. Migration feature app berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
@@ -97,6 +99,7 @@ database/migrations/apps/<subdomain>/
 - CSS/JS custom halaman berada di `resources/views/apps/<subdomain>/<module>/assets/<page>.css.blade.php` dan/atau `<page>.js.blade.php`, lalu hanya di-include oleh Blade pemiliknya. File vendor pihak ketiga yang tidak dapat ditulis sebagai Blade tetap lokal di `public/assets/apps/<subdomain>/vendor/`; tag pemuatan dan inisialisasinya tetap berada pada asset Blade halaman.
 - Landing root bukan feature app; tetap di `app/Livewire/Landing` dan `resources/views/landing`.
 - Migration app tidak diletakkan di root `database/migrations` atau di dalam folder module. Satu folder `<subdomain>` menampung seluruh riwayat migration app tersebut agar Laravel tetap dapat memuatnya otomatis dan ownership schema mudah ditelusuri.
+- Extension UI project hanya boleh berada pada kontrak `resources/views/extensions/starter/` yang didokumentasikan. Extension bukan override: project dilarang menyalin atau mengganti view/layout core.
 
 ## Registrasi route
 

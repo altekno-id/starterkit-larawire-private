@@ -30,6 +30,7 @@
                 Kunci Layar
             </a>
         @endif
+        @includeIf('extensions.starter.profile-menu.index')
         <div class="dropdown-divider my-1"></div>
         <form method="POST" action="{{ route('auth.logout') }}" data-starter-logout-form>
             @csrf

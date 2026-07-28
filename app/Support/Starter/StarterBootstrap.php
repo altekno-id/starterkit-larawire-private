@@ -22,11 +22,11 @@ class StarterBootstrap
     public static function registerRoutes(): void
     {
         Route::middleware('web')
-            ->group(base_path('routes/starter/global.php'));
+            ->group(StarterPaths::path('routes/starter/global.php'));
 
         Route::middleware('web')
             ->domain(config('app.domain'))
-            ->group(base_path('routes/starter/web.php'));
+            ->group(StarterPaths::path('routes/starter/web.php'));
 
         StarterRouteRegistrar::registerAll();
     }

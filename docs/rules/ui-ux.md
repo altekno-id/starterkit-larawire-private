@@ -24,6 +24,10 @@ rg -n "invoice|table|status" docs/template/template.md
 
 ## Prinsip
 
+- Layout shell, dropdown akun, auth, lock screen, dan error page dimiliki starterkit. Project tidak boleh mengubah atau meng-copy view core untuk menambahkan feature.
+- Extension global project hanya melalui path tetap: `extensions/starter/header-actions/index.blade.php`, `extensions/starter/profile-menu/index.blade.php`, `extensions/starter/layout/head.blade.php`, dan `extensions/starter/layout/body-end.blade.php`. File tersebut hanya ada di repository project bila diperlukan.
+- `header-actions` untuk aksi global top bar dan wajib mendukung variable `$compact`; `profile-menu` untuk aksi global terkait user/project sebelum Logout. Navigasi module tetap melalui registry menu/sidebar, bukan raw Blade extension.
+- Extension wajib mengotorisasi visibility dan action sendiri, memakai named route, serta mengikuti komponen/markup template UI aktif. Jangan memakai extension untuk memodifikasi state, urutan, atau security control milik starterkit.
 - Setiap halaman wajib memakai contoh/markup template UI aktif terdekat dari `docs/template`; gunakan atlas untuk membandingkan kandidat dan jangan membuat desain atau komponen baru hanya berdasarkan selera.
 - Gunakan komponen/markup template UI existing sebelum membuat komponen custom. Bila padanan persis tidak tersedia, komposisikan card, list group, badge, table, dropdown, modal, alert, empty state, dan utility template terdekat—jangan membangun design system baru.
 - Layout content fluid sampai Full HD dan dibatasi secara wajar untuk layar sangat besar.

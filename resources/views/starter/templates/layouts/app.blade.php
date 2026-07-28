@@ -295,6 +295,7 @@
             display: block;
         }
     </style>
+    @includeIf('extensions.starter.layout.head')
     @stack('page-styles')
     @livewireStyles
 </head>
@@ -332,6 +333,7 @@
                 </div>
 
                 <div class="navbar-nav flex-row d-lg-none ms-auto align-items-center gap-2" x-persist="{{ $accountPersistBase }}-mobile">
+                    @includeIf('extensions.starter.header-actions.index', ['compact' => true])
                     @include('starter.templates.layouts.app-switcher', ['compact' => true])
                     @include('starter.templates.layouts.account-menu')
                 </div>
@@ -375,6 +377,7 @@
                 </div>
 
                 <div class="navbar-nav flex-row order-lg-last ms-auto align-items-center">
+                    @includeIf('extensions.starter.header-actions.index', ['compact' => false])
                     @include('starter.templates.layouts.app-switcher', ['compact' => false])
                     @include('starter.templates.layouts.account-menu')
                 </div>
@@ -439,6 +442,7 @@
     <script src="{{ asset('assets/starter/js/starter-runtime.js') }}?v={{ filemtime(public_path('assets/starter/js/starter-runtime.js')) }}" data-navigate-once defer></script>
     @livewireScripts
     @stack('page-scripts')
+    @includeIf('extensions.starter.layout.body-end')
 </body>
 
 </html>

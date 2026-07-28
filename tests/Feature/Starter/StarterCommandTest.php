@@ -84,6 +84,12 @@ test('security check validates local defaults without production tuning', functi
         ->assertSuccessful();
 });
 
+test('publishing assets is a safe no-op in standalone starter development', function () {
+    $this->artisan('starter:publish-assets')
+        ->expectsOutputToContain('already use the host public/assets directory')
+        ->assertSuccessful();
+});
+
 test('production security check rejects unsafe deployment configuration', function () {
     $this->app->detectEnvironment(fn (): string => 'production');
     config()->set('app.debug', true);

@@ -82,6 +82,7 @@
             }
         }
     </style>
+    @includeIf('extensions.starter.layout.head')
     @stack('page-styles')
     @livewireStyles
 </head>
@@ -168,6 +169,7 @@
     <script src="{{ asset('assets/starter/js/starter-runtime.js') }}?v={{ filemtime(public_path('assets/starter/js/starter-runtime.js')) }}" data-navigate-once defer></script>
     @livewireScripts
     @stack('page-scripts')
+    @includeIf('extensions.starter.layout.body-end')
 </body>
 
 </html>

@@ -2,6 +2,12 @@
 
 namespace App\Providers\Starter;
 
+use App\Console\Commands\Starter\AdminCommand;
+use App\Console\Commands\Starter\MakeAppCommand;
+use App\Console\Commands\Starter\PublishAssetsCommand;
+use App\Console\Commands\Starter\SecurityCheckCommand;
+use App\Console\Commands\Starter\SetupCommand;
+use App\Console\Commands\Starter\SyncCommand;
 use App\Contracts\Starter\ActivityLogInterface;
 use App\Contracts\Starter\AppInterface;
 use App\Contracts\Starter\AppModInterface;
@@ -30,6 +36,7 @@ use App\Services\Starter\StarterConfigService;
 use App\Services\Starter\StarterContextService;
 use App\Services\Starter\UserManagementRoleService;
 use App\Services\Starter\UserManagementUserService;
+use App\Support\Starter\StarterPaths;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
@@ -43,6 +50,8 @@ class StarterServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->mergeConfigFrom(StarterPaths::path('config/starter.php'), 'starter');
+        $this->configureEmbeddedApplication();
         $this->registerViewPaths();
 
         $this->app->bind(AppInterface::class, AppRepository::class);
@@ -61,13 +70,24 @@ class StarterServiceProvider extends ServiceProvider
         $this->app->scoped(StarterContextService::class);
         $this->app->scoped(UserManagementRoleService::class);
         $this->app->scoped(UserManagementUserService::class);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                AdminCommand::class,
+                MakeAppCommand::class,
+                PublishAssetsCommand::class,
+                SecurityCheckCommand::class,
+                SetupCommand::class,
+                SyncCommand::class,
+            ]);
+        }
     }
 
     public function boot(): void
     {
-        $this->loadMigrationsFrom(database_path('migrations/starter'));
+        $this->loadMigrationsFrom(StarterPaths::path('database/migrations/starter'));
         $this->loadAppMigrations();
-        View::addNamespace('errors', resource_path('views/starter/errors'));
+        View::addNamespace('errors', StarterPaths::path('resources/views/starter/errors'));
 
         Number::useLocale(str_replace('_', '-', (string) config('app.locale')));
         $strictDevelopment = $this->app->isLocal() || $this->app->runningUnitTests();
@@ -106,7 +126,7 @@ class StarterServiceProvider extends ServiceProvider
 
     private function registerViewPaths(): void
     {
-        $starterViewPath = resource_path('views/starter');
+        $starterViewPath = StarterPaths::path('resources/views/starter');
         $viewPaths = (array) $this->app['config']->get('view.paths', [resource_path('views')]);
 
         if (! in_array($starterViewPath, $viewPaths, true)) {
@@ -139,5 +159,36 @@ class StarterServiceProvider extends ServiceProvider
         if ($paths !== []) {
             $this->loadMigrationsFrom($paths);
         }
+    }
+
+    private function configureEmbeddedApplication(): void
+    {
+        if (! StarterPaths::isEmbedded()) {
+            return;
+        }
+
+        $config = $this->app['config'];
+        $starterViews = StarterPaths::path('resources/views/starter');
+
+        $config->set('app.domain', $config->get('starter.domain'));
+
+        if ($config->get('starter.connector.configure_auth', true)) {
+            $config->set('auth', require StarterPaths::path('config/auth.php'));
+        }
+
+        if ($config->get('starter.connector.configure_shared_session', true)) {
+            $domain = trim((string) $config->get('starter.domain'), '.');
+            $config->set('session.domain', in_array($domain, ['', 'localhost', '127.0.0.1'], true)
+                ? null
+                : ".{$domain}");
+        }
+
+        $componentLocations = (array) $config->get('livewire.component_locations', []);
+        array_unshift($componentLocations, "{$starterViews}/templates/components");
+
+        $config->set('livewire.component_locations', array_values(array_unique($componentLocations)));
+        $config->set('livewire.component_namespaces.layouts', "{$starterViews}/templates/layouts");
+        $config->set('livewire.component_layout', 'layouts::app');
+        $config->set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:10240']);
     }
 }

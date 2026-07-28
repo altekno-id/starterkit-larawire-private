@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Starter\StarterPaths;
 use Illuminate\Support\Facades\File;
 
 test('presentation layer does not own persistence queries', function () {
@@ -110,6 +111,33 @@ test('layouts expose page-scoped asset stacks', function () {
             ->toContain("@stack('page-styles')")
             ->toContain("@stack('page-scripts')");
     }
+});
+
+test('starter paths resolve the repository root in standalone development', function () {
+    expect(realpath(StarterPaths::root()))->toBe(realpath(base_path()))
+        ->and(StarterPaths::isEmbedded())->toBeFalse()
+        ->and(StarterPaths::path('routes/starter/web.php'))
+        ->toBe(base_path('routes/starter/web.php'));
+});
+
+test('starter layout exposes only the documented project extension contracts', function () {
+    $appLayout = File::get(resource_path('views/starter/templates/layouts/app.blade.php'));
+    $authLayout = File::get(resource_path('views/starter/templates/layouts/auth.blade.php'));
+    $landingLayout = File::get(resource_path('views/starter/templates/layouts/landing.blade.php'));
+    $accountMenu = File::get(resource_path('views/starter/templates/layouts/account-menu.blade.php'));
+
+    expect($appLayout)
+        ->toContain("@includeIf('extensions.starter.header-actions.index'")
+        ->toContain("@includeIf('extensions.starter.layout.head')")
+        ->toContain("@includeIf('extensions.starter.layout.body-end')")
+        ->and($authLayout)
+        ->toContain("@includeIf('extensions.starter.layout.head')")
+        ->toContain("@includeIf('extensions.starter.layout.body-end')")
+        ->and($landingLayout)
+        ->toContain("@includeIf('extensions.starter.layout.head')")
+        ->toContain("@includeIf('extensions.starter.layout.body-end')")
+        ->and($accountMenu)
+        ->toContain("@includeIf('extensions.starter.profile-menu.index')");
 });
 
 test('starter form fields defer ordinary Livewire updates', function () {

@@ -2,6 +2,7 @@
 
 ## Prasyarat
 
+- Pada mode clone, folder `<laravel>/starterkit` tersedia dari repository core dan autoload/provider/bootstrap connector telah terpasang sesuai `docs/installation-git-clone.md`.
 - PHP yang kompatibel dengan dependency project serta extension Laravel tersedia.
 - Extension `intl` tersedia untuk format angka/currency berbasis locale.
 - Document root diarahkan ke folder `public`.
@@ -30,6 +31,7 @@ Biarkan `SESSION_DOMAIN=null` untuk deployment normal. Konfigurasi session otoma
 ```bash
 composer install --no-dev --optimize-autoloader
 php artisan starter:security-check
+php artisan starter:publish-assets
 php artisan migrate --force
 php artisan starter:setup --company="Nama Perusahaan"
 php artisan starter:sync --dry-run
@@ -72,6 +74,7 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
 ## Update
 
 - Backup database dan file upload sebelum migration berisiko.
+- Pull `master` di folder clone starterkit, jalankan `composer dump-autoload`, lalu `starter:publish-assets` sebelum migration/test.
 - Jalankan migration dan sync sesudah source code terpasang.
 - Jalankan `php artisan optimize` kembali.
 - Pastikan asset Livewire yang dipublish sesuai versi package setelah update dependency.

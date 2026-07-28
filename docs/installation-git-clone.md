@@ -172,7 +172,8 @@ composer dump-autoload
 php artisan starter:publish-assets
 php artisan migrate --force
 php artisan starter:sync --dry-run
+php artisan starter:sync --force
 php artisan test --compact
 ```
 
-Jangan mengubah file clone langsung untuk kebutuhan satu project. Jika perubahan memang universal, buat branch di clone starterkit, push, ajukan PR, lalu merge ke `master`.
+Periksa hasil dry-run sebelum menjalankan sync dengan `--force`. Jangan mengubah file clone langsung untuk kebutuhan satu project. Jika perubahan memang universal, buat branch di clone starterkit, push, ajukan PR, lalu merge ke `master`.

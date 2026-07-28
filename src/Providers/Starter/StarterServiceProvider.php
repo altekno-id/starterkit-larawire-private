@@ -161,13 +161,16 @@ class StarterServiceProvider extends ServiceProvider
 
     private function registerViewPaths(): void
     {
-        $starterViewPath = StarterPaths::path('resources/views/starter');
         $viewPaths = (array) $this->app['config']->get('view.paths', [resource_path('views')]);
+        $starterViewPaths = [
+            StarterPaths::path('resources/views/starter'),
+            StarterPaths::path('resources/views'),
+        ];
 
-        if (! in_array($starterViewPath, $viewPaths, true)) {
-            array_unshift($viewPaths, $starterViewPath);
-            $this->app['config']->set('view.paths', $viewPaths);
-        }
+        $this->app['config']->set('view.paths', array_values(array_unique([
+            ...$starterViewPaths,
+            ...$viewPaths,
+        ])));
     }
 
     private function loadAppMigrations(): void

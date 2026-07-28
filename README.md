@@ -43,6 +43,7 @@ composer dump-autoload
 php artisan starter:publish-assets
 php artisan migrate --force
 php artisan starter:sync --dry-run
+php artisan starter:sync --force
 php artisan test --compact
 ```
 

@@ -168,8 +168,8 @@ class StarterServiceProvider extends ServiceProvider
         ];
 
         $this->app['config']->set('view.paths', array_values(array_unique([
-            ...$starterViewPaths,
             ...$viewPaths,
+            ...$starterViewPaths,
         ])));
     }
 

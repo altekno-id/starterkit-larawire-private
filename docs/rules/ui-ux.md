@@ -58,7 +58,10 @@ rg -n "invoice|table|status" docs/template/template.md
 - Request perubahan input biasa tidak boleh memunculkan loader action.
 - Modal harus ditutup/diselesaikan sebelum loader mengambil fokus agar tidak bertumpuk.
 - Feedback sukses/error memakai event toast project, bukan alert.
-- Link internal memakai pola navigasi Livewire yang sudah ada.
+- Navigasi SPA Livewire hanya dipakai bila URL akhir dijamin tetap pada origin
+  yang sama. Link lintas root/auth/app subdomain, serta link seperti Login yang
+  dapat diarahkan middleware ke subdomain App, wajib memakai navigasi browser
+  penuh tanpa `wire:navigate`; jangan membuka CORS untuk mengakali navigasi UI.
 
 ## JavaScript
 

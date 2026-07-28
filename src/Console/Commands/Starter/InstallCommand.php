@@ -338,7 +338,7 @@ PHP.PHP_EOL;
             </div>
 
             <div class="navbar-nav flex-row order-md-last">
-                <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary" wire:navigate>
+                <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary">
                     Login
                 </a>
             </div>
@@ -352,7 +352,7 @@ PHP.PHP_EOL;
                     <h1 class="display-5 fw-bold mb-3">Ini landing page</h1>
                     <p class="text-secondary mb-4">{{ config('app.name') }}</p>
 
-                    <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary" wire:navigate>
+                    <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary">
                         Masuk ke aplikasi
                     </a>
                 </div>
@@ -495,7 +495,7 @@ php artisan starter:sync layanan --force</code></pre>
                                     Keduanya didukung. Satu instalasi berbagi login dan pengaturan global, sedangkan setiap App memisahkan subdomain, module, route, menu, dan code fiturnya.
                                 </p>
                             </div>
-                            <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary" wire:navigate>
+                            <a href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}" class="btn btn-primary">
                                 Login
                             </a>
                         </div>

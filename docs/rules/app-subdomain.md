@@ -51,6 +51,10 @@ Gunakan `--no-sync` hanya jika file perlu dilengkapi sebelum metadata diterapkan
 ## Navigasi lintas subdomain
 
 - URL root/auth/app dibentuk melalui named route dan `StarterNavigation`; jangan merangkai host atau URL login/logout secara manual di view.
+- Perpindahan origin antara root/auth dan app subdomain wajib memakai full-page
+  browser navigation. Jangan memakai `wire:navigate` pada link yang lintas
+  subdomain atau yang respons akhirnya dapat diarahkan middleware ke subdomain
+  lain; CORS bukan solusi untuk navigasi halaman terautentikasi.
 - `APP_URL` harus menunjuk root domain yang sama dengan `APP_DOMAIN`; middleware trusted hosts otomatis mengizinkan root dan app subdomain tanpa daftar manual.
 - Form logout selalu memakai method `POST`, CSRF, action route root yang valid, dan redirect tujuan yang lolos pemeriksaan safe redirect.
 - Uji login, session, lock screen, dan logout dari root domain serta app subdomain pada environment lokal dan domain production.

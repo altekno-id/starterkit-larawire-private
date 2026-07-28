@@ -12,7 +12,9 @@ beserta file tematik di `docs/rules/`.
 
 ```text
 starterkit/
-├── install.php                   # bootstrap installer pertama
+├── installer/                    # bootstrap awal; abaikan saat development fitur
+│   ├── install.php               # satu-satunya entry point instalasi
+│   └── templates/                # template internal connector
 ├── src/                          # runtime PHP namespace Altekno\StarterKit
 ├── config/                       # config auth dan starter
 ├── database/migrations/starter/  # schema inti starterkit
@@ -20,8 +22,7 @@ starterkit/
 ├── resources/views/starter/      # Livewire view, layout, dan error page
 ├── public/assets/                # asset core yang dipublish ke host
 ├── docs/rules/                   # aturan implementasi developer dan AI
-├── docs/template/                # atlas referensi UI
-└── examples/                     # connector untuk fallback manual
+└── docs/template/                # atlas referensi UI
 ```
 
 Tidak ada `artisan`, shell `bootstrap/`, folder `app/`, dependency `vendor`,
@@ -53,7 +54,7 @@ Jalankan tepat dari root Laravel host:
 
 ```bash
 git clone https://github.com/altekno-id/starterkit-larawire-private-tabler.git starterkit
-php starterkit/install.php --company="Nama Aplikasi"
+php starterkit/installer/install.php --company="Nama Aplikasi"
 ```
 
 Selesai. Pada instalasi Laravel standar tidak ada file core yang perlu dicopy
@@ -75,7 +76,7 @@ aplikasi, dan akun setup—tidak ditimpa.
 Contoh ketika database belum siap:
 
 ```bash
-php starterkit/install.php --company="Nama Aplikasi" --skip-migration
+php starterkit/installer/install.php --company="Nama Aplikasi" --skip-migration
 
 # Setelah database siap:
 php artisan starterkit:install --company="Nama Aplikasi"
@@ -93,19 +94,26 @@ Installer memasang connector minimum secara otomatis:
 |---|---|
 | `.gitignore` | Menambahkan `/starterkit/` |
 | `composer.json` | Menambahkan namespace `Altekno\StarterKit\` dan auto-publish asset |
-| `composer.lock` dan `vendor/` | Memasang `livewire/livewire` serta `laravel-lang/common` bila belum tersedia |
+| `composer.lock` dan `vendor/` | Memasang `livewire/livewire`, `laravel-lang/common`, serta Pest untuk development bila belum tersedia |
 | `bootstrap/providers.php` | Mendaftarkan `StarterServiceProvider` tanpa menghapus provider project |
 | `bootstrap/app.php` | Menghubungkan route, middleware, dan exception starterkit |
 | `.env` | Menambahkan key yang belum tersedia dan menormalkan nilai keamanan wajib |
 | `.env.example` | Mencerminkan environment key tanpa nilai rahasia |
 | `lang/<APP_LOCALE>` | Memasang bahasa sesuai `APP_LOCALE` melalui Laravel Lang |
+| `tests/Pest.php` | Membuat bootstrap Pest bila project belum memilikinya |
 | `public/assets/starter` dan `public/assets/tabler` | Mempublish asset core; bukan tempat edit |
 | database | Menjalankan migration dan setup awal secara idempotent |
+| landing project | Membuat landing minimum bila root landing belum tersedia |
+| app registry | Membuat app `app1` dan module `dashboard` bila project belum memiliki app |
 
 Installer juga melakukan:
 
 - generate `APP_KEY` jika masih kosong;
 - setup perusahaan dan akun Superuser;
+- landing minimum bertuliskan “Ini landing page” dengan tombol Login;
+- satu app awal `app1`;
+- satu module `dashboard`;
+- menu induk Dashboard dengan Submenu 1 dan Submenu 2;
 - sinkronisasi registry app, module, route, dan menu;
 - pemeriksaan konfigurasi keamanan.
 
@@ -115,7 +123,7 @@ Tepat setelah clone, Composer Laravel host belum mengenal namespace starterkit
 dan provider belum terdaftar. Artisan belum mungkin menemukan
 `starterkit:install`.
 
-`php starterkit/install.php` memasang bootstrap teknis tersebut, lalu otomatis
+`php starterkit/installer/install.php` memasang bootstrap teknis tersebut, lalu otomatis
 menjalankan:
 
 ```bash
@@ -126,6 +134,12 @@ Setelah instalasi pertama, command Artisan tersedia dan idempotent untuk
 melanjutkan instalasi yang terputus. Command tersebut melakukan sinkronisasi
 registry dengan `--force`; update rutin tetap mengikuti alur dry-run pada bagian
 Update starterkit.
+
+Seluruh file bootstrap awal berada di `starterkit/installer/`. Setelah instalasi
+berhasil, folder tersebut tidak digunakan oleh runtime request maupun
+development feature dan harus diabaikan developer/AI. Folder tetap disimpan
+agar clone Git bersih, instalasi dapat diaudit, dan setup dapat dipulihkan tanpa
+mengunduh artifact lain.
 
 ## Keamanan terhadap project existing
 
@@ -150,10 +164,10 @@ Bagian ini bukan alur instalasi normal.
 
 ```bash
 composer require livewire/livewire laravel-lang/common
+composer require --dev pestphp/pest pestphp/pest-plugin-laravel --with-all-dependencies
 ```
 
-Gabungkan `starterkit/examples/composer-autoload.json` ke `composer.json` host.
-Pastikan mapping berikut tersedia:
+Pastikan mapping berikut tersedia pada `composer.json` host:
 
 ```json
 "Altekno\\StarterKit\\": "starterkit/src/"
@@ -167,17 +181,22 @@ Tambahkan command berikut pada `scripts.post-autoload-dump`:
 
 ### Provider
 
-Tambahkan `StarterServiceProvider::class` ke `bootstrap/providers.php` tanpa
-menghapus provider project. Acuan utuh tersedia pada:
+Tambahkan provider berikut ke array `bootstrap/providers.php` tanpa menghapus
+provider project:
 
-```text
-starterkit/examples/providers.php
+```php
+use Altekno\StarterKit\Providers\Starter\StarterServiceProvider;
+
+return [
+    StarterServiceProvider::class,
+    App\Providers\AppServiceProvider::class,
+];
 ```
 
 ### Bootstrap aplikasi
 
-Gabungkan tiga connector dari `starterkit/examples/bootstrap-app.php` ke
-`bootstrap/app.php` host:
+Gabungkan tiga connector dari
+`starterkit/installer/templates/bootstrap-app.php` ke `bootstrap/app.php` host:
 
 - `StarterBootstrap::registerRoutes()`;
 - `StarterBootstrap::configureMiddleware($middleware)`;
@@ -189,8 +208,26 @@ menangkap root route milik app subdomain.
 
 ### Environment
 
-Gabungkan key dari `starterkit/examples/env.example` ke `.env` dan
-`.env.example`. Nilai rahasia hanya boleh berada di `.env`.
+Pastikan key berikut tersedia pada `.env` dan `.env.example`. Nilai rahasia
+hanya boleh berada di `.env`:
+
+```env
+APP_DOMAIN=example.test
+APP_LOCALE=id
+APP_FALLBACK_LOCALE=id
+APP_FAKER_LOCALE=id_ID
+
+SESSION_ENCRYPT=true
+SESSION_HTTP_ONLY=true
+SESSION_SECURE_COOKIE=true
+SESSION_SAME_SITE=lax
+SESSION_DOMAIN=null
+
+STARTER_SUPERUSER_USERNAME=superuser
+STARTER_SUPERUSER_EMAIL=developer@example.test
+STARTER_SUPERUSER_PASSWORD=
+AUTH_PASSWORD_RESET_TOKEN_TABLE=x_password_reset_tokens
+```
 
 Selesaikan instalasi:
 
@@ -226,6 +263,23 @@ tests/
 
 Source core tidak dicopy ke area tersebut. Laravel membacanya langsung dari
 clone sehingga update core cukup dilakukan melalui Git pull.
+
+Pada Laravel host kosong, installer mengisi baseline berikut:
+
+```text
+Landing root
+└── tombol Login
+
+App app1
+└── Module dashboard
+    └── Dashboard
+        ├── Submenu 1
+        └── Submenu 2
+```
+
+Baseline hanya dibuat bila landing atau app project belum tersedia. Installer
+tidak menimpa landing custom dan tidak menambahkan `app1` ketika project sudah
+memiliki registry app.
 
 ## Extension UI project
 
@@ -318,13 +372,13 @@ mengaktifkannya.
 Gunakan bootstrap pertama:
 
 ```bash
-php starterkit/install.php --company="Nama Aplikasi"
+php starterkit/installer/install.php --company="Nama Aplikasi"
 ```
 
 ### Database belum siap
 
 ```bash
-php starterkit/install.php --company="Nama Aplikasi" --skip-migration
+php starterkit/installer/install.php --company="Nama Aplikasi" --skip-migration
 ```
 
 Setelah credential dan database siap:
@@ -336,8 +390,8 @@ php artisan starterkit:install --company="Nama Aplikasi"
 ### `bootstrap/app.php` ditolak installer
 
 File tersebut sudah dikustomisasi. Gabungkan
-`starterkit/examples/bootstrap-app.php` sesuai bagian fallback manual; installer
-sengaja tidak menimpa konfigurasi project yang tidak dikenali.
+`starterkit/installer/templates/bootstrap-app.php` sesuai bagian fallback
+manual; installer sengaja tidak menimpa konfigurasi project yang tidak dikenali.
 
 ### Asset tidak sinkron setelah update
 

@@ -46,7 +46,7 @@ class StarterAppScaffolder
      */
     private function files(string $subdomain, string $className, string $name, ?string $description, string $icon): array
     {
-        $description ??= "{$name} internal application.";
+        $description ??= "Aplikasi internal {$name}.";
         $viewName = "apps.{$subdomain}.dashboard.{$subdomain}-dashboard-index";
         $config = var_export([
             'name' => $name,
@@ -55,12 +55,21 @@ class StarterAppScaffolder
             'mods' => [
                 'dashboard' => [
                     'name' => 'Dashboard',
-                    'desc' => 'App summary.',
+                    'desc' => 'Ringkasan aplikasi.',
                     'menus' => [[
                         'label' => 'Dashboard',
                         'icon' => 'layout-dashboard',
-                        'route' => "{$subdomain}.dashboard",
-                        'landing' => true,
+                        'children' => [
+                            [
+                                'label' => 'Submenu 1',
+                                'route' => "{$subdomain}.dashboard",
+                                'landing' => true,
+                            ],
+                            [
+                                'label' => 'Submenu 2',
+                                'route' => "{$subdomain}.dashboard.submenu-two",
+                            ],
+                        ],
                     ]],
                 ],
             ],
@@ -82,7 +91,12 @@ class {$className}DashboardIndex extends Component
 {
     public function render()
     {
-        return view('{$viewName}')->title('{$name} Dashboard');
+        \$section = request()->routeIs('{$subdomain}.dashboard.submenu-two')
+            ? 'Submenu 2'
+            : 'Submenu 1';
+
+        return view('{$viewName}', compact('section'))
+            ->title('{$name} - '.\$section);
     }
 }
 PHP,
@@ -90,7 +104,7 @@ PHP,
 <div>
     <div class="page-header">
         <div class="page-pretitle">{$name}</div>
-        <h2 class="page-title">Dashboard</h2>
+        <h2 class="page-title">{{ \$section }}</h2>
     </div>
     <div class="card mt-3"><div class="card-body">{$description}</div></div>
 </div>
@@ -101,7 +115,8 @@ BLADE,
 use Illuminate\Support\Facades\Route;
 
 it('registers the {$subdomain} dashboard route', function () {
-    expect(Route::has('{$subdomain}.dashboard'))->toBeTrue();
+    expect(Route::has('{$subdomain}.dashboard'))->toBeTrue()
+        ->and(Route::has('{$subdomain}.dashboard.submenu-two'))->toBeTrue();
 });
 PHP,
         ];
@@ -136,6 +151,7 @@ Route::name('{$subdomain}.')->group(function () {
 
         Route::middleware('starter.authorize')->group(function () {
             Route::livewire('/dashboard/index', {$className}DashboardIndex::class)->name('dashboard');
+            Route::livewire('/dashboard/submenu-2', {$className}DashboardIndex::class)->name('dashboard.submenu-two');
         });
     });
 });

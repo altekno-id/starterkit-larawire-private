@@ -44,4 +44,6 @@ php artisan test --compact
 - Sync dry-run diperiksa jika route/config app berubah.
 - Browser test dilakukan jika UX berubah.
 - Tidak ada perubahan scope, dependency, config production, atau keputusan bisnis yang disisipkan tanpa dicatat/disetujui.
-- Tidak ada issue/archive atau dokumentasi planning repository yang dibuat tanpa permintaan eksplisit.
+- Permintaan feature memiliki tepat satu `issues/<feature-slug>.md` sebelum
+  implementasi; bugfix/maintenance tidak membuat issue otomatis. Tidak ada
+  folder template issue, archive, atau planning tambahan tanpa permintaan.

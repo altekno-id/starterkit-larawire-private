@@ -13,17 +13,21 @@ Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan se
 - Metadata app, module, route, dan menu didefinisikan di source code lalu disinkronkan ke database.
 - UI menggunakan Bahasa Indonesia, kecuali istilah familiar seperti username, password, email, role, dan module.
 - Selama development jangan aktifkan config cache; gunakan config cache hanya pada deployment production.
-- Root clone starterkit hanya boleh memiliki bootstrap installer `install.php`,
-  source core, migration inti, route inti, view inti, asset, contoh connector,
-  dokumentasi, dan rules. Jangan menambahkan shell Laravel seperti `artisan`,
-  `bootstrap/`, `app/`, `vendor/`, database development, landing project, atau
-  app contoh.
+- Root clone starterkit hanya boleh memiliki folder bootstrap `installer/`,
+  source core, migration inti, route inti, view inti, asset, dokumentasi, dan
+  rules. Jangan menambahkan shell Laravel seperti `artisan`, `bootstrap/`,
+  `app/`, `vendor/`, database development, landing project, atau app contoh.
 
 Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal project atau ketika konteks percakapan hilang.
 
 ## Kontrak default feature
 
 - User/developer cukup menjelaskan kebutuhan bisnis, flow, data, dan role yang relevan. Jangan meminta mereka mengulang standar teknis starterkit.
+- Setiap permintaan membuat atau mengubah feature wajib melewati gerbang
+  spesifikasi: buat `issues/<feature-slug>.md` pada Laravel host, berhenti sebelum
+  mengubah code feature, lalu minta user membaca dan menyetujui detail teknis.
+  Setelah file selesai, respons wajib menyebut bahwa eksekusi dapat dilanjutkan
+  dengan model yang lebih hemat/rendah karena konteks teknis sudah dikunci.
 - Secara otomatis terapkan authorization, validation, proteksi injection/mass-assignment, server-side pagination untuk data yang dapat tumbuh, query efisien, audit log, transaksi, locale/format, pola Livewire/Alpine, UI state, migration production-safe, dan test sesuai rule pemilik.
 - Seluruh feature untuk app/subdomain wajib mengikuti struktur `Apps/<Subdomain>` pada layer yang dipakai. Baca `docs/rules/architecture.md` sebelum membuat file feature app baru; jangan mencampurnya dengan folder Starter atau root project.
 - Migration feature app wajib berada di `database/migrations/apps/<subdomain>/`, bukan root `database/migrations`; folder tersebut dimuat otomatis saat perintah Artisan migration berjalan.
@@ -89,18 +93,27 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 ## Cara kerja hemat token
 
 1. Cari file terkait dengan `rg`; baca sibling terdekat sebelum mengubah code.
-2. Untuk implementasi, baca file flow existing dan rule yang relevan; jangan membuat artefak planning di repository kecuali diminta.
+2. Untuk permintaan feature, lakukan discovery minimum lalu tulis satu spesifikasi
+   teknis di `issues/<feature-slug>.md`; jangan menulis ulang rule umum ke dalamnya.
 3. Untuk UI, cari `docs/template/template.md` dengan `rg` berdasarkan konteks dan komponen, lalu buka 1–3 HTML sumber yang paling relevan. Jangan membaca seluruh atlas atau `docs/template/tabler-components`.
 4. Jangan menyalin ulang aturan umum ke dokumen feature.
-5. Jangan membuat issue/archive atau dokumentasi planning di repository kecuali diminta eksplisit.
+5. Jangan membuat folder template issue atau archive. File `issues/*.md` hanya
+   dibuat sebagai gerbang permintaan feature; bugfix, diagnosis, maintenance,
+   dan dokumentasi tidak membuat issue otomatis.
 
 ## Aturan eksekusi
 
 - Pada project pemakai, folder clone `starterkit/` adalah core read-only untuk feature project. Perubahan di dalamnya hanya untuk improvement universal melalui branch/PR starterkit.
-- Instalasi standar wajib memakai `php starterkit/install.php`, lalu command
+- Folder `starterkit/installer/` hanya dimiliki bootstrap instalasi. Setelah
+  setup berhasil, developer dan AI feature wajib mengabaikannya; baca atau ubah
+  folder tersebut hanya saat tugas memang menyangkut installer.
+- Instalasi standar wajib memakai `php starterkit/installer/install.php`, lalu command
   idempotent `php artisan starterkit:install`; jangan meminta developer menyalin
   source core atau mengedit connector satu per satu jika bootstrap host masih
   memakai struktur Laravel standar.
+- Setelah membuat `issues/<feature-slug>.md`, jangan langsung mengeksekusi code.
+  Beri tahu user bahwa detail teknis siap diperiksa dan tunggu persetujuan
+  eksplisit untuk melanjutkan implementasi.
 - Perubahan trivial seperti typo/dokumentasi murni dapat langsung dikerjakan bila tidak mengubah business flow, authorization, data, API, atau deployment.
 - Jika user hanya meminta planning/review/diagnosis, jangan mengubah code atau state di luar artefak planning yang diminta.
 - Jalankan `php artisan make:* --no-interaction` dari root Laravel host untuk file project.

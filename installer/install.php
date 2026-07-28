@@ -7,7 +7,7 @@ const STARTER_NAMESPACE = 'Altekno\\StarterKit\\';
 const STARTER_AUTOLOAD_PATH = 'starterkit/src/';
 const STARTER_PUBLISH_SCRIPT = '@php artisan starter:publish-assets --ansi';
 
-$starterRoot = __DIR__;
+$starterRoot = dirname(__DIR__);
 $hostRoot = dirname($starterRoot);
 $arguments = array_slice($argv, 1);
 
@@ -24,7 +24,7 @@ try {
     $composer = readJson($composerPath);
     $bootstrap = connectedBootstrap(
         readRequiredFile($bootstrapPath),
-        readRequiredFile($starterRoot.'/examples/bootstrap-app.php'),
+        readRequiredFile($starterRoot.'/installer/templates/bootstrap-app.php'),
     );
     $providers = connectedProviders(readRequiredFile($providersPath));
 
@@ -161,13 +161,31 @@ function assertLaravelHost(string $hostRoot, string $starterRoot): void
 function ensureDependencies(string $hostRoot, array $composer): void
 {
     $required = array_keys((array) ($composer['require'] ?? []));
-    $missing = array_values(array_diff([
+    $missingRuntime = array_values(array_diff([
         'livewire/livewire',
         'laravel-lang/common',
     ], $required));
 
-    if ($missing === []) {
+    if ($missingRuntime === []) {
         output('SKIP    dependency runtime sudah tersedia');
+    } else {
+        run($hostRoot, [
+            'composer',
+            'require',
+            ...$missingRuntime,
+            '--no-interaction',
+            '--no-scripts',
+        ]);
+    }
+
+    $requiredDev = array_keys((array) ($composer['require-dev'] ?? []));
+    $missingDevelopment = array_values(array_diff([
+        'pestphp/pest',
+        'pestphp/pest-plugin-laravel',
+    ], $requiredDev));
+
+    if ($missingDevelopment === []) {
+        output('SKIP    dependency test Pest sudah tersedia');
 
         return;
     }
@@ -175,7 +193,9 @@ function ensureDependencies(string $hostRoot, array $composer): void
     run($hostRoot, [
         'composer',
         'require',
-        ...$missing,
+        '--dev',
+        ...$missingDevelopment,
+        '--with-all-dependencies',
         '--no-interaction',
         '--no-scripts',
     ]);
@@ -190,7 +210,7 @@ function connectedProviders(string $contents): string
     if (! str_contains($contents, 'return [')) {
         throw new RuntimeException(
             'bootstrap/providers.php tidak memakai struktur Laravel yang didukung. '
-            .'Lihat starterkit/examples/providers.php untuk integrasi manual.',
+            .'Lihat fallback manual pada starterkit/README.md.',
         );
     }
 
@@ -220,7 +240,8 @@ function connectedBootstrap(string $current, string $connector): string
     if (! isFreshLaravelBootstrap($current)) {
         throw new RuntimeException(
             'bootstrap/app.php sudah memiliki kustomisasi yang tidak aman untuk ditimpa otomatis. '
-            .'Gabungkan starterkit/examples/bootstrap-app.php secara manual, lalu jalankan ulang installer.',
+            .'Gabungkan starterkit/installer/templates/bootstrap-app.php secara manual, '
+            .'lalu jalankan ulang installer.',
         );
     }
 
@@ -386,7 +407,7 @@ function run(string $workingDirectory, array $command): void
 
 function relativeHostPath(string $path): string
 {
-    $hostRoot = dirname(__DIR__);
+    $hostRoot = dirname(dirname(__DIR__));
 
     return ltrim(str_replace($hostRoot, '', $path), DIRECTORY_SEPARATOR);
 }

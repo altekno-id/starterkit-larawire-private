@@ -10,7 +10,7 @@
 
 ## Angka dan Currency
 
-- Gunakan `App\Support\Starter\StarterNumber`, bukan `number_format()` tersebar di view.
+- Gunakan `Altekno\StarterKit\Support\Starter\StarterNumber`, bukan `number_format()` tersebar di view.
 - Format angka Indonesia memakai titik untuk ribuan dan koma untuk pecahan: `1.234` dan `1.234,5`.
 - Currency default adalah IDR dan harus menampilkan simbol/kode sesuai locale; pecahan currency ditampilkan dua digit hanya bila nilai memang memiliki pecahan.
 - Nilai database, input API, kalkulasi, dan validation tetap menggunakan tipe numerik mentah; format locale hanya pada presentation boundary.

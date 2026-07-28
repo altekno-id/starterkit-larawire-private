@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Starter\Auth\LogoutController;
-use App\Livewire\Starter\Auth\Login;
-use App\Models\Starter\ClientLogin;
-use App\Services\Starter\NavigationAuthorizedRedirectService;
-use App\Support\Starter\StarterNavigation;
+use Altekno\StarterKit\Http\Controllers\Starter\Auth\LogoutController;
+use Altekno\StarterKit\Livewire\Starter\Auth\Login;
+use Altekno\StarterKit\Models\Starter\ClientLogin;
+use Altekno\StarterKit\Services\Starter\NavigationAuthorizedRedirectService;
+use Altekno\StarterKit\Support\Starter\StarterNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

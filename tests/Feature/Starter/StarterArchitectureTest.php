@@ -1,12 +1,14 @@
 <?php
 
-use App\Support\Starter\StarterPaths;
+use Altekno\StarterKit\Support\Starter\StarterPaths;
 use Illuminate\Support\Facades\File;
 
 test('presentation layer does not own persistence queries', function () {
     $files = [
         ...File::allFiles(app_path('Livewire')),
         ...File::allFiles(app_path('Http/Controllers')),
+        ...File::allFiles(StarterPaths::path('src/Livewire')),
+        ...File::allFiles(StarterPaths::path('src/Http/Controllers')),
     ];
 
     expect($files)->not->toBeEmpty();
@@ -24,7 +26,7 @@ test('presentation layer does not own persistence queries', function () {
 });
 
 test('services keep model query construction in repositories', function () {
-    $files = File::allFiles(app_path('Services'));
+    $files = File::allFiles(StarterPaths::path('src/Services'));
 
     expect($files)->not->toBeEmpty();
 
@@ -93,7 +95,7 @@ test('app migration folders are registered dynamically for artisan migration com
 
         expect($this->app->make('migrator')->paths())
             ->toContain($migrationDirectory)
-            ->toContain(database_path('migrations/starter'));
+            ->toContain(StarterPaths::path('database/migrations/starter'));
     } finally {
         File::deleteDirectory($migrationDirectory);
     }

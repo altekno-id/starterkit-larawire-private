@@ -4,7 +4,7 @@
 
 Starterkit di-clone sebagai repository Git mandiri pada path tetap `<laravel>/starterkit`. Repo Laravel host mengabaikan folder tersebut sehingga commit feature project tidak pernah bercampur dengan commit starterkit.
 
-Tidak ada Composer package atau submodule. Composer milik Laravel host hanya dipakai untuk memuat namespace `App\...\Starter` dari folder clone.
+Tidak ada Composer package atau submodule. Composer milik Laravel host hanya dipakai untuk memuat namespace terisolasi `Altekno\StarterKit` dari folder clone.
 
 ## 1. Clone
 
@@ -24,15 +24,13 @@ Tambahkan ke `.gitignore` repository project:
 
 Dependency minimum host harus mencakup dependency runtime yang tercatat pada `starterkit/composer.json`, terutama Livewire dan paket locale.
 
-Ubah mapping `App\\` pada `composer.json` Laravel host menjadi:
+Tambahkan mapping `Altekno\\StarterKit\\` pada `composer.json` Laravel host:
 
 ```json
 "autoload": {
     "psr-4": {
-        "App\\": [
-            "app/",
-            "starterkit/app/"
-        ],
+        "App\\": "app/",
+        "Altekno\\StarterKit\\": "starterkit/src/",
         "Database\\Factories\\": "database/factories/",
         "Database\\Seeders\\": "database/seeders/"
     }
@@ -45,7 +43,7 @@ Jalankan:
 composer dump-autoload
 ```
 
-Project dilarang membuat namespace/path `App\...\Starter`; namespace tersebut dimiliki clone starterkit.
+Project memakai namespace `App\...`, sedangkan seluruh class inti memakai `Altekno\StarterKit\...`. Pemisahan ini mencegah benturan class dan membuat batas kepemilikan jelas.
 
 ## 3. Provider
 
@@ -55,7 +53,7 @@ Tambahkan provider starter pada `bootstrap/providers.php`:
 <?php
 
 use App\Providers\AppServiceProvider;
-use App\Providers\Starter\StarterServiceProvider;
+use Altekno\StarterKit\Providers\Starter\StarterServiceProvider;
 
 return [
     StarterServiceProvider::class,
@@ -68,7 +66,7 @@ return [
 Hubungkan route, middleware, dan exception starter melalui `bootstrap/app.php`:
 
 ```php
-use App\Support\Starter\StarterBootstrap;
+use Altekno\StarterKit\Support\Starter\StarterBootstrap;
 ```
 
 Pada `withRouting(..., using:)`:

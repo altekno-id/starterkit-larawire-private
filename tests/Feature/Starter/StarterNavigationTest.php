@@ -1,6 +1,6 @@
 <?php
 
-use App\Support\Starter\StarterNavigation;
+use Altekno\StarterKit\Support\Starter\StarterNavigation;
 
 test('landing page is public', function () {
     $response = $this->get('/');

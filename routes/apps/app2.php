@@ -1,13 +1,13 @@
 <?php
 
+use Altekno\StarterKit\Models\Starter\ClientLogin;
+use Altekno\StarterKit\Services\Starter\NavigationAuthorizedRedirectService;
+use Altekno\StarterKit\Support\Starter\StarterNavigation;
 use App\Livewire\Apps\App2\Dashboard\App2DashboardIndex;
 use App\Livewire\Apps\App2\Module1\App2Module1Create;
 use App\Livewire\Apps\App2\Module1\App2Module1Edit;
 use App\Livewire\Apps\App2\Module1\App2Module1Index;
 use App\Livewire\Apps\App2\Module1\App2Module1Show;
-use App\Models\Starter\ClientLogin;
-use App\Services\Starter\NavigationAuthorizedRedirectService;
-use App\Support\Starter\StarterNavigation;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', function () {

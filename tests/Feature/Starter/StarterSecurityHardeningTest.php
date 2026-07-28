@@ -1,19 +1,19 @@
 <?php
 
-use App\Livewire\Starter\Auth\ConfirmPassword;
-use App\Livewire\Starter\Auth\Login;
-use App\Livewire\Starter\Logs\ActivityLogIndex;
-use App\Livewire\Starter\Profile\EditMyProfile;
-use App\Livewire\Starter\Settings\ClientProfile;
-use App\Models\Starter\ActivityLog;
-use App\Models\Starter\Client;
-use App\Models\Starter\ClientLogin;
-use App\Models\Starter\ClientRole;
-use App\Services\Starter\AuditLogService;
-use App\Services\Starter\AuthLoginService;
-use App\Services\Starter\StarterConfigService;
-use App\Support\Starter\StarterNavigation;
-use App\Support\Starter\StarterNumber;
+use Altekno\StarterKit\Livewire\Starter\Auth\ConfirmPassword;
+use Altekno\StarterKit\Livewire\Starter\Auth\Login;
+use Altekno\StarterKit\Livewire\Starter\Logs\ActivityLogIndex;
+use Altekno\StarterKit\Livewire\Starter\Profile\EditMyProfile;
+use Altekno\StarterKit\Livewire\Starter\Settings\ClientProfile;
+use Altekno\StarterKit\Models\Starter\ActivityLog;
+use Altekno\StarterKit\Models\Starter\Client;
+use Altekno\StarterKit\Models\Starter\ClientLogin;
+use Altekno\StarterKit\Models\Starter\ClientRole;
+use Altekno\StarterKit\Services\Starter\AuditLogService;
+use Altekno\StarterKit\Services\Starter\AuthLoginService;
+use Altekno\StarterKit\Services\Starter\StarterConfigService;
+use Altekno\StarterKit\Support\Starter\StarterNavigation;
+use Altekno\StarterKit\Support\Starter\StarterNumber;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;

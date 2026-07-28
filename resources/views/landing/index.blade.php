@@ -5,7 +5,7 @@
                 <span class="avatar avatar-sm bg-primary text-white me-2">{{ str(config('app.name'))->substr(0, 1)->upper() }}</span>
                 {{ config('app.name') }}
             </a>
-            <a class="btn btn-primary" href="{{ \App\Support\Starter\StarterNavigation::authLoginUrl() }}">Login</a>
+            <a class="btn btn-primary" href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}">Login</a>
         </div>
     </header>
 
@@ -16,7 +16,7 @@
                     <span class="badge bg-primary-lt text-primary mb-3">Aplikasi Internal Perusahaan</span>
                     <h1 class="display-4 fw-bold mb-3">Satu fondasi untuk seluruh aplikasi internal.</h1>
                     <p class="lead text-secondary mb-4">Multi-subdomain, modul dan menu dinamis, serta pengaturan hak akses berbasis database. Akun hanya dibuat dan dikelola oleh administrator perusahaan.</p>
-                    <a class="btn btn-primary btn-lg" href="{{ \App\Support\Starter\StarterNavigation::authLoginUrl() }}">Masuk ke Aplikasi</a>
+                    <a class="btn btn-primary btn-lg" href="{{ \Altekno\StarterKit\Support\Starter\StarterNavigation::authLoginUrl() }}">Masuk ke Aplikasi</a>
                 </div>
                 <div class="col-lg-5">
                     <div class="card shadow-sm">

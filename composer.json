@@ -29,6 +29,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "Altekno\\StarterKit\\": "src/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }

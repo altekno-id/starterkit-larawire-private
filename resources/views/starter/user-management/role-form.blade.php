@@ -112,7 +112,7 @@
                                     <span class="status status-blue status-lite">Role Aktif</span>
                                 @endif
                                 <span class="badge bg-primary-lt text-primary">
-                                    {{ \App\Support\Starter\StarterNumber::decimal($grantedAppCount) }} app · {{ \App\Support\Starter\StarterNumber::decimal($grantedModuleCount) }} module
+                                    {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppCount) }} app · {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedModuleCount) }} module
                                 </span>
                                 @if ($roleForm['can_manage_settings'])
                                     <span class="badge bg-azure-lt text-azure">
@@ -126,7 +126,7 @@
                                         Log Aktivitas
                                     </span>
                                 @endif
-                                <span class="badge bg-secondary-lt">{{ \App\Support\Starter\StarterNumber::decimal($assignedUserCount) }} user</span>
+                                <span class="badge bg-secondary-lt">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($assignedUserCount) }} user</span>
                             </div>
                         </div>
 
@@ -259,7 +259,7 @@
                         </div>
                         <div class="card-actions">
                             <span class="status {{ $isSuperuserRole ? 'status-green' : 'status-blue' }} status-lite">
-                                {{ \App\Support\Starter\StarterNumber::decimal($grantedAppCount) }} / {{ \App\Support\Starter\StarterNumber::decimal($appTotal) }} app
+                                {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppCount) }} / {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appTotal) }} app
                             </span>
                         </div>
                     </div>
@@ -302,10 +302,10 @@
                                     >
                                         <span class="me-auto">
                                             <span class="d-block fw-semibold">{{ $appName }}</span>
-                                            <span class="d-block small text-secondary">{{ \App\Support\Starter\StarterNumber::decimal($appModules->count()) }} module tersedia</span>
+                                            <span class="d-block small text-secondary">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appModules->count()) }} module tersedia</span>
                                         </span>
                                         <span class="badge {{ $grantedAppModules > 0 ? 'bg-primary-lt text-primary' : 'bg-secondary-lt' }}">
-                                            {{ \App\Support\Starter\StarterNumber::decimal($grantedAppModules) }} / {{ \App\Support\Starter\StarterNumber::decimal($appModules->count()) }} module
+                                            {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppModules) }} / {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appModules->count()) }} module
                                         </span>
                                         <div class="accordion-button-toggle">
                                             @include('starter.templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'icon-1'])

@@ -1,11 +1,11 @@
 <?php
 
-use App\Livewire\Starter\Logs\ActivityLogIndex;
-use App\Models\Starter\ActivityLog;
-use App\Models\Starter\App;
-use App\Models\Starter\Client;
-use App\Models\Starter\ClientLogin;
-use App\Models\Starter\ClientRole;
+use Altekno\StarterKit\Livewire\Starter\Logs\ActivityLogIndex;
+use Altekno\StarterKit\Models\Starter\ActivityLog;
+use Altekno\StarterKit\Models\Starter\App;
+use Altekno\StarterKit\Models\Starter\Client;
+use Altekno\StarterKit\Models\Starter\ClientLogin;
+use Altekno\StarterKit\Models\Starter\ClientRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Livewire\Livewire;

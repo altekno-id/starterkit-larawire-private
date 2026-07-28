@@ -55,7 +55,7 @@
         <div class="card-header">
             <div>
                 <h3 class="card-title">Daftar User</h3>
-                <p class="card-subtitle">Menampilkan {{ \App\Support\Starter\StarterNumber::decimal($users->firstItem() ?? 0) }}–{{ \App\Support\Starter\StarterNumber::decimal($users->lastItem() ?? 0) }} dari {{ \App\Support\Starter\StarterNumber::decimal($users->total()) }} user</p>
+                <p class="card-subtitle">Menampilkan {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($users->firstItem() ?? 0) }}–{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($users->lastItem() ?? 0) }} dari {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($users->total()) }} user</p>
             </div>
             <div class="card-actions">
                 <a
@@ -90,7 +90,7 @@
                             </td>
                             <td>
                                 <div>{{ $user->role?->name ?? '-' }}</div>
-                                <div class="small text-secondary">{{ $user->role?->isSuperuser() ? 'Akses penuh' : \App\Support\Starter\StarterNumber::decimal($user->role?->mods_count ?? 0).' module' }}</div>
+                                <div class="small text-secondary">{{ $user->role?->isSuperuser() ? 'Akses penuh' : \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($user->role?->mods_count ?? 0).' module' }}</div>
                             </td>
                             <td>
                                 <span class="status {{ $user->status === 'active' ? 'status-green' : 'status-red' }} status-lite">{{ ['active' => 'Aktif', 'inactive' => 'Nonaktif', 'locked' => 'Terkunci'][$user->status] ?? $user->status }}</span>

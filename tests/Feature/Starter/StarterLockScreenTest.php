@@ -1,9 +1,9 @@
 <?php
 
-use App\Livewire\Starter\Auth\LockScreen;
-use App\Models\Starter\Client;
-use App\Models\Starter\ClientLogin;
-use App\Models\Starter\ClientRole;
+use Altekno\StarterKit\Livewire\Starter\Auth\LockScreen;
+use Altekno\StarterKit\Models\Starter\Client;
+use Altekno\StarterKit\Models\Starter\ClientLogin;
+use Altekno\StarterKit\Models\Starter\ClientRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 

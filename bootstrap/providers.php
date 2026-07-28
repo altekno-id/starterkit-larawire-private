@@ -1,7 +1,7 @@
 <?php
 
+use Altekno\StarterKit\Providers\Starter\StarterServiceProvider;
 use App\Providers\AppServiceProvider;
-use App\Providers\Starter\StarterServiceProvider;
 
 return [
     StarterServiceProvider::class,

@@ -167,6 +167,12 @@ environment, APP key, bahasa, asset, migration, Superuser, landing, registry,
 dan pemeriksaan keamanan. Pada Laravel standar tidak ada file yang perlu dicopy
 atau diedit manual.
 
+Tabel infrastruktur Laravel dibedakan dengan prefix `x_`, termasuk
+`x_migrations`, cache, queue/job, session, dan password-reset. Installer
+menghapus migration bawaan Laravel fresh lalu mengatur migration serta config
+helper tersebut secara otomatis; tabel bisnis tetap mengikuti prefix App dan
+module.
+
 ## Login awal
 
 Credential development awal dicantumkan langsung pada `.env` dan

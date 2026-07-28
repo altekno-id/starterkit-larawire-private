@@ -32,6 +32,15 @@
 - Pivot memakai pola `{subdomain}_{module}_{entity_a}_{entity_b}` dengan urutan entity yang konsisten/alfabetis. Foreign key tetap memakai `{entity_singular}_id` yang jelas.
 - Seluruh nama tabel, foreign key, unique constraint, dan index wajib berada dalam batas identifier database—maksimal 64 karakter untuk MySQL. Bila nama berisiko panjang, pendekkan key app/module/entity secara jelas dan beri nama index eksplisit; jangan memakai singkatan ambigu.
 - Prefix `starter_` tetap khusus infrastruktur starterkit. Rule prefix domain hanya berlaku untuk tabel feature/project baru; tabel existing tidak boleh di-rename sekadar menyeragamkan nama tanpa scope eksplisit dan migration production-safe.
+- Seluruh tabel infrastruktur/helper Laravel memakai prefix `x_` agar mudah
+  dibedakan dari tabel starterkit dan domain: `x_migrations`, `x_cache`,
+  `x_cache_locks`, `x_jobs`, `x_job_batches`, `x_failed_jobs`, `x_sessions`,
+  dan `x_password_reset_tokens`. Gunakan config/environment table name yang
+  disiapkan installer; jangan hard-code nama bawaan tanpa prefix.
+- Prefix `x_` tidak boleh dipakai untuk tabel bisnis, pivot bisnis, atau tabel
+  core starterkit. Perubahan nama tabel helper pada project existing wajib
+  memakai migration rename/backfill yang production-safe; jangan hanya mengubah
+  config karena dapat membuat Laravel menganggap migration belum pernah jalan.
 - Migration infrastruktur core hanya berada di `starterkit/database/migrations/starter`. Migration tabel feature pada Laravel host wajib berada di `database/migrations/apps/<subdomain>/`; jangan membuat migration feature baru di root `database/migrations` atau folder module. Loader starter menemukan folder subdomain valid secara otomatis saat Artisan migration berjalan.
 - Sampai generator khusus tersedia, buat model dan migration app sebagai dua perintah terpisah agar path migration tidak salah:
 

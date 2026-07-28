@@ -32,6 +32,9 @@ try {
     $envExamplePath = $hostRoot.'/.env.example';
     $envPath = $hostRoot.'/.env';
 
+    removeFreshLaravelMigrations($hostRoot);
+    configureFrameworkTableNames($hostRoot);
+
     $composer = readJson($composerPath);
     $bootstrap = connectedBootstrap(
         readRequiredFile($bootstrapPath),
@@ -242,6 +245,69 @@ function directoryHasFiles(string $path): bool
     }
 
     return false;
+}
+
+function removeFreshLaravelMigrations(string $hostRoot): void
+{
+    $paths = [
+        $hostRoot.'/database/migrations/0001_01_01_000000_create_users_table.php',
+        $hostRoot.'/database/migrations/0001_01_01_000001_create_cache_table.php',
+        $hostRoot.'/database/migrations/0001_01_01_000002_create_jobs_table.php',
+    ];
+
+    foreach ($paths as $path) {
+        if (! is_file($path)) {
+            continue;
+        }
+
+        if (! unlink($path)) {
+            throw new RuntimeException("Tidak dapat menghapus migration bawaan Laravel: {$path}");
+        }
+
+        output('REMOVE  '.relativeHostPath($path));
+    }
+}
+
+function configureFrameworkTableNames(string $hostRoot): void
+{
+    $replacements = [
+        'config/database.php' => [
+            "'table' => 'migrations'," => "'table' => env('DB_MIGRATIONS_TABLE', 'x_migrations'),",
+        ],
+        'config/cache.php' => [
+            "'table' => env('DB_CACHE_TABLE', 'cache')," => "'table' => env('DB_CACHE_TABLE', 'x_cache'),",
+            "'lock_table' => env('DB_CACHE_LOCK_TABLE')," => "'lock_table' => env('DB_CACHE_LOCK_TABLE', 'x_cache_locks'),",
+        ],
+        'config/queue.php' => [
+            "'table' => env('DB_QUEUE_TABLE', 'jobs')," => "'table' => env('DB_QUEUE_TABLE', 'x_jobs'),",
+            "'table' => 'job_batches'," => "'table' => env('DB_QUEUE_BATCH_TABLE', 'x_job_batches'),",
+            "'table' => 'failed_jobs'," => "'table' => env('DB_QUEUE_FAILED_TABLE', 'x_failed_jobs'),",
+        ],
+        'config/session.php' => [
+            "'table' => env('SESSION_TABLE', 'sessions')," => "'table' => env('SESSION_TABLE', 'x_sessions'),",
+        ],
+    ];
+
+    foreach ($replacements as $relativePath => $fileReplacements) {
+        $path = $hostRoot.'/'.$relativePath;
+        $contents = readRequiredFile($path);
+
+        foreach ($fileReplacements as $from => $to) {
+            if (str_contains($contents, $to)) {
+                continue;
+            }
+
+            if (! str_contains($contents, $from)) {
+                throw new RuntimeException(
+                    "Struktur {$relativePath} tidak didukung untuk konfigurasi tabel helper.",
+                );
+            }
+
+            $contents = str_replace($from, $to, $contents);
+        }
+
+        writeIfChanged($path, $contents);
+    }
 }
 
 /**
@@ -517,8 +583,15 @@ function mergeEnvironment(string $path): void
         'APP_LOCALE' => 'id',
         'APP_FALLBACK_LOCALE' => 'id',
         'APP_FAKER_LOCALE' => 'id_ID',
+        'DB_MIGRATIONS_TABLE' => 'x_migrations',
+        'DB_CACHE_TABLE' => 'x_cache',
+        'DB_CACHE_LOCK_TABLE' => 'x_cache_locks',
+        'DB_QUEUE_TABLE' => 'x_jobs',
+        'DB_QUEUE_BATCH_TABLE' => 'x_job_batches',
+        'DB_QUEUE_FAILED_TABLE' => 'x_failed_jobs',
         'SESSION_SECURE_COOKIE' => $secure,
         'SESSION_DOMAIN' => 'null',
+        'SESSION_TABLE' => 'x_sessions',
         'STARTER_SUPERUSER_USERNAME' => 'superuser',
         'STARTER_SUPERUSER_EMAIL' => 'developer@example.test',
         'AUTH_PASSWORD_RESET_TOKEN_TABLE' => 'x_password_reset_tokens',

@@ -128,8 +128,8 @@ class SetupCommand extends Command
     {
         $password = (string) config('starter.superuser.password');
 
-        if ($password === '' && app()->environment(['local', 'testing'])) {
-            $password = 'rahasia123';
+        if ($password === '' && app()->environment(['local', 'development', 'testing'])) {
+            $password = 'superuser123';
         }
 
         if ($password === '' && $this->input->isInteractive()) {
@@ -137,12 +137,12 @@ class SetupCommand extends Command
         }
 
         if ($password === '') {
-            $this->fail('STARTER_SUPERUSER_PASSWORD is required when creating or resetting Superuser outside local/testing.');
+            $this->fail('STARTER_SUPERUSER_PASSWORD is required when creating or resetting Superuser outside local/development/testing.');
         }
 
-        if ($password === 'rahasia123') {
-            if (! app()->environment(['local', 'testing'])) {
-                $this->fail('The development Superuser password cannot be used outside local/testing.');
+        if (in_array($password, ['superuser123', 'rahasia123'], true)) {
+            if (! app()->environment(['local', 'development', 'testing'])) {
+                $this->fail('The development Superuser password cannot be used outside local/development/testing.');
             }
 
             $this->warn('Using the local-only default password. Configure STARTER_SUPERUSER_PASSWORD before deployment.');

@@ -804,10 +804,10 @@ function mergeEnvironment(string $path): void
         $contents = setEnvironmentValue($contents, $key, $value);
     }
 
-    $contents = setEnvironmentValueIfEmpty(
+    $contents = setEnvironmentValueIfEmptyOrLegacyDefault(
         $contents,
         'STARTER_SUPERUSER_PASSWORD',
-        'rahasia123',
+        'superuser123',
     );
     $contents = setEnvironmentDefault($contents, 'SESSION_SAME_SITE', 'lax');
 
@@ -858,11 +858,11 @@ function setEnvironmentDefault(string $contents, string $key, string $value): st
     return setEnvironmentValue($contents, $key, $value);
 }
 
-function setEnvironmentValueIfEmpty(string $contents, string $key, string $value): string
+function setEnvironmentValueIfEmptyOrLegacyDefault(string $contents, string $key, string $value): string
 {
-    $current = environmentValueFromContents($contents, $key);
+    $current = trim(environmentValueFromContents($contents, $key), "\"' ");
 
-    return $current === ''
+    return in_array($current, ['', 'rahasia123'], true)
         ? setEnvironmentValue($contents, $key, $value)
         : $contents;
 }

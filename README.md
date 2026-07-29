@@ -22,7 +22,7 @@ php starterkit/installer/install.php --company="Nama Aplikasi"
 Installer meminta:
 
 1. konfirmasi reset database;
-2. kode App pertama, misalnya `spmb`—boleh dikosongkan;
+2. kode App pertama, misalnya `crm`—boleh dikosongkan;
 3. nama App yang ditampilkan.
 
 Setelah itu dependency, connector Laravel, `.env`, APP key, locale, asset,
@@ -37,10 +37,10 @@ Jalankan dari root Laravel.
 |---|---|
 | Instalasi awal | `php starterkit/installer/install.php --company="Nama Aplikasi"` |
 | Reinstall development | `php starterkit/installer/install.php --reset --company="Nama Aplikasi"` |
-| Membuat App | `php artisan starter:make-app spmb --name="SPMB"` |
-| Membuat App tanpa langsung sync | `php artisan starter:make-app spmb --name="SPMB" --no-sync` |
-| Memeriksa perubahan registry | `php artisan starter:sync spmb --dry-run` |
-| Menerapkan registry | `php artisan starter:sync spmb --force` |
+| Membuat App | `php artisan starter:make-app crm --name="CRM"` |
+| Membuat App tanpa langsung sync | `php artisan starter:make-app crm --name="CRM" --no-sync` |
+| Memeriksa perubahan registry | `php artisan starter:sync crm --dry-run` |
+| Menerapkan registry | `php artisan starter:sync crm --force` |
 | Sync seluruh App | `php artisan starter:sync --dry-run`, lalu `php artisan starter:sync --force` |
 | Publish ulang asset | `php artisan starter:publish-assets` |
 | Cek keamanan lokal | `php artisan starter:security-check` |
@@ -68,24 +68,24 @@ pengaturan global.
 domainxx.com
 ├── Landing, login, profil, user, role, pengaturan, dan log global
 │
-├── spmb.domainxx.com                         App SPMB
-│   ├── Module Pendaftaran
-│   │   └── Menu: Pendaftar, Verifikasi
-│   └── Module Seleksi
-│       └── Menu: Jadwal, Hasil Seleksi
+├── crm.domainxx.com                          App CRM
+│   ├── Module Leads
+│   │   └── Menu: Daftar Leads, Pipeline
+│   └── Module Pelanggan
+│       └── Menu: Data Pelanggan, Aktivitas
 │
-├── alumni.domainxx.com                       App Alumni
-│   └── Module Data Alumni
-│       └── Menu: Alumni, Tracer Study
+├── support.domainxx.com                      App Customer Support
+│   └── Module Tiket
+│       └── Menu: Daftar Tiket, SLA
 │
-├── spmi.domainxx.com                         App SPMI
-│   └── Module Mutu
-│       └── Menu: Dokumen Mutu, Audit Mutu
+├── marketing.domainxx.com                    App Marketing
+│   └── Module Campaign
+│       └── Menu: Campaign, Segmentasi
 │
 └── api.domainxx.com                          Gateway API opsional
-    ├── /spmb
-    ├── /alumni
-    └── /spmi
+    ├── /crm
+    ├── /support
+    └── /marketing
 ```
 
 Ringkasnya:
@@ -109,23 +109,23 @@ project atau database yang terpisah.
 Command `starter:make-app` membuat:
 
 ```text
-app/Livewire/Apps/Spmb/
-config/apps/spmb.php
-routes/apps/spmb.php
-routes/apps/spmb.api.php
-resources/views/apps/spmb/
-tests/Feature/Apps/Spmb/
+app/Livewire/Apps/Crm/
+config/apps/crm.php
+routes/apps/crm.php
+routes/apps/crm.api.php
+resources/views/apps/crm/
+tests/Feature/Apps/Crm/
 ```
 
 Migration bisnis App diletakkan di:
 
 ```text
-database/migrations/apps/spmb/
+database/migrations/apps/crm/
 ```
 
-- `config/apps/spmb.php`: definisi App, module, menu, dan landing.
-- `routes/apps/spmb.php`: route web `spmb.domainxx.com`.
-- `routes/apps/spmb.api.php`: endpoint `api.domainxx.com/spmb`.
+- `config/apps/crm.php`: definisi App, module, menu, dan landing.
+- `routes/apps/crm.php`: route web `crm.domainxx.com`.
+- `routes/apps/crm.api.php`: endpoint `api.domainxx.com/crm`.
 - `starter:sync`: memproyeksikan config dan route web ke metadata database.
 
 Kode `api` tidak dapat dipakai sebagai nama App karena dicadangkan untuk gateway
@@ -150,8 +150,8 @@ Hasilnya:
 ```text
 api.domainxx.com                 Dokumentasi Scramble
 api.domainxx.com/openapi.json    Dokumen OpenAPI
-api.domainxx.com/spmb            Endpoint App SPMB
-api.domainxx.com/alumni          Endpoint App Alumni
+api.domainxx.com/crm             Endpoint App CRM
+api.domainxx.com/support         Endpoint App Customer Support
 ```
 
 Tidak ada prefix `/api`. Development dapat membuka dokumentasi langsung;
@@ -165,11 +165,12 @@ Installer menambahkan credential development ke `.env` dan `.env.example`:
 ```env
 STARTER_SUPERUSER_USERNAME=superuser
 STARTER_SUPERUSER_EMAIL=developer@example.test
-STARTER_SUPERUSER_PASSWORD=rahasia123
+STARTER_SUPERUSER_PASSWORD=superuser123
 ```
 
-Password tersebut hanya untuk local/testing. Production wajib memakai password
-kuat; `starter:security-check --production` akan menolak password default.
+Password tersebut hanya untuk local/development/testing. Production wajib
+memakai password kuat; `starter:security-check --production` akan menolak
+password default.
 
 ## Instalasi tanpa App pertama
 

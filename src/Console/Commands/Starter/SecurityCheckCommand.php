@@ -122,7 +122,7 @@ class SecurityCheckCommand extends Command
             ),
             $this->check(
                 'Superuser password is not local default',
-                $superuserPassword !== 'rahasia123',
+                ! in_array($superuserPassword, ['superuser123', 'rahasia123'], true),
                 'STARTER_SUPERUSER_PASSWORD must never use the local default.',
             ),
             $this->check(

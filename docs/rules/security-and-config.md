@@ -11,8 +11,8 @@
 - Jangan meminta developer menambahkan environment key secara manual bila perubahan tersebut dapat diterapkan langsung pada checkout lokal. Untuk production, dokumentasikan nilai atau pola nilainya melalui `.env.example` dan rule deployment.
 - Credential awal Superuser local/testing wajib terlihat eksplisit pada `.env`
   dan `.env.example` agar setup tidak bergantung pada fallback tersembunyi.
-  Default `STARTER_SUPERUSER_PASSWORD=rahasia123` hanya boleh dipakai pada
-  local/testing; production wajib menggantinya dengan password kuat dan
+  Default `STARTER_SUPERUSER_PASSWORD=superuser123` hanya boleh dipakai pada
+  local/development/testing; production wajib menggantinya dengan password kuat dan
   `starter:security-check --production` wajib menolaknya.
 
 Konfigurasi existing:

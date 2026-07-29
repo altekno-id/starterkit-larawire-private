@@ -17,6 +17,8 @@
 
 Konfigurasi existing:
 
+- Gateway API `api.<APP_DOMAIN>` aktif/tidak melalui
+  `STARTER_API_ENABLED` dengan default `false`.
 - Remember me aktif/tidak.
 - Lock screen aktif/tidak dan timeout menit.
 - Batas percobaan login dan decay.
@@ -73,3 +75,10 @@ Konfigurasi existing:
 - Jangan log password, token, secret, credential, atau isi file.
 - Password/credential pada state Livewire wajib memiliki batas panjang dan dibersihkan setelah action berhasil maupun gagal; jangan mempertahankannya untuk kenyamanan form.
 - Semua input dianggap tidak tepercaya: validasi tipe/panjang/enum, gunakan authorization pada action, allowlist mass assignment, escape output, dan gunakan binding Eloquent/query builder. Raw SQL/HTML hanya boleh memakai nilai internal yang sudah dibuktikan aman.
+- API nonaktif wajib tidak mendaftarkan endpoint maupun dokumentasi. Saat aktif,
+  endpoint bisnis memakai authentication/authorization eksplisit dan rate
+  limit sesuai risiko. Dokumentasi API production hanya untuk Superuser;
+  jangan membuka gate Scramble secara publik.
+- Reinstall destruktif hanya diizinkan oleh installer pada
+  `APP_ENV=local|development` setelah dua konfirmasi eksplisit. `--force`,
+  non-interactive mode, atau config production tidak boleh melewati batas ini.

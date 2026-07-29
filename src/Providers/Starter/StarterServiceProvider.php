@@ -33,6 +33,7 @@ use Altekno\StarterKit\Livewire\Starter\UserManagement\RoleForm;
 use Altekno\StarterKit\Livewire\Starter\UserManagement\Roles;
 use Altekno\StarterKit\Livewire\Starter\UserManagement\UserForm;
 use Altekno\StarterKit\Livewire\Starter\UserManagement\Users;
+use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Repositories\Starter\ActivityLogRepository;
 use Altekno\StarterKit\Repositories\Starter\AppModRepository;
 use Altekno\StarterKit\Repositories\Starter\AppRepository;
@@ -50,10 +51,15 @@ use Altekno\StarterKit\Services\Starter\StarterContextService;
 use Altekno\StarterKit\Services\Starter\UserManagementRoleService;
 use Altekno\StarterKit\Services\Starter\UserManagementUserService;
 use Altekno\StarterKit\Support\Starter\StarterPaths;
+use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
+use Dedoc\Scramble\Scramble;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Routing\Route;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
@@ -66,6 +72,7 @@ class StarterServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(StarterPaths::path('config/starter.php'), 'starter');
         $this->configureEmbeddedApplication();
         $this->registerViewPaths();
+        $this->prepareApiDocumentation();
 
         $this->app->bind(AppInterface::class, AppRepository::class);
         $this->app->bind(AppModInterface::class, AppModRepository::class);
@@ -102,6 +109,7 @@ class StarterServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(StarterPaths::path('database/migrations/starter'));
         $this->loadAppMigrations();
         $this->registerLivewireComponents();
+        $this->configureApiDocumentation();
         View::addNamespace('errors', StarterPaths::path('resources/views/starter/errors'));
 
         Number::useLocale(str_replace('_', '-', (string) config('app.locale')));
@@ -230,5 +238,61 @@ class StarterServiceProvider extends ServiceProvider
         $config->set('livewire.component_namespaces.layouts', "{$starterViews}/templates/layouts");
         $config->set('livewire.component_layout', 'layouts::app');
         $config->set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:10240']);
+    }
+
+    private function prepareApiDocumentation(): void
+    {
+        if (! class_exists(Scramble::class)) {
+            if (config('starter.api.enabled')) {
+                throw new \RuntimeException(
+                    'STARTER_API_ENABLED membutuhkan package dedoc/scramble. '
+                    .'Jalankan composer require dedoc/scramble.',
+                );
+            }
+
+            return;
+        }
+
+        Scramble::ignoreDefaultRoutes();
+
+        $config = $this->app['config'];
+        $config->set('scramble.api_domain', $config->get('starter.api.domain'));
+        $config->set('scramble.api_path', '');
+        $config->set('scramble.middleware', [
+            'web',
+            RestrictedDocsAccess::class,
+        ]);
+        $config->set('scramble.info.title', $config->get('app.name').' API');
+    }
+
+    private function configureApiDocumentation(): void
+    {
+        if (! class_exists(Scramble::class) || ! config('starter.api.enabled')) {
+            return;
+        }
+
+        Gate::define('viewApiDocs', function (?ClientLogin $login): bool {
+            if ($this->app->environment(['local', 'development'])) {
+                return true;
+            }
+
+            return $login?->role?->isSuperuser() ?? false;
+        });
+
+        $apiDomain = (string) config('starter.api.domain');
+
+        Scramble::configure()
+            ->routes(fn (Route $route): bool => $route->getDomain() === $apiDomain
+                && in_array('api', $route->gatherMiddleware(), true))
+            ->expose(
+                ui: fn (Router $router, mixed $action): Route => $router
+                    ->domain($apiDomain)
+                    ->get('/', $action)
+                    ->name('api.docs'),
+                document: fn (Router $router, mixed $action): Route => $router
+                    ->domain($apiDomain)
+                    ->get('/openapi.json', $action)
+                    ->name('api.openapi'),
+            );
     }
 }

@@ -36,6 +36,10 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 - Secara otomatis terapkan authorization, validation, proteksi injection/mass-assignment, server-side pagination untuk data yang dapat tumbuh, query efisien, audit log, transaksi, locale/format, pola Livewire/Alpine, UI state, migration production-safe, dan test sesuai rule pemilik.
 - Seluruh feature untuk app/subdomain wajib mengikuti struktur `Apps/<Subdomain>` pada layer yang dipakai. Baca `docs/rules/architecture.md` sebelum membuat file feature app baru; jangan mencampurnya dengan folder Starter atau root project.
 - Migration feature app wajib berada di `database/migrations/apps/<subdomain>/`, bukan root `database/migrations`; folder tersebut dimuat otomatis saat perintah Artisan migration berjalan.
+- Endpoint API App wajib berada di `routes/apps/<subdomain>.api.php`. API memakai
+  gateway `api.<APP_DOMAIN>/<subdomain>`, tidak memakai prefix `/api`, tidak
+  menjadi metadata menu/module web, dan hanya didaftarkan ketika
+  `STARTER_API_ENABLED=true`.
 - Asset CSS/JS custom halaman app wajib berada pada Blade asset yang berdekatan dengan view pemiliknya. Gunakan Alpine untuk UI kecil, Livewire hanya untuk kebutuhan server, dan `wire:model.defer` untuk form normal; baca `ui-ux.md` serta `performance.md` sebelum membuat interaksi atau memakai library baru.
 - UI wajib berangkat dari contoh terdekat di `docs/template`. Gunakan `docs/template/template.md` sebagai atlas pencarian yang tidak mengikat: cari beberapa kandidat lintas konteks, buka satu sampai tiga sumber HTML, lalu pilih/komposisikan pola template UI aktif yang paling tepat. Jangan membuat desain/komponen hanya berdasarkan selera. Pilih komponen berdasarkan konteks, jenis, dan volume data agar halaman padat, informatif, responsif, serta profesional.
 - Bila sebuah standar tidak relevan, lewati tanpa menambah code seremonial. Bila requirement meminta deviasi, jelaskan risiko dan minta keputusan eksplisit.
@@ -121,6 +125,11 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
   landing onboarding wajib menjelaskan App, module, menu, submenu, generator,
   struktur source, dan alur sync. Jangan memakai `starterkit:install` untuk
   update, deploy rutin, project berjalan, atau database existing.
+- Reinstall destruktif hanya melalui
+  `php starterkit/installer/install.php --reset`, hanya pada
+  `APP_ENV=local|development`, dan wajib melewati konfirmasi `y` lalu `RESET`.
+  Mode ini menghapus seluruh data serta source App/project yang dimiliki
+  kontrak starterkit; production wajib ditolak sebelum mutation.
 - Jangan meminta developer menyalin source core atau mengedit connector satu per
   satu pada instalasi Laravel fresh yang masih memakai struktur standar.
 - Setelah membuat `issues/<feature-slug>.md`, jangan langsung mengeksekusi code.

@@ -227,6 +227,12 @@ PHP.PHP_EOL);
             return self::FAILURE;
         }
 
+        if ($app === 'api') {
+            $this->components->error('First app code [api] is reserved for the shared API gateway.');
+
+            return self::FAILURE;
+        }
+
         $name = trim((string) ($this->option('app-name') ?: Str::headline($app)));
 
         if ($name === '' || mb_strlen($name) > 255) {
@@ -472,6 +478,7 @@ PHP.PHP_EOL;
                                     <div class="list-group list-group-flush mb-4">
                                         <div class="list-group-item px-0"><code>config/apps/layanan.php</code> — definisi App, module, dan menu.</div>
                                         <div class="list-group-item px-0"><code>routes/apps/layanan.php</code> — route pada subdomain App.</div>
+                                        <div class="list-group-item px-0"><code>routes/apps/layanan.api.php</code> — endpoint App pada gateway API opsional.</div>
                                         <div class="list-group-item px-0"><code>app/Livewire/Apps/Layanan/</code> — komponen server.</div>
                                         <div class="list-group-item px-0"><code>resources/views/apps/layanan/</code> — tampilan App.</div>
                                         <div class="list-group-item px-0"><code>tests/Feature/Apps/Layanan/</code> — test awal.</div>

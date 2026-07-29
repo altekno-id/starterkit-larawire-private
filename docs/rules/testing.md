@@ -26,6 +26,10 @@ php artisan test --compact
 - Authorization: role diizinkan, role ditolak, dan perlindungan Superuser.
 - Livewire: render, validation, action, redirect, toast/modal event.
 - Route/menu/module: route name, middleware, `starter:sync --dry-run`, akses role.
+- API: uji switch mati tidak mendaftarkan gateway, switch aktif mendaftarkan
+  `api.<APP_DOMAIN>/<app>`, nama route `api.<app>.*`, middleware/rate limit,
+  authentication/authorization/validation endpoint, serta isi OpenAPI Scramble.
+  Jika CORS memang disetujui, uji origin yang diizinkan dan ditolak.
 - UI JavaScript: test server metadata/endpoint dan browser test perilaku nyata. Pastikan asset halaman tidak termuat pada halaman lain, form normal tidak mengirim request ketika mengetik, dan navigasi masuk → pindah → kembali tidak menggandakan script, listener, modal, dropdown, atau instance library.
 - Navigasi subdomain: uji kondisi guest dan user yang sudah login dari landing,
   auth, serta App. Pastikan URL yang dapat berpindah origin melakukan full-page

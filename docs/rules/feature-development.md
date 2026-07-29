@@ -41,6 +41,12 @@ Developer wajib menyebutkan secara eksplisit:
 - label menu single, atau label parent dan seluruh label child secara berurutan;
 - menu/child yang menjadi halaman awal.
 
+Jika module juga membutuhkan API, developer wajib menyebut konsumen API
+(mobile, server, atau browser), metode authentication, role/authorization,
+endpoint dan operasi yang dibutuhkan, serta apakah browser lintas origin perlu
+CORS. Informasi ini tidak boleh ditebak karena menentukan kontrak dan keamanan
+API.
+
 Jangan menebak struktur menu dari nama feature dan jangan langsung membuat
 issue atau code jika informasi tersebut belum lengkap. Respons pertama harus
 singkat, menjelaskan hubungan module sebagai batas akses dan menu sebagai
@@ -125,6 +131,20 @@ Route::middleware(['auth:web', 'starter.active', 'starter.password-change', 'sta
 ```
 
 Nama akhir wajib mengikuti `<app-key>.<module-code>.<action>`, misalnya `hr.pegawai.index`.
+
+Route API untuk module yang sama ditulis terpisah di
+`routes/apps/<app-key>.api.php`. Tulis path relatif setelah prefix App dan nama
+relatif setelah `api.<app-key>.`; jangan mengulang `/api` atau `<app-key>`:
+
+```php
+Route::prefix('pegawai')->name('pegawai.')->group(function (): void {
+    Route::get('/', PegawaiIndexController::class)->name('index');
+});
+```
+
+Contoh tersebut menjadi `api.example.com/hr/pegawai` dengan nama
+`api.hr.pegawai.index`. Terapkan authentication, authorization, validation,
+resource response, pagination, dan rate limit yang sesuai kontrak API.
 
 ## 6. Config module dan menu
 

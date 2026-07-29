@@ -18,6 +18,7 @@
 - `APP_DEBUG=false`
 - `APP_URL=https://<domain>`
 - `APP_DOMAIN=<domain tanpa scheme>`
+- `STARTER_API_ENABLED=false` kecuali gateway API memang akan dipakai
 - database credential production
 - `SESSION_DRIVER=file`
 - `CACHE_STORE=file`
@@ -27,6 +28,11 @@
 - `APP_LOCALE=id`, `APP_FALLBACK_LOCALE=id`, dan `APP_FAKER_LOCALE=id_ID`
 
 Biarkan `SESSION_DOMAIN=null` untuk deployment normal. Konfigurasi session otomatis memakai `.<APP_DOMAIN>`, sehingga cookie dapat digunakan oleh root, auth, dan app subdomain. Override `SESSION_DOMAIN` hanya bila deployment membutuhkan scope cookie yang berbeda. Cookie lintas subdomain tetap wajib diuji pada domain nyata.
+
+Jika API diaktifkan, arahkan DNS/vhost `api.<APP_DOMAIN>` ke folder `public`
+yang sama seperti root dan App lain. Tidak ada konfigurasi Laravel tambahan:
+route App API dan Scramble mengikuti switch environment tersebut. Dokumentasi
+production tetap memerlukan login Superuser.
 
 ## Urutan deploy
 
@@ -66,6 +72,9 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
 
 - `/up` sehat.
 - root landing, auth subdomain, dan setiap app subdomain dapat dibuka.
+- bila API aktif: root `api.<APP_DOMAIN>` hanya dapat dibuka sesuai policy
+  dokumentasi, `/openapi.json` valid, dan endpoint setiap App memakai prefix
+  `/<app>`.
 - login, remember me, auto-lock/unlock, logout.
 - session perangkat lama terputus setelah perubahan/reset password.
 - role/module/menu sesuai hasil sync.

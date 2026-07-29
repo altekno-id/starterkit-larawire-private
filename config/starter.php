@@ -1,7 +1,14 @@
 <?php
 
+$domain = env('APP_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost');
+
 return [
-    'domain' => env('APP_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost'),
+    'domain' => $domain,
+
+    'api' => [
+        'enabled' => env('STARTER_API_ENABLED', false),
+        'domain' => 'api.'.trim((string) $domain, '.'),
+    ],
 
     'connector' => [
         'configure_auth' => env('STARTER_CONFIGURE_AUTH', true),

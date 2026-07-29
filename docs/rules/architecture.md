@@ -5,6 +5,8 @@
 1. **Registry code-first**
    - `config/apps/<app-key>.php`: nama app, module, struktur menu, icon, dan landing.
    - `routes/apps/<app-key>.php`: route app pada subdomain.
+   - `routes/apps/<app-key>.api.php`: endpoint API App pada gateway API bersama;
+     file ini tidak menjadi metadata registry web.
    - `StarterAppRegistry`: menemukan app valid dari pasangan kedua file tersebut.
 2. **Metadata database**
    - `starter_apps`, `starter_app_mods`, `starter_app_routes`, `starter_app_menus`.
@@ -64,8 +66,10 @@ Ketentuan konsistensi dan performa:
   `StarterBootstrap`, environment, dan asset publish. Pada Laravel host standar
   seluruh connector dipasang oleh `php starterkit/installer/install.php`.
   Instalasi awal hanya menerima Laravel fresh dan database baru karena memakai
-  `migrate:fresh`; project existing harus memakai alur update, bukan integrasi
-  atau instalasi ulang. Detail instalasi ada pada `README.md` root starterkit.
+  `migrate:fresh`; project existing harus memakai alur update. Pengecualian
+  hanya reinstall destruktif yang diminta eksplisit pada environment
+  local/development melalui `--reset`. Detail instalasi ada pada `README.md`
+  root starterkit.
 - Seluruh PHP milik starterkit wajib berada pada subfolder/namespace `Starter` di layer masing-masing: Commands, Contracts, Controllers, Middleware, Livewire, Models, Repositories, Rules, Services, dan Support.
 - Binding, alias Livewire, listener, migration loader, view path, dan persistent middleware starter dimiliki `src/Providers/Starter/StarterServiceProvider.php`. `AppServiceProvider` host tetap bersih untuk binding project turunan.
 - Seluruh migration core berada di `starterkit/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
@@ -107,7 +111,10 @@ database/migrations/apps/<subdomain>/
 ```
 
 - Layer khusus hanya dibuat bila dipakai: `app/Http/Middleware/Apps/<Subdomain>/`, `app/Policies/Apps/<Subdomain>/`, `app/Jobs/Apps/<Subdomain>/`, `app/Events/Apps/<Subdomain>/`, `app/Listeners/Apps/<Subdomain>/`, `app/Notifications/Apps/<Subdomain>/`, dan `app/Console/Commands/Apps/<Subdomain>/`.
-- `config/apps/<subdomain>.php` dan `routes/apps/<subdomain>.php` sengaja tetap berupa file langsung karena dipakai oleh discovery starter. Isi dan class yang dirujuknya tetap mengikuti area `Apps/<Subdomain>`.
+- `config/apps/<subdomain>.php`, `routes/apps/<subdomain>.php`, dan
+  `routes/apps/<subdomain>.api.php` sengaja tetap berupa file langsung karena
+  dipakai registrar starter. Isi dan class yang dirujuknya tetap mengikuti area
+  `Apps/<Subdomain>`.
 - CSS/JS custom halaman berada di `resources/views/apps/<subdomain>/<module>/assets/<page>.css.blade.php` dan/atau `<page>.js.blade.php`, lalu hanya di-include oleh Blade pemiliknya. File vendor pihak ketiga yang tidak dapat ditulis sebagai Blade tetap lokal di `public/assets/apps/<subdomain>/vendor/`; tag pemuatan dan inisialisasinya tetap berada pada asset Blade halaman.
 - Landing root bukan feature app; tetap di `app/Livewire/Landing` dan `resources/views/landing`.
 - Migration app tidak diletakkan di root `database/migrations` atau di dalam folder module. Satu folder `<subdomain>` menampung seluruh riwayat migration app tersebut agar Laravel tetap dapat memuatnya otomatis dan ownership schema mudah ditelusuri.
@@ -119,6 +126,12 @@ database/migrations/apps/<subdomain>/
 - `routes/starter/web.php` hanya didaftarkan pada root `APP_DOMAIN` untuk autentikasi starter.
 - `routes/web.php` hanya memuat landing dan route project root-domain.
 - `StarterRouteRegistrar` memasang `routes/apps/<app-key>.php` pada `<app-key>.<APP_DOMAIN>`.
+- Ketika `STARTER_API_ENABLED=true`, registrar memasang
+  `routes/apps/<app-key>.api.php` pada
+  `api.<APP_DOMAIN>/<app-key>` dengan namespace route `api.<app-key>.*`.
+- Domain `api.<APP_DOMAIN>` adalah gateway infrastruktur dan bukan App baru.
+  Scramble memakai root domain tersebut sebagai UI dokumentasi dan
+  `/openapi.json` sebagai spesifikasi.
 - File app harus memakai nama route `<app-key>.<module-code>.<action>`.
 - Route `<app-key>.anchor` adalah pengecualian untuk redirect awal app.
 

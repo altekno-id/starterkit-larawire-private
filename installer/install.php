@@ -13,14 +13,31 @@ $arguments = array_slice($argv, 1);
 
 try {
     assertLaravelHost($hostRoot, $starterRoot);
-    assertFreshLaravelInstallation($hostRoot);
+    $reset = hasArgument($arguments, '--reset');
 
-    if (! hasArgument($arguments, '--skip-migration')) {
+    if ($reset) {
+        if (hasArgument($arguments, '--skip-migration')) {
+            throw new RuntimeException('--reset tidak dapat digabungkan dengan --skip-migration.');
+        }
+
+        assertDevelopmentReinstall($hostRoot);
+        assertStarterkitInstallation($hostRoot);
+        confirmDevelopmentReinstall($hostRoot);
+        $arguments = withoutArgument($arguments, '--reset');
+    } else {
+        assertFreshLaravelInstallation($hostRoot);
+    }
+
+    if (! $reset && ! hasArgument($arguments, '--skip-migration')) {
         confirmFreshDatabaseReset();
 
         if (! hasArgument($arguments, '--force')) {
             $arguments[] = '--force';
         }
+    }
+
+    if ($reset && ! hasArgument($arguments, '--force')) {
+        $arguments[] = '--force';
     }
 
     $arguments = withDefaultAppSelection($arguments);
@@ -71,7 +88,15 @@ try {
     mergeEnvironment($envExamplePath);
     mergeEnvironment($envPath);
 
+    if ($reset) {
+        resetProjectSource($hostRoot);
+    }
+
     run($hostRoot, ['composer', 'dump-autoload', '--no-interaction']);
+
+    if ($reset) {
+        run($hostRoot, [PHP_BINARY, 'artisan', 'optimize:clear', '--ansi']);
+    }
 
     if (environmentValue($envPath, 'APP_KEY') === '') {
         run($hostRoot, [PHP_BINARY, 'artisan', 'key:generate', '--ansi']);
@@ -228,6 +253,157 @@ function assertFreshLaravelInstallation(string $hostRoot): void
     );
 }
 
+function assertStarterkitInstallation(string $hostRoot): void
+{
+    $composer = readJson($hostRoot.'/composer.json');
+    $autoloadPath = $composer['autoload']['psr-4'][STARTER_NAMESPACE] ?? null;
+    $providers = readRequiredFile($hostRoot.'/bootstrap/providers.php');
+    $bootstrap = readRequiredFile($hostRoot.'/bootstrap/app.php');
+
+    if ($autoloadPath !== STARTER_AUTOLOAD_PATH
+        || ! str_contains($providers, 'StarterServiceProvider::class')
+        || ! str_contains($bootstrap, 'StarterBootstrap::registerRoutes()')) {
+        throw new RuntimeException(
+            'Mode --reset hanya dapat digunakan pada Laravel host yang sudah terpasang starterkit ini.',
+        );
+    }
+}
+
+function assertDevelopmentReinstall(string $hostRoot): void
+{
+    $envPath = $hostRoot.'/.env';
+
+    if (! is_file($envPath)) {
+        throw new RuntimeException('Mode --reset membutuhkan file .env untuk memverifikasi APP_ENV.');
+    }
+
+    $environment = strtolower(trim(effectiveEnvironmentValue($envPath, 'APP_ENV'), "\"' "));
+
+    if (! in_array($environment, ['local', 'development'], true)) {
+        throw new RuntimeException(
+            'Mode --reset hanya diizinkan pada APP_ENV=local atau APP_ENV=development. '
+            .'Environment aktif: '.($environment !== '' ? $environment : '(kosong)').'.',
+        );
+    }
+}
+
+function confirmDevelopmentReinstall(string $hostRoot): void
+{
+    $envPath = $hostRoot.'/.env';
+    $database = trim(effectiveEnvironmentValue($envPath, 'DB_DATABASE'), "\"' ");
+
+    output('');
+    output('PERINGATAN REINSTALL DEVELOPMENT');
+    output('Mode ini akan menghapus seluruh tabel/data serta seluruh source App milik project.');
+    output('Landing project, extension UI, migration App, asset App, upload, dan issue feature juga akan dihapus.');
+    output('Database target: '.($database !== '' ? $database : '(tidak terdefinisi)'));
+    output('');
+    fwrite(STDOUT, 'Tahap 1/2 — lanjutkan reinstall destruktif? Ketik y [y/N]: ');
+
+    $firstAnswer = fgets(STDIN);
+
+    if ($firstAnswer === false || strtolower(trim($firstAnswer)) !== 'y') {
+        output('');
+        output('Reinstall dibatalkan. Tidak ada file project atau database yang diubah.');
+        exit(0);
+    }
+
+    fwrite(STDOUT, 'Tahap 2/2 — ketik RESET untuk menghapus source App dan seluruh data: ');
+    $secondAnswer = fgets(STDIN);
+
+    if ($secondAnswer === false || trim($secondAnswer) !== 'RESET') {
+        output('');
+        output('Reinstall dibatalkan. Tidak ada file project atau database yang diubah.');
+        exit(0);
+    }
+
+    output('');
+}
+
+function resetProjectSource(string $hostRoot): void
+{
+    $directories = [
+        'app/Console/Commands/Apps',
+        'app/Contracts/Apps',
+        'app/Events/Apps',
+        'app/Http/Controllers/Apps',
+        'app/Http/Middleware/Apps',
+        'app/Jobs/Apps',
+        'app/Listeners/Apps',
+        'app/Livewire/Apps',
+        'app/Livewire/Landing',
+        'app/Models/Apps',
+        'app/Notifications/Apps',
+        'app/Policies/Apps',
+        'app/Repositories/Apps',
+        'app/Rules/Apps',
+        'app/Services/Apps',
+        'app/Support/Apps',
+        'config/apps',
+        'database/migrations/apps',
+        'issues',
+        'public/assets/apps',
+        'resources/views/apps',
+        'resources/views/extensions/starter',
+        'resources/views/landing',
+        'routes/apps',
+        'storage/app/private/apps',
+        'storage/app/public/apps',
+        'storage/app/public/starter',
+        'tests/Feature/Apps',
+    ];
+
+    foreach (glob($hostRoot.'/lang/*/apps', GLOB_ONLYDIR) ?: [] as $languageAppsPath) {
+        $directories[] = ltrim(str_replace($hostRoot, '', $languageAppsPath), DIRECTORY_SEPARATOR);
+    }
+
+    foreach (array_unique($directories) as $directory) {
+        removeDirectory($hostRoot.'/'.$directory, $hostRoot);
+    }
+
+    writeIfChanged(
+        $hostRoot.'/routes/web.php',
+        "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\nRoute::view('/', 'welcome');\n",
+    );
+}
+
+function removeDirectory(string $path, string $hostRoot): void
+{
+    if (! is_dir($path)) {
+        return;
+    }
+
+    $realHostRoot = realpath($hostRoot);
+    $realPath = realpath($path);
+
+    if ($realHostRoot === false
+        || $realPath === false
+        || ! str_starts_with($realPath.DIRECTORY_SEPARATOR, $realHostRoot.DIRECTORY_SEPARATOR)) {
+        throw new RuntimeException("Target reset berada di luar Laravel host: {$path}");
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($realPath, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST,
+    );
+
+    foreach ($iterator as $item) {
+        $removed = $item->isDir()
+            ? rmdir($item->getPathname())
+            : unlink($item->getPathname());
+
+        if (! $removed) {
+            throw new RuntimeException("Gagal menghapus source project: {$item->getPathname()}");
+        }
+    }
+
+    if (! rmdir($realPath)) {
+        throw new RuntimeException("Gagal menghapus folder project: {$realPath}");
+    }
+
+    output('REMOVE  '.relativeHostPath($path));
+}
+
 function directoryHasFiles(string $path): bool
 {
     if (! is_dir($path)) {
@@ -322,6 +498,18 @@ function hasArgument(array $arguments, string $argument): bool
  * @param  list<string>  $arguments
  * @return list<string>
  */
+function withoutArgument(array $arguments, string $argument): array
+{
+    return array_values(array_filter(
+        $arguments,
+        fn (string $value): bool => $value !== $argument,
+    ));
+}
+
+/**
+ * @param  list<string>  $arguments
+ * @return list<string>
+ */
 function withDefaultAppSelection(array $arguments): array
 {
     $skipDefaultApp = hasArgument($arguments, '--skip-default-app');
@@ -353,6 +541,12 @@ function withDefaultAppSelection(array $arguments): array
             output('');
 
             return $arguments;
+        }
+
+        if ($app === 'api') {
+            output("Kode 'api' dicadangkan untuk gateway API. Gunakan kode App lain.");
+
+            continue;
         }
 
         if (preg_match('/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/', $app) === 1) {
@@ -430,6 +624,7 @@ function ensureDependencies(string $hostRoot, array $composer): void
 {
     $required = array_keys((array) ($composer['require'] ?? []));
     $missingRuntime = array_values(array_diff([
+        'dedoc/scramble',
         'livewire/livewire',
         'laravel-lang/common',
     ], $required));
@@ -583,6 +778,7 @@ function mergeEnvironment(string $path): void
         'APP_LOCALE' => 'id',
         'APP_FALLBACK_LOCALE' => 'id',
         'APP_FAKER_LOCALE' => 'id_ID',
+        'STARTER_API_ENABLED' => 'false',
         'DB_MIGRATIONS_TABLE' => 'x_migrations',
         'DB_CACHE_TABLE' => 'x_cache',
         'DB_CACHE_LOCK_TABLE' => 'x_cache_locks',
@@ -621,6 +817,15 @@ function mergeEnvironment(string $path): void
 function environmentValue(string $path, string $key): string
 {
     return environmentValueFromContents(readRequiredFile($path), $key);
+}
+
+function effectiveEnvironmentValue(string $path, string $key): string
+{
+    $processValue = getenv($key);
+
+    return is_string($processValue) && $processValue !== ''
+        ? $processValue
+        : environmentValue($path, $key);
 }
 
 function environmentValueFromContents(string $contents, string $key): string

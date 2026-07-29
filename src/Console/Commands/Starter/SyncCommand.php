@@ -229,6 +229,10 @@ class SyncCommand extends Command
      */
     private function validateSubdomain(string $subdomain): void
     {
+        if ($subdomain === 'api') {
+            $this->fail('App code [api] is reserved for the shared API gateway.');
+        }
+
         if (preg_match('/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/', $subdomain) !== 1) {
             $this->fail("Invalid app config filename [{$subdomain}]. Use lowercase letters, numbers, and hyphens only.");
         }

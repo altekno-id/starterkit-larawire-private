@@ -22,6 +22,10 @@ class StarterAppRegistry
                 return pathinfo($path, PATHINFO_FILENAME);
             })
             ->filter(function (string $key): bool {
+                if ($key === 'api') {
+                    return false;
+                }
+
                 if (preg_match('/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/', $key) !== 1) {
                     return false;
                 }

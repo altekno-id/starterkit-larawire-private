@@ -20,10 +20,13 @@ php artisan starter:make-app <subdomain> \
   --icon=apps
 ```
 
-Subdomain hanya boleh berisi huruf kecil, angka, dan tanda hubung internal. Command membuat:
+Subdomain hanya boleh berisi huruf kecil, angka, dan tanda hubung internal.
+Kode `api` dicadangkan untuk gateway bersama dan tidak boleh menjadi App.
+Command membuat:
 
 - `config/apps/<subdomain>.php`
 - `routes/apps/<subdomain>.php`
+- `routes/apps/<subdomain>.api.php`
 - dashboard Livewire
 - view dashboard
 - feature test route
@@ -59,9 +62,38 @@ Gunakan `--no-sync` hanya jika file perlu dilengkapi sebelum metadata diterapkan
 - Form logout selalu memakai method `POST`, CSRF, action route root yang valid, dan redirect tujuan yang lolos pemeriksaan safe redirect.
 - Uji login, session, lock screen, dan logout dari root domain serta app subdomain pada environment lokal dan domain production.
 
+## API App
+
+- API adalah gateway terpisah, bukan App: domainnya selalu
+  `api.<APP_DOMAIN>` dan tidak memiliki config/module/menu pada registry.
+- API nonaktif secara default. `STARTER_API_ENABLED=true` mendaftarkan
+  dokumentasi pada root domain API dan file API seluruh App; `false` tidak
+  mendaftarkan keduanya.
+- Endpoint satu App hanya ditulis pada `routes/apps/<subdomain>.api.php`.
+  Registrar otomatis memberi domain API, prefix URI `/<subdomain>`, middleware
+  `api`, rate limit dasar, dan prefix nama route `api.<subdomain>.`.
+- File API hanya menulis path relatif terhadap App. Contoh
+  `Route::get('/pendaftaran', ...)->name('pendaftaran.index')` menjadi
+  `api.example.com/spmb/pendaftaran` dengan nama
+  `api.spmb.pendaftaran.index`.
+- Route API tidak masuk `starter:sync`, metadata module, menu, landing role,
+  atau middleware `starter.authorize` web. Setiap endpoint bisnis wajib
+  mendefinisikan authentication dan authorization API yang sesuai konsumennya;
+  jangan menganggap session web sebagai kontrak API.
+- Scramble menjadi source dokumentasi otomatis. Root `api.<APP_DOMAIN>` adalah
+  UI dokumentasi dan `/openapi.json` adalah dokumen OpenAPI. Development dapat
+  membukanya langsung; production hanya dapat dibuka Superuser yang sudah
+  terautentikasi.
+- Default tidak membuka CORS. Bila browser dari origin lain harus memakai API,
+  requirement wajib menyebut origin dan credential yang dibutuhkan agar
+  allowlist CORS dibuat secara sempit; jangan memakai wildcard untuk endpoint
+  berautentikasi.
+
 ## Jangan dilakukan
 
 - Jangan menambah daftar app manual di provider: registry melakukan discovery.
 - Jangan membuat app hanya dengan config atau hanya dengan route; keduanya wajib ada.
 - Jangan memakai route name dengan prefix app/module yang berbeda.
 - Jangan membuat route app global di `routes/starter/global.php` atau `routes/starter/web.php`.
+- Jangan menaruh endpoint App di `routes/api.php`, route web App, atau file API
+  milik App lain.

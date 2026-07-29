@@ -16,6 +16,10 @@ class StarterAppScaffolder
      */
     public function create(string $subdomain, string $name, ?string $description = null, string $icon = 'apps'): array
     {
+        if ($subdomain === 'api') {
+            throw new RuntimeException('Subdomain [api] is reserved for the shared API gateway.');
+        }
+
         $className = Str::studly($subdomain);
         $files = $this->files($subdomain, $className, $name, $description, $icon);
         $collisions = array_keys(array_filter($files, fn (string $contents, string $path): bool => $this->files->exists($path), ARRAY_FILTER_USE_BOTH));
@@ -79,6 +83,7 @@ class StarterAppScaffolder
         return [
             config_path("apps/{$subdomain}.php") => "<?php\n\nreturn {$config};\n",
             base_path("routes/apps/{$subdomain}.php") => $this->routeContents($subdomain, $className),
+            base_path("routes/apps/{$subdomain}.api.php") => $this->apiRouteContents($subdomain),
             app_path("Livewire/Apps/{$className}/Dashboard/{$className}DashboardIndex.php") => <<<PHP
 <?php
 
@@ -118,6 +123,14 @@ use Illuminate\Support\Facades\Route;
 it('registers the {$subdomain} dashboard route', function () {
     expect(Route::has('{$subdomain}.dashboard'))->toBeTrue()
         ->and(Route::has('{$subdomain}.dashboard.submenu-two'))->toBeTrue();
+});
+
+it('ships an isolated API route for the {$subdomain} app', function () {
+    expect(base_path('routes/apps/{$subdomain}.api.php'))->toBeFile();
+
+    if (config('starter.api.enabled')) {
+        expect(Route::has('api.{$subdomain}.index'))->toBeTrue();
+    }
 });
 
 it('uses the standard page header spacing', function () {
@@ -171,6 +184,20 @@ Route::name('{$subdomain}.')->group(function () {
         });
     });
 });
+PHP.PHP_EOL;
+    }
+
+    private function apiRouteContents(string $subdomain): string
+    {
+        return <<<PHP
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', fn () => response()->json([
+    'app' => config('apps.{$subdomain}.name'),
+    'status' => 'ready',
+]))->name('index');
 PHP.PHP_EOL;
     }
 }

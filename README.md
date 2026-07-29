@@ -83,6 +83,7 @@ Setelah instalasi, project mempunyai:
 - Superuser, user, role, module, menu, dan hak akses;
 - pencatatan aktivitas serta event keamanan;
 - registry App, module, route, menu, dan halaman awal role;
+- gateway API per App dan dokumentasi OpenAPI otomatis dengan Scramble;
 - landing project dan halaman error;
 - komponen UI serta asset lokal siap pakai;
 - Bahasa Indonesia dan format angka/currency;
@@ -117,9 +118,10 @@ Installer hanya boleh digunakan pada:
 Installer menggunakan `migrate:fresh`. Semua tabel dan seluruh data pada
 database yang dipilih di `.env` akan dihapus sebelum schema dibuat ulang.
 
-Jangan menjalankan installer pada project berjalan, database production, atau
-database milik aplikasi lain. Update starterkit menggunakan alur update, bukan
-instalasi ulang.
+Instalasi normal tidak boleh dijalankan pada project berjalan, database
+production, atau database milik aplikasi lain. Pengecualian hanya mode
+reinstall development yang dijelaskan di bawah. Update starterkit tetap
+menggunakan alur update, bukan reinstall.
 
 ## Instalasi
 
@@ -167,6 +169,10 @@ environment, APP key, bahasa, asset, migration, Superuser, landing, registry,
 dan pemeriksaan keamanan. Pada Laravel standar tidak ada file yang perlu dicopy
 atau diedit manual.
 
+Installer juga menambahkan `STARTER_API_ENABLED=false` ke `.env` dan
+`.env.example`. API tidak membuka route apa pun sampai switch tersebut
+diaktifkan.
+
 Tabel infrastruktur Laravel dibedakan dengan prefix `x_`, termasuk
 `x_migrations`, cache, queue/job, session, dan password-reset. Installer
 menghapus migration bawaan Laravel fresh lalu mengatur migration serta config
@@ -213,6 +219,7 @@ Generator membuat area terisolasi berikut:
 app/Livewire/Apps/<App>/
 config/apps/<app>.php
 routes/apps/<app>.php
+routes/apps/<app>.api.php
 resources/views/apps/<app>/
 tests/Feature/Apps/<App>/
 ```
@@ -228,6 +235,50 @@ module, menu, submenu, route, dan halaman awal. `starter:sync` menyamakan
 metadata database dengan source tersebut; sync tidak membuat desain navigasi
 yang belum didefinisikan di source.
 
+## Gateway API
+
+API memakai satu gateway bersama dan bukan App terpisah. Aktifkan pada
+environment yang membutuhkannya:
+
+```env
+STARTER_API_ENABLED=true
+```
+
+Dengan `APP_DOMAIN=myapp.com`, hasilnya:
+
+```text
+api.myapp.com                 Dokumentasi Scramble
+api.myapp.com/openapi.json    Dokumen OpenAPI
+api.myapp.com/spmb            Endpoint root App spmb
+api.myapp.com/alumni          Endpoint root App alumni
+```
+
+Tidak ada prefix `/api`. Endpoint setiap App ditulis di
+`routes/apps/<app>.api.php`; generator `starter:make-app` membuat file tersebut
+secara otomatis. Development dapat membuka dokumentasi langsung. Pada
+production, dokumentasi hanya dapat dibuka oleh Superuser yang sudah login.
+
+Untuk production, subdomain `api` tetap harus diarahkan oleh DNS/panel hosting
+ke folder `public` yang sama. Starterkit menangani routing Laravel tanpa config
+server tambahan.
+
+## Reinstall khusus development
+
+Jika instalasi development memang perlu diulang dari nol:
+
+```bash
+php starterkit/installer/install.php --reset --company="Nama Aplikasi"
+```
+
+Mode ini hanya berjalan pada `APP_ENV=local` atau `APP_ENV=development`.
+Installer meminta dua konfirmasi: `y`, kemudian kata `RESET`. Setelah keduanya
+benar, seluruh tabel/data, source App, landing, extension UI, migration/asset
+App, upload starter/App, dan issue feature di Laravel host dihapus lalu
+starterkit dipasang ulang.
+
+Production dan environment selain development ditolak sebelum file atau
+database diubah. Jangan gunakan `--reset` sebagai cara update.
+
 ## Update starterkit
 
 Update tidak me-reset database:
@@ -237,7 +288,7 @@ cd starterkit
 git pull --ff-only origin master
 
 cd ..
-composer dump-autoload
+composer require dedoc/scramble --no-interaction
 php artisan starter:publish-assets
 php artisan migrate --force
 php artisan starter:sync --dry-run
@@ -280,8 +331,10 @@ pernah dibuat.
 - Sidebar berasal dari registry App/module/menu, bukan menu Blade manual.
 - Tambahan header, dropdown profil, atau layout memakai
   `resources/views/extensions/starter/`.
-- Jangan menjalankan `starterkit:install` sebagai update atau deploy rutin.
+- Jangan menjalankan installer normal atau `--reset` sebagai update/deploy
+  rutin.
 
-Jika installer menolak project, target bukan Laravel fresh atau bootstrap sudah
-terkustomisasi. Gunakan Laravel baru dan ulangi instalasi pada database yang
-bersih.
+Jika instalasi normal ditolak, target bukan Laravel fresh atau bootstrap sudah
+terkustomisasi. Gunakan Laravel baru dan database bersih. Untuk membuang
+instalasi development starterkit yang sudah ada, gunakan mode `--reset` yang
+terlindungi; jangan menggunakannya di production.

@@ -29,6 +29,12 @@ class MakeAppCommand extends Command
             return self::FAILURE;
         }
 
+        if ($subdomain === 'api') {
+            $this->error('Subdomain [api] is reserved for the shared API gateway.');
+
+            return self::FAILURE;
+        }
+
         $name = trim((string) ($this->option('name') ?: Str::headline($subdomain)));
 
         try {

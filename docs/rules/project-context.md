@@ -22,6 +22,8 @@ Seluruh file di `docs/rules/` adalah batas arsitektur dan standar implementasi p
 
 - PHP, Laravel, Livewire, serta Pest/PHPUnit mengikuti versi terbaru yang kompatibel dan terkunci pada dependency project.
 - Template UI mengikuti aset aktif project; nama, icon set, dan API komponennya harus dibuktikan dari source/template yang tersedia.
+- Scramble menyediakan dokumentasi OpenAPI untuk gateway
+  `api.<APP_DOMAIN>` yang opsional dan nonaktif secara default.
 - Session dan cache berbasis file
 - Queue default `sync`, sesuai target shared hosting
 

@@ -39,7 +39,10 @@ rg -n "invoice|table|status" docs/template/template.md
 - Detail sekunder memakai modal ringkas dan proporsional.
 - Tabel dipakai untuk banyak data sejenis yang perlu dipindai atau dibandingkan; gunakan pagination database, filter, status badge, aksi per baris, dan kolom yang benar-benar membantu keputusan. Jangan mengubah tabel besar menjadi kumpulan card hanya demi mobile.
 - Card ringkas, statistik, list group, atau key-value dipakai untuk ringkasan, sedikit data, dan detail satu entitas. Riwayat/perubahan memakai timeline, tabel log, atau list kronologis sesuai contoh template UI aktif.
+- Pemilihan tabel atau card mengikuti pekerjaan user, bukan diterapkan seragam. Tabel manajemen yang datanya dapat bertambah wajib menyediakan pencarian, pagination database, jumlah hasil, reset filter, filter domain yang relevan, serta sorting hanya pada kolom yang membantu keputusan. Card listing yang dapat bertambah tetap memakai pencarian, filter/status, sorting penting, pagination, dan empty state.
+- Filter, sorting, serta kolom tidak boleh ditambahkan hanya agar tampak lengkap. Pertahankan state filter, sorting, dan halaman selama interaksi yang tidak mengubah konteks; reset halaman hanya ketika kriteria query berubah.
 - Pilihan sedikit memakai radio, checkbox, select group, atau segmented control; pilihan besar memakai pencarian/autocomplete server-side atau tabel selector, bukan dropdown panjang.
+- Select yang sumber datanya banyak atau dapat terus bertambah wajib dapat dicari tanpa memuat seluruh pilihan ke browser. Gunakan autocomplete server-side atau tabel selector dengan debounce, batas hasil, dan allowlist filter/sort.
 - Prioritaskan identitas, status, waktu penting, angka ringkas, dan aksi pada tampilan awal; detail sekunder dipindahkan ke halaman detail atau modal ringkas.
 - Empty state harus memberi penjelasan kondisi dan next action. Status proses wajib memiliki teks/badge selain warna.
 - Label UI Bahasa Indonesia; pertahankan istilah familiar: username, password, email, role, module.
@@ -52,9 +55,12 @@ rg -n "invoice|table|status" docs/template/template.md
 ## Livewire
 
 - Form normal memakai `wire:submit` dan `wire:model.defer`. Validasi, authorization, query, audit, dan persistence berjalan saat submit; jangan memakai `wire:model.live`, autosave, atau validasi server pada setiap input secara default.
+- Form create/edit sederhana atau menengah boleh memakai modal. Modal wajib membedakan mode tambah/edit, mereset state serta error saat dibuka, mengarahkan fokus awal secara wajar, dan menampilkan feedback submit tanpa menumpuk modal dengan loader. Form kompleks tetap memakai halaman sendiri kecuali requirement feature secara eksplisit menetapkan modal dan isinya dapat dibagi menjadi section yang tetap proporsional.
+- Editable table hanya dipakai untuk perubahan berulang pada field homogen seperti urutan, durasi, atau bobot. Perubahan dilakukan secara lokal saat mengetik, baris/sel yang berubah harus terlihat, validasi muncul pada sel terkait, dan persistence memakai aksi simpan per baris atau simpan semua—bukan request/autosave pada setiap ketikan. Authorization, transaksi, audit, allowlist kolom, serta batas jumlah baris tetap wajib.
 - Live request form hanya boleh digunakan untuk kebutuhan yang tidak dapat ditunda—cek unik yang perlu diketahui sebelum submit, dropdown bergantung server, autocomplete, perhitungan harga/stok otoritatif, atau upload/preview file. Request tersebut wajib memiliki alasan UX, scope field sempit, batas input server-side, dan validasi penuh tetap diulang saat submit.
 - Search/filter live memakai debounce sekitar 300–500 ms bila menjalankan query dan tetap dibatasi server-side.
 - Action yang mengirim request menampilkan loader global dan blur area melalui `starter-runtime.js`.
+- Polling, refresh otomatis monitoring, dan sinkronisasi pasif berjalan tanpa loader global, tanpa mengosongkan konten, serta tanpa mereset filter, pagination, fokus input, atau posisi scroll. Gunakan indikator kecil seperti waktu pembaruan terakhir bila feedback diperlukan; loader global tetap dipakai untuk aksi eksplisit user.
 - Request perubahan input biasa tidak boleh memunculkan loader action.
 - Modal harus ditutup/diselesaikan sebelum loader mengambil fokus agar tidak bertumpuk.
 - Feedback sukses/error memakai event toast project, bukan alert.

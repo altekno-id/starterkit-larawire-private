@@ -119,6 +119,13 @@ database/migrations/apps/<subdomain>/
 - Landing root bukan feature app; tetap di `app/Livewire/Landing` dan `resources/views/landing`.
 - Migration app tidak diletakkan di root `database/migrations` atau di dalam folder module. Satu folder `<subdomain>` menampung seluruh riwayat migration app tersebut agar Laravel tetap dapat memuatnya otomatis dan ownership schema mudah ditelusuri.
 - Extension UI project hanya boleh berada pada kontrak `resources/views/extensions/starter/` yang didokumentasikan. Extension bukan override: project dilarang menyalin atau mengganti view/layout core.
+- `AGENTS.md` pada root Laravel host adalah connector project yang dipasang
+  installer dan wajib disimpan dalam repository project. Rules canonical tetap
+  berada di `starterkit/AGENTS.md` serta `starterkit/docs/rules/`; connector
+  hanya mengarahkan agent agar rules terbaru langsung berlaku setelah clone
+  starterkit diperbarui.
+- Installer hanya boleh mengelola block connector starterkit di dalam
+  `AGENTS.md`; instruksi project di luar marker block wajib dipertahankan.
 
 ## Registrasi route
 

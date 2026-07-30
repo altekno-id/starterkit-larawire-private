@@ -7,6 +7,42 @@ sudah disiapkan agar developer fokus pada fitur bisnis dan agentic coding.
 Repository ini bukan aplikasi mandiri. Clone ke folder `starterkit` di dalam
 Laravel fresh, lalu jalankan installer.
 
+## Agentic-ready — tujuan rules
+
+Starterkit ini terutama dirancang untuk pengembangan dengan agent AI, bukan
+untuk menyalin pola code secara manual satu per satu. Developer cukup memberi
+konteks fitur, flow bisnis, data, role, App, module, serta menu. Rules bawaan
+menjadi kontrak teknis agar agent otomatis mengikuti keamanan, validasi,
+authorization, audit, migration production-safe, pagination server-side,
+performa query, pola Livewire/Alpine, UI, struktur folder, dan testing.
+
+Saat instalasi, connector `AGENTS.md` otomatis dibuat di root Laravel. Connector
+tersebut mengarahkan agent ke [`starterkit/AGENTS.md`](AGENTS.md) dan rule
+terkait tanpa menduplikasi seluruh isi. Karena source of truth tetap berada di
+folder starterkit, rules terbaru langsung tersedia setelah `git pull`.
+
+Alur pengembangan feature:
+
+1. Developer menjelaskan kebutuhan bisnis serta App, module, dan bentuk menu.
+2. Agent memeriksa code existing dan informasi yang masih kurang.
+3. Agent membuat satu spesifikasi teknis di `issues/<fitur>.md`, lalu berhenti
+   agar developer dapat memeriksanya.
+4. Setelah disetujui, implementasi dapat dilanjutkan—termasuk dengan model yang
+   lebih hemat—karena keputusan dan standar teknis sudah terkunci.
+
+Contoh prompt yang cukup:
+
+```text
+Buat modul Penjualan pada App sales. Menu induk Penjualan memiliki submenu
+Pipeline, Penawaran, dan Transaksi. Role Sales dapat mengelola datanya,
+sedangkan Manager hanya melihat dan menyetujui penawaran.
+```
+
+Jika App, module, atau struktur menu belum disebut, agent wajib meminta
+kelengkapannya sambil memberi contoh prompt yang benar. Gerbang
+`issues/<fitur>.md` hanya untuk feature; bugfix, diagnosis, maintenance, dan
+perubahan dokumentasi tidak membuat issue otomatis.
+
 ## Template UI — Tabler
 
 Varian starterkit ini menggunakan **Tabler** sebagai fondasi tampilan. Tabler
@@ -30,6 +66,53 @@ dan komponen visual lain untuk membangun UI yang konsisten dan profesional.
 Tabler adalah lapisan presentasi starterkit ini. Laravel, Livewire, aturan
 keamanan, performa, dan pemisahan App tetap menjadi fondasi arsitekturnya.
 
+## Extension UI project
+
+Blade core starterkit bersifat read-only bagi feature project. Tambahkan elemen
+UI global melalui extension pada Laravel host agar update starterkit tidak
+menimpa code project:
+
+| Lokasi pada Laravel host | Area yang disediakan |
+|---|---|
+| `resources/views/extensions/starter/header-actions/index.blade.php` | Aksi top bar desktop dan mobile; variable `$compact` selalu tersedia |
+| `resources/views/extensions/starter/profile-menu/index.blade.php` | Menu tambahan pada dropdown profil, tepat sebelum Logout |
+| `resources/views/extensions/starter/layout/head.blade.php` | Tambahan global di `<head>` |
+| `resources/views/extensions/starter/layout/body-end.blade.php` | Tambahan global sebelum penutup `<body>` |
+
+Contoh menambah menu pada dropdown profil:
+
+```blade
+<a href="{{ route('notifications.index') }}"
+   class="dropdown-item">
+    @include('starter.templates.layouts.icon', [
+        'name' => 'bell',
+        'class' => 'icon dropdown-item-icon',
+    ])
+    Notifikasi Saya
+</a>
+```
+
+Contoh aksi pada top bar yang tetap ringkas di mobile:
+
+```blade
+<a href="{{ route('notifications.index') }}"
+   class="nav-link px-2"
+   aria-label="Notifikasi">
+    @include('starter.templates.layouts.icon', ['name' => 'bell'])
+    @if (! $compact)
+        <span class="ms-1">Notifikasi</span>
+    @endif
+</a>
+```
+
+Buat file extension hanya ketika diperlukan; starterkit mendeteksinya otomatis
+tanpa registrasi atau config tambahan. Route dan action tetap wajib memiliki
+authorization server-side; sembunyikan extension bila user tidak berhak
+melihatnya. Gunakan navigasi browser penuh untuk link lintas subdomain; atribut
+navigasi Livewire hanya boleh ditambahkan bila URL dijamin tetap pada origin
+yang sama. Navigasi App/module pada sidebar tidak menggunakan raw Blade
+extension—daftarkan melalui `config/apps/<app>.php` lalu jalankan `starter:sync`.
+
 ## Instalasi — mulai dari sini
 
 > Wajib memakai Laravel fresh dan database baru. Installer menjalankan
@@ -48,9 +131,10 @@ Installer meminta:
 2. kode App pertama, misalnya `sales`—boleh dikosongkan;
 3. nama App yang ditampilkan.
 
-Setelah itu dependency, connector Laravel, `.env`, APP key, locale, asset,
-migration, Superuser, landing, App pertama, sync, dan security check disiapkan
-otomatis. Tidak ada file yang perlu disalin atau disambungkan manual.
+Setelah itu dependency, connector Laravel, connector AI `AGENTS.md`, `.env`,
+APP key, locale, asset, migration, Superuser, landing, App pertama, sync, dan
+security check disiapkan otomatis. Tidak ada file yang perlu disalin atau
+disambungkan manual.
 
 ## Command utama
 
@@ -286,20 +370,6 @@ Config cache/`optimize` hanya untuk production. Selama development gunakan
 config langsung dan jalankan `php artisan optimize:clear` jika cache pernah
 dibuat.
 
-## Pengembangan dengan AI
-
-Starterkit ini terutama dirancang untuk agentic coding. Developer cukup
-menjelaskan fitur, flow bisnis, data, role, App, module, dan struktur menu.
-
-Agent AI membaca [`AGENTS.md`](AGENTS.md) dan rule terkait, lalu membuat detail
-teknis di `issues/<fitur>.md`. Setelah disetujui, implementasi dapat dilanjutkan
-dengan model yang lebih hemat tanpa mengulang instruksi keamanan, validasi,
-pagination, audit, performa, UI, atau struktur folder.
-
-Folder `starterkit` adalah core read-only untuk fitur project. Code bisnis
-berada di Laravel host; perubahan universal starterkit dilakukan melalui
-repository starterkit.
-
 ## Batas penting
 
 - Satu instalasi mewakili satu perusahaan/client, bukan SaaS multi-tenant.
@@ -309,5 +379,9 @@ repository starterkit.
 - Sidebar berasal dari registry App/module/menu.
 - Landing dan fitur bisnis berada di Laravel host.
 - Extension UI berada di `resources/views/extensions/starter/`.
+- `AGENTS.md` root Laravel adalah connector AI; rules canonical berada di
+  folder `starterkit`.
+- Folder `starterkit` adalah core read-only untuk feature project; improvement
+  universal dilakukan melalui repository starterkit.
 - Installer normal hanya untuk Laravel fresh dan database baru.
 - Reinstall hanya untuk development; update dan deploy tidak memakai installer.

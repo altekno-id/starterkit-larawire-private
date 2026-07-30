@@ -4,6 +4,14 @@ Dokumen ini adalah kontrak eksekusi untuk setiap model AI yang mengembangkan pro
 
 Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan sebagai aplikasi Laravel mandiri. Semua perintah Composer, Artisan, Pint, Pest, migration, dan setup dijalankan dari root Laravel host yang memiliki clone ini pada folder `starterkit/`.
 
+Installer membuat connector terkelola pada `AGENTS.md` di root Laravel host.
+Connector tersebut mengarahkan agent ke file canonical ini tanpa menyalin
+seluruh rules, sehingga perubahan rules langsung terbaca setelah
+`git pull` pada folder `starterkit/`. Bila bekerja dari root Laravel host,
+referensi `docs/...` dalam file ini berarti `starterkit/docs/...`; path feature
+seperti `app/`, `routes/apps/`, `resources/views/apps/`,
+`database/migrations/apps/`, `tests/`, dan `issues/` tetap milik Laravel host.
+
 ## Konteks wajib
 
 - Project private/internal company, bukan SaaS.
@@ -132,6 +140,10 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
   kontrak starterkit; production wajib ditolak sebelum mutation.
 - Jangan meminta developer menyalin source core atau mengedit connector satu per
   satu pada instalasi Laravel fresh yang masih memakai struktur standar.
+- Installer wajib membuat atau memperbarui block connector terkelola pada
+  `AGENTS.md` root Laravel host tanpa menimpa instruksi project di luar block
+  tersebut. File canonical `starterkit/AGENTS.md` tetap menjadi source of truth
+  agar update rules tidak memerlukan copy manual.
 - Setelah membuat `issues/<feature-slug>.md`, jangan langsung mengeksekusi code.
   Beri tahu user bahwa detail teknis siap diperiksa dan tunggu persetujuan
   eksplisit untuk melanjutkan implementasi.

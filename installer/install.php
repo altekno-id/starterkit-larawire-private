@@ -6,6 +6,8 @@ const STARTER_PROVIDER = 'Altekno\\StarterKit\\Providers\\Starter\\StarterServic
 const STARTER_NAMESPACE = 'Altekno\\StarterKit\\';
 const STARTER_AUTOLOAD_PATH = 'starterkit/src/';
 const STARTER_PUBLISH_SCRIPT = '@php artisan starter:publish-assets --ansi';
+const STARTER_AGENTS_BLOCK_START = '<!-- starterkit:agentic-connector:start -->';
+const STARTER_AGENTS_BLOCK_END = '<!-- starterkit:agentic-connector:end -->';
 
 $starterRoot = dirname(__DIR__);
 $hostRoot = dirname($starterRoot);
@@ -46,6 +48,7 @@ try {
     $providersPath = $hostRoot.'/bootstrap/providers.php';
     $bootstrapPath = $hostRoot.'/bootstrap/app.php';
     $gitignorePath = $hostRoot.'/.gitignore';
+    $agentsPath = $hostRoot.'/AGENTS.md';
     $envExamplePath = $hostRoot.'/.env.example';
     $envPath = $hostRoot.'/.env';
 
@@ -71,6 +74,10 @@ try {
     writeJson($composerPath, $composer);
     writeIfChanged($bootstrapPath, $bootstrap);
     writeIfChanged($providersPath, $providers);
+    connectAgentInstructions(
+        $agentsPath,
+        readRequiredFile($starterRoot.'/installer/templates/agents-connector.md'),
+    );
     ensureIgnored($gitignorePath, '/starterkit/');
 
     if (! is_file($envPath)) {
@@ -758,6 +765,52 @@ function ensureIgnored(string $path, string $entry): void
 
     $contents = rtrim($contents).PHP_EOL.$entry.PHP_EOL;
     writeIfChanged($path, ltrim($contents, PHP_EOL));
+}
+
+function connectAgentInstructions(string $path, string $connector): void
+{
+    $contents = is_file($path) ? readRequiredFile($path) : '';
+    $startCount = substr_count($contents, STARTER_AGENTS_BLOCK_START);
+    $endCount = substr_count($contents, STARTER_AGENTS_BLOCK_END);
+    $hasConnector = $startCount === 1 && $endCount === 1;
+
+    if ($startCount !== $endCount || $startCount > 1) {
+        throw new RuntimeException(
+            'AGENTS.md memiliki marker connector starterkit yang tidak valid. '
+            .'Perbaiki marker connector sebelum menjalankan installer.',
+        );
+    }
+
+    $block = STARTER_AGENTS_BLOCK_START.PHP_EOL
+        .trim($connector).PHP_EOL
+        .STARTER_AGENTS_BLOCK_END;
+
+    if (! $hasConnector) {
+        $updated = trim($contents) === ''
+            ? $block.PHP_EOL
+            : rtrim($contents).PHP_EOL.PHP_EOL.$block.PHP_EOL;
+
+        writeIfChanged($path, $updated);
+
+        return;
+    }
+
+    $pattern = '/'.preg_quote(STARTER_AGENTS_BLOCK_START, '/')
+        .'.*?'
+        .preg_quote(STARTER_AGENTS_BLOCK_END, '/').'/s';
+    $updated = preg_replace_callback(
+        $pattern,
+        static fn (): string => $block,
+        $contents,
+        1,
+        $count,
+    );
+
+    if ($updated === null || $count !== 1) {
+        throw new RuntimeException('Connector starterkit pada AGENTS.md tidak dapat diperbarui dengan aman.');
+    }
+
+    writeIfChanged($path, rtrim($updated).PHP_EOL);
 }
 
 function mergeEnvironment(string $path): void

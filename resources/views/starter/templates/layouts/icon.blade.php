@@ -13,6 +13,7 @@
         'apps',
         'alert-triangle',
         'arrow-left',
+        'activity',
         'building',
         'brand-google',
         'check',
@@ -27,6 +28,7 @@
         'eye',
         'eye-off',
         'folder',
+        'folders',
         'history',
         'file-plus',
         'info-circle',
@@ -34,6 +36,9 @@
         'lock',
         'logout',
         'menu-2',
+        'clipboard-text',
+        'report-analytics',
+        'school',
         'shield-check',
         'shield-lock',
         'settings',
@@ -74,6 +79,10 @@
             <path d="M5 12l6 -6" />
             @break
 
+        @case('activity')
+            <path d="M3 12h4l3 8l4 -16l3 8h4" />
+            @break
+
         @case('building')
             <path d="M3 21l18 0" />
             <path d="M9 8l1 0" />
@@ -91,6 +100,17 @@
 
         @case('check')
             <path d="M5 12l5 5l10 -10" />
+            @break
+
+        @case('circle')
+            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+            @break
+
+        @case('clipboard-text')
+            <path d="M9 5h6" />
+            <path d="M9 3h6a2 2 0 0 1 2 2v1h1a2 2 0 0 1 2 2v11a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h1v-1a2 2 0 0 1 2 -2z" />
+            <path d="M9 12h6" />
+            <path d="M9 16h6" />
             @break
 
         @case('chevron-down')
@@ -143,6 +163,11 @@
             <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" />
             @break
 
+        @case('folders')
+            <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" />
+            <path d="M3 14v-7a2 2 0 0 1 2 -2" />
+            @break
+
         @case('history')
             <path d="M12 8l0 4l2 2" />
             <path d="M3.05 11a9 9 0 1 0 .5 -3m-.5 -4v4h4" />
@@ -184,6 +209,20 @@
             <path d="M4 6l16 0" />
             <path d="M4 12l16 0" />
             <path d="M4 18l16 0" />
+            @break
+
+        @case('report-analytics')
+            <path d="M9 17v-5" />
+            <path d="M12 17v-1" />
+            <path d="M15 17v-3" />
+            <path d="M5 4h14a2 2 0 0 1 2 2v14h-18v-14a2 2 0 0 1 2 -2z" />
+            <path d="M3 20h18" />
+            @break
+
+        @case('school')
+            <path d="M3 10l9 -5l9 5l-9 5z" />
+            <path d="M7 12v5c3 2 7 2 10 0v-5" />
+            <path d="M21 10v6" />
             @break
 
         @case('shield-check')

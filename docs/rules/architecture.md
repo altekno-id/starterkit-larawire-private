@@ -66,10 +66,10 @@ Ketentuan konsistensi dan performa:
   `StarterBootstrap`, environment, dan asset publish. Pada Laravel host standar
   seluruh connector dipasang oleh `php starterkit/installer/install.php`.
   Instalasi awal hanya menerima Laravel fresh dan database baru karena memakai
-  `migrate:fresh`; project existing harus memakai alur update atau reset
-  database development yang terdokumentasi. Installer menolak `--reset` dan
-  tidak boleh menghapus source project. Detail instalasi ada pada `README.md`
-  root starterkit.
+  `migrate:fresh`; project existing harus memakai alur update. Opsi `--reset`
+  hanya mereset database local/development dengan `migrate:fresh` dan setup
+  ulang dari source existing; installer tidak boleh menghapus source project.
+  Detail instalasi ada pada `README.md` root starterkit.
 - Seluruh PHP milik starterkit wajib berada pada subfolder/namespace `Starter` di layer masing-masing: Commands, Contracts, Controllers, Middleware, Livewire, Models, Repositories, Rules, Services, dan Support.
 - Binding, alias Livewire, listener, migration loader, view path, dan persistent middleware starter dimiliki `src/Providers/Starter/StarterServiceProvider.php`. `AppServiceProvider` host tetap bersih untuk binding project turunan.
 - Seluruh migration core berada di `starterkit/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.

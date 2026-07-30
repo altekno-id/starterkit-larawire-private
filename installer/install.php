@@ -5,6 +5,7 @@ declare(strict_types=1);
 const STARTER_PROVIDER = 'Altekno\\StarterKit\\Providers\\Starter\\StarterServiceProvider';
 const STARTER_NAMESPACE = 'Altekno\\StarterKit\\';
 const STARTER_AUTOLOAD_PATH = 'starterkit/src/';
+const STARTER_CLEAR_SCRIPT = '@php artisan optimize:clear --ansi';
 const STARTER_PUBLISH_SCRIPT = '@php artisan starter:publish-assets --ansi';
 const STARTER_AGENTS_BLOCK_START = '<!-- starterkit:agentic-connector:start -->';
 const STARTER_AGENTS_BLOCK_END = '<!-- starterkit:agentic-connector:end -->';
@@ -14,18 +15,36 @@ $hostRoot = dirname($starterRoot);
 $arguments = array_slice($argv, 1);
 
 try {
-    if (hasArgument($arguments, '--reset')) {
-        throw new RuntimeException(
-            'Opsi --reset telah dihapus karena dapat menghapus source fitur project. '
-            .'Untuk mereset database development tanpa menghapus source, gunakan migrate:fresh '
-            .'lalu starter:setup dan starter:sync sesuai README.',
-        );
+    assertLaravelHost($hostRoot, $starterRoot);
+    $reset = hasArgument($arguments, '--reset');
+
+    if ($reset) {
+        if (hasArgument($arguments, '--skip-migration')) {
+            throw new RuntimeException('--reset tidak dapat digabungkan dengan --skip-migration.');
+        }
+
+        if (argumentValue($arguments, '--app') !== null
+            || argumentValue($arguments, '--app-name') !== null) {
+            throw new RuntimeException('--reset tidak dapat membuat atau mengganti App project.');
+        }
+
+        assertDevelopmentDatabaseReset($hostRoot);
+        assertStarterkitInstallation($hostRoot);
+        confirmDevelopmentDatabaseReset($hostRoot);
+        $arguments = withoutArgument($arguments, '--reset');
+
+        if (! hasArgument($arguments, '--force')) {
+            $arguments[] = '--force';
+        }
+
+        if (! hasArgument($arguments, '--skip-default-app')) {
+            $arguments[] = '--skip-default-app';
+        }
+    } else {
+        assertFreshLaravelInstallation($hostRoot);
     }
 
-    assertLaravelHost($hostRoot, $starterRoot);
-    assertFreshLaravelInstallation($hostRoot);
-
-    if (! hasArgument($arguments, '--skip-migration')) {
+    if (! $reset && ! hasArgument($arguments, '--skip-migration')) {
         confirmFreshDatabaseReset();
 
         if (! hasArgument($arguments, '--force')) {
@@ -33,7 +52,9 @@ try {
         }
     }
 
-    $arguments = withDefaultAppSelection($arguments);
+    if (! $reset) {
+        $arguments = withDefaultAppSelection($arguments);
+    }
 
     $composerPath = $hostRoot.'/composer.json';
     $providersPath = $hostRoot.'/bootstrap/providers.php';
@@ -43,48 +64,55 @@ try {
     $envExamplePath = $hostRoot.'/.env.example';
     $envPath = $hostRoot.'/.env';
 
-    removeFreshLaravelMigrations($hostRoot);
-    configureFrameworkTableNames($hostRoot);
+    if (! $reset) {
+        removeFreshLaravelMigrations($hostRoot);
+        configureFrameworkTableNames($hostRoot);
 
-    $composer = readJson($composerPath);
-    $bootstrap = connectedBootstrap(
-        readRequiredFile($bootstrapPath),
-        readRequiredFile($starterRoot.'/installer/templates/bootstrap-app.php'),
-    );
-    $providers = connectedProviders(readRequiredFile($providersPath));
+        $composer = readJson($composerPath);
+        $bootstrap = connectedBootstrap(
+            readRequiredFile($bootstrapPath),
+            readRequiredFile($starterRoot.'/installer/templates/bootstrap-app.php'),
+        );
+        $providers = connectedProviders(readRequiredFile($providersPath));
 
-    ensureDependencies($hostRoot, $composer);
+        ensureDependencies($hostRoot, $composer);
 
-    $composer = readJson($composerPath);
-    $composer['autoload']['psr-4'][STARTER_NAMESPACE] = STARTER_AUTOLOAD_PATH;
-    $composer['scripts']['post-autoload-dump'] = array_values(array_unique([
-        ...($composer['scripts']['post-autoload-dump'] ?? []),
-        STARTER_PUBLISH_SCRIPT,
-    ]));
+        $composer = readJson($composerPath);
+        $composer['autoload']['psr-4'][STARTER_NAMESPACE] = STARTER_AUTOLOAD_PATH;
+        $postAutoloadScripts = array_values(array_filter(
+            $composer['scripts']['post-autoload-dump'] ?? [],
+            fn (string $script): bool => ! in_array($script, [STARTER_CLEAR_SCRIPT, STARTER_PUBLISH_SCRIPT], true),
+        ));
+        $composer['scripts']['post-autoload-dump'] = array_values(array_unique([
+            ...$postAutoloadScripts,
+            STARTER_CLEAR_SCRIPT,
+            STARTER_PUBLISH_SCRIPT,
+        ]));
 
-    writeJson($composerPath, $composer);
-    writeIfChanged($bootstrapPath, $bootstrap);
-    writeIfChanged($providersPath, $providers);
-    connectAgentInstructions(
-        $agentsPath,
-        readRequiredFile($starterRoot.'/installer/templates/agents-connector.md'),
-    );
-    ensureIgnored($gitignorePath, '/starterkit/');
+        writeJson($composerPath, $composer);
+        writeIfChanged($bootstrapPath, $bootstrap);
+        writeIfChanged($providersPath, $providers);
+        connectAgentInstructions(
+            $agentsPath,
+            readRequiredFile($starterRoot.'/installer/templates/agents-connector.md'),
+        );
+        ensureIgnored($gitignorePath, '/starterkit/');
 
-    if (! is_file($envPath)) {
-        if (! is_file($envExamplePath)) {
-            throw new RuntimeException('File .env dan .env.example tidak ditemukan pada Laravel host.');
+        if (! is_file($envPath)) {
+            if (! is_file($envExamplePath)) {
+                throw new RuntimeException('File .env dan .env.example tidak ditemukan pada Laravel host.');
+            }
+
+            if (! copy($envExamplePath, $envPath)) {
+                throw new RuntimeException('Tidak dapat membuat .env dari .env.example.');
+            }
+
+            output('CREATE  .env');
         }
 
-        if (! copy($envExamplePath, $envPath)) {
-            throw new RuntimeException('Tidak dapat membuat .env dari .env.example.');
-        }
-
-        output('CREATE  .env');
+        mergeEnvironment($envExamplePath);
+        mergeEnvironment($envPath);
     }
-
-    mergeEnvironment($envExamplePath);
-    mergeEnvironment($envPath);
 
     run($hostRoot, ['composer', 'dump-autoload', '--no-interaction']);
 
@@ -243,6 +271,72 @@ function assertFreshLaravelInstallation(string $hostRoot): void
     );
 }
 
+function assertStarterkitInstallation(string $hostRoot): void
+{
+    $composer = readJson($hostRoot.'/composer.json');
+    $autoloadPath = $composer['autoload']['psr-4'][STARTER_NAMESPACE] ?? null;
+    $providers = readRequiredFile($hostRoot.'/bootstrap/providers.php');
+    $bootstrap = readRequiredFile($hostRoot.'/bootstrap/app.php');
+
+    if ($autoloadPath !== STARTER_AUTOLOAD_PATH
+        || ! str_contains($providers, 'StarterServiceProvider::class')
+        || ! str_contains($bootstrap, 'StarterBootstrap::registerRoutes()')) {
+        throw new RuntimeException(
+            'Mode --reset hanya dapat digunakan pada Laravel host yang sudah terpasang starterkit ini.',
+        );
+    }
+}
+
+function assertDevelopmentDatabaseReset(string $hostRoot): void
+{
+    $envPath = $hostRoot.'/.env';
+
+    if (! is_file($envPath)) {
+        throw new RuntimeException('Mode --reset membutuhkan file .env untuk memverifikasi APP_ENV.');
+    }
+
+    $environment = strtolower(trim(effectiveEnvironmentValue($envPath, 'APP_ENV'), "\"' "));
+
+    if (! in_array($environment, ['local', 'development'], true)) {
+        throw new RuntimeException(
+            'Mode --reset hanya diizinkan pada APP_ENV=local atau APP_ENV=development. '
+            .'Environment aktif: '.($environment !== '' ? $environment : '(kosong)').'.',
+        );
+    }
+}
+
+function confirmDevelopmentDatabaseReset(string $hostRoot): void
+{
+    $database = trim(effectiveEnvironmentValue($hostRoot.'/.env', 'DB_DATABASE'), "\"' ");
+
+    output('');
+    output('PERINGATAN RESET DATABASE DEVELOPMENT');
+    output('Mode ini menjalankan migrate:fresh dan menghapus seluruh tabel/data pada database.');
+    output('Seluruh source App, migration, route, view, test, asset, upload, dan issue tetap dipertahankan.');
+    output('Database target: '.($database !== '' ? $database : '(tidak terdefinisi)'));
+    output('');
+    fwrite(STDOUT, 'Tahap 1/2 — lanjutkan reset database? Ketik y [y/N]: ');
+
+    $firstAnswer = fgets(STDIN);
+
+    if ($firstAnswer === false || strtolower(trim($firstAnswer)) !== 'y') {
+        output('');
+        output('Reset database dibatalkan. Tidak ada source atau database yang diubah.');
+        exit(0);
+    }
+
+    fwrite(STDOUT, 'Tahap 2/2 — ketik RESET untuk menjalankan migrate:fresh: ');
+    $secondAnswer = fgets(STDIN);
+
+    if ($secondAnswer === false || trim($secondAnswer) !== 'RESET') {
+        output('');
+        output('Reset database dibatalkan. Tidak ada source atau database yang diubah.');
+        exit(0);
+    }
+
+    output('');
+}
+
 function directoryHasFiles(string $path): bool
 {
     if (! is_dir($path)) {
@@ -331,6 +425,18 @@ function configureFrameworkTableNames(string $hostRoot): void
 function hasArgument(array $arguments, string $argument): bool
 {
     return in_array($argument, $arguments, true);
+}
+
+/**
+ * @param  list<string>  $arguments
+ * @return list<string>
+ */
+function withoutArgument(array $arguments, string $argument): array
+{
+    return array_values(array_filter(
+        $arguments,
+        fn (string $value): bool => $value !== $argument,
+    ));
 }
 
 /**

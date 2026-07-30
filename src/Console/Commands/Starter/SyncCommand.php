@@ -6,6 +6,7 @@ use Altekno\StarterKit\Models\Starter\App;
 use Altekno\StarterKit\Models\Starter\AppMenu;
 use Altekno\StarterKit\Models\Starter\AppMod;
 use Altekno\StarterKit\Models\Starter\AppRoute;
+use Altekno\StarterKit\Services\Starter\StarterDeploymentService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -21,20 +22,27 @@ class SyncCommand extends Command
     protected $signature = 'starter:sync
         {subdomain? : Sync only one registered subdomain}
         {--force : Run without confirmation}
-        {--dry-run : Validate and show changes without writing to the database}';
+        {--dry-run : Validate and show changes without writing to the database}
+        {--prepared : Internal flag when deployment preparation was already completed by starter:setup}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Sync starter app config, modules, routes, and menus into database';
+    protected $description = 'Apply migrations, assets, and starter app registry updates';
 
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(StarterDeploymentService $deployment): int
     {
+        if (! $this->option('dry-run')
+            && ! $this->option('prepared')
+            && $deployment->prepare($this) !== self::SUCCESS) {
+            return self::FAILURE;
+        }
+
         foreach ($this->subdomains() as $subdomain) {
             $plan = $this->buildPlan($subdomain);
 
@@ -57,6 +65,11 @@ class SyncCommand extends Command
 
             $this->applyPlan($subdomain, $plan);
             $this->info("Synced app: {$subdomain}");
+        }
+
+        if (! $this->option('dry-run')
+            && $deployment->finish($this) !== self::SUCCESS) {
+            return self::FAILURE;
         }
 
         return self::SUCCESS;

@@ -143,15 +143,16 @@ Jalankan dari root Laravel.
 | Kebutuhan | Command |
 |---|---|
 | Instalasi awal | `php starterkit/installer/install.php --company="Nama Aplikasi"` |
+| Reset database development | `php starterkit/installer/install.php --reset --company="Nama Aplikasi"` |
 | Membuat App | `php artisan starter:make-app sales --name="Sales"` |
 | Membuat App tanpa langsung sync | `php artisan starter:make-app sales --name="Sales" --no-sync` |
 | Memeriksa perubahan registry | `php artisan starter:sync sales --dry-run` |
-| Menerapkan registry | `php artisan starter:sync sales --force` |
-| Sync seluruh App | `php artisan starter:sync --dry-run`, lalu `php artisan starter:sync --force` |
+| Menerapkan update App | `php artisan starter:sync sales` |
+| Menerapkan seluruh update | `php artisan starter:sync` |
 | Publish ulang asset | `php artisan starter:publish-assets` |
 | Cek keamanan lokal | `php artisan starter:security-check` |
 | Simulasi cek production | `php artisan starter:security-check --production` |
-| Menyiapkan ulang data inti | `php artisan starter:setup --company="Nama Aplikasi"` |
+| Deployment pertama | `php artisan starter:setup --company="Nama Aplikasi"` |
 
 `starterkit:install` adalah command internal yang dipanggil installer. Jangan
 menjalankannya langsung untuk update atau deployment.
@@ -161,8 +162,14 @@ Yang berjalan otomatis:
 - `starter:make-app` langsung menjalankan sync, kecuali memakai `--no-sync`;
 - `php artisan migrate` memuat migration core dan seluruh folder
   `database/migrations/apps/<app>/`;
-- Composer `post-autoload-dump` menjalankan `starter:publish-assets`;
-- `starter:setup` menjalankan security check saat environment production.
+- Composer `post-autoload-dump` membersihkan cache bootstrap dan menjalankan
+  `starter:publish-assets`;
+- `starter:setup` menyiapkan APP key bila kosong, security check, migration,
+  client/Superuser, seluruh registry App, asset, storage link bila didukung,
+  asset Livewire, dan cache production;
+- `starter:sync` menangani security check, migration baru, asset, registry App,
+  storage link bila didukung, asset Livewire, dan cache production tanpa
+  membuat ulang akun atau mereset password.
 
 ## Multi-domain itu seperti apa?
 
@@ -318,19 +325,17 @@ php artisan starter:sync layanan --force
 ## Reset database development
 
 ```bash
-php artisan migrate:fresh
-php artisan starter:setup --company="Nama Aplikasi"
-php artisan starter:sync --force
+php starterkit/installer/install.php --reset --company="Nama Aplikasi"
 ```
 
-Alur ini menghapus tabel/data database development, tetapi tidak menghapus
-source App, landing, migration, route, view, test, asset, upload, atau issue
-feature. Backup data yang masih dibutuhkan sebelum menjalankannya.
+Opsi `--reset` hanya dapat berjalan pada `APP_ENV=local|development` setelah
+konfirmasi `y` dan `RESET`. Installer menjalankan `migrate:fresh`, setup data
+inti, dan sync ulang dari source yang tetap ada.
 
-Opsi installer `--reset` telah dihapus dan ditolak sebelum installer melakukan
-mutation karena pernah memiliki kemampuan menghapus source fitur project.
-Installer hanya untuk instalasi awal Laravel fresh; project yang sudah berjalan
-memakai command Artisan di atas atau alur update.
+Reset menghapus seluruh tabel/data database development, tetapi tidak pernah
+menghapus source App, landing, migration, route, view, test, asset, upload,
+atau issue feature. Production ditolak sebelum mutation. Backup data yang masih
+dibutuhkan sebelum menjalankannya.
 
 ## Perubahan core starterkit
 
@@ -353,32 +358,41 @@ cd starterkit
 git pull --ff-only origin master
 
 cd ..
-composer require dedoc/scramble --no-interaction
-php artisan starter:publish-assets
-php artisan migrate --force
-php artisan starter:sync --dry-run
-php artisan starter:sync --force
-php artisan starter:security-check
+composer install --no-dev --optimize-autoloader
+php artisan starter:sync
 php artisan test --compact
 ```
 
-Periksa hasil `--dry-run` sebelum menerapkan sync.
+Gunakan `php artisan starter:sync --dry-run` terlebih dahulu bila ingin
+memeriksa perubahan registry tanpa migration, publish asset, atau mutation.
 
 ## Deployment shared hosting
 
+Deployment pertama setelah source dan `.env` production tersedia:
+
 ```bash
 composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-php artisan starter:publish-assets
-php artisan starter:sync --dry-run
-php artisan starter:sync --force
-php artisan starter:security-check --production
-php artisan optimize
+php artisan starter:setup --company="Nama Perusahaan"
+```
+
+Deployment berikutnya:
+
+```bash
+git pull --ff-only origin master
+composer install --no-dev --optimize-autoloader
+php artisan starter:sync
 ```
 
 Production wajib memakai HTTPS, `APP_DEBUG=false`, password Superuser kuat, dan
 document root menuju `public`. Root domain dan seluruh subdomain App/API
 diarahkan ke folder `public` yang sama.
+
+Jika PHP shared hosting memblokir pembuatan symlink, setup/sync tetap selesai
+dan menampilkan perintah shell yang perlu dijalankan satu kali:
+
+```bash
+ln -s ../storage/app/public public/storage
+```
 
 Config cache/`optimize` hanya untuk production. Selama development gunakan
 config langsung dan jalankan `php artisan optimize:clear` jika cache pernah
@@ -398,7 +412,7 @@ dibuat.
 - Folder `starterkit` adalah core read-only untuk feature project; improvement
   universal dilakukan melalui repository starterkit.
 - Installer normal hanya untuk Laravel fresh dan database baru.
-- Installer tidak menyediakan reset/reinstall project existing dan tidak boleh
-  menghapus source fitur project.
+- Installer menyediakan reset database khusus local/development, tetapi tidak
+  boleh menghapus source atau upload project.
 - Perubahan core starterkit wajib commit dan push pada repository starterkit
   sebelum disinkronkan, diuji, di-commit, dan dipush pada project pengguna.

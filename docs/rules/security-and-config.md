@@ -79,8 +79,8 @@ Konfigurasi existing:
   endpoint bisnis memakai authentication/authorization eksplisit dan rate
   limit sesuai risiko. Dokumentasi API production hanya untuk Superuser;
   jangan membuka gate Scramble secara publik.
-- Installer hanya untuk instalasi awal Laravel fresh. Installer wajib menolak
-  opsi `--reset` sebelum mutation dan tidak boleh menghapus source atau upload
-  project. Reset database development memakai `migrate:fresh`, lalu
-  `starter:setup` dan `starter:sync`; backup data tetap menjadi tanggung jawab
-  developer.
+- Opsi installer `--reset` hanya boleh berjalan pada
+  `APP_ENV=local|development` setelah konfirmasi `y` dan `RESET`. Mode tersebut
+  menjalankan `migrate:fresh`, setup, dan sync ulang tanpa menghapus source atau
+  upload project; production wajib ditolak sebelum mutation. Backup data tetap
+  menjadi tanggung jawab developer.

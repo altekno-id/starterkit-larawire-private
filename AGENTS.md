@@ -133,11 +133,18 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
   landing onboarding wajib menjelaskan App, module, menu, submenu, generator,
   struktur source, dan alur sync. Jangan memakai `starterkit:install` untuk
   update, deploy rutin, project berjalan, atau database existing.
-- Installer tidak boleh menyediakan reset/reinstall untuk project existing dan
+- Installer boleh menyediakan `--reset` hanya untuk reset database pada
+  `APP_ENV=local|development`, wajib meminta konfirmasi `y` lalu `RESET`, dan
+  menjalankan `migrate:fresh` serta setup ulang dari source existing. Mode ini
   tidak boleh menghapus source App, landing, migration, route, view, test,
-  asset, upload, issue feature, atau source project lain. Opsi lama `--reset`
-  wajib ditolak sebelum mutation. Reset database development dilakukan dengan
-  command Artisan yang terdokumentasi tanpa menghapus source.
+  asset, upload, issue feature, atau source project lain; production wajib
+  ditolak sebelum mutation.
+- Deployment pertama diringkas menjadi `composer install` lalu
+  `starter:setup`; update berikutnya menjadi `composer install` lalu
+  `starter:sync`. Kedua command Artisan memiliki orchestration migration,
+  security check, asset, registry, storage link best-effort, asset Livewire,
+  dan cache production sesuai ownership masing-masing. APP key hanya boleh
+  dibuat bila masih kosong; update rutin tidak boleh mereset akun/password.
 - Setiap perubahan core starterkit wajib dikerjakan pada repository starterkit
   canonical yang memiliki remote `origin`, diverifikasi melalui Laravel host,
   lalu dibuat sebagai commit terfokus dan dipush sebelum disinkronkan ke folder

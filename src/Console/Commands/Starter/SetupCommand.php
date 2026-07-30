@@ -7,6 +7,7 @@ use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Models\Starter\ClientRole;
 use Altekno\StarterKit\Rules\Starter\StarterPasswordRules;
 use Altekno\StarterKit\Services\Starter\AuditLogService;
+use Altekno\StarterKit\Services\Starter\StarterDeploymentService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +22,7 @@ class SetupCommand extends Command
         {--username= : Superuser username}
         {--reset-password : Replace the existing Superuser password}';
 
-    protected $description = 'Set up the private client and built-in Superuser account';
+    protected $description = 'Prepare the first deployment, client, Superuser, database, registry, and assets';
 
     public function __construct(
         private readonly AuditLogService $auditLogs,
@@ -29,10 +30,9 @@ class SetupCommand extends Command
         parent::__construct();
     }
 
-    public function handle(): int
+    public function handle(StarterDeploymentService $deployment): int
     {
-        if (app()->isProduction()
-            && $this->call('starter:security-check') !== self::SUCCESS) {
+        if ($deployment->prepare($this, ensureApplicationKey: true) !== self::SUCCESS) {
             return self::FAILURE;
         }
 
@@ -115,7 +115,10 @@ class SetupCommand extends Command
             );
         }
 
-        if ($this->call('starter:sync', ['--force' => true]) !== self::SUCCESS) {
+        if ($this->call('starter:sync', [
+            '--force' => true,
+            '--prepared' => true,
+        ]) !== self::SUCCESS) {
             return self::FAILURE;
         }
 

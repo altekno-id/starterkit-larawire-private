@@ -36,22 +36,34 @@ production tetap memerlukan login Superuser.
 
 ## Urutan deploy
 
+Deployment pertama:
+
 ```bash
 composer install --no-dev --optimize-autoloader
-php artisan starter:security-check
-php artisan starter:publish-assets
-php artisan migrate --force
 php artisan starter:setup --company="Nama Perusahaan"
-php artisan starter:sync --dry-run
-php artisan starter:sync --force
-php artisan storage:link
-php artisan livewire:publish --assets --no-interaction
-php artisan optimize
+```
+
+Deployment berikutnya:
+
+```bash
+git pull --ff-only origin master
+composer install --no-dev --optimize-autoloader
+php artisan starter:sync
 ```
 
 Jangan menjalankan `starter:setup --reset-password` pada deploy rutin.
 
-`starter:security-check` tidak mengubah state dan memvalidasi APP key, session encryption, HTTP-only/SameSite cookie, kesesuaian `APP_URL`/`APP_DOMAIN`, serta requirement production seperti HTTPS, debug off, secure cookie, password default, extension `intl`, dan permission runtime. Pada production, `starter:setup` juga menjalankan check ini otomatis.
+`starter:setup` dan `starter:sync` mengorkestrasi security check, publish asset,
+migration, registry App, asset Livewire, storage link best-effort, serta
+`optimize` production. Setup juga membuat APP key hanya bila kosong dan
+menyiapkan client/Superuser. Sync update rutin tidak mereset akun/password.
+
+Composer `post-autoload-dump` membersihkan cache bootstrap sebelum command sync
+dijalankan agar config dan route terbaru dimuat. Jika command mendeteksi cache
+lama masih aktif, cache dibersihkan dan command berhenti dengan instruksi untuk
+dijalankan sekali lagi, bukan melanjutkan memakai metadata stale.
+
+`starter:security-check` tidak mengubah state dan memvalidasi APP key, session encryption, HTTP-only/SameSite cookie, kesesuaian `APP_URL`/`APP_DOMAIN`, serta requirement production seperti HTTPS, debug off, secure cookie, password default, extension `intl`, dan permission runtime.
 
 `php artisan optimize` hanya untuk production. Selama development jangan memakai `config:cache`; gunakan config langsung agar perubahan `.env` terbaca dan jalankan `php artisan optimize:clear` bila cache pernah dibuat.
 
@@ -85,8 +97,9 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
 ## Update
 
 - Backup database dan file upload sebelum migration berisiko.
-- Pull `master` di folder clone starterkit, jalankan `composer dump-autoload`, lalu `starter:publish-assets` sebelum migration/test.
-- Jalankan migration dan sync sesudah source code terpasang.
-- Jalankan `php artisan optimize` kembali.
+- Pull `master` di folder clone starterkit, jalankan `composer install`, lalu
+  `starter:sync`.
+- Migration, asset, registry, security check, dan cache production ditangani
+  oleh `starter:sync`.
 - Pastikan asset Livewire yang dipublish sesuai versi package setelah update dependency.
 - Jangan menyimpan session/cache di lokasi di luar project untuk target shared hosting ini.

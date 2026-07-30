@@ -53,6 +53,16 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         document.querySelector('[data-starter-livewire-loader]')?.setAttribute('aria-hidden', 'false');
         document.body?.classList.add('starter-livewire-is-loading');
     },
+    isSilentLivewireMessage(message) {
+        const root = message?.component?.el;
+        const calls = Array.isArray(message?.calls) ? message.calls : [];
+
+        if (! root?.hasAttribute?.('data-starter-silent-poll') || calls.length === 0) {
+            return false;
+        }
+
+        return calls.every((call) => ['$refresh', 'refreshMonitoring'].includes(call?.method));
+    },
     hideLivewireLoader() {
         this.livewireLoadingCount = Math.max((this.livewireLoadingCount || 1) - 1, 0);
 
@@ -680,7 +690,11 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
 
         window.Livewire.interceptRequest(({ request, onSend, onError, onFinish }) => {
             const messages = Array.from(request?.messages || []);
-            const actionMessages = messages.filter((message) => Array.isArray(message.calls) && message.calls.length > 0);
+            const actionMessages = messages.filter((message) => (
+                Array.isArray(message.calls)
+                && message.calls.length > 0
+                && ! this.isSilentLivewireMessage(message)
+            ));
             const components = actionMessages
                 .map((message) => message.component)
                 .filter(Boolean);

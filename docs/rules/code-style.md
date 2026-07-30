@@ -27,7 +27,7 @@
 ## Database
 
 - Tabel domain/bisnis baru wajib memakai pola `{subdomain}_{module}_{entity}` dalam `snake_case` lowercase. Gunakan app key/subdomain dan module key dari registry sebagai source of truth, lalu normalisasi tanda hubung menjadi underscore.
-- Nama `entity` merepresentasikan koleksi/plural sesuai bahasa domain; jangan memaksakan akhiran `s` bahasa Inggris pada istilah Indonesia. Contoh: `crm_leads_contacts` dan `crm_customers_activities`.
+- Nama `entity` merepresentasikan koleksi/plural sesuai bahasa domain; jangan memaksakan akhiran `s` bahasa Inggris pada istilah Indonesia. Contoh: `sales_prospek_leads` dan `customer_aktivitas_interaksi`.
 - Model untuk tabel berpola tersebut wajib mendeklarasikan `$table` secara eksplisit; jangan mengandalkan tebakan pluralisasi Eloquent.
 - Pivot memakai pola `{subdomain}_{module}_{entity_a}_{entity_b}` dengan urutan entity yang konsisten/alfabetis. Foreign key tetap memakai `{entity_singular}_id` yang jelas.
 - Seluruh nama tabel, foreign key, unique constraint, dan index wajib berada dalam batas identifier database—maksimal 64 karakter untuk MySQL. Bila nama berisiko panjang, pendekkan key app/module/entity secara jelas dan beri nama index eksplisit; jangan memakai singkatan ambigu.
@@ -45,10 +45,10 @@
 - Sampai generator khusus tersedia, buat model dan migration app sebagai dua perintah terpisah agar path migration tidak salah:
 
   ```bash
-  php artisan make:model Apps/Crm/Contact --no-interaction
-  php artisan make:migration create_crm_leads_contacts_table \
-    --create=crm_leads_contacts \
-    --path=database/migrations/apps/crm \
+  php artisan make:model Apps/Sales/Lead --no-interaction
+  php artisan make:migration create_sales_prospek_leads_table \
+    --create=sales_prospek_leads \
+    --path=database/migrations/apps/sales \
     --no-interaction
   ```
 

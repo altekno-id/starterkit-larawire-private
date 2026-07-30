@@ -22,7 +22,7 @@ php starterkit/installer/install.php --company="Nama Aplikasi"
 Installer meminta:
 
 1. konfirmasi reset database;
-2. kode App pertama, misalnya `crm`—boleh dikosongkan;
+2. kode App pertama, misalnya `sales`—boleh dikosongkan;
 3. nama App yang ditampilkan.
 
 Setelah itu dependency, connector Laravel, `.env`, APP key, locale, asset,
@@ -37,10 +37,10 @@ Jalankan dari root Laravel.
 |---|---|
 | Instalasi awal | `php starterkit/installer/install.php --company="Nama Aplikasi"` |
 | Reinstall development | `php starterkit/installer/install.php --reset --company="Nama Aplikasi"` |
-| Membuat App | `php artisan starter:make-app crm --name="CRM"` |
-| Membuat App tanpa langsung sync | `php artisan starter:make-app crm --name="CRM" --no-sync` |
-| Memeriksa perubahan registry | `php artisan starter:sync crm --dry-run` |
-| Menerapkan registry | `php artisan starter:sync crm --force` |
+| Membuat App | `php artisan starter:make-app sales --name="Sales"` |
+| Membuat App tanpa langsung sync | `php artisan starter:make-app sales --name="Sales" --no-sync` |
+| Memeriksa perubahan registry | `php artisan starter:sync sales --dry-run` |
+| Menerapkan registry | `php artisan starter:sync sales --force` |
 | Sync seluruh App | `php artisan starter:sync --dry-run`, lalu `php artisan starter:sync --force` |
 | Publish ulang asset | `php artisan starter:publish-assets` |
 | Cek keamanan lokal | `php artisan starter:security-check` |
@@ -60,40 +60,63 @@ Yang berjalan otomatis:
 
 ## Multi-domain itu seperti apa?
 
-Starterkit memakai satu root domain dengan beberapa subdomain App. Semuanya
-tetap berada dalam satu project Laravel, satu database, satu login, dan satu
-pengaturan global.
+Contoh berikut adalah satu sistem CRM yang dipecah menjadi beberapa App sesuai
+area bisnis. Setiap App memakai subdomain sendiri, tetapi semuanya tetap berada
+dalam satu project Laravel, satu database, satu login, dan satu pengaturan
+global.
 
 ```text
-domainxx.com
-├── Landing, login, profil, user, role, pengaturan, dan log global
+Sistem CRM
 │
-├── crm.domainxx.com                          App CRM
-│   ├── Module Leads
-│   │   └── Menu: Daftar Leads, Pipeline
-│   └── Module Pelanggan
-│       └── Menu: Data Pelanggan, Aktivitas
+├── domainxx.com                             Area global
+│   └── Landing, login, profil, user, role, pengaturan, dan log
 │
-├── support.domainxx.com                      App Customer Support
-│   └── Module Tiket
-│       └── Menu: Daftar Tiket, SLA
+├── sales.domainxx.com                       App Sales
+│   ├── Modul Prospek
+│   │   ├── Menu: Daftar Prospek
+│   │   └── Menu: Sumber Prospek
+│   └── Modul Penjualan
+│       ├── Menu: Pipeline
+│       ├── Menu: Penawaran
+│       └── Menu: Transaksi
 │
-├── marketing.domainxx.com                    App Marketing
-│   └── Module Campaign
-│       └── Menu: Campaign, Segmentasi
+├── customer.domainxx.com                    App Customer
+│   ├── Modul Pelanggan
+│   │   ├── Menu: Data Pelanggan
+│   │   └── Menu: Kontak
+│   └── Modul Aktivitas
+│       ├── Menu: Riwayat Interaksi
+│       └── Menu: Catatan
 │
-└── api.domainxx.com                          Gateway API opsional
-    ├── /crm
-    ├── /support
-    └── /marketing
+├── marketing.domainxx.com                   App Marketing
+│   ├── Modul Campaign
+│   │   ├── Menu: Daftar Campaign
+│   │   └── Menu: Segmentasi
+│   └── Modul Analitik
+│       └── Menu: Performa Campaign
+│
+├── support.domainxx.com                     App Customer Support
+│   ├── Modul Tiket
+│   │   ├── Menu: Daftar Tiket
+│   │   └── Menu: Eskalasi
+│   └── Modul Layanan
+│       ├── Menu: SLA
+│       └── Menu: Knowledge Base
+│
+└── api.domainxx.com                         Gateway API opsional
+    ├── /sales
+    ├── /customer
+    ├── /marketing
+    └── /support
 ```
 
 Ringkasnya:
 
 ```text
-App = aplikasi/subdomain
-Module = kelompok fitur sekaligus batas akses role
-Menu/Submenu = navigasi halaman milik module
+Sistem CRM = satu project dan satu ekosistem bisnis
+App = area bisnis besar yang memakai subdomain
+Module (Modul) = kelompok fitur sekaligus batas akses role
+Menu/Submenu = navigasi halaman milik modul
 ```
 
 Setiap App mempunyai module, menu, route, tampilan, test, dan code sendiri.
@@ -109,23 +132,23 @@ project atau database yang terpisah.
 Command `starter:make-app` membuat:
 
 ```text
-app/Livewire/Apps/Crm/
-config/apps/crm.php
-routes/apps/crm.php
-routes/apps/crm.api.php
-resources/views/apps/crm/
-tests/Feature/Apps/Crm/
+app/Livewire/Apps/Sales/
+config/apps/sales.php
+routes/apps/sales.php
+routes/apps/sales.api.php
+resources/views/apps/sales/
+tests/Feature/Apps/Sales/
 ```
 
 Migration bisnis App diletakkan di:
 
 ```text
-database/migrations/apps/crm/
+database/migrations/apps/sales/
 ```
 
-- `config/apps/crm.php`: definisi App, module, menu, dan landing.
-- `routes/apps/crm.php`: route web `crm.domainxx.com`.
-- `routes/apps/crm.api.php`: endpoint `api.domainxx.com/crm`.
+- `config/apps/sales.php`: definisi App, module, menu, dan landing.
+- `routes/apps/sales.php`: route web `sales.domainxx.com`.
+- `routes/apps/sales.api.php`: endpoint `api.domainxx.com/sales`.
 - `starter:sync`: memproyeksikan config dan route web ke metadata database.
 
 Kode `api` tidak dapat dipakai sebagai nama App karena dicadangkan untuk gateway
@@ -150,7 +173,9 @@ Hasilnya:
 ```text
 api.domainxx.com                 Dokumentasi Scramble
 api.domainxx.com/openapi.json    Dokumen OpenAPI
-api.domainxx.com/crm             Endpoint App CRM
+api.domainxx.com/sales           Endpoint App Sales
+api.domainxx.com/customer        Endpoint App Customer
+api.domainxx.com/marketing       Endpoint App Marketing
 api.domainxx.com/support         Endpoint App Customer Support
 ```
 

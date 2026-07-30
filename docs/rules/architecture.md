@@ -89,7 +89,7 @@ Ketentuan konsistensi dan performa:
 ## Struktur feature app/subdomain
 
 - Setiap feature bisnis milik app/subdomain wajib berada di area `Apps/<Subdomain>` pada layer yang dipakai; jangan membuat feature app di folder `Starter`, root layer, atau app/subdomain lain.
-- Gunakan `<Subdomain>` dalam PascalCase untuk namespace/path PHP, misalnya `Crm`; gunakan `<subdomain>` lowercase untuk route, config, view, translation, dan asset, misalnya `crm`.
+- Gunakan `<Subdomain>` dalam PascalCase untuk namespace/path PHP, misalnya `Sales`; gunakan `<subdomain>` lowercase untuk route, config, view, translation, dan asset, misalnya `sales`.
 - Buat hanya folder yang benar-benar dibutuhkan feature. Jangan membuat seluruh tree kosong sebagai formalitas.
 
 ```text

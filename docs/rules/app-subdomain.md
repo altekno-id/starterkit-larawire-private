@@ -73,8 +73,8 @@ Gunakan `--no-sync` hanya jika file perlu dilengkapi sebelum metadata diterapkan
   Registrar otomatis memberi domain API, prefix URI `/<subdomain>`, middleware
   `api`, rate limit dasar, dan prefix nama route `api.<subdomain>.`.
 - File API hanya menulis path relatif terhadap App. Contoh
-  `Route::get('/leads', ...)->name('leads.index')` menjadi
-  `api.example.com/crm/leads` dengan nama `api.crm.leads.index`.
+  `Route::get('/prospek', ...)->name('prospek.index')` menjadi
+  `api.example.com/sales/prospek` dengan nama `api.sales.prospek.index`.
 - Route API tidak masuk `starter:sync`, metadata module, menu, landing role,
   atau middleware `starter.authorize` web. Setiap endpoint bisnis wajib
   mendefinisikan authentication dan authorization API yang sesuai konsumennya;

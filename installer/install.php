@@ -96,7 +96,6 @@ try {
             $agentsPath,
             readRequiredFile($starterRoot.'/installer/templates/agents-connector.md'),
         );
-        ensureIgnored($gitignorePath, '/starterkit/');
         ensureIgnored($gitignorePath, '/public/vendor/');
 
         if (! is_file($envPath)) {

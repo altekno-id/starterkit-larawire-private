@@ -60,7 +60,11 @@ Ketentuan konsistensi dan performa:
 
 ## Isolasi starterkit dan project turunan
 
-- Pada mode Git clone, source core berada di `<laravel>/starterkit` sebagai repository mandiri dan diabaikan oleh Git project host. Feature project dilarang mengubah file clone; improvement universal wajib melalui branch dan PR repository starterkit.
+- Source core berada di `<laravel>/starterkit` sebagai Git subtree yang dilacak
+  repository host. Dengan demikian deployment production memperoleh core lewat
+  `git pull` repository host tanpa clone tambahan. Feature project dilarang
+  mengubah source subtree; improvement universal wajib dikerjakan dan dipush
+  pada repository canonical, lalu ditarik dengan `git subtree pull`.
 - Connector host dibatasi pada autoload namespace `Altekno\StarterKit\` dari
   `starterkit/src`, registrasi `StarterServiceProvider`, pemanggilan
   `StarterBootstrap`, environment, dan asset publish. Pada Laravel host standar
@@ -75,7 +79,7 @@ Ketentuan konsistensi dan performa:
 - Seluruh migration core berada di `starterkit/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
 - Seluruh Blade internal starter berada di `resources/views/starter`, termasuk `errors`, `templates`, auth, profile, settings, log, dan user management.
 - Landing adalah area kustom project host dan wajib berada di
-  `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder clone
+  `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder subtree
   starterkit. Installer membuat landing minimum hanya bila project belum
   memiliki root landing. Ketika instalasi tidak membuat App pertama, landing
   minimum berfungsi sebagai onboarding yang menjelaskan hierarki App → Module →
@@ -122,13 +126,13 @@ database/migrations/apps/<subdomain>/
 - `AGENTS.md` pada root Laravel host adalah connector project yang dipasang
   installer dan wajib disimpan dalam repository project. Rules canonical tetap
   berada di `starterkit/AGENTS.md` serta `starterkit/docs/rules/`; connector
-  hanya mengarahkan agent agar rules terbaru langsung berlaku setelah clone
+  hanya mengarahkan agent agar rules terbaru langsung berlaku setelah update
   starterkit diperbarui.
 - Installer hanya boleh mengelola block connector starterkit di dalam
   `AGENTS.md`; instruksi project di luar marker block wajib dipertahankan.
 - Improvement universal wajib berasal dari repository starterkit canonical,
   diverifikasi pada Laravel host, di-commit, dan dipush sebelum commit tersebut
-  disinkronkan ke project pengguna. Perubahan langsung pada clone/embedded
+  disinkronkan ke project pengguna. Perubahan langsung pada subtree/embedded
   project tidak boleh menjadi source of truth core.
 
 ## Registrasi route

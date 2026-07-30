@@ -121,7 +121,8 @@ extension—daftarkan melalui `config/apps/<app>.php` lalu jalankan `starter:syn
 Dari root Laravel:
 
 ```bash
-git clone https://github.com/altekno-id/starterkit-larawire-private-tabler.git starterkit
+git subtree add --prefix=starterkit \
+  https://github.com/altekno-id/starterkit-larawire-private-tabler.git master --squash
 php starterkit/installer/install.php --company="Nama Aplikasi"
 ```
 
@@ -340,7 +341,7 @@ dibutuhkan sebelum menjalankannya.
 ## Perubahan core starterkit
 
 Repository starterkit adalah satu-satunya source of truth untuk perubahan core.
-Setiap perbaikan universal wajib dikerjakan pada clone repository starterkit
+Setiap perbaikan universal wajib dikerjakan pada repository canonical starterkit
 yang memiliki remote `origin`, diverifikasi melalui Laravel host, lalu dibuat
 sebagai commit terfokus dan dipush sebelum disinkronkan ke project pengguna.
 
@@ -354,13 +355,12 @@ push perubahan integrasinya pada repository project.
 Update tidak me-reset database:
 
 ```bash
-cd starterkit
-git pull --ff-only origin master
-
-cd ..
+git subtree pull --prefix=starterkit \
+  https://github.com/altekno-id/starterkit-larawire-private-tabler.git master --squash
 composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 php artisan test --compact
+git push origin master
 ```
 
 Gunakan `php artisan starter:sync --dry-run` terlebih dahulu bila ingin

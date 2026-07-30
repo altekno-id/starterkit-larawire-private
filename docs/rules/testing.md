@@ -39,8 +39,8 @@ php artisan test --compact
 - Security/session: login throttle per akun dan IP, trusted/untrusted host, safe redirect, security header, revokasi session setelah perubahan password, backward compatibility session existing, serta `starter:security-check` local/production.
 - Performance: pagination berjalan di database, query tidak bertambah per-row, input search dibatasi, bulk action tidak memuat seluruh tabel, dan layout/daftar kritis memiliki batas atas query bila relevan.
 - Guard arsitektur `StarterArchitectureTest` berlaku untuk starterkit dan project turunannya: Livewire/controller tidak boleh memiliki query/load relation/service locator, dan service tidak boleh membangun query model. Jangan menghapus atau melonggarkan guard hanya agar test lulus; deviasi arsitektur wajib memiliki alasan teknis dan persetujuan eksplisit.
-- Test integrasi host wajib memastikan clone terdeteksi sebagai embedded source, namespace core dapat di-autoload, migration core dimuat dari `starterkit/database/migrations/starter`, folder migration app didaftarkan dinamis dari `database/migrations/apps/<subdomain>`, route/auth/view core tersedia, dan asset publish berhasil.
-- Repository starterkit tidak memiliki Laravel test harness sendiri. Regression core dijalankan melalui suite Laravel host; jangan menambahkan shell Laravel hanya untuk menjalankan test dari root clone.
+- Test integrasi host wajib memastikan subtree terdeteksi sebagai embedded source, namespace core dapat di-autoload, migration core dimuat dari `starterkit/database/migrations/starter`, folder migration app didaftarkan dinamis dari `database/migrations/apps/<subdomain>`, route/auth/view core tersedia, dan asset publish berhasil.
+- Repository starterkit tidak memiliki Laravel test harness sendiri. Regression core dijalankan melalui suite Laravel host; jangan menambahkan shell Laravel hanya untuk menjalankan test dari root canonical.
 
 ## Definition of done
 

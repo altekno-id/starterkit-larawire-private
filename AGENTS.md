@@ -2,7 +2,7 @@
 
 Dokumen ini adalah kontrak eksekusi untuk setiap model AI yang mengembangkan project turunan dari starterkit ini. Jangan membaca seluruh `docs/` pada setiap tugas; baca konteks inti dan rule yang relevan.
 
-Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan sebagai aplikasi Laravel mandiri. Semua perintah Composer, Artisan, Pint, Pest, migration, dan setup dijalankan dari root Laravel host yang memiliki clone ini pada folder `starterkit/`.
+Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan sebagai aplikasi Laravel mandiri. Semua perintah Composer, Artisan, Pint, Pest, migration, dan setup dijalankan dari root Laravel host yang memuat source ini pada folder `starterkit/`.
 
 Installer membuat connector terkelola pada `AGENTS.md` di root Laravel host.
 Connector tersebut mengarahkan agent ke file canonical ini tanpa menyalin
@@ -80,7 +80,7 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 | Pengujian dan definition of done | `docs/rules/testing.md` |
 | Shared hosting/deployment | `docs/rules/deployment.md` |
 | Hubungan layer dan source of truth | `docs/rules/architecture.md` |
-| Install/update clone starterkit atau extension project | `README.md` |
+| Install/update subtree starterkit atau extension project | `README.md` |
 
 ## Profil baca minimum
 
@@ -120,7 +120,7 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 
 ## Aturan eksekusi
 
-- Pada project pemakai, folder clone `starterkit/` adalah core read-only untuk feature project. Perubahan di dalamnya hanya untuk improvement universal melalui branch/PR starterkit.
+- Pada project pemakai, folder subtree `starterkit/` adalah core read-only untuk feature project. Perubahan di dalamnya hanya untuk improvement universal melalui branch/PR starterkit, lalu disinkronkan dengan `git subtree pull`.
 - Folder `starterkit/installer/` hanya dimiliki bootstrap instalasi. Setelah
   setup berhasil, developer dan AI feature wajib mengabaikannya; baca atau ubah
   folder tersebut hanya saat tugas memang menyangkut installer.

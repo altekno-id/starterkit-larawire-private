@@ -2,9 +2,10 @@
 
 ## Prasyarat
 
-- Pada mode clone, folder `<laravel>/starterkit` tersedia dari repository core
-  dan autoload/provider/bootstrap connector telah terpasang sesuai `README.md`
-  root starterkit.
+- Folder `<laravel>/starterkit` dilacak sebagai Git subtree oleh repository host,
+  sehingga production mendapat seluruh source core melalui `git pull`.
+  Autoload/provider/bootstrap connector terpasang sesuai `README.md` root
+  starterkit.
 - PHP yang kompatibel dengan dependency project serta extension Laravel tersedia.
 - Extension `intl` tersedia untuk format angka/currency berbasis locale.
 - Document root diarahkan ke folder `public`.
@@ -97,8 +98,8 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
 ## Update
 
 - Backup database dan file upload sebelum migration berisiko.
-- Pull `master` di folder clone starterkit, jalankan `composer install`, lalu
-  `starter:sync`.
+- Tarik `master` canonical melalui `git subtree pull` di repository host,
+  jalankan `composer install`, lalu `starter:sync`.
 - Migration, asset, registry, security check, dan cache production ditangani
   oleh `starter:sync`.
 - Pastikan asset Livewire yang dipublish sesuai versi package setelah update dependency.

@@ -1,11 +1,34 @@
 # Laravel Private Starterkit
 
 Starterkit Laravel untuk aplikasi internal perusahaan. Fondasi login, user,
-role, App, module, menu, audit, keamanan, API, UI, dan aturan agentic coding
-sudah disiapkan agar developer fokus pada fitur bisnis.
+role, App, module, menu, audit, keamanan, API, serta UI berbasis **Tabler**
+sudah disiapkan agar developer fokus pada fitur bisnis dan agentic coding.
 
 Repository ini bukan aplikasi mandiri. Clone ke folder `starterkit` di dalam
 Laravel fresh, lalu jalankan installer.
+
+## Template UI — Tabler
+
+Varian starterkit ini menggunakan **Tabler** sebagai fondasi tampilan. Tabler
+menyediakan pola layout admin responsif, sidebar, navbar, card, table, form,
+badge, alert, dropdown, modal, pagination, empty state, halaman autentikasi,
+dan komponen visual lain untuk membangun UI yang konsisten dan profesional.
+
+- Layout, halaman starter, dan error page sudah terintegrasi dengan Tabler.
+- Interaksi server memakai Livewire; interaksi ringan di browser memakai
+  Alpine.js tanpa mengubah pola navigasi yang sudah berjalan.
+- CSS, JavaScript, icon, dan asset inti Tabler disimpan lokal sehingga tidak
+  bergantung pada CDN, Vite development server, atau konfigurasi production
+  tambahan.
+- [`docs/template/template.md`](docs/template/template.md) adalah atlas komponen
+  untuk membantu agent AI menemukan contoh Tabler yang tepat tanpa membaca
+  seluruh file HTML.
+- Source contoh di [`docs/template`](docs/template) menjadi acuan sebelum
+  memilih atau menyusun komponen baru. Komponen custom tetap mengikuti bahasa
+  visual Tabler.
+
+Tabler adalah lapisan presentasi starterkit ini. Laravel, Livewire, aturan
+keamanan, performa, dan pemisahan App tetap menjadi fondasi arsitekturnya.
 
 ## Instalasi — mulai dari sini
 

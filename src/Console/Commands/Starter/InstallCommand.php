@@ -101,7 +101,7 @@ class InstallCommand extends Command
     {
         $locale = (string) config('app.locale', 'id');
 
-        if (File::isDirectory(lang_path($locale))) {
+        if ($this->localeIsInstalled($locale)) {
             $this->components->info("Locale [{$locale}] is already installed.");
 
             return self::SUCCESS;
@@ -120,9 +120,15 @@ class InstallCommand extends Command
             return self::FAILURE;
         }
 
-        return File::isDirectory(lang_path($locale))
+        return $this->localeIsInstalled($locale)
             ? self::SUCCESS
             : self::FAILURE;
+    }
+
+    private function localeIsInstalled(string $locale): bool
+    {
+        return File::exists(lang_path("{$locale}/validation.php"))
+            && File::exists(lang_path("{$locale}.json"));
     }
 
     private function installLanding(): int

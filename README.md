@@ -23,12 +23,19 @@ folder starterkit, rules terbaru langsung tersedia setelah `git pull`.
 
 Alur pengembangan feature:
 
-1. Developer menjelaskan kebutuhan bisnis serta App, module, dan bentuk menu.
-2. Agent memeriksa code existing dan informasi yang masih kurang.
-3. Agent membuat satu spesifikasi teknis di `issues/<fitur>.md`, lalu berhenti
-   agar developer dapat memeriksanya.
-4. Setelah disetujui, implementasi dapat dilanjutkan—termasuk dengan model yang
+1. Developer menjelaskan kebutuhan bisnis/bug serta App, module, dan area yang
+   relevan.
+2. Agent memeriksa source secara baca-saja, lalu mengirim konfirmasi pemahaman
+   terstruktur di chat. Belum ada file planning atau perubahan code.
+3. Setelah developer menjawab `OK`, agent membuat satu spesifikasi teknis sangat
+   detail dan junior-friendly:
+   `issues/feature_<nama>_<YYYY_MM_DD_HHMMSS>.md` atau
+   `issues/bug_<nama>_<YYYY_MM_DD_HHMMSS>.md`.
+4. Agent berhenti agar developer dapat mereview file. Setelah disetujui,
+   implementasi dapat diteruskan—termasuk oleh programmer junior atau model yang
    lebih hemat—karena keputusan dan standar teknis sudah terkunci.
+5. Setelah implementasi dan verifikasi selesai, file dipindahkan menjadi
+   `issues/archives/done_<nama-file-asli>.md`.
 
 Contoh prompt yang cukup:
 
@@ -39,9 +46,10 @@ sedangkan Manager hanya melihat dan menyetujui penawaran.
 ```
 
 Jika App, module, atau struktur menu belum disebut, agent wajib meminta
-kelengkapannya sambil memberi contoh prompt yang benar. Gerbang
-`issues/<fitur>.md` hanya untuk feature; bugfix, diagnosis, maintenance, dan
-perubahan dokumentasi tidak membuat issue otomatis.
+kelengkapannya sambil memberi contoh prompt yang benar. Gerbang konfirmasi dan
+file issue berlaku untuk feature/perubahan feature/bug yang membutuhkan code;
+diagnosis baca-saja, status report, konsultasi, dan dokumentasi murni tidak
+membuat issue otomatis.
 
 ## Template UI — Tabler
 

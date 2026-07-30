@@ -63,8 +63,10 @@ try {
     $agentsPath = $hostRoot.'/AGENTS.md';
     $envExamplePath = $hostRoot.'/.env.example';
     $envPath = $hostRoot.'/.env';
+    $issuesArchivePath = $hostRoot.'/issues/archives';
 
     if (! $reset) {
+        ensureDirectory($issuesArchivePath);
         removeFreshLaravelMigrations($hostRoot);
         configureFrameworkTableNames($hostRoot);
 
@@ -112,6 +114,8 @@ try {
 
         mergeEnvironment($envExamplePath);
         mergeEnvironment($envPath);
+    } else {
+        ensureDirectory($issuesArchivePath);
     }
 
     run($hostRoot, ['composer', 'dump-autoload', '--no-interaction']);
@@ -185,6 +189,25 @@ function writeIfChanged(string $path, string $contents): void
     }
 
     output('UPDATE  '.relativeHostPath($path));
+}
+
+function ensureDirectory(string $path): void
+{
+    if (is_dir($path)) {
+        output('SKIP    '.relativeHostPath($path).'/');
+
+        return;
+    }
+
+    if (file_exists($path)) {
+        throw new RuntimeException("Path directory terhalang oleh file: {$path}");
+    }
+
+    if (! mkdir($path, 0755, true) && ! is_dir($path)) {
+        throw new RuntimeException("Tidak dapat membuat directory: {$path}");
+    }
+
+    output('CREATE  '.relativeHostPath($path).'/');
 }
 
 function assertLaravelHost(string $hostRoot, string $starterRoot): void

@@ -28,14 +28,25 @@ seperti `app/`, `routes/apps/`, `resources/views/apps/`,
 
 Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal project atau ketika konteks percakapan hilang.
 
-## Kontrak default feature
+## Kontrak default request implementasi
 
 - User/developer cukup menjelaskan kebutuhan bisnis, flow, data, dan role yang relevan. Jangan meminta mereka mengulang standar teknis starterkit.
-- Setiap permintaan membuat atau mengubah feature wajib melewati gerbang
-  spesifikasi: buat `issues/<feature-slug>.md` pada Laravel host, berhenti sebelum
-  mengubah code feature, lalu minta user membaca dan menyetujui detail teknis.
-  Setelah file selesai, respons wajib menyebut bahwa eksekusi dapat dilanjutkan
-  dengan model yang lebih hemat/rendah karena konteks teknis sudah dikunci.
+- Setiap request implementasi feature, perubahan perilaku, atau bug wajib
+  melewati tiga gerbang sebelum code diubah: konfirmasi pemahaman di chat,
+  spesifikasi teknis terperinci di `issues/`, lalu persetujuan eksplisit
+  developer atas file tersebut. Jangan membuat file issue sebelum developer
+  menyatakan konfirmasi chat sudah benar.
+- Gunakan `issues/feature_<nama>_<YYYY_MM_DD_HHMMSS>.md` untuk feature baru atau
+  perubahan feature, dan `issues/bug_<nama>_<YYYY_MM_DD_HHMMSS>.md` untuk bug.
+  Timestamp mengikuti waktu lokal project/developer dan berfungsi sebagai
+  serial unik seperti migration.
+- Spesifikasi wajib cukup lengkap agar programmer junior atau model AI yang
+  lebih hemat dapat mengimplementasikannya secara presisi tanpa menebak
+  keputusan bisnis, arsitektur, file, test, atau acceptance criteria.
+- Setelah implementasi benar-benar selesai dan seluruh verifikasi relevan
+  lulus, pindahkan file menjadi
+  `issues/archives/done_<nama-file-asli>.md`. Jangan arsipkan pekerjaan parsial,
+  gagal, dibatalkan, atau masih menunggu keputusan.
 - Permintaan module baru belum boleh masuk gerbang spesifikasi bila developer
   belum menyebut App pemilik, nama module, dan struktur menu (single atau parent
   beserta child). Respons pertama wajib menjelaskan informasi yang kurang dan
@@ -88,7 +99,7 @@ Profil ini menentukan titik mulai pembacaan, bukan izin untuk mengabaikan rule l
 
 | Jenis tugas | Baca minimum | Tambahkan bila tersentuh |
 |---|---|---|
-| Bug/refactor kecil pada area yang sudah dikenal | `AGENTS.md`, sibling code/test, dan rule pemilik area | `testing.md` untuk perubahan perilaku; rule lain sesuai dampak |
+| Bug/refactor kecil pada area yang sudah dikenal | `feature-development.md`, sibling code/test, dan rule pemilik area | `testing.md` untuk perubahan perilaku; rule lain sesuai dampak |
 | Feature CRUD pada app existing | `feature-development.md`, `architecture.md`, `audit-logging.md`, `testing.md` | `code-style.md` bila model/migration; `performance.md` bila daftar/query; `ui-ux.md` bila UI/interaksi |
 | Halaman atau interaksi UI | `ui-ux.md`, `testing.md`, dan pencarian atlas template | `performance.md` untuk daftar/asset/library; `security-and-config.md` untuk upload, sesi, atau kredensial |
 | Schema, migration, atau perubahan data | `feature-development.md`, `code-style.md`, `testing.md` | `audit-logging.md` untuk mutation bisnis; `performance.md` untuk query/index |
@@ -110,13 +121,16 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 ## Cara kerja hemat token
 
 1. Cari file terkait dengan `rg`; baca sibling terdekat sebelum mengubah code.
-2. Untuk permintaan feature, lakukan discovery minimum lalu tulis satu spesifikasi
-   teknis di `issues/<feature-slug>.md`; jangan menulis ulang rule umum ke dalamnya.
+2. Untuk request implementasi, lakukan discovery baca-saja secukupnya untuk
+   mengisi konfirmasi chat baku. Setelah developer menjawab bahwa pemahaman
+   sudah benar, tulis satu spesifikasi teknis bernama
+   `issues/<jenis>_<slug>_<YYYY_MM_DD_HHMMSS>.md`.
 3. Untuk UI, cari `docs/template/template.md` dengan `rg` berdasarkan konteks dan komponen, lalu buka 1–3 HTML sumber yang paling relevan. Jangan membaca seluruh atlas atau `docs/template/tabler-components`.
 4. Jangan menyalin ulang aturan umum ke dokumen feature.
-5. Jangan membuat folder template issue atau archive. File `issues/*.md` hanya
-   dibuat sebagai gerbang permintaan feature; bugfix, diagnosis, maintenance,
-   dan dokumentasi tidak membuat issue otomatis.
+5. Jangan membuat file issue sebelum konfirmasi chat disetujui. Folder
+   `issues/archives/` hanya untuk spesifikasi yang implementasinya sudah selesai;
+   diagnosis baca-saja, status report, dan dokumentasi murni tidak membuat issue
+   otomatis karena tidak meminta implementasi code.
 
 ## Aturan eksekusi
 
@@ -157,9 +171,15 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
   `AGENTS.md` root Laravel host tanpa menimpa instruksi project di luar block
   tersebut. File canonical `starterkit/AGENTS.md` tetap menjadi source of truth
   agar update rules tidak memerlukan copy manual.
-- Setelah membuat `issues/<feature-slug>.md`, jangan langsung mengeksekusi code.
-  Beri tahu user bahwa detail teknis siap diperiksa dan tunggu persetujuan
-  eksplisit untuk melanjutkan implementasi.
+- Setelah konfirmasi chat disetujui dan file issue dibuat, jangan langsung
+  mengeksekusi code. Beri tahu developer bahwa detail teknis siap diperiksa dan
+  tunggu persetujuan eksplisit atas file untuk melanjutkan implementasi.
+- Saat developer memerintahkan eksekusi, baca ulang file issue yang disetujui
+  sebagai kontrak scope. Jika instruksi baru mengubah scope atau keputusan
+  material, kembali ke konfirmasi chat dan revisi spesifikasi sebelum coding.
+- Setelah acceptance criteria terpenuhi dan verifikasi relevan lulus, pindahkan
+  file issue yang sama ke `issues/archives/` dengan prefix `done_` dalam commit
+  implementasi. Jangan membuat salinan sehingga hanya ada satu source of truth.
 - Perubahan trivial seperti typo/dokumentasi murni dapat langsung dikerjakan bila tidak mengubah business flow, authorization, data, API, atau deployment.
 - Jika user hanya meminta planning/review/diagnosis, jangan mengubah code atau state di luar artefak planning yang diminta.
 - Jalankan `php artisan make:* --no-interaction` dari root Laravel host untuk file project.

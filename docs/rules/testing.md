@@ -54,6 +54,12 @@ php artisan test --compact
   repository canonical sebelum disinkronkan; integrasi pada project pengguna
   juga diverifikasi, di-commit, dan dipush.
 - Tidak ada perubahan scope, dependency, config production, atau keputusan bisnis yang disisipkan tanpa dicatat/disetujui.
-- Permintaan feature memiliki tepat satu `issues/<feature-slug>.md` sebelum
-  implementasi; bugfix/maintenance tidak membuat issue otomatis. Tidak ada
-  folder template issue, archive, atau planning tambahan tanpa permintaan.
+- Request feature/perubahan feature/bug telah dikonfirmasi di chat sebelum
+  memiliki tepat satu file
+  `issues/<feature|bug>_<slug>_<YYYY_MM_DD_HHMMSS>.md`.
+- File issue disetujui sebelum implementasi, cukup detail untuk programmer
+  junior/model hemat, dan tidak memiliki keputusan material yang dibiarkan
+  implisit.
+- Setelah implementasi serta test selesai, file yang sama telah dipindahkan ke
+  `issues/archives/done_<nama-file-asli>.md`; pekerjaan yang belum tuntas tetap
+  berada di root `issues/`.

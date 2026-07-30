@@ -66,7 +66,7 @@ class AppModRepository implements AppModInterface
 
     public function forApp(App $app, array $with = [], array $onlyIds = []): EloquentCollection
     {
-        return AppMod::query()
+        $modules = AppMod::query()
             ->whereBelongsTo($app)
             ->with($with)
             ->when($onlyIds !== [], function ($query) use ($onlyIds): void {
@@ -74,5 +74,16 @@ class AppModRepository implements AppModInterface
             })
             ->orderBy('id')
             ->get();
+
+        $configuredOrder = array_flip(array_keys(
+            config("apps.{$app->subdomain}.mods", [])
+        ));
+
+        return $modules
+            ->sortBy(fn (AppMod $module): array => [
+                $configuredOrder[$module->code] ?? PHP_INT_MAX,
+                $module->id,
+            ])
+            ->values();
     }
 }

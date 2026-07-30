@@ -143,7 +143,6 @@ Jalankan dari root Laravel.
 | Kebutuhan | Command |
 |---|---|
 | Instalasi awal | `php starterkit/installer/install.php --company="Nama Aplikasi"` |
-| Reinstall development | `php starterkit/installer/install.php --reset --company="Nama Aplikasi"` |
 | Membuat App | `php artisan starter:make-app sales --name="Sales"` |
 | Membuat App tanpa langsung sync | `php artisan starter:make-app sales --name="Sales" --no-sync` |
 | Memeriksa perubahan registry | `php artisan starter:sync sales --dry-run` |
@@ -316,19 +315,34 @@ php artisan starter:sync layanan --dry-run
 php artisan starter:sync layanan --force
 ```
 
-## Reinstall khusus development
+## Reset database development
 
 ```bash
-php starterkit/installer/install.php --reset --company="Nama Aplikasi"
+php artisan migrate:fresh
+php artisan starter:setup --company="Nama Aplikasi"
+php artisan starter:sync --force
 ```
 
-Hanya dapat berjalan pada `APP_ENV=local` atau `APP_ENV=development`. Installer
-meminta konfirmasi `y`, lalu kata `RESET`.
+Alur ini menghapus tabel/data database development, tetapi tidak menghapus
+source App, landing, migration, route, view, test, asset, upload, atau issue
+feature. Backup data yang masih dibutuhkan sebelum menjalankannya.
 
-Mode ini menghapus seluruh database, source App, landing, extension UI,
-migration/asset App, upload starter/App, dan issue feature. Production ditolak
-sebelum file atau database diubah. Jangan gunakan reinstall sebagai cara
-update.
+Opsi installer `--reset` telah dihapus dan ditolak sebelum installer melakukan
+mutation karena pernah memiliki kemampuan menghapus source fitur project.
+Installer hanya untuk instalasi awal Laravel fresh; project yang sudah berjalan
+memakai command Artisan di atas atau alur update.
+
+## Perubahan core starterkit
+
+Repository starterkit adalah satu-satunya source of truth untuk perubahan core.
+Setiap perbaikan universal wajib dikerjakan pada clone repository starterkit
+yang memiliki remote `origin`, diverifikasi melalui Laravel host, lalu dibuat
+sebagai commit terfokus dan dipush sebelum disinkronkan ke project pengguna.
+
+Jangan menyelesaikan perubahan core hanya di folder embedded `starterkit/`
+milik project. Setelah commit upstream tersedia, update folder starterkit pada
+project pengguna dari commit tersebut, jalankan verifikasi host, lalu commit dan
+push perubahan integrasinya pada repository project.
 
 ## Update starterkit
 
@@ -384,4 +398,7 @@ dibuat.
 - Folder `starterkit` adalah core read-only untuk feature project; improvement
   universal dilakukan melalui repository starterkit.
 - Installer normal hanya untuk Laravel fresh dan database baru.
-- Reinstall hanya untuk development; update dan deploy tidak memakai installer.
+- Installer tidak menyediakan reset/reinstall project existing dan tidak boleh
+  menghapus source fitur project.
+- Perubahan core starterkit wajib commit dan push pada repository starterkit
+  sebelum disinkronkan, diuji, di-commit, dan dipush pada project pengguna.

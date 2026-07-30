@@ -133,11 +133,17 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
   landing onboarding wajib menjelaskan App, module, menu, submenu, generator,
   struktur source, dan alur sync. Jangan memakai `starterkit:install` untuk
   update, deploy rutin, project berjalan, atau database existing.
-- Reinstall destruktif hanya melalui
-  `php starterkit/installer/install.php --reset`, hanya pada
-  `APP_ENV=local|development`, dan wajib melewati konfirmasi `y` lalu `RESET`.
-  Mode ini menghapus seluruh data serta source App/project yang dimiliki
-  kontrak starterkit; production wajib ditolak sebelum mutation.
+- Installer tidak boleh menyediakan reset/reinstall untuk project existing dan
+  tidak boleh menghapus source App, landing, migration, route, view, test,
+  asset, upload, issue feature, atau source project lain. Opsi lama `--reset`
+  wajib ditolak sebelum mutation. Reset database development dilakukan dengan
+  command Artisan yang terdokumentasi tanpa menghapus source.
+- Setiap perubahan core starterkit wajib dikerjakan pada repository starterkit
+  canonical yang memiliki remote `origin`, diverifikasi melalui Laravel host,
+  lalu dibuat sebagai commit terfokus dan dipush sebelum disinkronkan ke folder
+  starterkit project pengguna. Jangan meninggalkan improvement universal hanya
+  sebagai perubahan lokal/embedded. Setelah sync, verifikasi, commit, dan push
+  perubahan integrasi pada repository project pengguna.
 - Jangan meminta developer menyalin source core atau mengedit connector satu per
   satu pada instalasi Laravel fresh yang masih memakai struktur standar.
 - Installer wajib membuat atau memperbarui block connector terkelola pada

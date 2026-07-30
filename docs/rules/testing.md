@@ -50,6 +50,9 @@ php artisan test --compact
 - Pint bersih.
 - Sync dry-run diperiksa jika route/config app berubah.
 - Browser test dilakukan jika UX berubah.
+- Perubahan core starterkit telah menjadi commit terfokus dan dipush pada
+  repository canonical sebelum disinkronkan; integrasi pada project pengguna
+  juga diverifikasi, di-commit, dan dipush.
 - Tidak ada perubahan scope, dependency, config production, atau keputusan bisnis yang disisipkan tanpa dicatat/disetujui.
 - Permintaan feature memiliki tepat satu `issues/<feature-slug>.md` sebelum
   implementasi; bugfix/maintenance tidak membuat issue otomatis. Tidak ada

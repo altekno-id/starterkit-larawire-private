@@ -66,9 +66,9 @@ Ketentuan konsistensi dan performa:
   `StarterBootstrap`, environment, dan asset publish. Pada Laravel host standar
   seluruh connector dipasang oleh `php starterkit/installer/install.php`.
   Instalasi awal hanya menerima Laravel fresh dan database baru karena memakai
-  `migrate:fresh`; project existing harus memakai alur update. Pengecualian
-  hanya reinstall destruktif yang diminta eksplisit pada environment
-  local/development melalui `--reset`. Detail instalasi ada pada `README.md`
+  `migrate:fresh`; project existing harus memakai alur update atau reset
+  database development yang terdokumentasi. Installer menolak `--reset` dan
+  tidak boleh menghapus source project. Detail instalasi ada pada `README.md`
   root starterkit.
 - Seluruh PHP milik starterkit wajib berada pada subfolder/namespace `Starter` di layer masing-masing: Commands, Contracts, Controllers, Middleware, Livewire, Models, Repositories, Rules, Services, dan Support.
 - Binding, alias Livewire, listener, migration loader, view path, dan persistent middleware starter dimiliki `src/Providers/Starter/StarterServiceProvider.php`. `AppServiceProvider` host tetap bersih untuk binding project turunan.
@@ -126,6 +126,10 @@ database/migrations/apps/<subdomain>/
   starterkit diperbarui.
 - Installer hanya boleh mengelola block connector starterkit di dalam
   `AGENTS.md`; instruksi project di luar marker block wajib dipertahankan.
+- Improvement universal wajib berasal dari repository starterkit canonical,
+  diverifikasi pada Laravel host, di-commit, dan dipush sebelum commit tersebut
+  disinkronkan ke project pengguna. Perubahan langsung pada clone/embedded
+  project tidak boleh menjadi source of truth core.
 
 ## Registrasi route
 

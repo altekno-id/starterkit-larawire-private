@@ -30,7 +30,7 @@ class PublishAssetsCommand extends Command
         }
 
         File::ensureDirectoryExists($destination);
-        $fingerprintDirectory = storage_path('framework/starterkit');
+        $fingerprintDirectory = storage_path('framework/cache/starterkit');
         File::ensureDirectoryExists($fingerprintDirectory);
 
         foreach (['starter', 'tabler'] as $ownedDirectory) {

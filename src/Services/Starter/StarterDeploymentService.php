@@ -61,7 +61,7 @@ class StarterDeploymentService
                 return Command::FAILURE;
             }
 
-            if (! app()->configurationIsCached() || ! app()->routesAreCached()) {
+            if (! is_file(app()->getCachedConfigPath()) || ! is_file(app()->getCachedRoutesPath())) {
                 $command->error('Cache config atau route production gagal dibangun.');
 
                 return Command::FAILURE;

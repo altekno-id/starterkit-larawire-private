@@ -48,9 +48,12 @@ Deployment berikutnya:
 
 ```bash
 git pull --ff-only origin master
-composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 ```
+
+Jalankan `composer install --no-dev --optimize-autoloader` hanya jika pull
+tersebut mengubah `composer.lock` (misalnya ada perubahan dependency). Update
+kode, route, migration, asset, atau konfigurasi biasa tidak memerlukannya.
 
 Jangan menjalankan `starter:setup --reset-password` pada deploy rutin.
 
@@ -99,8 +102,9 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
 ## Update
 
 - Backup database dan file upload sebelum migration berisiko.
-- Tarik `master` canonical melalui `git subtree pull` di repository host,
-  jalankan `composer install`, lalu `starter:sync`.
+- Tarik `master` canonical melalui `git subtree pull` di repository host, lalu
+  jalankan `starter:sync`. Jalankan `composer install` hanya bila
+  `composer.lock` ikut berubah.
 - Migration, asset, registry, security check, dan cache production ditangani
   oleh `starter:sync`.
 - Pastikan asset Livewire yang dipublish sesuai versi package setelah update dependency.

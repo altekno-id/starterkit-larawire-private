@@ -367,11 +367,13 @@ Update tidak me-reset database:
 ```bash
 git subtree pull --prefix=starterkit \
   https://github.com/altekno-id/starterkit-larawire-private-tabler.git master --squash
-composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 php artisan test --compact
 git push origin master
 ```
+
+Tambahkan `composer install --no-dev --optimize-autoloader` hanya jika
+`composer.lock` pada project ikut berubah.
 
 Gunakan `php artisan starter:sync --dry-run` terlebih dahulu bila ingin
 memeriksa perubahan registry tanpa migration, publish asset, atau mutation.
@@ -389,8 +391,13 @@ Deployment berikutnya:
 
 ```bash
 git pull --ff-only origin master
-composer install --no-dev --optimize-autoloader
 php artisan starter:sync
+```
+
+Jika pull mengubah `composer.lock`, jalankan terlebih dahulu:
+
+```bash
+composer install --no-dev --optimize-autoloader
 ```
 
 Production wajib memakai HTTPS, `APP_DEBUG=false`, password Superuser kuat, dan

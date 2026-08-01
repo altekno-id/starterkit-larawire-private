@@ -31,7 +31,10 @@ class StarterBootstrap
         StarterRouteRegistrar::registerAll();
     }
 
-    public static function configureMiddleware(Middleware $middleware): void
+    /**
+     * @param  array<string, class-string>  $additionalAliases
+     */
+    public static function configureMiddleware(Middleware $middleware, array $additionalAliases = []): void
     {
         $middleware->trustHosts();
         $middleware->append(StarterSecurityHeaders::class);
@@ -43,6 +46,7 @@ class StarterBootstrap
             'starter.password-change' => StarterForcePasswordChange::class,
             'starter.logs' => StarterLogAccess::class,
             'starter.lock' => StarterLockScreen::class,
+            ...$additionalAliases,
         ]);
 
         $middleware->redirectGuestsTo(fn ($request) => StarterNavigation::authLoginUrl($request->fullUrl()));

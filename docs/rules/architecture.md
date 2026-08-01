@@ -76,6 +76,16 @@ Ketentuan konsistensi dan performa:
   Detail instalasi ada pada `README.md` root starterkit.
 - Seluruh PHP milik starterkit wajib berada pada subfolder/namespace `Starter` di layer masing-masing: Commands, Contracts, Controllers, Middleware, Livewire, Models, Repositories, Rules, Services, dan Support.
 - Binding, alias Livewire, listener, migration loader, view path, dan persistent middleware starter dimiliki `src/Providers/Starter/StarterServiceProvider.php`. `AppServiceProvider` host tetap bersih untuk binding project turunan.
+- Pada Laravel 13, `Middleware::alias()` menggantikan seluruh daftar alias pada
+  pemanggilan tersebut. App tidak boleh memanggilnya lagi setelah
+  `StarterBootstrap::configureMiddleware()`, karena itu menghapus alias
+  `starter.*`. Kirim alias App tambahan melalui argumen kedua:
+
+  ```php
+  StarterBootstrap::configureMiddleware($middleware, [
+      'app.contoh' => AppMiddleware::class,
+  ]);
+  ```
 - Seluruh migration core berada di `starterkit/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
 - Seluruh Blade internal starter berada di `resources/views/starter`, termasuk `errors`, `templates`, auth, profile, settings, log, dan user management.
 - Landing adalah area kustom project host dan wajib berada di

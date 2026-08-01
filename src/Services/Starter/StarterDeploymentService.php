@@ -110,9 +110,7 @@ class StarterDeploymentService
     {
         $environment = strtolower($this->environmentValue('APP_ENV'));
 
-        return $environment !== ''
-            ? $environment === 'production'
-            : app()->isProduction();
+        return app()->isProduction() || $environment === 'production';
     }
 
     private function ensureStorageLink(Command $command): void

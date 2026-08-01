@@ -11,7 +11,9 @@ class StarterDeploymentService
     {
         $hadBootCache = app()->configurationIsCached() || app()->routesAreCached();
 
-        if ($command->call('optimize:clear') !== Command::SUCCESS) {
+        $command->info('Membersihkan cache config dan route lama...');
+        if ($command->call('config:clear') !== Command::SUCCESS
+            || $command->call('route:clear') !== Command::SUCCESS) {
             return Command::FAILURE;
         }
 
@@ -40,18 +42,32 @@ class StarterDeploymentService
     public function finish(Command $command): int
     {
         $command->info('Mempublikasikan asset runtime dan membangun cache production...');
-        if ($command->call('livewire:publish', [
-            '--assets' => true,
-            '--no-interaction' => true,
-        ]) !== Command::SUCCESS) {
+        if (! $this->livewireAssetsAreCurrent()
+            && $command->call('livewire:publish', [
+                '--assets' => true,
+                '--no-interaction' => true,
+            ]) !== Command::SUCCESS) {
             return Command::FAILURE;
+        }
+
+        if ($this->livewireAssetsAreCurrent()) {
+            $command->line('Asset Livewire sudah terbaru.');
         }
 
         $this->ensureStorageLink($command);
 
-        if (app()->isProduction()
-            && $command->call('optimize') !== Command::SUCCESS) {
-            return Command::FAILURE;
+        if ($this->shouldBuildProductionCache()) {
+            if ($command->call('optimize') !== Command::SUCCESS) {
+                return Command::FAILURE;
+            }
+
+            if (! app()->configurationIsCached() || ! app()->routesAreCached()) {
+                $command->error('Cache config atau route production gagal dibangun.');
+
+                return Command::FAILURE;
+            }
+
+            $command->info('Cache config, event, route, dan view production telah dibangun ulang.');
         }
 
         return Command::SUCCESS;
@@ -78,6 +94,25 @@ class StarterDeploymentService
         config(['app.key' => $generatedKey]);
 
         return true;
+    }
+
+    private function livewireAssetsAreCurrent(): bool
+    {
+        $sourceManifest = base_path('vendor/livewire/livewire/dist/manifest.json');
+        $publishedManifest = public_path('vendor/livewire/manifest.json');
+
+        return is_file($sourceManifest)
+            && is_file($publishedManifest)
+            && hash_file('sha256', $sourceManifest) === hash_file('sha256', $publishedManifest);
+    }
+
+    private function shouldBuildProductionCache(): bool
+    {
+        $environment = strtolower($this->environmentValue('APP_ENV'));
+
+        return $environment !== ''
+            ? $environment === 'production'
+            : app()->isProduction();
     }
 
     private function ensureStorageLink(Command $command): void

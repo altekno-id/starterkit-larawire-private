@@ -62,6 +62,13 @@ migration, registry App, asset Livewire, storage link best-effort, serta
 `optimize` production. Setup juga membuat APP key hanya bila kosong dan
 menyiapkan client/Superuser. Sync update rutin tidak mereset akun/password.
 
+Pada awal proses, sync menghapus cache config dan route yang lama. Pada
+environment production yang dibaca langsung dari `.env`, tahap terakhir selalu
+menjalankan `optimize` lalu memastikan cache config dan route benar-benar
+terbentuk. Karena itu deploy rutin cukup `git pull` dan `starter:sync` tanpa
+command cache tambahan. Asset starter dan Livewire hanya dipublikasikan ulang
+ketika sumbernya berubah.
+
 Composer `post-autoload-dump` membersihkan cache bootstrap sebelum command sync
 dijalankan agar config dan route terbaru dimuat. Jika `starter:sync` atau
 `starter:setup` menemukan cache bootstrap lama, command membersihkannya lalu

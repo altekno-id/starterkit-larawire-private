@@ -34,6 +34,7 @@ class PublishAssetsCommand extends Command
         foreach (['starter', 'tabler'] as $ownedDirectory) {
             $ownedSource = "{$source}/{$ownedDirectory}";
             $ownedDestination = "{$destination}/{$ownedDirectory}";
+            $fingerprintPath = "{$destination}/.starter-publish-{$ownedDirectory}.sha256";
 
             if (! File::isDirectory($ownedSource)) {
                 $this->error("Required starter asset directory not found: {$ownedSource}");
@@ -41,7 +42,9 @@ class PublishAssetsCommand extends Command
                 return self::FAILURE;
             }
 
-            if ($this->directoriesMatch($ownedSource, $ownedDestination)) {
+            $fingerprint = $this->directoryFingerprint($ownedSource);
+
+            if ($this->publishedFingerprintMatches($ownedDestination, $fingerprintPath, $fingerprint)) {
                 $this->line("Starter asset directory is already current: {$ownedDirectory}");
 
                 continue;
@@ -54,6 +57,8 @@ class PublishAssetsCommand extends Command
 
                 return self::FAILURE;
             }
+
+            File::put($fingerprintPath, $fingerprint.PHP_EOL);
         }
 
         $this->info('Starter assets synchronized to public/assets.');
@@ -61,25 +66,31 @@ class PublishAssetsCommand extends Command
         return self::SUCCESS;
     }
 
-    private function directoriesMatch(string $source, string $destination): bool
+    private function publishedFingerprintMatches(
+        string $destination,
+        string $fingerprintPath,
+        string $sourceFingerprint,
+    ): bool
     {
-        if (! File::isDirectory($destination)) {
-            return false;
+        return File::isDirectory($destination)
+            && File::isFile($fingerprintPath)
+            && hash_equals($sourceFingerprint, trim((string) File::get($fingerprintPath)));
+    }
+
+    private function directoryFingerprint(string $source): string
+    {
+        $files = collect(File::allFiles($source))
+            ->sortBy(fn ($file): string => $file->getRelativePathname(), SORT_STRING);
+        $hash = hash_init('sha256');
+
+        foreach ($files as $file) {
+            hash_update($hash, implode("\0", [
+                $file->getRelativePathname(),
+                (string) $file->getSize(),
+                (string) $file->getMTime(),
+            ])."\n");
         }
 
-        $sourceFiles = collect(File::allFiles($source));
-        $destinationFiles = collect(File::allFiles($destination));
-
-        if ($sourceFiles->count() !== $destinationFiles->count()) {
-            return false;
-        }
-
-        return $sourceFiles->every(function ($file) use ($source, $destination): bool {
-            $relativePath = $file->getRelativePathname();
-            $destinationPath = "{$destination}/{$relativePath}";
-
-            return File::isFile($destinationPath)
-                && hash_file('sha256', $file->getPathname()) === hash_file('sha256', $destinationPath);
-        });
+        return hash_final($hash);
     }
 }

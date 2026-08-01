@@ -60,9 +60,10 @@ migration, registry App, asset Livewire, storage link best-effort, serta
 menyiapkan client/Superuser. Sync update rutin tidak mereset akun/password.
 
 Composer `post-autoload-dump` membersihkan cache bootstrap sebelum command sync
-dijalankan agar config dan route terbaru dimuat. Jika command mendeteksi cache
-lama masih aktif, cache dibersihkan dan command berhenti dengan instruksi untuk
-dijalankan sekali lagi, bukan melanjutkan memakai metadata stale.
+dijalankan agar config dan route terbaru dimuat. Jika `starter:sync` atau
+`starter:setup` menemukan cache bootstrap lama, command membersihkannya lalu
+tetap melanjutkan dalam satu proses; cache production dibangun ulang pada tahap
+terakhir. Asset starter hanya disalin kembali ketika isi sumber berubah.
 
 `starter:security-check` tidak mengubah state dan memvalidasi APP key, session encryption, HTTP-only/SameSite cookie, kesesuaian `APP_URL`/`APP_DOMAIN`, serta requirement production seperti HTTPS, debug off, secure cookie, password default, extension `intl`, dan permission runtime.
 

@@ -16,20 +16,20 @@ class StarterDeploymentService
         }
 
         if ($hadBootCache) {
-            $command->error(
-                'Cache bootstrap lama telah dibersihkan. Jalankan command yang sama sekali lagi '
-                .'agar Laravel memuat config dan route terbaru.',
-            );
-
-            return Command::FAILURE;
+            $command->info('Cache bootstrap lama telah dibersihkan. Deployment dilanjutkan dalam proses yang sama.');
         }
 
         if ($ensureApplicationKey && ! $this->ensureApplicationKey($command)) {
             return Command::FAILURE;
         }
 
-        if ($command->call('starter:security-check') !== Command::SUCCESS
-            || $command->call('starter:publish-assets') !== Command::SUCCESS
+        $command->info('Memvalidasi konfigurasi keamanan...');
+        if ($command->call('starter:security-check') !== Command::SUCCESS) {
+            return Command::FAILURE;
+        }
+
+        $command->info('Menyinkronkan asset dan migration...');
+        if ($command->call('starter:publish-assets') !== Command::SUCCESS
             || $command->call('migrate', ['--force' => true]) !== Command::SUCCESS) {
             return Command::FAILURE;
         }
@@ -39,6 +39,7 @@ class StarterDeploymentService
 
     public function finish(Command $command): int
     {
+        $command->info('Mempublikasikan asset runtime dan membangun cache production...');
         if ($command->call('livewire:publish', [
             '--assets' => true,
             '--no-interaction' => true,

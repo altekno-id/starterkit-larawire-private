@@ -177,8 +177,10 @@ Yang berjalan otomatis:
   client/Superuser, seluruh registry App, asset, storage link bila didukung,
   asset Livewire, dan cache production;
 - `starter:sync` menangani security check, migration baru, asset, registry App,
-  storage link bila didukung, asset Livewire, dan cache production tanpa
-  membuat ulang akun atau mereset password.
+  storage link bila didukung, asset Livewire, dan cache production dalam satu
+  kali jalan tanpa membuat ulang akun atau mereset password. Cache bootstrap
+  lama dibersihkan lalu cache production dibangun ulang pada tahap akhir; asset
+  starter hanya disalin ulang saat isinya berubah.
 
 ## Multi-domain itu seperti apa?
 

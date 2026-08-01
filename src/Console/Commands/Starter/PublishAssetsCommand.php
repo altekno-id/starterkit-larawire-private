@@ -41,6 +41,12 @@ class PublishAssetsCommand extends Command
                 return self::FAILURE;
             }
 
+            if ($this->directoriesMatch($ownedSource, $ownedDestination)) {
+                $this->line("Starter asset directory is already current: {$ownedDirectory}");
+
+                continue;
+            }
+
             File::deleteDirectory($ownedDestination);
 
             if (! File::copyDirectory($ownedSource, $ownedDestination)) {
@@ -53,5 +59,27 @@ class PublishAssetsCommand extends Command
         $this->info('Starter assets synchronized to public/assets.');
 
         return self::SUCCESS;
+    }
+
+    private function directoriesMatch(string $source, string $destination): bool
+    {
+        if (! File::isDirectory($destination)) {
+            return false;
+        }
+
+        $sourceFiles = collect(File::allFiles($source));
+        $destinationFiles = collect(File::allFiles($destination));
+
+        if ($sourceFiles->count() !== $destinationFiles->count()) {
+            return false;
+        }
+
+        return $sourceFiles->every(function ($file) use ($source, $destination): bool {
+            $relativePath = $file->getRelativePathname();
+            $destinationPath = "{$destination}/{$relativePath}";
+
+            return File::isFile($destinationPath)
+                && hash_file('sha256', $file->getPathname()) === hash_file('sha256', $destinationPath);
+        });
     }
 }

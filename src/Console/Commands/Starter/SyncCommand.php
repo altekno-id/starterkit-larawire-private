@@ -8,6 +8,7 @@ use Altekno\StarterKit\Models\Starter\AppMod;
 use Altekno\StarterKit\Models\Starter\AppRoute;
 use Altekno\StarterKit\Services\Starter\StarterDeploymentService;
 use Illuminate\Console\Command;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -112,12 +113,13 @@ class SyncCommand extends Command
     {
         $this->validateSubdomain($subdomain);
         $config = $this->appConfig($subdomain);
-        $this->validateConfig($subdomain, $config);
+        $sourceRouteNames = $this->sourceRouteNames($subdomain);
+        $this->validateConfig($subdomain, $config, $sourceRouteNames);
 
         $app = App::query()->where('subdomain', $subdomain)->first();
         $configuredModCodes = collect($config['mods'] ?? [])->keys();
         $configuredMenuKeys = $this->configuredMenuKeys($config['mods'] ?? []);
-        $routeNames = $this->routeNames($subdomain, $configuredModCodes);
+        $routeNames = $this->routeNames($configuredModCodes, $sourceRouteNames);
 
         $existingMods = $app
             ? AppMod::query()->where('app_id', $app->id)->get()
@@ -256,7 +258,7 @@ class SyncCommand extends Command
      *
      * @param  array<string, mixed>  $config
      */
-    private function validateConfig(string $subdomain, array $config): void
+    private function validateConfig(string $subdomain, array $config, Collection $sourceRouteNames): void
     {
         if (empty($config['mods']) || ! is_array($config['mods'])) {
             $this->fail("App [{$subdomain}] must define at least one module in the [mods] array.");
@@ -279,12 +281,11 @@ class SyncCommand extends Command
                 $this->fail("Module [{$subdomain}.{$modCode}] must define a name.");
             }
 
-            $this->validateMenus($subdomain, $modCode, $modConfig['menus'] ?? []);
+            $this->validateMenus($subdomain, $modCode, $modConfig['menus'] ?? [], $sourceRouteNames);
         }
 
-        collect(Route::getRoutes())
-            ->map(fn ($route): string => (string) $route->getName())
-            ->filter(fn (string $name): bool => str_starts_with($name, "{$subdomain}.") && $name !== "{$subdomain}.anchor")
+        $sourceRouteNames
+            ->filter(fn (string $name): bool => $name !== "{$subdomain}.anchor")
             ->each(function (string $name) use ($subdomain, $config): void {
                 $modCode = explode('.', $name)[1] ?? '';
 
@@ -297,7 +298,12 @@ class SyncCommand extends Command
     /**
      * @param  array<int, array<string, mixed>>  $menus
      */
-    private function validateMenus(string $subdomain, string $modCode, array $menus): void
+    private function validateMenus(
+        string $subdomain,
+        string $modCode,
+        array $menus,
+        Collection $sourceRouteNames,
+    ): void
     {
         foreach ($menus as $menu) {
             if (! is_array($menu) || blank($menu['label'] ?? null)) {
@@ -307,7 +313,7 @@ class SyncCommand extends Command
             $routeName = $menu['route'] ?? null;
 
             if ($routeName !== null) {
-                if (! is_string($routeName) || ! Route::has($routeName)) {
+                if (! is_string($routeName) || ! $sourceRouteNames->contains($routeName)) {
                     $this->fail("Menu [{$menu['label']}] references missing route [{$routeName}].");
                 }
 
@@ -322,7 +328,7 @@ class SyncCommand extends Command
                 $this->fail("Landing menu [{$menu['label']}] must define a route.");
             }
 
-            $this->validateMenus($subdomain, $modCode, $menu['children'] ?? []);
+            $this->validateMenus($subdomain, $modCode, $menu['children'] ?? [], $sourceRouteNames);
         }
     }
 
@@ -434,21 +440,44 @@ class SyncCommand extends Command
      * @param  Collection<int, string>  $configuredModCodes
      * @return Collection<int, string>
      */
-    private function routeNames(string $subdomain, Collection $configuredModCodes): Collection
+    private function routeNames(Collection $configuredModCodes, Collection $sourceRouteNames): Collection
     {
-        return collect(Route::getRoutes())
-            ->filter(function ($route) use ($subdomain): bool {
-                return str_starts_with((string) $route->getName(), "{$subdomain}.");
-            })
-            ->filter(function ($route) use ($configuredModCodes): bool {
-                $modCode = explode('.', (string) $route->getName())[1] ?? 'dashboard';
+        return $sourceRouteNames
+            ->filter(function (string $routeName) use ($configuredModCodes): bool {
+                $modCode = explode('.', $routeName)[1] ?? 'dashboard';
 
                 return $configuredModCodes->contains($modCode);
             })
-            ->map(function ($route): string {
-                return (string) $route->getName();
-            })
             ->values();
+    }
+
+    /**
+     * Load the current App route source independently from any route cache that
+     * was active when Artisan booted.
+     *
+     * @return Collection<int, string>
+     */
+    private function sourceRouteNames(string $subdomain): Collection
+    {
+        $activeRouter = Route::getFacadeRoot();
+        $sourceRouter = new Router(app('events'), app());
+
+        Route::swap($sourceRouter);
+
+        try {
+            $sourceRouter
+                ->middleware('web')
+                ->domain($subdomain.'.'.config('app.domain'))
+                ->group(base_path("routes/apps/{$subdomain}.php"));
+
+            return collect($sourceRouter->getRoutes())
+                ->map(fn ($route): string => (string) $route->getName())
+                ->filter(fn (string $name): bool => str_starts_with($name, "{$subdomain}."))
+                ->unique()
+                ->values();
+        } finally {
+            Route::swap($activeRouter);
+        }
     }
 
     /**

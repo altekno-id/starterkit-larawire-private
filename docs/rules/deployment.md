@@ -69,6 +69,11 @@ terbentuk. Karena itu deploy rutin cukup `git pull` dan `starter:sync` tanpa
 command cache tambahan. Asset starter dan Livewire hanya dipublikasikan ulang
 ketika sumbernya berubah.
 
+Registry App membaca file route host melalui router terisolasi, bukan dari
+route collection yang mungkin sudah dimuat dari cache saat Artisan boot. Dengan
+demikian penambahan maupun penghapusan route setelah `git pull` diterapkan pada
+sync pertama.
+
 Composer `post-autoload-dump` membersihkan cache bootstrap sebelum command sync
 dijalankan agar config dan route terbaru dimuat. Jika `starter:sync` atau
 `starter:setup` menemukan cache bootstrap lama, command membersihkannya lalu

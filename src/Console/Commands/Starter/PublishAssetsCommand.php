@@ -30,11 +30,13 @@ class PublishAssetsCommand extends Command
         }
 
         File::ensureDirectoryExists($destination);
+        $fingerprintDirectory = storage_path('framework/starterkit');
+        File::ensureDirectoryExists($fingerprintDirectory);
 
         foreach (['starter', 'tabler'] as $ownedDirectory) {
             $ownedSource = "{$source}/{$ownedDirectory}";
             $ownedDestination = "{$destination}/{$ownedDirectory}";
-            $fingerprintPath = "{$destination}/.starter-publish-{$ownedDirectory}.sha256";
+            $fingerprintPath = "{$fingerprintDirectory}/assets-{$ownedDirectory}.sha256";
 
             if (! File::isDirectory($ownedSource)) {
                 $this->error("Required starter asset directory not found: {$ownedSource}");

@@ -469,8 +469,8 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
             return;
         }
 
-        this.lastBrowserActivityAt = Date.now();
-        this.lastSessionTouchAt ??= Date.now();
+        this.lastBrowserActivityAt ??= Date.now();
+        this.lastSessionTouchAt ??= this.lastBrowserActivityAt;
         this.scheduleAutoLock();
         this.bindAutoLockActivity();
     },
@@ -512,17 +512,28 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
                 return;
             }
 
-            const elapsed = Date.now() - this.lastBrowserActivityAt;
+            this.resumeAutoLock();
+        });
 
-            if (this.autoLockConfigValue && elapsed >= this.autoLockConfigValue.timeoutMilliseconds) {
-                this.performAutoLock();
-                return;
-            }
-
-            this.recordBrowserActivity(true);
+        ['focus', 'pageshow'].forEach((eventName) => {
+            window.addEventListener(eventName, () => this.resumeAutoLock());
         });
 
         this.autoLockActivityBound = true;
+    },
+    resumeAutoLock() {
+        if (! this.autoLockConfigValue || this.autoLocking || document.hidden) {
+            return;
+        }
+
+        const elapsed = Date.now() - this.lastBrowserActivityAt;
+
+        if (elapsed >= this.autoLockConfigValue.timeoutMilliseconds) {
+            this.performAutoLock();
+            return;
+        }
+
+        this.recordBrowserActivity(true);
     },
     recordBrowserActivity(forceTouch = false) {
         if (! this.autoLockConfigValue || this.autoLocking) {
@@ -586,7 +597,12 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
 
         const lockUrl = new URL(this.autoLockConfigValue.lockUrl, window.location.href);
         lockUrl.searchParams.set('redirect', window.location.href);
-        this.navigate(lockUrl.href);
+        this.clearLivewireLoader();
+        this.hideNavigateLoader();
+
+        // Locking must leave a suspended Livewire navigation behind. A full-page
+        // replacement guarantees the server lock state is rendered immediately.
+        window.location.replace(lockUrl.href);
     },
     bind() {
         if (this.bound) return;
@@ -710,11 +726,13 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
             });
 
             onError(({ response, body, preventDefault }) => {
-                if (![401, 419].includes(response.status)) {
+                if (![401, 419, 423].includes(response.status)) {
                     return;
                 }
 
-                const redirect = this.extractRedirectUrl(body) || this.authLoginUrl();
+                const redirect = this.extractRedirectUrl(body)
+                    || (response.status === 423 ? this.autoLockConfigValue?.lockUrl : null)
+                    || this.authLoginUrl();
 
                 preventDefault();
                 window.location.assign(redirect);

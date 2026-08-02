@@ -42,7 +42,7 @@ Konfigurasi existing:
 - Setiap perubahan atau reset password wajib menaikkan `auth_version`, merotasi `remember_token`, dan mempertahankan hanya session pelaku yang baru memverifikasi password. Session perangkat lain dihentikan server-side pada request berikutnya.
 - Remember me mengikuti config dinamis.
 - Middleware `starter.lock` menjadi pertahanan server.
-- Runtime JavaScript mengunci otomatis tanpa reload penuh dan menyentuh session secara throttled saat ada aktivitas browser.
+- Runtime JavaScript mengunci otomatis dan menyentuh session secara throttled saat ada aktivitas browser. Saat tab kembali terlihat, window kembali fokus, atau halaman dipulihkan setelah sleep/back-forward cache, runtime wajib menghitung ulang timeout sebelum menyentuh session. Jika timeout telah lewat, lock screen harus dibuka dengan full-page navigation agar loader Livewire lama tidak dapat tertinggal/stuck.
 - Timeout minimal 60 detik dan maksimal 24 jam.
 - Unlock memerlukan password, rate-limited, dan kembali ke URL aman sebelumnya.
 

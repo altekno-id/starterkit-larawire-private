@@ -11,6 +11,10 @@ Aturan ini berlaku otomatis untuk starterkit dan seluruh project turunannya. Use
 
 ## Query dan pagination
 
+- Tabel Livewire wajib memakai PowerGrid dengan datasource Builder. Seluruh
+  search, filter per kolom, sort, aggregate, dan pagination dijalankan oleh
+  query database; jangan mengubah Builder menjadi Collection sebelum PowerGrid
+  memprosesnya.
 - Setiap daftar data bisnis yang dapat bertambah wajib melakukan search, filter, sort, aggregate, dan pagination di database.
 - Dilarang memanggil `get()`/`all()` lalu memfilter, mengurutkan, atau membuat `LengthAwarePaginator` manual untuk daftar yang dapat bertambah.
 - Batasi `perPage` pada pilihan yang wajar. Sort column, sort direction, filter enum, dan page size dari request/Livewire wajib memakai allowlist.

@@ -9,6 +9,7 @@ use Altekno\StarterKit\Services\Starter\AuthenticatedLoginService;
 use Altekno\StarterKit\Support\Starter\ActivityLogFilters;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -94,6 +95,7 @@ class ActivityLogIndex extends Component
         $this->resetPage('logsPage');
     }
 
+    #[On('starter-log-detail-request')]
     public function showActionDetail(string $actionId): void
     {
         abort_unless(preg_match('/^[0-9A-HJKMNP-TV-Z]{26}$/i', $actionId) === 1, 404);

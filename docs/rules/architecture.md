@@ -18,7 +18,9 @@
 4. **Presentation**
    - Full-page Livewire component di `app/Livewire/Apps/<App>/<Module>/`.
    - Blade di `resources/views/apps/<app-key>/<module>/`.
-   - Layout utama `resources/views/starter/templates/layouts/app.blade.php`.
+   - View core theme aktif di `resources/themes/<theme>/views/starter/`.
+   - Atlas UI theme aktif di `docs/template/<theme>/`.
+   - Tabel Livewire memakai PowerGrid dan adapter theme aktif.
 5. **Domain/data**
    - Model untuk persistence.
    - Service untuk business flow, transaksi, dan aksi lintas model.
@@ -60,15 +62,15 @@ Ketentuan konsistensi dan performa:
 
 ## Isolasi starterkit dan project turunan
 
-- Source core berada di `<laravel>/starterkit` sebagai Git subtree yang dilacak
-  repository host. Dengan demikian deployment production memperoleh core lewat
-  `git pull` repository host tanpa clone tambahan. Feature project dilarang
-  mengubah source subtree; improvement universal wajib dikerjakan dan dipush
-  pada repository canonical, lalu ditarik dengan `git subtree pull`.
+- Source core berada di `<laravel>/starterkit-larawire-private` sebagai clone
+  Git mandiri yang diabaikan repository host. Feature project dilarang mengubah
+  source clone; improvement universal wajib dikerjakan dan dipush pada
+  repository canonical. Update project dilakukan manual dari dalam clone dengan
+  `git pull --ff-only origin master`, kemudian diverifikasi dari root host.
 - Connector host dibatasi pada autoload namespace `Altekno\StarterKit\` dari
-  `starterkit/src`, registrasi `StarterServiceProvider`, pemanggilan
+  `starterkit-larawire-private/src`, registrasi `StarterServiceProvider`, pemanggilan
   `StarterBootstrap`, environment, dan asset publish. Pada Laravel host standar
-  seluruh connector dipasang oleh `php starterkit/installer/install.php`.
+  seluruh connector dipasang oleh `php starterkit-larawire-private/installer/install.php`.
   Instalasi awal hanya menerima Laravel fresh dan database baru karena memakai
   `migrate:fresh`; project existing harus memakai alur update. Opsi `--reset`
   hanya mereset database local/development dengan `migrate:fresh` dan setup
@@ -86,16 +88,16 @@ Ketentuan konsistensi dan performa:
       'app.contoh' => AppMiddleware::class,
   ]);
   ```
-- Seluruh migration core berada di `starterkit/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
-- Seluruh Blade internal starter berada di `resources/views/starter`, termasuk `errors`, `templates`, auth, profile, settings, log, dan user management.
+- Seluruh migration core berada di `starterkit-larawire-private/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
+- Seluruh Blade internal starter berada di `resources/themes/<theme>/views/starter`, termasuk `errors`, `templates`, auth, profile, settings, log, dan user management. Logic universal tidak boleh memuat class/asset template secara langsung di luar registry/adapter theme.
 - Landing adalah area kustom project host dan wajib berada di
-  `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder subtree
+  `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder clone
   starterkit. Installer membuat landing minimum hanya bila project belum
   memiliki root landing. Ketika instalasi tidak membuat App pertama, landing
   minimum berfungsi sebagai onboarding yang menjelaskan hierarki App → Module →
   Menu → Submenu, generator, lokasi source, dan alur sync. Setelah dibuat,
   ownership landing sepenuhnya milik project.
-- Route internal starter berada di `starterkit/routes/starter`; `routes/web.php` milik host memuat landing dan route project root-domain.
+- Route internal starter berada di `starterkit-larawire-private/routes/starter`; `routes/web.php` milik host memuat landing dan route project root-domain.
 - Test internal starter berada di `tests/Feature/Starter`; test feature project berada di `tests/Feature/Apps/<App>` atau folder domain project.
 - Asset internal starter berada di `public/assets/starter`; jangan menaruh asset starter baru di folder project yang generik.
 - File standar framework seperti `config/auth.php`, `config/session.php`, dan `config/livewire.php` tetap pada lokasi Laravel karena dibaca langsung oleh framework. Isolasi dilakukan pada ownership dan referensinya, bukan dengan memindahkan file standar secara paksa.
@@ -135,14 +137,14 @@ database/migrations/apps/<subdomain>/
 - Extension UI project hanya boleh berada pada kontrak `resources/views/extensions/starter/` yang didokumentasikan. Extension bukan override: project dilarang menyalin atau mengganti view/layout core.
 - `AGENTS.md` pada root Laravel host adalah connector project yang dipasang
   installer dan wajib disimpan dalam repository project. Rules canonical tetap
-  berada di `starterkit/AGENTS.md` serta `starterkit/docs/rules/`; connector
+  berada di `starterkit-larawire-private/AGENTS.md` serta `starterkit-larawire-private/docs/rules/`; connector
   hanya mengarahkan agent agar rules terbaru langsung berlaku setelah update
   starterkit diperbarui.
 - Installer hanya boleh mengelola block connector starterkit di dalam
   `AGENTS.md`; instruksi project di luar marker block wajib dipertahankan.
 - Improvement universal wajib berasal dari repository starterkit canonical,
   diverifikasi pada Laravel host, di-commit, dan dipush sebelum commit tersebut
-  disinkronkan ke project pengguna. Perubahan langsung pada subtree/embedded
+  ditarik manual pada clone project pengguna. Perubahan langsung pada clone embedded
   project tidak boleh menjadi source of truth core.
 
 ## Registrasi route

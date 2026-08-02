@@ -2,6 +2,7 @@
 
 namespace Altekno\StarterKit\Console\Commands\Starter;
 
+use Altekno\StarterKit\Support\Starter\StarterTheme;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -81,6 +82,12 @@ class SecurityCheckCommand extends Command
                 'Application domain consistency',
                 $this->domainMatchesApplicationUrl(),
                 'APP_URL host must equal APP_DOMAIN.',
+            ),
+            $this->check(
+                'Starter UI theme',
+                StarterTheme::key() === 'tabler'
+                    && class_exists(StarterTheme::powerGridTheme()),
+                'STARTER_THEME must reference a registered theme with a PowerGrid adapter.',
             ),
         ];
     }

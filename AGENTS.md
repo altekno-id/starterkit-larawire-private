@@ -2,13 +2,13 @@
 
 Dokumen ini adalah kontrak eksekusi untuk setiap model AI yang mengembangkan project turunan dari starterkit ini. Jangan membaca seluruh `docs/` pada setiap tugas; baca konteks inti dan rule yang relevan.
 
-Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan sebagai aplikasi Laravel mandiri. Semua perintah Composer, Artisan, Pint, Pest, migration, dan setup dijalankan dari root Laravel host yang memuat source ini pada folder `starterkit/`.
+Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan sebagai aplikasi Laravel mandiri. Semua perintah Composer, Artisan, Pint, Pest, migration, dan setup dijalankan dari root Laravel host yang memuat clone ini pada folder `starterkit-larawire-private/`.
 
 Installer membuat connector terkelola pada `AGENTS.md` di root Laravel host.
 Connector tersebut mengarahkan agent ke file canonical ini tanpa menyalin
 seluruh rules, sehingga perubahan rules langsung terbaca setelah
-`git pull` pada folder `starterkit/`. Bila bekerja dari root Laravel host,
-referensi `docs/...` dalam file ini berarti `starterkit/docs/...`; path feature
+`git pull --ff-only` pada folder `starterkit-larawire-private/`. Bila bekerja dari root Laravel host,
+referensi `docs/...` dalam file ini berarti `starterkit-larawire-private/docs/...`; path feature
 seperti `app/`, `routes/apps/`, `resources/views/apps/`,
 `database/migrations/apps/`, `tests/`, dan `issues/` tetap milik Laravel host.
 
@@ -54,6 +54,14 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
   `docs/rules/feature-development.md`.
 - Secara otomatis terapkan authorization, validation, proteksi injection/mass-assignment, server-side pagination untuk data yang dapat tumbuh, query efisien, audit log, transaksi, locale/format, pola Livewire/Alpine, UI state, migration production-safe, dan test sesuai rule pemilik.
 - Setiap module manajemen entitas bisnis menerapkan lifecycle CRUD lengkap secara default—create, edit/update, arsip/soft delete, pulihkan, dan hard delete—serta checkbox aksi massal dan aksi by-filter. Terapkan kontrak scope, konfirmasi berbahaya, relasi, audit, performa, dan pengecualian data turunan/append-only dari `ui-ux.md`, `performance.md`, `audit-logging.md`, `code-style.md`, dan `testing.md` tanpa menunggu developer mengulangnya.
+- Setiap penyajian data berbentuk tabel pada project Livewire wajib memakai
+  `power-components/livewire-powergrid`. Datasource, pencarian, filter setiap
+  kolom yang relevan, sorting, dan pagination wajib berjalan server-side.
+  Tabel manajemen mutable wajib menyediakan checkbox, aksi massal/by-filter,
+  serta lifecycle arsip, pulihkan, dan hapus permanen. Pengecualian filter atau
+  lifecycle hanya untuk kolom/data yang memang tidak relevan, turunan,
+  append-only, audit/compliance, pivot, atau metadata sistem dan alasannya wajib
+  dibuktikan serta diuji.
 - Seluruh feature untuk app/subdomain wajib mengikuti struktur `Apps/<Subdomain>` pada layer yang dipakai. Baca `docs/rules/architecture.md` sebelum membuat file feature app baru; jangan mencampurnya dengan folder Starter atau root project.
 - Migration feature app wajib berada di `database/migrations/apps/<subdomain>/`, bukan root `database/migrations`; folder tersebut dimuat otomatis saat perintah Artisan migration berjalan.
 - Endpoint API App wajib berada di `routes/apps/<subdomain>.api.php`. API memakai
@@ -61,7 +69,7 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
   menjadi metadata menu/module web, dan hanya didaftarkan ketika
   `STARTER_API_ENABLED=true`.
 - Asset CSS/JS custom halaman app wajib berada pada Blade asset yang berdekatan dengan view pemiliknya. Gunakan Alpine untuk UI kecil, Livewire hanya untuk kebutuhan server, dan `wire:model.defer` untuk form normal; baca `ui-ux.md` serta `performance.md` sebelum membuat interaksi atau memakai library baru.
-- UI wajib berangkat dari contoh terdekat di `docs/template`. Gunakan `docs/template/template.md` sebagai atlas pencarian yang tidak mengikat: cari beberapa kandidat lintas konteks, buka satu sampai tiga sumber HTML, lalu pilih/komposisikan pola template UI aktif yang paling tepat. Jangan membuat desain/komponen hanya berdasarkan selera. Pilih komponen berdasarkan konteks, jenis, dan volume data agar halaman padat, informatif, responsif, serta profesional.
+- UI wajib berangkat dari contoh terdekat di `docs/template/<theme>`. Gunakan `docs/template/<theme>/template.md` sebagai atlas pencarian yang tidak mengikat: cari beberapa kandidat lintas konteks, buka satu sampai tiga sumber HTML, lalu pilih/komposisikan pola template UI aktif yang paling tepat. PowerGrid wajib memakai adapter/komponen theme aktif, bukan tampilan generik lintas theme. Jangan membuat desain/komponen hanya berdasarkan selera. Pilih komponen berdasarkan konteks, jenis, dan volume data agar halaman padat, informatif, responsif, serta profesional.
 - Bila sebuah standar tidak relevan, lewati tanpa menambah code seremonial. Bila requirement meminta deviasi, jelaskan risiko dan minta keputusan eksplisit.
 
 ## Kontrak anti-asumsi
@@ -92,7 +100,7 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
 | Pengujian dan definition of done | `docs/rules/testing.md` |
 | Shared hosting/deployment | `docs/rules/deployment.md` |
 | Hubungan layer dan source of truth | `docs/rules/architecture.md` |
-| Install/update subtree starterkit atau extension project | `README.md` |
+| Install/update clone starterkit, theme, atau extension project | `README.md` |
 
 ## Profil baca minimum
 
@@ -126,7 +134,7 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
    mengisi konfirmasi chat baku. Setelah developer menjawab bahwa pemahaman
    sudah benar, tulis satu spesifikasi teknis bernama
    `issues/<jenis>_<slug>_<YYYY_MM_DD_HHMMSS>.md`.
-3. Untuk UI, cari `docs/template/template.md` dengan `rg` berdasarkan konteks dan komponen, lalu buka 1–3 HTML sumber yang paling relevan. Jangan membaca seluruh atlas atau `docs/template/tabler-components`.
+3. Untuk UI, cari `docs/template/<theme>/template.md` dengan `rg` berdasarkan konteks dan komponen, lalu buka 1–3 HTML sumber yang paling relevan. Jangan membaca seluruh atlas atau source template sekaligus.
 4. Jangan menyalin ulang aturan umum ke dokumen feature.
 5. Jangan membuat file issue sebelum konfirmasi chat disetujui. Folder
    `issues/archives/` hanya untuk spesifikasi yang implementasinya sudah selesai;
@@ -135,12 +143,12 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 
 ## Aturan eksekusi
 
-- Pada project pemakai, folder subtree `starterkit/` adalah core read-only untuk feature project. Perubahan di dalamnya hanya untuk improvement universal melalui branch/PR starterkit, lalu disinkronkan dengan `git subtree pull`.
-- Folder `starterkit/installer/` hanya dimiliki bootstrap instalasi. Setelah
+- Pada project pemakai, folder clone `starterkit-larawire-private/` adalah core read-only untuk feature project dan memiliki repository Git sendiri. Update dilakukan manual dari dalam clone memakai `git pull --ff-only origin master`; repository host wajib mengabaikan folder tersebut dan tidak merekamnya sebagai subtree, submodule, atau gitlink.
+- Folder `starterkit-larawire-private/installer/` hanya dimiliki bootstrap instalasi. Setelah
   setup berhasil, developer dan AI feature wajib mengabaikannya; baca atau ubah
   folder tersebut hanya saat tugas memang menyangkut installer.
 - Instalasi standar hanya boleh dilakukan pada Laravel fresh dengan database
-  khusus yang baru melalui `php starterkit/installer/install.php`. Installer
+  khusus yang baru melalui `php starterkit-larawire-private/installer/install.php`. Installer
   wajib memeriksa source target, menjelaskan bahwa `migrate:fresh` menghapus
   seluruh tabel/data, dan berhenti sebelum mutation kecuali developer
   mengonfirmasi dengan `y`. Installer wajib menanyakan kode/subdomain dan nama
@@ -163,14 +171,14 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 - Setiap perubahan core starterkit wajib dikerjakan pada repository starterkit
   canonical yang memiliki remote `origin`, diverifikasi melalui Laravel host,
   lalu dibuat sebagai commit terfokus dan dipush sebelum disinkronkan ke folder
-  starterkit project pengguna. Jangan meninggalkan improvement universal hanya
+  clone starterkit project pengguna. Jangan meninggalkan improvement universal hanya
   sebagai perubahan lokal/embedded. Setelah sync, verifikasi, commit, dan push
   perubahan integrasi pada repository project pengguna.
 - Jangan meminta developer menyalin source core atau mengedit connector satu per
   satu pada instalasi Laravel fresh yang masih memakai struktur standar.
 - Installer wajib membuat atau memperbarui block connector terkelola pada
   `AGENTS.md` root Laravel host tanpa menimpa instruksi project di luar block
-  tersebut. File canonical `starterkit/AGENTS.md` tetap menjadi source of truth
+  tersebut. File canonical `starterkit-larawire-private/AGENTS.md` tetap menjadi source of truth
   agar update rules tidak memerlukan copy manual.
 - Setelah konfirmasi chat disetujui dan file issue dibuat, jangan langsung
   mengeksekusi code. Beri tahu developer bahwa detail teknis siap diperiksa dan

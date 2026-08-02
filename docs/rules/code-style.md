@@ -41,7 +41,7 @@
   core starterkit. Perubahan nama tabel helper pada project existing wajib
   memakai migration rename/backfill yang production-safe; jangan hanya mengubah
   config karena dapat membuat Laravel menganggap migration belum pernah jalan.
-- Migration infrastruktur core hanya berada di `starterkit/database/migrations/starter`. Migration tabel feature pada Laravel host wajib berada di `database/migrations/apps/<subdomain>/`; jangan membuat migration feature baru di root `database/migrations` atau folder module. Loader starter menemukan folder subdomain valid secara otomatis saat Artisan migration berjalan.
+- Migration infrastruktur core hanya berada di `starterkit-larawire-private/database/migrations/starter`. Migration tabel feature pada Laravel host wajib berada di `database/migrations/apps/<subdomain>/`; jangan membuat migration feature baru di root `database/migrations` atau folder module. Loader starter menemukan folder subdomain valid secara otomatis saat Artisan migration berjalan.
 - Sampai generator khusus tersedia, buat model dan migration app sebagai dua perintah terpisah agar path migration tidak salah:
 
   ```bash

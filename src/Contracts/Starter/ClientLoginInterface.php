@@ -4,9 +4,12 @@ namespace Altekno\StarterKit\Contracts\Starter;
 
 use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 interface ClientLoginInterface
 {
+    public function tableQueryForViewer(ClientLogin $viewer, string $archiveStatus = 'active'): Builder;
+
     public function findByUsername(string $username): ?ClientLogin;
 
     /**
@@ -23,6 +26,8 @@ interface ClientLoginInterface
     public function findBasicById(int $id): ?ClientLogin;
 
     public function findForManagement(int $id): ?ClientLogin;
+
+    public function findWithTrashedForManagement(int $id): ?ClientLogin;
 
     /**
      * @param  array<string, mixed>  $data
@@ -41,4 +46,10 @@ interface ClientLoginInterface
     public function countForViewer(ClientLogin $viewer): int;
 
     public function revokeRememberTokens(): int;
+
+    public function archive(ClientLogin $login): void;
+
+    public function restore(ClientLogin $login): void;
+
+    public function forceDelete(ClientLogin $login): void;
 }

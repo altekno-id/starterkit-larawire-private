@@ -21,6 +21,25 @@ class ActivityLogRepository implements ActivityLogInterface
     /** @var list<string>|null */
     private ?array $protectedUserIds = null;
 
+    public function tableQueryForViewer(ClientLogin $viewer): Builder
+    {
+        return $this->viewerQuery($viewer)
+            ->selectRaw('MAX(id) as id')
+            ->selectRaw('action_id')
+            ->selectRaw('MAX(created_at) as created_at')
+            ->selectRaw('MAX(action_label) as action_label')
+            ->selectRaw('MAX(action_key) as action_key')
+            ->selectRaw('MAX(actor_name) as actor_name')
+            ->selectRaw('MAX(actor_username) as actor_username')
+            ->selectRaw('MAX(actor_role) as actor_role')
+            ->selectRaw('MAX(app_key) as app_key')
+            ->selectRaw('MAX(route_name) as route_name')
+            ->selectRaw('MAX(ip_address) as ip_address')
+            ->selectRaw('COUNT(*) as changes_count')
+            ->selectRaw('COUNT(DISTINCT table_name) as tables_count')
+            ->groupBy('action_id');
+    }
+
     public function paginateActionsForViewer(
         ClientLogin $viewer,
         ActivityLogFilters $filters,

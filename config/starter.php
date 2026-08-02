@@ -1,9 +1,22 @@
 <?php
 
+use Altekno\StarterKit\Themes\Starter\TablerPowerGridTheme;
+
 $domain = env('APP_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost');
 
 return [
     'domain' => $domain,
+
+    'theme' => env('STARTER_THEME', 'tabler'),
+
+    'themes' => [
+        'tabler' => [
+            'views' => 'resources/themes/tabler/views',
+            'assets' => 'public/themes/tabler/assets',
+            'docs' => 'docs/template/tabler',
+            'powergrid' => TablerPowerGridTheme::class,
+        ],
+    ],
 
     'api' => [
         'enabled' => env('STARTER_API_ENABLED', false),

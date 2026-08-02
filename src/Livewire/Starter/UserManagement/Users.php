@@ -6,23 +6,17 @@ use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Services\Starter\AuthenticatedLoginService;
 use Altekno\StarterKit\Services\Starter\UserManagementUserService;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 #[Layout('layouts::app')]
 class Users extends Component
 {
-    use WithPagination;
-
     private UserManagementUserService $userService;
 
     private AuthenticatedLoginService $authenticatedLogins;
 
     public bool $embedded = false;
-
-    public string $search = '';
-
-    public string $statusFilter = '';
 
     public ?string $temporaryPassword = null;
 
@@ -47,16 +41,7 @@ class Users extends Component
         $this->embedded = $embedded;
     }
 
-    public function updatedSearch(): void
-    {
-        $this->resetPage('usersPage');
-    }
-
-    public function updatedStatusFilter(): void
-    {
-        $this->resetPage('usersPage');
-    }
-
+    #[On('starter-user-reset-request')]
     public function preparePasswordReset(int $id): void
     {
         $login = $this->users()->findPasswordResetTarget($this->login(), $id);
@@ -94,15 +79,7 @@ class Users extends Component
 
     public function render()
     {
-        $login = $this->login();
-        $users = $this->users()->paginateUsers(
-            $login,
-            $this->search,
-            $this->statusFilter,
-        );
-
         return view('starter.user-management.users', [
-            'users' => $users,
             'appCount' => $this->users()->appCount(),
         ])->title('Manajemen User');
     }

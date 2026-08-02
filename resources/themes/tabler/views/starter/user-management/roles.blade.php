@@ -17,6 +17,10 @@
         </div>
     @endunless
 
+    <livewire:starter.user-management.roles-table />
+
+    {{-- Legacy markup remains temporarily compile-safe while PowerGrid owns the rendered table. --}}
+    @if (false)
     <div class="card">
         <div class="card-header">
             <div>
@@ -191,6 +195,8 @@
             </div>
         @endif
     </div>
+
+    @endif
 
     @if ($roleUsersModalOpen)
         <div class="modal modal-blur fade show d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="role-users-modal-title">

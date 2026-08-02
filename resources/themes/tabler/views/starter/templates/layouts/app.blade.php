@@ -15,6 +15,7 @@
     <link rel="shortcut icon" href="{{ asset('assets/tabler/static/logo-small.svg') }}">
     <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler.min.css') }}?v={{ filemtime(public_path('assets/tabler/dist/css/tabler.min.css')) }}">
     <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler-vendors.min.css') }}?v={{ filemtime(public_path('assets/tabler/dist/css/tabler-vendors.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset('vendor/livewire-powergrid/bootstrap5.css') }}?v={{ filemtime(public_path('vendor/livewire-powergrid/bootstrap5.css')) }}">
     <style>
         [x-cloak] {
             display: none !important;
@@ -445,6 +446,7 @@
 
     <script src="{{ asset('assets/tabler/dist/js/tabler.min.js') }}?v={{ filemtime(public_path('assets/tabler/dist/js/tabler.min.js')) }}" defer></script>
     <script src="{{ asset('assets/starter/js/starter-runtime.js') }}?v={{ filemtime(public_path('assets/starter/js/starter-runtime.js')) }}" data-navigate-once defer></script>
+    <script src="{{ asset('vendor/livewire-powergrid/powergrid.js') }}?v={{ filemtime(public_path('vendor/livewire-powergrid/powergrid.js')) }}" data-navigate-once defer></script>
     @livewireScripts
     @stack('page-scripts')
     @includeIf('extensions.starter.layout.body-end')

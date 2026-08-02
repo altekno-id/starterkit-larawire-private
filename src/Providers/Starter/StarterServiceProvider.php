@@ -25,14 +25,17 @@ use Altekno\StarterKit\Livewire\Starter\Auth\ConfirmPassword;
 use Altekno\StarterKit\Livewire\Starter\Auth\LockScreen as LockScreenComponent;
 use Altekno\StarterKit\Livewire\Starter\Auth\Login;
 use Altekno\StarterKit\Livewire\Starter\Logs\ActivityLogIndex;
+use Altekno\StarterKit\Livewire\Starter\Logs\ActivityLogsTable;
 use Altekno\StarterKit\Livewire\Starter\Profile\EditMyProfile;
 use Altekno\StarterKit\Livewire\Starter\Settings\ClientProfile;
 use Altekno\StarterKit\Livewire\Starter\Settings\SecuritySettings;
 use Altekno\StarterKit\Livewire\Starter\Settings\SettingsIndex;
 use Altekno\StarterKit\Livewire\Starter\UserManagement\RoleForm;
 use Altekno\StarterKit\Livewire\Starter\UserManagement\Roles;
+use Altekno\StarterKit\Livewire\Starter\UserManagement\RolesTable;
 use Altekno\StarterKit\Livewire\Starter\UserManagement\UserForm;
 use Altekno\StarterKit\Livewire\Starter\UserManagement\Users;
+use Altekno\StarterKit\Livewire\Starter\UserManagement\UsersTable;
 use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Repositories\Starter\ActivityLogRepository;
 use Altekno\StarterKit\Repositories\Starter\AppModRepository;
@@ -51,6 +54,7 @@ use Altekno\StarterKit\Services\Starter\StarterContextService;
 use Altekno\StarterKit\Services\Starter\UserManagementRoleService;
 use Altekno\StarterKit\Services\Starter\UserManagementUserService;
 use Altekno\StarterKit\Support\Starter\StarterPaths;
+use Altekno\StarterKit\Support\Starter\StarterTheme;
 use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Auth\Middleware\RequirePassword;
@@ -70,6 +74,7 @@ class StarterServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(StarterPaths::path('config/starter.php'), 'starter');
+        $this->configurePowerGrid();
         $this->configureEmbeddedApplication();
         $this->registerViewPaths();
         $this->prepareApiDocumentation();
@@ -110,7 +115,7 @@ class StarterServiceProvider extends ServiceProvider
         $this->loadAppMigrations();
         $this->registerLivewireComponents();
         $this->configureApiDocumentation();
-        View::addNamespace('errors', StarterPaths::path('resources/views/starter/errors'));
+        View::addNamespace('errors', StarterTheme::viewPath('starter/errors'));
 
         Number::useLocale(str_replace('_', '-', (string) config('app.locale')));
         $strictDevelopment = $this->app->isLocal() || $this->app->runningUnitTests();
@@ -121,6 +126,7 @@ class StarterServiceProvider extends ServiceProvider
             'eloquent.created: *',
             'eloquent.updated: *',
             'eloquent.deleted: *',
+            'eloquent.restored: *',
         ], function (string $eventName, array $models): void {
             $event = str($eventName)->after('eloquent.')->before(':')->value();
             $model = $models[0] ?? null;
@@ -154,14 +160,17 @@ class StarterServiceProvider extends ServiceProvider
             'starter.auth.lock-screen' => LockScreenComponent::class,
             'starter.auth.login' => Login::class,
             'starter.logs.activity-log-index' => ActivityLogIndex::class,
+            'starter.logs.activity-logs-table' => ActivityLogsTable::class,
             'starter.profile.edit-my-profile' => EditMyProfile::class,
             'starter.settings.client-profile' => ClientProfile::class,
             'starter.settings.security-settings' => SecuritySettings::class,
             'starter.settings.settings-index' => SettingsIndex::class,
             'starter.user-management.role-form' => RoleForm::class,
             'starter.user-management.roles' => Roles::class,
+            'starter.user-management.roles-table' => RolesTable::class,
             'starter.user-management.user-form' => UserForm::class,
             'starter.user-management.users' => Users::class,
+            'starter.user-management.users-table' => UsersTable::class,
         ];
 
         foreach ($components as $name => $component) {
@@ -173,8 +182,8 @@ class StarterServiceProvider extends ServiceProvider
     {
         $viewPaths = (array) $this->app['config']->get('view.paths', [resource_path('views')]);
         $starterViewPaths = [
-            StarterPaths::path('resources/views/starter'),
-            StarterPaths::path('resources/views'),
+            StarterTheme::viewPath('starter'),
+            StarterTheme::viewPath(),
         ];
 
         $this->app['config']->set('view.paths', array_values(array_unique([
@@ -216,7 +225,7 @@ class StarterServiceProvider extends ServiceProvider
         }
 
         $config = $this->app['config'];
-        $starterViews = StarterPaths::path('resources/views/starter');
+        $starterViews = StarterTheme::viewPath('starter');
 
         $config->set('app.domain', $config->get('starter.domain'));
 
@@ -238,6 +247,14 @@ class StarterServiceProvider extends ServiceProvider
         $config->set('livewire.component_namespaces.layouts', "{$starterViews}/templates/layouts");
         $config->set('livewire.component_layout', 'layouts::app');
         $config->set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:10240']);
+    }
+
+    private function configurePowerGrid(): void
+    {
+        $config = $this->app['config'];
+        $config->set('livewire-powergrid.theme', StarterTheme::powerGridTheme());
+        $config->set('livewire-powergrid.filter', 'inline');
+        $config->set('livewire-powergrid.persist_driver', 'session');
     }
 
     private function prepareApiDocumentation(): void

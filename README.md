@@ -1,11 +1,13 @@
-# Laravel Private Starterkit
+# Starterkit Larawire Private
 
 Starterkit Laravel untuk aplikasi internal perusahaan. Fondasi login, user,
-role, App, module, menu, audit, keamanan, API, serta UI berbasis **Tabler**
+role, App, module, menu, audit, keamanan, API, serta UI bertema **Tabler**
 sudah disiapkan agar developer fokus pada fitur bisnis dan agentic coding.
 
-Repository ini bukan aplikasi mandiri. Clone ke folder `starterkit` di dalam
-Laravel fresh, lalu jalankan installer.
+Repository ini bukan aplikasi mandiri. Clone sebagai repository Git mandiri ke
+folder `starterkit-larawire-private` di dalam Laravel fresh, lalu jalankan
+installer. Repository Laravel host mengabaikan folder tersebut; update source
+starterkit dilakukan manual dari clone itu sendiri.
 
 ## Agentic-ready — tujuan rules
 
@@ -17,9 +19,9 @@ authorization, audit, migration production-safe, pagination server-side,
 performa query, pola Livewire/Alpine, UI, struktur folder, dan testing.
 
 Saat instalasi, connector `AGENTS.md` otomatis dibuat di root Laravel. Connector
-tersebut mengarahkan agent ke [`starterkit/AGENTS.md`](AGENTS.md) dan rule
+tersebut mengarahkan agent ke `starterkit-larawire-private/AGENTS.md` dan rule
 terkait tanpa menduplikasi seluruh isi. Karena source of truth tetap berada di
-folder starterkit, rules terbaru langsung tersedia setelah `git pull`.
+clone starterkit, rules terbaru langsung tersedia setelah pull manual.
 
 Alur pengembangan feature:
 
@@ -51,9 +53,10 @@ file issue berlaku untuk feature/perubahan feature/bug yang membutuhkan code;
 diagnosis baca-saja, status report, konsultasi, dan dokumentasi murni tidak
 membuat issue otomatis.
 
-## Template UI — Tabler
+## Theme UI — Tabler
 
-Varian starterkit ini menggunakan **Tabler** sebagai fondasi tampilan. Tabler
+Theme default starterkit ini adalah **Tabler**. Logic private Livewire tetap
+universal dan tidak dimiliki theme. Tabler
 menyediakan pola layout admin responsif, sidebar, navbar, card, table, form,
 badge, alert, dropdown, modal, pagination, empty state, halaman autentikasi,
 dan komponen visual lain untuk membangun UI yang konsisten dan profesional.
@@ -64,15 +67,38 @@ dan komponen visual lain untuk membangun UI yang konsisten dan profesional.
 - CSS, JavaScript, icon, dan asset inti Tabler disimpan lokal sehingga tidak
   bergantung pada CDN, Vite development server, atau konfigurasi production
   tambahan.
-- [`docs/template/template.md`](docs/template/template.md) adalah atlas komponen
+- [`docs/template/tabler/template.md`](docs/template/tabler/template.md) adalah atlas komponen
   untuk membantu agent AI menemukan contoh Tabler yang tepat tanpa membaca
   seluruh file HTML.
-- Source contoh di [`docs/template`](docs/template) menjadi acuan sebelum
+- Source contoh di [`docs/template/tabler`](docs/template/tabler) menjadi acuan sebelum
   memilih atau menyusun komponen baru. Komponen custom tetap mengikuti bahasa
   visual Tabler.
 
 Tabler adalah lapisan presentasi starterkit ini. Laravel, Livewire, aturan
 keamanan, performa, dan pemisahan App tetap menjadi fondasi arsitekturnya.
+
+Theme aktif ditentukan saat instalasi:
+
+```env
+STARTER_THEME=tabler
+```
+
+View theme berada di `resources/themes/tabler`, asset khusus theme di
+`public/themes/tabler`, dan atlas UI di `docs/template/tabler`. Theme baru wajib
+menyediakan ketiga area tersebut serta adapter PowerGrid tanpa menyalin logic
+core.
+
+## Standar tabel — Livewire PowerGrid
+
+Semua tabel Livewire memakai `power-components/livewire-powergrid`. Search,
+filter setiap kolom yang relevan, sorting, dan pagination berjalan di database.
+Tabel manajemen mutable menyediakan checkbox, aksi individual/massal/by-filter,
+arsip, pulihkan, dan hapus permanen. Log, pivot, metadata sistem, data turunan,
+dan append-only mengikuti pengecualian yang dibuktikan pada flow dan test.
+
+PowerGrid memakai adapter theme aktif. Theme Tabler menggunakan adapter
+Bootstrap 5 yang disesuaikan dengan card, table, filter, pagination, checkbox,
+empty state, dan modal Tabler; source vendor tidak diubah.
 
 ## Extension UI project
 
@@ -129,9 +155,9 @@ extension—daftarkan melalui `config/apps/<app>.php` lalu jalankan `starter:syn
 Dari root Laravel:
 
 ```bash
-git subtree add --prefix=starterkit \
-  https://github.com/altekno-id/starterkit-larawire-private-tabler.git master --squash
-php starterkit/installer/install.php --company="Nama Aplikasi"
+git clone https://github.com/altekno-id/starterkit-larawire-private.git \
+  starterkit-larawire-private
+php starterkit-larawire-private/installer/install.php --company="Nama Aplikasi"
 ```
 
 Installer meminta:
@@ -151,8 +177,8 @@ Jalankan dari root Laravel.
 
 | Kebutuhan | Command |
 |---|---|
-| Instalasi awal | `php starterkit/installer/install.php --company="Nama Aplikasi"` |
-| Reset database development | `php starterkit/installer/install.php --reset --company="Nama Aplikasi"` |
+| Instalasi awal | `php starterkit-larawire-private/installer/install.php --company="Nama Aplikasi"` |
+| Reset database development | `php starterkit-larawire-private/installer/install.php --reset --company="Nama Aplikasi"` |
 | Membuat App | `php artisan starter:make-app sales --name="Sales"` |
 | Membuat App tanpa langsung sync | `php artisan starter:make-app sales --name="Sales" --no-sync` |
 | Memeriksa perubahan registry | `php artisan starter:sync sales --dry-run` |
@@ -336,7 +362,7 @@ php artisan starter:sync layanan --force
 ## Reset database development
 
 ```bash
-php starterkit/installer/install.php --reset --company="Nama Aplikasi"
+php starterkit-larawire-private/installer/install.php --reset --company="Nama Aplikasi"
 ```
 
 Opsi `--reset` hanya dapat berjalan pada `APP_ENV=local|development` setelah
@@ -355,7 +381,7 @@ Setiap perbaikan universal wajib dikerjakan pada repository canonical starterkit
 yang memiliki remote `origin`, diverifikasi melalui Laravel host, lalu dibuat
 sebagai commit terfokus dan dipush sebelum disinkronkan ke project pengguna.
 
-Jangan menyelesaikan perubahan core hanya di folder embedded `starterkit/`
+Jangan menyelesaikan perubahan core hanya di clone embedded `starterkit-larawire-private/`
 milik project. Setelah commit upstream tersedia, update folder starterkit pada
 project pengguna dari commit tersebut, jalankan verifikasi host, lalu commit dan
 push perubahan integrasinya pada repository project.
@@ -365,8 +391,9 @@ push perubahan integrasinya pada repository project.
 Update tidak me-reset database:
 
 ```bash
-git subtree pull --prefix=starterkit \
-  https://github.com/altekno-id/starterkit-larawire-private-tabler.git master --squash
+git -C starterkit-larawire-private status --short --branch
+git -C starterkit-larawire-private pull --ff-only origin master
+composer install
 php artisan starter:sync
 php artisan test --compact
 git push origin master
@@ -383,6 +410,8 @@ memeriksa perubahan registry tanpa migration, publish asset, atau mutation.
 Deployment pertama setelah source dan `.env` production tersedia:
 
 ```bash
+git clone https://github.com/altekno-id/starterkit-larawire-private.git \
+  starterkit-larawire-private
 composer install --no-dev --optimize-autoloader
 php artisan starter:setup --company="Nama Perusahaan"
 ```
@@ -391,6 +420,8 @@ Deployment berikutnya:
 
 ```bash
 git pull --ff-only origin master
+git -C starterkit-larawire-private pull --ff-only origin master
+composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 ```
 
@@ -425,9 +456,10 @@ dibuat.
 - Landing dan fitur bisnis berada di Laravel host.
 - Extension UI berada di `resources/views/extensions/starter/`.
 - `AGENTS.md` root Laravel adalah connector AI; rules canonical berada di
-  folder `starterkit`.
-- Folder `starterkit` adalah core read-only untuk feature project; improvement
-  universal dilakukan melalui repository starterkit.
+  folder `starterkit-larawire-private`.
+- Folder `starterkit-larawire-private` adalah clone Git mandiri dan core
+  read-only untuk feature project; improvement universal dilakukan melalui
+  repository canonical.
 - Installer normal hanya untuk Laravel fresh dan database baru.
 - Installer menyediakan reset database khusus local/development, tetapi tidak
   boleh menghapus source atau upload project.

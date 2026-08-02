@@ -1,0 +1,149 @@
+<?php
+
+namespace Altekno\StarterKit\Livewire\Starter\UserManagement;
+
+use Altekno\StarterKit\Models\Starter\ClientLogin;
+use Altekno\StarterKit\Models\Starter\ClientRole;
+use Altekno\StarterKit\Services\Starter\AuthenticatedLoginService;
+use Altekno\StarterKit\Services\Starter\UserManagementRoleService;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\On;
+use PowerComponents\LivewirePowerGrid\Button;
+use PowerComponents\LivewirePowerGrid\Column;
+use PowerComponents\LivewirePowerGrid\Facades\Filter;
+use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
+use PowerComponents\LivewirePowerGrid\PowerGridComponent;
+use PowerComponents\LivewirePowerGrid\PowerGridFields;
+
+class RolesTable extends PowerGridComponent
+{
+    public string $tableName = 'starter-roles-table';
+
+    public string $archiveStatus = 'active';
+
+    public ?string $pendingAction = null;
+
+    /** @var list<int> */
+    public array $pendingIds = [];
+
+    private UserManagementRoleService $roles;
+
+    private AuthenticatedLoginService $authenticatedLogins;
+
+    public function boot(UserManagementRoleService $roles, AuthenticatedLoginService $authenticatedLogins): void
+    {
+        $this->roles = $roles;
+        $this->authenticatedLogins = $authenticatedLogins;
+    }
+
+    public function setUp(): array
+    {
+        $this->showCheckBox();
+
+        return [
+            PowerGrid::header()->showSearchInput()->includeViewOnTop('starter.user-management.powergrid.roles-toolbar'),
+            PowerGrid::footer()->showPerPage(10, [10, 25, 50, 100])->showRecordCount(),
+        ];
+    }
+
+    public function datasource(): Builder
+    {
+        return $this->roles->tableQuery($this->login(), $this->archiveStatus);
+    }
+
+    public function fields(): PowerGridFields
+    {
+        return PowerGrid::fields()
+            ->add('id')->add('name')->add('code')->add('desc')->add('client_logins_count')->add('mods_count')
+            ->add('settings_label', fn (ClientRole $role): string => $role->canManageSettings() ? 'Ya' : 'Tidak')
+            ->add('logs_label', fn (ClientRole $role): string => $role->canViewLogs() ? 'Ya' : 'Tidak')
+            ->add('deleted_at');
+    }
+
+    public function columns(): array
+    {
+        return [
+            Column::make('Role', 'name')->searchable()->sortable(),
+            Column::make('Kode', 'code')->searchable()->sortable(),
+            Column::make('Deskripsi', 'desc')->searchable()->sortable(),
+            Column::make('User', 'client_logins_count')->sortable(),
+            Column::make('Modul', 'mods_count')->sortable(),
+            Column::make('Pengaturan', 'settings_label', 'can_manage_settings')->sortable(),
+            Column::make('Log', 'logs_label', 'can_view_logs')->sortable(),
+            Column::action('Aksi'),
+        ];
+    }
+
+    public function filters(): array
+    {
+        return [
+            Filter::inputText('name')->operators(['contains']),
+            Filter::inputText('code')->operators(['contains']),
+            Filter::inputText('desc')->operators(['contains']),
+            Filter::boolean('settings_label', 'can_manage_settings')->label('Ya', 'Tidak'),
+            Filter::boolean('logs_label', 'can_view_logs')->label('Ya', 'Tidak'),
+        ];
+    }
+
+    public function actions(ClientRole $row): array
+    {
+        $buttons = [];
+
+        if (! $row->trashed()) {
+            $buttons[] = Button::add('users')->slot('User')->dispatch('starter-role-users-request', ['id' => $row->id])->class('btn btn-sm btn-outline-secondary');
+            $buttons[] = Button::add('access')->slot('Akses')->dispatch('starter-role-access-request', ['id' => $row->id])->class('btn btn-sm btn-outline-secondary');
+            $buttons[] = Button::add('edit')->slot('Edit')->route('starter.settings.roles.edit', ['roleId' => $row->id])->class('btn btn-sm btn-outline-primary');
+
+            if (! $row->isSuperuser()) {
+                $buttons[] = Button::add('archive')->slot('Arsipkan')->dispatchSelf('prepare-row-action', ['action' => 'archive', 'id' => $row->id])->class('btn btn-sm btn-outline-warning');
+            }
+        } else {
+            $buttons[] = Button::add('restore')->slot('Pulihkan')->dispatchSelf('prepare-row-action', ['action' => 'restore', 'id' => $row->id])->class('btn btn-sm btn-outline-success');
+            $buttons[] = Button::add('force-delete')->slot('Hapus permanen')->dispatchSelf('prepare-row-action', ['action' => 'forceDelete', 'id' => $row->id])->class('btn btn-sm btn-outline-danger');
+        }
+
+        return $buttons;
+    }
+
+    public function prepareBulkAction(string $action): void
+    {
+        $this->prepareAction($action, $this->checkboxValues);
+    }
+
+    #[On('prepare-row-action')]
+    public function prepareRowAction(string $action, int $id): void
+    {
+        $this->prepareAction($action, [$id]);
+    }
+
+    public function cancelPendingAction(): void
+    {
+        $this->pendingAction = null;
+        $this->pendingIds = [];
+    }
+
+    public function executePendingAction(): void
+    {
+        $changed = match ($this->pendingAction) {
+            'archive' => $this->roles->archiveRoles($this->login(), $this->pendingIds),
+            'restore' => $this->roles->restoreRoles($this->login(), $this->pendingIds),
+            'forceDelete' => $this->roles->forceDeleteRoles($this->login(), $this->pendingIds),
+            default => 0,
+        };
+        $this->checkboxValues = [];
+        $this->cancelPendingAction();
+        $this->dispatch('starter-toast', type: $changed > 0 ? 'success' : 'warning', message: $changed > 0 ? "{$changed} role berhasil diproses." : 'Tidak ada role yang dapat diproses; pastikan role bukan sistem dan tidak sedang digunakan.');
+    }
+
+    private function prepareAction(string $action, array $ids): void
+    {
+        abort_unless(in_array($action, ['archive', 'restore', 'forceDelete'], true), 422);
+        $this->pendingIds = collect($ids)->map(fn ($id): int => (int) $id)->filter()->unique()->values()->all();
+        $this->pendingAction = $this->pendingIds === [] ? null : $action;
+    }
+
+    private function login(): ClientLogin
+    {
+        return $this->authenticatedLogins->settingsManager();
+    }
+}

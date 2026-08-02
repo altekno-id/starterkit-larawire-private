@@ -6,10 +6,13 @@ use Altekno\StarterKit\Models\Starter\AppMenu;
 use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Models\Starter\ClientRole;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 interface ClientRoleInterface
 {
+    public function tableQueryForViewer(ClientLogin $viewer, string $archiveStatus = 'active'): Builder;
+
     /**
      * @return Collection<int, ClientRole>
      */
@@ -28,6 +31,8 @@ interface ClientRoleInterface
     public function findBasicById(int $id): ?ClientRole;
 
     public function findForManagement(int $id): ?ClientRole;
+
+    public function findWithTrashedForManagement(int $id): ?ClientRole;
 
     /**
      * @return Collection<int, ClientLogin>
@@ -80,4 +85,8 @@ interface ClientRoleInterface
     public function hasClientLogins(ClientRole $role): bool;
 
     public function deleteRole(ClientRole $role): void;
+
+    public function restore(ClientRole $role): void;
+
+    public function forceDelete(ClientRole $role): void;
 }

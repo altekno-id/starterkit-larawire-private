@@ -302,6 +302,7 @@ class AuditLogService
         $verb = match ($event) {
             'created' => 'Membuat',
             'deleted' => 'Menghapus',
+            'restored' => 'Memulihkan',
             default => 'Mengubah',
         };
         $subject = $auditableLabel ?: Str::headline(class_basename($auditableType));

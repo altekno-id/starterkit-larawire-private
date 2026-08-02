@@ -2,10 +2,11 @@
 
 ## Prasyarat
 
-- Folder `<laravel>/starterkit` dilacak sebagai Git subtree oleh repository host,
-  sehingga production mendapat seluruh source core melalui `git pull`.
-  Autoload/provider/bootstrap connector terpasang sesuai `README.md` root
-  starterkit.
+- Folder `<laravel>/starterkit-larawire-private` adalah clone Git mandiri dari
+  repository canonical dan diabaikan repository host. Production wajib
+  meng-clone folder ini sebelum Composer pada deployment pertama, lalu menarik
+  update manual dengan `git pull --ff-only`. Autoload/provider/bootstrap
+  connector terpasang sesuai README canonical.
 - PHP yang kompatibel dengan dependency project serta extension Laravel tersedia.
 - Extension `intl` tersedia untuk format angka/currency berbasis locale.
 - Document root diarahkan ke folder `public`.
@@ -20,6 +21,7 @@
 - `APP_URL=https://<domain>`
 - `APP_DOMAIN=<domain tanpa scheme>`
 - `STARTER_API_ENABLED=false` kecuali gateway API memang akan dipakai
+- `STARTER_THEME=tabler`
 - database credential production
 - `SESSION_DRIVER=file`
 - `CACHE_STORE=file`
@@ -40,6 +42,7 @@ production tetap memerlukan login Superuser.
 Deployment pertama:
 
 ```bash
+git clone https://github.com/altekno-id/starterkit-larawire-private.git starterkit-larawire-private
 composer install --no-dev --optimize-autoloader
 php artisan starter:setup --company="Nama Perusahaan"
 ```
@@ -48,12 +51,15 @@ Deployment berikutnya:
 
 ```bash
 git pull --ff-only origin master
+git -C starterkit-larawire-private pull --ff-only origin master
+composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 ```
 
-Jalankan `composer install --no-dev --optimize-autoloader` hanya jika pull
-tersebut mengubah `composer.lock` (misalnya ada perubahan dependency). Update
-kode, route, migration, asset, atau konfigurasi biasa tidak memerlukannya.
+`composer install` aman dijalankan pada setiap deployment dan wajib ketika
+composer.lock host berubah. Update source starterkit yang memperkenalkan
+dependency baru harus lebih dahulu diterapkan pada composer.json/lock host
+sesuai release note canonical sebelum Artisan dijalankan.
 
 Jangan menjalankan `starter:setup --reset-password` pada deploy rutin.
 
@@ -114,9 +120,10 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
 ## Update
 
 - Backup database dan file upload sebelum migration berisiko.
-- Tarik `master` canonical melalui `git subtree pull` di repository host, lalu
-  jalankan `starter:sync`. Jalankan `composer install` hanya bila
-  `composer.lock` ikut berubah.
+- Masuk atau gunakan `git -C starterkit-larawire-private`, tarik `master`
+  canonical memakai `git pull --ff-only origin master`, lalu jalankan Composer
+  dan `starter:sync` dari root host. Clone kotor/divergen wajib dihentikan dan
+  diselesaikan manual; jangan merge, reset, atau rebase otomatis.
 - Migration, asset, registry, security check, dan cache production ditangani
   oleh `starter:sync`.
 - Pastikan asset Livewire yang dipublish sesuai versi package setelah update dependency.

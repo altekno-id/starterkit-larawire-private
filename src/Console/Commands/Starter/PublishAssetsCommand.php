@@ -3,6 +3,7 @@
 namespace Altekno\StarterKit\Console\Commands\Starter;
 
 use Altekno\StarterKit\Support\Starter\StarterPaths;
+use Altekno\StarterKit\Support\Starter\StarterTheme;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
@@ -14,27 +15,20 @@ class PublishAssetsCommand extends Command
 
     public function handle(): int
     {
-        $source = StarterPaths::path('public/assets');
         $destination = public_path('assets');
-
-        if (! File::isDirectory($source)) {
-            $this->error("Starter asset source not found: {$source}");
-
-            return self::FAILURE;
-        }
-
-        if (realpath($source) === realpath($destination)) {
-            $this->info('Starter assets already use the host public/assets directory.');
-
-            return self::SUCCESS;
-        }
-
         File::ensureDirectoryExists($destination);
         $fingerprintDirectory = storage_path('framework/cache/starterkit');
         File::ensureDirectoryExists($fingerprintDirectory);
 
-        foreach (['starter', 'tabler'] as $ownedDirectory) {
-            $ownedSource = "{$source}/{$ownedDirectory}";
+        $sources = [
+            'starter' => StarterPaths::path('public/assets/starter'),
+        ];
+
+        foreach (File::directories(StarterTheme::assetPath()) as $themeAssetPath) {
+            $sources[basename($themeAssetPath)] = $themeAssetPath;
+        }
+
+        foreach ($sources as $ownedDirectory => $ownedSource) {
             $ownedDestination = "{$destination}/{$ownedDirectory}";
             $fingerprintPath = "{$fingerprintDirectory}/assets-{$ownedDirectory}.sha256";
 
@@ -63,17 +57,53 @@ class PublishAssetsCommand extends Command
             File::put($fingerprintPath, $fingerprint.PHP_EOL);
         }
 
+        if (! $this->publishPowerGridAssets($fingerprintDirectory)) {
+            return self::FAILURE;
+        }
+
         $this->info('Starter assets synchronized to public/assets.');
 
         return self::SUCCESS;
+    }
+
+    private function publishPowerGridAssets(string $fingerprintDirectory): bool
+    {
+        $source = base_path('vendor/power-components/livewire-powergrid/dist');
+        $destination = public_path('vendor/livewire-powergrid');
+        $fingerprintPath = "{$fingerprintDirectory}/assets-livewire-powergrid.sha256";
+
+        if (! File::isDirectory($source)) {
+            $this->error('Livewire PowerGrid assets are unavailable. Run Composer install first.');
+
+            return false;
+        }
+
+        $fingerprint = $this->directoryFingerprint($source);
+
+        if ($this->publishedFingerprintMatches($destination, $fingerprintPath, $fingerprint)) {
+            $this->line('Starter asset directory is already current: livewire-powergrid');
+
+            return true;
+        }
+
+        File::deleteDirectory($destination);
+
+        if (! File::copyDirectory($source, $destination)) {
+            $this->error('Unable to publish Livewire PowerGrid assets.');
+
+            return false;
+        }
+
+        File::put($fingerprintPath, $fingerprint.PHP_EOL);
+
+        return true;
     }
 
     private function publishedFingerprintMatches(
         string $destination,
         string $fingerprintPath,
         string $sourceFingerprint,
-    ): bool
-    {
+    ): bool {
         return File::isDirectory($destination)
             && File::isFile($fingerprintPath)
             && hash_equals($sourceFingerprint, trim((string) File::get($fingerprintPath)));

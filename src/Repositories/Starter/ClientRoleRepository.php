@@ -13,6 +13,25 @@ use Illuminate\Support\Collection;
 
 class ClientRoleRepository implements ClientRoleInterface
 {
+    public function tableQueryForViewer(ClientLogin $viewer, string $archiveStatus = 'active'): Builder
+    {
+        $query = ClientRole::query()
+            ->select('starter_client_roles.*')
+            ->withCount(['clientLogins', 'mods']);
+
+        if ($archiveStatus === 'archived') {
+            $query->onlyTrashed();
+        } elseif ($archiveStatus === 'all') {
+            $query->withTrashed();
+        }
+
+        if (! $viewer->role?->isSuperuser()) {
+            $query->where('is_system', false)->where('code', '!=', 'superuser');
+        }
+
+        return $query;
+    }
+
     public function allAssignableForViewer(ClientLogin $viewer): Collection
     {
         return ClientRole::query()
@@ -70,6 +89,15 @@ class ClientRoleRepository implements ClientRoleInterface
     public function findForManagement(int $id): ?ClientRole
     {
         return ClientRole::query()
+            ->with(['mods.app', 'landings.menu.route', 'landings.menu.mod.app'])
+            ->withCount('clientLogins')
+            ->whereKey($id)
+            ->first();
+    }
+
+    public function findWithTrashedForManagement(int $id): ?ClientRole
+    {
+        return ClientRole::withTrashed()
             ->with(['mods.app', 'landings.menu.route', 'landings.menu.mod.app'])
             ->withCount('clientLogins')
             ->whereKey($id)
@@ -180,5 +208,15 @@ class ClientRoleRepository implements ClientRoleInterface
     public function deleteRole(ClientRole $role): void
     {
         $role->delete();
+    }
+
+    public function restore(ClientRole $role): void
+    {
+        $role->restore();
+    }
+
+    public function forceDelete(ClientRole $role): void
+    {
+        $role->forceDelete();
     }
 }

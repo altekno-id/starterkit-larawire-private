@@ -9,6 +9,7 @@ use Altekno\StarterKit\Models\Starter\AppMod;
 use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Models\Starter\ClientRole;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -42,6 +43,29 @@ class UserManagementUserService
             $perPage,
             $pageName,
         );
+    }
+
+    public function tableQuery(ClientLogin $login, string $archiveStatus = 'active'): Builder
+    {
+        return $this->clientLogins->tableQueryForViewer($login, $archiveStatus);
+    }
+
+    /** @param list<int> $ids */
+    public function archiveUsers(ClientLogin $currentLogin, array $ids): int
+    {
+        return $this->mutateUsers($currentLogin, $ids, 'archive');
+    }
+
+    /** @param list<int> $ids */
+    public function restoreUsers(ClientLogin $currentLogin, array $ids): int
+    {
+        return $this->mutateUsers($currentLogin, $ids, 'restore');
+    }
+
+    /** @param list<int> $ids */
+    public function forceDeleteUsers(ClientLogin $currentLogin, array $ids): int
+    {
+        return $this->mutateUsers($currentLogin, $ids, 'forceDelete');
     }
 
     /** @return Collection<int, ClientRole> */
@@ -166,5 +190,39 @@ class UserManagementUserService
     public function availableModules(): Collection
     {
         return $this->availableModulesCache ??= $this->appMods->allForUserAccessPreview();
+    }
+
+    /** @param list<int> $ids */
+    private function mutateUsers(ClientLogin $currentLogin, array $ids, string $operation): int
+    {
+        $ids = collect($ids)->map(fn ($id): int => (int) $id)->filter()->unique()->values();
+        $changed = 0;
+
+        foreach ($ids as $id) {
+            $login = $this->clientLogins->findWithTrashedForManagement($id);
+
+            if (! $login instanceof ClientLogin || $login->id === $currentLogin->id || $login->role?->isSuperuser()) {
+                continue;
+            }
+
+            if ($operation === 'archive' && ! $login->trashed()) {
+                $this->auditLogs->withinAction('user.archive', 'Mengarsipkan user '.$login->name, function () use ($login): void {
+                    $this->clientLogins->updateUser($login, [
+                        'remember_token' => null,
+                        'auth_version' => max(1, (int) $login->auth_version) + 1,
+                    ]);
+                    $this->clientLogins->archive($login);
+                });
+                $changed++;
+            } elseif ($operation === 'restore' && $login->trashed()) {
+                $this->auditLogs->withinAction('user.restore', 'Memulihkan user '.$login->name, fn () => $this->clientLogins->restore($login));
+                $changed++;
+            } elseif ($operation === 'forceDelete' && $login->trashed()) {
+                $this->auditLogs->withinAction('user.force_delete', 'Menghapus permanen user '.$login->name, fn () => $this->clientLogins->forceDelete($login));
+                $changed++;
+            }
+        }
+
+        return $changed;
     }
 }

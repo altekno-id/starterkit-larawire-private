@@ -6,10 +6,13 @@ use Altekno\StarterKit\Models\Starter\ActivityLog;
 use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Support\Starter\ActivityLogFilters;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 interface ActivityLogInterface
 {
+    public function tableQueryForViewer(ClientLogin $viewer): Builder;
+
     /**
      * @return LengthAwarePaginator<int, ActivityLog>
      */

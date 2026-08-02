@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['code', 'name', 'desc', 'is_system', 'can_manage_settings', 'can_view_logs'])]
 class ClientRole extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'starter_client_roles';
 
     protected function casts(): array

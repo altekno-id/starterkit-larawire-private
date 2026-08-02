@@ -34,14 +34,18 @@ php artisan test --compact
 - Navigasi subdomain: uji kondisi guest dan user yang sudah login dari landing,
   auth, serta App. Pastikan URL yang dapat berpindah origin melakukan full-page
   navigation tanpa request `fetch`/Livewire Navigate dan tanpa membutuhkan CORS.
-- UI halaman: uji data kosong, sedikit, dan banyak sesuai relevansi. Pastikan pola komponen mengikuti contoh terdekat di `docs/template`, informasi utama mudah dipindai, status tidak hanya dibedakan oleh warna, dan desktop/mobile tetap proporsional.
+- UI halaman: uji data kosong, sedikit, dan banyak sesuai relevansi. Pastikan pola komponen mengikuti contoh terdekat di `docs/template/<theme>`, informasi utama mudah dipindai, status tidak hanya dibedakan oleh warna, dan desktop/mobile tetap proporsional.
+- PowerGrid: uji datasource Builder, filter setiap kolom relevan, search,
+  sorting allowlist, pagination database, theme adapter aktif, checkbox halaman,
+  selected/by-filter scope, reset selection, action individual/massal, serta
+  query budget. Setiap kolom tanpa filter harus memiliki alasan yang diuji.
 - Shared hosting/config: perintah production seperti `php artisan optimize` diuji hanya saat menyiapkan deployment pada environment production-like; jangan mengaktifkan config cache selama development rutin.
 - Security/session: login throttle per akun dan IP, trusted/untrusted host, safe redirect, security header, revokasi session setelah perubahan password, backward compatibility session existing, serta `starter:security-check` local/production.
 - Performance: pagination berjalan di database, query tidak bertambah per-row, input search dibatasi, bulk action tidak memuat seluruh tabel, dan layout/daftar kritis memiliki batas atas query bila relevan.
 - Lifecycle CRUD/table: uji create, edit/update, arsip tanpa kehilangan row database, filter arsip, pulihkan, hard delete hanya dari arsip, cascade seluruh relasi milik target, serta perlindungan data shared/reference.
 - Bulk action: uji checkbox halaman aktif, selected IDs tervalidasi, arsip/pulihkan/hard delete massal, aksi by-filter dengan search/filter/sort aktif, filter kosong/all-data guard, pagination besar, audit summary, transaksi/rollback, dan dialog metadata yang menjelaskan scope serta dampaknya.
 - Guard arsitektur `StarterArchitectureTest` berlaku untuk starterkit dan project turunannya: Livewire/controller tidak boleh memiliki query/load relation/service locator, dan service tidak boleh membangun query model. Jangan menghapus atau melonggarkan guard hanya agar test lulus; deviasi arsitektur wajib memiliki alasan teknis dan persetujuan eksplisit.
-- Test integrasi host wajib memastikan subtree terdeteksi sebagai embedded source, namespace core dapat di-autoload, migration core dimuat dari `starterkit/database/migrations/starter`, folder migration app didaftarkan dinamis dari `database/migrations/apps/<subdomain>`, route/auth/view core tersedia, dan asset publish berhasil.
+- Test integrasi host wajib memastikan clone `starterkit-larawire-private` terdeteksi sebagai embedded source mandiri, namespace core dapat di-autoload, migration core dimuat dari `starterkit-larawire-private/database/migrations/starter`, folder migration app didaftarkan dinamis dari `database/migrations/apps/<subdomain>`, theme aktif terdaftar, route/auth/view core tersedia, serta asset starter/theme/PowerGrid berhasil dipublish.
 - Repository starterkit tidak memiliki Laravel test harness sendiri. Regression core dijalankan melalui suite Laravel host; jangan menambahkan shell Laravel hanya untuk menjalankan test dari root canonical.
 
 ## Definition of done

@@ -9,6 +9,30 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ClientLoginRepository implements ClientLoginInterface
 {
+    public function tableQueryForViewer(ClientLogin $viewer, string $archiveStatus = 'active'): Builder
+    {
+        $query = ClientLogin::query()
+            ->select([
+                'starter_client_logins.*',
+                'list_role.name as role_name',
+                'list_role.code as role_code',
+                'list_role.is_system as role_is_system',
+            ])
+            ->leftJoin('starter_client_roles as list_role', 'list_role.id', '=', 'starter_client_logins.client_role_id');
+
+        if ($archiveStatus === 'archived') {
+            $query->onlyTrashed();
+        } elseif ($archiveStatus === 'all') {
+            $query->withTrashed();
+        }
+
+        if (! $viewer->role?->isSuperuser()) {
+            $query->where('list_role.is_system', false)->where('list_role.code', '!=', 'superuser');
+        }
+
+        return $query;
+    }
+
     public function findByUsername(string $username): ?ClientLogin
     {
         return ClientLogin::query()
@@ -76,6 +100,14 @@ class ClientLoginRepository implements ClientLoginInterface
             ->first();
     }
 
+    public function findWithTrashedForManagement(int $id): ?ClientLogin
+    {
+        return ClientLogin::withTrashed()
+            ->with('role')
+            ->whereKey($id)
+            ->first();
+    }
+
     public function createUser(array $data): ClientLogin
     {
         return ClientLogin::query()->create($data);
@@ -115,5 +147,20 @@ class ClientLoginRepository implements ClientLoginInterface
         return ClientLogin::query()
             ->whereNotNull('remember_token')
             ->update(['remember_token' => null]);
+    }
+
+    public function archive(ClientLogin $login): void
+    {
+        $login->delete();
+    }
+
+    public function restore(ClientLogin $login): void
+    {
+        $login->restore();
+    }
+
+    public function forceDelete(ClientLogin $login): void
+    {
+        $login->forceDelete();
     }
 }

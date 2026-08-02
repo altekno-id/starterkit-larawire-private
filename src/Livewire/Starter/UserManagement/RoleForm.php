@@ -178,7 +178,7 @@ class RoleForm extends Component
         $this->deleteRoleModalOpen = false;
         session()->flash('starter-toast', [
             'type' => 'success',
-            'message' => 'Role berhasil dihapus.',
+            'message' => 'Role berhasil diarsipkan.',
         ]);
 
         return $this->redirectRoute('starter.settings', ['section' => 'roles'], navigate: true);

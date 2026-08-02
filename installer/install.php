@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 const STARTER_PROVIDER = 'Altekno\\StarterKit\\Providers\\Starter\\StarterServiceProvider';
 const STARTER_NAMESPACE = 'Altekno\\StarterKit\\';
-const STARTER_AUTOLOAD_PATH = 'starterkit/src/';
+define('STARTER_DIRECTORY', basename(dirname(__DIR__)));
+define('STARTER_AUTOLOAD_PATH', STARTER_DIRECTORY.'/src/');
 const STARTER_CLEAR_SCRIPT = '@php artisan optimize:clear --ansi';
 const STARTER_PUBLISH_SCRIPT = '@php artisan starter:publish-assets --ansi';
 const STARTER_AGENTS_BLOCK_START = '<!-- starterkit:agentic-connector:start -->';
@@ -96,7 +97,11 @@ try {
         writeIfChanged($providersPath, $providers);
         connectAgentInstructions(
             $agentsPath,
-            readRequiredFile($starterRoot.'/installer/templates/agents-connector.md'),
+            str_replace(
+                '{{STARTERKIT_DIRECTORY}}',
+                STARTER_DIRECTORY,
+                readRequiredFile($starterRoot.'/installer/templates/agents-connector.md'),
+            ),
         );
         ensureIgnored($gitignorePath, '/public/vendor/');
 
@@ -583,6 +588,7 @@ function ensureDependencies(string $hostRoot, array $composer): void
         'dedoc/scramble',
         'livewire/livewire',
         'laravel-lang/common',
+        'power-components/livewire-powergrid',
     ], $required));
 
     if ($missingRuntime === []) {
@@ -629,7 +635,7 @@ function connectedProviders(string $contents): string
     if (! str_contains($contents, 'return [')) {
         throw new RuntimeException(
             'bootstrap/providers.php tidak memakai struktur Laravel yang didukung. '
-            .'Gunakan project Laravel fresh sesuai starterkit/README.md.',
+            .'Gunakan project Laravel fresh sesuai '.STARTER_DIRECTORY.'/README.md.',
         );
     }
 
@@ -659,7 +665,7 @@ function connectedBootstrap(string $current, string $connector): string
     if (! isFreshLaravelBootstrap($current)) {
         throw new RuntimeException(
             'bootstrap/app.php sudah memiliki kustomisasi yang tidak aman untuk ditimpa otomatis. '
-            .'Gabungkan starterkit/installer/templates/bootstrap-app.php secara manual, '
+            .'Gabungkan '.STARTER_DIRECTORY.'/installer/templates/bootstrap-app.php secara manual, '
             .'lalu jalankan ulang installer.',
         );
     }
@@ -781,6 +787,7 @@ function mergeEnvironment(string $path): void
         'APP_FALLBACK_LOCALE' => 'id',
         'APP_FAKER_LOCALE' => 'id_ID',
         'STARTER_API_ENABLED' => 'false',
+        'STARTER_THEME' => 'tabler',
         'DB_MIGRATIONS_TABLE' => 'x_migrations',
         'DB_CACHE_TABLE' => 'x_cache',
         'DB_CACHE_LOCK_TABLE' => 'x_cache_locks',

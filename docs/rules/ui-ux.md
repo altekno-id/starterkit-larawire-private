@@ -2,7 +2,7 @@
 
 ## Source UI
 
-Gunakan template UI aktif yang sudah tersedia. `docs/template/template.md` adalah atlas pencarian lengkap dan tidak mengikat untuk seluruh HTML di `docs/template`; pakai atlas untuk menemukan kandidat lintas konteks, bukan sebagai daftar keputusan desain yang kaku.
+Gunakan template UI aktif yang sudah tersedia. `docs/template/<theme>/template.md` adalah atlas pencarian lengkap dan tidak mengikat untuk theme aktif; pakai atlas untuk menemukan kandidat lintas konteks, bukan sebagai daftar keputusan desain yang kaku.
 
 Prosedur wajib dan hemat token:
 
@@ -11,15 +11,15 @@ Prosedur wajib dan hemat token:
 3. Pilih tiga sampai lima kandidat, termasuk alternatif lintas konteks bila relevan; lalu buka hanya satu sampai tiga HTML sumber terdekat.
 4. Cari markup/kelas spesifik pada sumber terpilih, bandingkan hierarki informasi dan kepadatan, lalu komposisikan pola template UI yang tepat.
 5. Jika kandidat atlas belum cukup, cari `preview/pages`, `shared/includes`, atau dokumentasi template secara terarah.
-6. Jangan membaca seluruh `template.md`, `docs/template/tabler-components`, atau membuat katalog tambahan untuk satu kebutuhan halaman.
+6. Jangan membaca seluruh atlas atau seluruh source template untuk satu kebutuhan halaman.
 
 Contoh pencarian:
 
 ```bash
-rg -l "modal|modal-dialog" docs/template | head
-rg -l "table-responsive|pagination" docs/template | head
-rg -l "form-selectgroup|form-check" docs/template | head
-rg -n "invoice|table|status" docs/template/template.md
+rg -l "modal|modal-dialog" docs/template/tabler | head
+rg -l "table-responsive|pagination" docs/template/tabler | head
+rg -l "form-selectgroup|form-check" docs/template/tabler | head
+rg -n "invoice|table|status" docs/template/tabler/template.md
 ```
 
 ## Prinsip
@@ -28,7 +28,7 @@ rg -n "invoice|table|status" docs/template/template.md
 - Extension global project hanya melalui path tetap: `extensions/starter/header-actions/index.blade.php`, `extensions/starter/profile-menu/index.blade.php`, `extensions/starter/layout/head.blade.php`, dan `extensions/starter/layout/body-end.blade.php`. File tersebut hanya ada di repository project bila diperlukan.
 - `header-actions` untuk aksi global top bar dan wajib mendukung variable `$compact`; `profile-menu` untuk aksi global terkait user/project sebelum Logout. Navigasi module tetap melalui registry menu/sidebar, bukan raw Blade extension.
 - Extension wajib mengotorisasi visibility dan action sendiri, memakai named route, serta mengikuti komponen/markup template UI aktif. Jangan memakai extension untuk memodifikasi state, urutan, atau security control milik starterkit.
-- Setiap halaman wajib memakai contoh/markup template UI aktif terdekat dari `docs/template`; gunakan atlas untuk membandingkan kandidat dan jangan membuat desain atau komponen baru hanya berdasarkan selera.
+- Setiap halaman wajib memakai contoh/markup template UI aktif terdekat dari `docs/template/<theme>`; gunakan atlas untuk membandingkan kandidat dan jangan membuat desain atau komponen baru hanya berdasarkan selera.
 - Gunakan komponen/markup template UI existing sebelum membuat komponen custom. Bila padanan persis tidak tersedia, komposisikan card, list group, badge, table, dropdown, modal, alert, empty state, dan utility template terdekat—jangan membangun design system baru.
 - Layout content fluid sampai Full HD dan dibatasi secara wajar untuk layar sangat besar.
 - Halaman harus padat, informatif, mudah dipindai, dan profesional tanpa terasa sesak. Hindari card besar berisi sedikit data, whitespace berlebihan, tombol tersebar tanpa hierarki, serta detail panjang yang tidak mendukung keputusan user.
@@ -38,6 +38,18 @@ rg -n "invoice|table|status" docs/template/template.md
 - Destructive action memakai confirm modal, bukan browser alert.
 - Detail sekunder memakai modal ringkas dan proporsional.
 - Tabel dipakai untuk banyak data sejenis yang perlu dipindai atau dibandingkan; gunakan pagination database, filter, status badge, aksi per baris, dan kolom yang benar-benar membantu keputusan. Jangan mengubah tabel besar menjadi kumpulan card hanya demi mobile.
+- Setiap tabel pada project Livewire wajib diimplementasikan dengan Livewire
+  PowerGrid. Gunakan Builder sebagai datasource agar pencarian, filter, sorting,
+  dan pagination tetap server-side. Collection hanya boleh untuk dataset kecil,
+  statis, dan terverifikasi tidak akan tumbuh serta bukan tabel manajemen.
+- Setiap kolom data wajib memiliki filter yang sesuai tipe dan domainnya.
+  Checkbox, aksi, nomor urut presentasi, nilai composite yang tidak dapat
+  difilter dengan benar, serta kolom yang tidak membantu keputusan boleh tanpa
+  filter; alasan pengecualian wajib dicatat pada code/test feature.
+- PowerGrid wajib memakai custom theme adapter milik template aktif. Class,
+  markup, asset, filter, pagination, checkbox, empty/loading state, action, dan
+  modal harus konsisten dengan template aktif. Jangan mengubah view vendor atau
+  memakai theme PowerGrid yang tidak sesuai hanya agar tabel cepat tampil.
 - Card ringkas, statistik, list group, atau key-value dipakai untuk ringkasan, sedikit data, dan detail satu entitas. Riwayat/perubahan memakai timeline, tabel log, atau list kronologis sesuai contoh template UI aktif.
 - Pemilihan tabel atau card mengikuti pekerjaan user, bukan diterapkan seragam. Tabel manajemen yang datanya dapat bertambah wajib menyediakan pencarian, pagination database, jumlah hasil, reset filter, filter domain yang relevan, serta sorting hanya pada kolom yang membantu keputusan. Card listing yang dapat bertambah tetap memakai pencarian, filter/status, sorting penting, pagination, dan empty state.
 - Setiap halaman manajemen entitas bisnis yang dapat dimutasi wajib menyediakan lifecycle lengkap secara default: tambah, lihat/edit, update, arsip (soft delete), pulihkan dari arsip, dan hapus permanen. Pengecualian hanya untuk data turunan, append-only, audit/compliance, atau data sistem yang memang tidak boleh dibuat/diubah manual; alasan pengecualian wajib dibuktikan dari flow dan dicatat pada implementasi/test.
@@ -53,7 +65,7 @@ rg -n "invoice|table|status" docs/template/template.md
 - Empty state harus memberi penjelasan kondisi dan next action. Status proses wajib memiliki teks/badge selain warna.
 - Label UI Bahasa Indonesia; pertahankan istilah familiar: username, password, email, role, module.
 - Pesan validasi wajib memakai Bahasa Indonesia dan nama field yang terlihat oleh user; jangan tampilkan nama property internal, nested key, atau label field berbahasa Inggris.
-- Sebelum membuat toast, alert, modal konfirmasi/hapus/password, loader, icon, atau pola feedback baru, cari dan gunakan komponen yang sudah tersedia di `resources/views/starter/templates/` bila sesuai kebutuhan.
+- Sebelum membuat toast, alert, modal konfirmasi/hapus/password, loader, icon, atau pola feedback baru, cari dan gunakan komponen yang sudah tersedia di `resources/themes/<theme>/views/starter/templates/` bila sesuai kebutuhan.
 - Validasi pada `input-group` harus mewarnai border input dan seluruh addon/button sebagai satu control utuh; ikon validasi background pada input di dalam group disembunyikan agar tidak bertabrakan dengan trailing control.
 - `input-group` invalid yang sedang fokus wajib mempertahankan border dan focus ring merah; state `focus-within` bawaan template tidak boleh mengembalikannya menjadi biru.
 - Pada varian `input-group-flat`, letakkan `invalid-feedback` sebagai sibling setelah penutup `input-group` dengan `d-block`, bukan sebagai child group. Hubungkan input dan pesan memakai `aria-invalid` serta `aria-describedby` agar focus ring tidak membungkus pesan dan rounded corner addon tetap benar.
@@ -99,7 +111,7 @@ Gunakan JavaScript/Alpine hanya untuk interaksi client seperti password visibili
 
 ## Error Page
 
-- Error `400`, `401`, `403`, `404`, `405`, `408`, `419`, `422`, `429`, `500`, `503`, serta fallback `4xx`/`5xx` memakai layout lokal `resources/views/starter/errors/layout.blade.php` dan desain template UI aktif yang konsisten.
+- Error `400`, `401`, `403`, `404`, `405`, `408`, `419`, `422`, `429`, `500`, `503`, serta fallback `4xx`/`5xx` memakai layout lokal `resources/themes/<theme>/views/starter/errors/layout.blade.php` dan desain template UI aktif yang konsisten.
 - Error page memakai asset lokal, `noindex`, Bahasa Indonesia, kode status, dan aksi kembali yang aman; jangan tampilkan stack trace, exception message internal, path server, query, atau credential.
 - Uji view spesifik/fallback dan minimal satu response exception nyata dengan `APP_DEBUG=false`.
 
@@ -111,5 +123,5 @@ Uji dengan browser:
 - loading, modal, toast, validasi, empty state, status, dan aksi utama;
 - data kosong, sedikit, dan banyak untuk membuktikan pemilihan komponen serta kepadatan informasi tepat;
 - desktop Full HD, ukuran laptop, dan mobile yang relevan.
-- kesesuaian struktur/markup dengan contoh `docs/template` yang dipakai sebagai referensi.
+- kesesuaian struktur/markup dengan contoh `docs/template/<theme>` yang dipakai sebagai referensi.
 - Untuk perubahan CSS komponen, verifikasi state normal, focus, invalid, serta invalid+focus; periksa struktur DOM/computed style bila screenshot saja belum membuktikan penyebab.

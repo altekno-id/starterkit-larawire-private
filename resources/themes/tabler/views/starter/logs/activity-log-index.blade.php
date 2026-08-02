@@ -3,6 +3,7 @@
         'created' => ['label' => 'Dibuat', 'class' => 'bg-success-lt text-success'],
         'updated' => ['label' => 'Diubah', 'class' => 'bg-warning-lt text-warning'],
         'deleted' => ['label' => 'Dihapus', 'class' => 'bg-danger-lt text-danger'],
+        'restored' => ['label' => 'Dipulihkan', 'class' => 'bg-success-lt text-success'],
         'security' => ['label' => 'Keamanan', 'class' => 'bg-primary-lt text-primary'],
     ];
     $activeFilterCount = collect([
@@ -98,6 +99,10 @@
         </div>
     </div>
 
+    <livewire:starter.logs.activity-logs-table />
+
+    {{-- Legacy filter/table markup is intentionally not rendered; PowerGrid is the server-side table authority. --}}
+    @if (false)
     <div class="card mb-3" data-log-filter-card>
         <div class="card-header">
             <div>
@@ -339,6 +344,8 @@
             </div>
         @endif
     </div>
+
+    @endif
 
     @if ($detailModalOpen)
         <div class="modal modal-blur fade show d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="activity-log-detail-title">

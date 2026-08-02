@@ -82,7 +82,7 @@
                             <div class="card-actions">
                                 <button type="button" class="btn btn-outline-danger btn-sm" wire:click="prepareRoleDeletion">
                                     @include('starter.templates.layouts.icon', ['name' => 'trash', 'class' => 'icon-sm me-1'])
-                                    Hapus Role
+                                    Arsipkan Role
                                 </button>
                             </div>
                         @endif
@@ -405,11 +405,11 @@
 
     @include('starter.templates.components.danger-modal', [
         'id' => 'delete-role-modal',
-        'title' => 'Hapus role?',
+        'title' => 'Arsipkan role?',
         'message' => filled($deleteRoleName)
-            ? 'Role '.$deleteRoleName.' akan dihapus permanen.'
-            : 'Role ini akan dihapus permanen.',
-        'confirmText' => 'Hapus Role',
+            ? 'Role '.$deleteRoleName.' akan dipindahkan ke arsip dan dapat dipulihkan.'
+            : 'Role ini akan dipindahkan ke arsip dan dapat dipulihkan.',
+        'confirmText' => 'Arsipkan Role',
         'confirmAction' => 'deleteSelectedRole',
         'cancelAction' => 'cancelRoleDeletion',
         'visible' => $deleteRoleModalOpen,

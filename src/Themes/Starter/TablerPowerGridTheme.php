@@ -1,0 +1,45 @@
+<?php
+
+namespace Altekno\StarterKit\Themes\Starter;
+
+use PowerComponents\LivewirePowerGrid\Themes\Bootstrap5;
+
+class TablerPowerGridTheme extends Bootstrap5
+{
+    public function table(): array
+    {
+        return array_replace_recursive(parent::table(), [
+            'layout' => [
+                'base' => 'p-0 align-middle d-block',
+                'div' => 'table-responsive m-0',
+                'table' => 'table table-vcenter table-hover card-table mb-0',
+                'container' => 'm-0',
+                'actions' => 'd-flex align-items-center justify-content-end gap-1',
+            ],
+            'header' => [
+                'th' => 'text-secondary text-nowrap small py-2',
+            ],
+            'body' => [
+                'td' => 'align-middle px-3 py-2',
+                'tdEmpty' => 'p-4 text-secondary text-center',
+                'tdActionsContainer' => 'd-flex align-items-center justify-content-end gap-1',
+            ],
+        ]);
+    }
+
+    public function footer(): array
+    {
+        return array_replace(parent::footer(), [
+            'select' => 'form-select form-select-sm w-auto',
+            'footer' => 'border-top px-3 py-2 w-100 d-flex flex-wrap gap-2 align-items-center justify-content-between',
+        ]);
+    }
+
+    public function searchBox(): array
+    {
+        return array_replace(parent::searchBox(), [
+            'input' => 'form-control form-control-sm',
+            'iconSearch' => '',
+        ]);
+    }
+}

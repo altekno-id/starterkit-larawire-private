@@ -8,6 +8,7 @@ use Altekno\StarterKit\Models\Starter\AppMod;
 use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Models\Starter\ClientRole;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -39,6 +40,29 @@ class UserManagementRoleService
             $perPage,
             $pageName,
         );
+    }
+
+    public function tableQuery(ClientLogin $login, string $archiveStatus = 'active'): Builder
+    {
+        return $this->clientRoles->tableQueryForViewer($login, $archiveStatus);
+    }
+
+    /** @param list<int> $ids */
+    public function archiveRoles(ClientLogin $login, array $ids): int
+    {
+        return $this->mutateRoles($login, $ids, 'archive');
+    }
+
+    /** @param list<int> $ids */
+    public function restoreRoles(ClientLogin $login, array $ids): int
+    {
+        return $this->mutateRoles($login, $ids, 'restore');
+    }
+
+    /** @param list<int> $ids */
+    public function forceDeleteRoles(ClientLogin $login, array $ids): int
+    {
+        return $this->mutateRoles($login, $ids, 'forceDelete');
     }
 
     /**
@@ -169,13 +193,7 @@ class UserManagementRoleService
             ]);
         }
 
-        $this->auditLogs->withinAction('role.delete', 'Menghapus role '.$role->name, function () use ($role): void {
-            DB::transaction(function () use ($role): void {
-                $this->clientRoles->detachLandings($role);
-                $this->clientRoles->detachMods($role);
-                $this->clientRoles->deleteRole($role);
-            });
-        });
+        $this->archiveRoles($login, [$role->id]);
     }
 
     private function normalizeCode(string $code): string
@@ -245,5 +263,43 @@ class UserManagementRoleService
         }
 
         return $landings;
+    }
+
+    /** @param list<int> $ids */
+    private function mutateRoles(ClientLogin $login, array $ids, string $operation): int
+    {
+        $ids = collect($ids)->map(fn ($id): int => (int) $id)->filter()->unique()->values();
+        $changed = 0;
+
+        foreach ($ids as $id) {
+            $role = $this->clientRoles->findWithTrashedForManagement($id);
+
+            if (! $role instanceof ClientRole || $role->isSuperuser()) {
+                continue;
+            }
+
+            if ($operation !== 'restore' && $this->clientRoles->hasClientLogins($role)) {
+                continue;
+            }
+
+            if ($operation === 'archive' && ! $role->trashed()) {
+                $this->auditLogs->withinAction('role.archive', 'Mengarsipkan role '.$role->name, fn () => $this->clientRoles->deleteRole($role));
+                $changed++;
+            } elseif ($operation === 'restore' && $role->trashed()) {
+                $this->auditLogs->withinAction('role.restore', 'Memulihkan role '.$role->name, fn () => $this->clientRoles->restore($role));
+                $changed++;
+            } elseif ($operation === 'forceDelete' && $role->trashed()) {
+                $this->auditLogs->withinAction('role.force_delete', 'Menghapus permanen role '.$role->name, function () use ($role): void {
+                    DB::transaction(function () use ($role): void {
+                        $this->clientRoles->detachLandings($role);
+                        $this->clientRoles->detachMods($role);
+                        $this->clientRoles->forceDelete($role);
+                    });
+                });
+                $changed++;
+            }
+        }
+
+        return $changed;
     }
 }

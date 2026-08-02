@@ -6,6 +6,7 @@ use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Services\Starter\AuthenticatedLoginService;
 use Altekno\StarterKit\Services\Starter\UserManagementRoleService;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -70,6 +71,7 @@ class Roles extends Component
         $this->resetPage('rolesPage');
     }
 
+    #[On('starter-role-users-request')]
     public function showRoleUsers(int $id): void
     {
         $role = $this->roles()->findRole($this->login(), $id);
@@ -93,6 +95,7 @@ class Roles extends Component
         $this->roleUsers = [];
     }
 
+    #[On('starter-role-access-request')]
     public function showRoleAccess(int $id): void
     {
         $role = $this->roles()->findRole($this->login(), $id);

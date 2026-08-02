@@ -2,12 +2,12 @@
 
 Dokumen ini adalah kontrak eksekusi untuk setiap model AI yang mengembangkan project turunan dari starterkit ini. Jangan membaca seluruh `docs/` pada setiap tugas; baca konteks inti dan rule yang relevan.
 
-Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan sebagai aplikasi Laravel mandiri. Semua perintah Composer, Artisan, Pint, Pest, migration, dan setup dijalankan dari root Laravel host yang memuat clone ini pada folder `starterkit-larawire-private/`.
+Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan sebagai aplikasi Laravel mandiri. Semua perintah Composer, Artisan, Pint, Pest, migration, dan setup dijalankan dari root Laravel host yang memuat snapshot source ini pada folder `starterkit-larawire-private/`.
 
 Installer membuat connector terkelola pada `AGENTS.md` di root Laravel host.
 Connector tersebut mengarahkan agent ke file canonical ini tanpa menyalin
-seluruh rules, sehingga perubahan rules langsung terbaca setelah
-`git pull --ff-only` pada folder `starterkit-larawire-private/`. Bila bekerja dari root Laravel host,
+seluruh rules, sehingga perubahan rules langsung terbaca setelah snapshot
+starterkit project diperbarui. Bila bekerja dari root Laravel host,
 referensi `docs/...` dalam file ini berarti `starterkit-larawire-private/docs/...`; path feature
 seperti `app/`, `routes/apps/`, `resources/views/apps/`,
 `database/migrations/apps/`, `tests/`, dan `issues/` tetap milik Laravel host.
@@ -143,7 +143,7 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 
 ## Aturan eksekusi
 
-- Pada project pemakai, folder clone `starterkit-larawire-private/` adalah core read-only untuk feature project dan memiliki repository Git sendiri. Update dilakukan manual dari dalam clone memakai `git pull --ff-only origin master`; repository host wajib mengabaikan folder tersebut dan tidak merekamnya sebagai subtree, submodule, atau gitlink.
+- Pada project pemakai, folder `starterkit-larawire-private/` adalah snapshot core read-only untuk feature project dan wajib dilacak sebagai file biasa oleh repository project. Folder ini tidak boleh memiliki `.git` sendiri, tidak diabaikan, dan bukan subtree, submodule, atau gitlink. Update dilakukan manual di lokal dengan menarik repository canonical, menyalin snapshot tanpa `.git`, memverifikasi host, lalu commit dan push repository project.
 - Folder `starterkit-larawire-private/installer/` hanya dimiliki bootstrap instalasi. Setelah
   setup berhasil, developer dan AI feature wajib mengabaikannya; baca atau ubah
   folder tersebut hanya saat tugas memang menyangkut installer.
@@ -171,7 +171,7 @@ Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat leb
 - Setiap perubahan core starterkit wajib dikerjakan pada repository starterkit
   canonical yang memiliki remote `origin`, diverifikasi melalui Laravel host,
   lalu dibuat sebagai commit terfokus dan dipush sebelum disinkronkan ke folder
-  clone starterkit project pengguna. Jangan meninggalkan improvement universal hanya
+  snapshot starterkit project pengguna. Jangan meninggalkan improvement universal hanya
   sebagai perubahan lokal/embedded. Setelah sync, verifikasi, commit, dan push
   perubahan integrasi pada repository project pengguna.
 - Jangan meminta developer menyalin source core atau mengedit connector satu per

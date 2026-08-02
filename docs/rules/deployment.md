@@ -2,10 +2,10 @@
 
 ## Prasyarat
 
-- Folder `<laravel>/starterkit-larawire-private` adalah clone Git mandiri dari
-  repository canonical dan diabaikan repository host. Production wajib
-  meng-clone folder ini sebelum Composer pada deployment pertama, lalu menarik
-  update manual dengan `git pull --ff-only`. Autoload/provider/bootstrap
+- Folder `<laravel>/starterkit-larawire-private` adalah snapshot source dari
+  repository canonical yang dilacak sebagai file biasa oleh repository host.
+  Folder ini tidak memiliki `.git` sendiri dan tidak diabaikan. Production
+  menerima snapshot melalui pull repository project; autoload/provider/bootstrap
   connector terpasang sesuai README canonical.
 - PHP yang kompatibel dengan dependency project serta extension Laravel tersedia.
 - Extension `intl` tersedia untuk format angka/currency berbasis locale.
@@ -42,7 +42,6 @@ production tetap memerlukan login Superuser.
 Deployment pertama:
 
 ```bash
-git clone https://github.com/altekno-id/starterkit-larawire-private.git starterkit-larawire-private
 composer install --no-dev --optimize-autoloader
 php artisan starter:setup --company="Nama Perusahaan"
 ```
@@ -51,7 +50,6 @@ Deployment berikutnya:
 
 ```bash
 git pull --ff-only origin master
-git -C starterkit-larawire-private pull --ff-only origin master
 composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 ```
@@ -120,10 +118,11 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
 ## Update
 
 - Backup database dan file upload sebelum migration berisiko.
-- Masuk atau gunakan `git -C starterkit-larawire-private`, tarik `master`
-  canonical memakai `git pull --ff-only origin master`, lalu jalankan Composer
-  dan `starter:sync` dari root host. Clone kotor/divergen wajib dihentikan dan
-  diselesaikan manual; jangan merge, reset, atau rebase otomatis.
+- Di mesin development, tarik `master` repository canonical di luar project,
+  salin isinya ke `starterkit-larawire-private/` dengan `rsync --delete` sambil
+  mengecualikan `.git/`, lalu verifikasi, commit, dan push repository project.
+  Production hanya menarik repository project, kemudian menjalankan Composer
+  dan `starter:sync` dari root host.
 - Migration, asset, registry, security check, dan cache production ditangani
   oleh `starter:sync`.
 - Pastikan asset Livewire yang dipublish sesuai versi package setelah update dependency.

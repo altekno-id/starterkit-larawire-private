@@ -104,7 +104,6 @@ try {
             ),
         );
         ensureIgnored($gitignorePath, '/public/vendor/');
-        ensureIgnored($gitignorePath, '/'.STARTER_DIRECTORY.'/');
 
         if (! is_file($envPath)) {
             if (! is_file($envExamplePath)) {
@@ -228,7 +227,7 @@ function assertLaravelHost(string $hostRoot, string $starterRoot): void
     foreach ($required as $path) {
         if (! is_file($path)) {
             throw new RuntimeException(
-                'Clone starterkit harus berada tepat pada <laravel>/'.STARTER_DIRECTORY.'. '
+                'Snapshot starterkit harus berada tepat pada <laravel>/'.STARTER_DIRECTORY.'. '
                 ."File host tidak ditemukan: {$path}",
             );
         }

@@ -152,11 +152,16 @@ extension—daftarkan melalui `config/apps/<app>.php` lalu jalankan `starter:syn
 > Wajib memakai Laravel fresh dan database baru. Installer menjalankan
 > `migrate:fresh`, sehingga seluruh tabel dan data pada database akan dihapus.
 
-Dari root Laravel:
+Dari root Laravel fresh, siapkan snapshot source tanpa metadata `.git` lalu
+jalankan installer. Setelah instalasi, folder snapshot wajib ikut di-commit ke
+repository project:
 
 ```bash
 git clone https://github.com/altekno-id/starterkit-larawire-private.git \
-  starterkit-larawire-private
+  /path/di-luar-project/starterkit-larawire-private
+rsync -a --delete --exclude='.git/' \
+  /path/di-luar-project/starterkit-larawire-private/ \
+  starterkit-larawire-private/
 php starterkit-larawire-private/installer/install.php --company="Nama Aplikasi"
 ```
 
@@ -381,21 +386,25 @@ Setiap perbaikan universal wajib dikerjakan pada repository canonical starterkit
 yang memiliki remote `origin`, diverifikasi melalui Laravel host, lalu dibuat
 sebagai commit terfokus dan dipush sebelum disinkronkan ke project pengguna.
 
-Jangan menyelesaikan perubahan core hanya di clone embedded `starterkit-larawire-private/`
+Jangan menyelesaikan perubahan core hanya di snapshot embedded `starterkit-larawire-private/`
 milik project. Setelah commit upstream tersedia, update folder starterkit pada
 project pengguna dari commit tersebut, jalankan verifikasi host, lalu commit dan
 push perubahan integrasinya pada repository project.
 
 ## Update starterkit
 
-Update tidak me-reset database:
+Update dilakukan manual di mesin development dan tidak me-reset database:
 
 ```bash
-git -C starterkit-larawire-private status --short --branch
-git -C starterkit-larawire-private pull --ff-only origin master
+git -C /path/di-luar-project/starterkit-larawire-private pull --ff-only origin master
+rsync -a --delete --exclude='.git/' \
+  /path/di-luar-project/starterkit-larawire-private/ \
+  starterkit-larawire-private/
 composer install
 php artisan starter:sync
 php artisan test --compact
+git add starterkit-larawire-private composer.json composer.lock
+git commit -m "chore: update starterkit snapshot"
 git push origin master
 ```
 
@@ -407,11 +416,10 @@ memeriksa perubahan registry tanpa migration, publish asset, atau mutation.
 
 ## Deployment shared hosting
 
-Deployment pertama setelah source dan `.env` production tersedia:
+Deployment pertama setelah repository project—termasuk snapshot
+`starterkit-larawire-private`—dan `.env` production tersedia:
 
 ```bash
-git clone https://github.com/altekno-id/starterkit-larawire-private.git \
-  starterkit-larawire-private
 composer install --no-dev --optimize-autoloader
 php artisan starter:setup --company="Nama Perusahaan"
 ```
@@ -420,7 +428,6 @@ Deployment berikutnya:
 
 ```bash
 git pull --ff-only origin master
-git -C starterkit-larawire-private pull --ff-only origin master
 composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 ```
@@ -457,9 +464,10 @@ dibuat.
 - Extension UI berada di `resources/views/extensions/starter/`.
 - `AGENTS.md` root Laravel adalah connector AI; rules canonical berada di
   folder `starterkit-larawire-private`.
-- Folder `starterkit-larawire-private` adalah clone Git mandiri dan core
-  read-only untuk feature project; improvement universal dilakukan melalui
-  repository canonical.
+- Folder `starterkit-larawire-private` adalah snapshot terlacak dan core
+  read-only untuk feature project; tidak memiliki `.git` sendiri. Improvement
+  universal dilakukan melalui repository canonical, kemudian disalin dan
+  di-commit ke repository project.
 - Installer normal hanya untuk Laravel fresh dan database baru.
 - Installer menyediakan reset database khusus local/development, tetapi tidak
   boleh menghapus source atau upload project.

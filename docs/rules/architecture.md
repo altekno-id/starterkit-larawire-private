@@ -62,11 +62,12 @@ Ketentuan konsistensi dan performa:
 
 ## Isolasi starterkit dan project turunan
 
-- Source core berada di `<laravel>/starterkit-larawire-private` sebagai clone
-  Git mandiri yang diabaikan repository host. Feature project dilarang mengubah
-  source clone; improvement universal wajib dikerjakan dan dipush pada
-  repository canonical. Update project dilakukan manual dari dalam clone dengan
-  `git pull --ff-only origin master`, kemudian diverifikasi dari root host.
+- Source core berada di `<laravel>/starterkit-larawire-private` sebagai snapshot
+  file biasa yang dilacak repository host. Folder ini tidak memiliki `.git`
+  sendiri dan tidak boleh diabaikan. Feature project dilarang mengubah source
+  snapshot secara sepihak; improvement universal wajib dikerjakan dan dipush
+  pada repository canonical, lalu snapshot disalin ke project, diverifikasi,
+  di-commit, dan dipush bersama repository project.
 - Connector host dibatasi pada autoload namespace `Altekno\StarterKit\` dari
   `starterkit-larawire-private/src`, registrasi `StarterServiceProvider`, pemanggilan
   `StarterBootstrap`, environment, dan asset publish. Pada Laravel host standar
@@ -91,7 +92,7 @@ Ketentuan konsistensi dan performa:
 - Seluruh migration core berada di `starterkit-larawire-private/database/migrations/starter`. Migration feature app milik host berada di `database/migrations/apps/<subdomain>` dan seluruh folder subdomain valid dimuat otomatis saat perintah Artisan migration berjalan. Tidak ada konfigurasi environment atau registrasi manual per app.
 - Seluruh Blade internal starter berada di `resources/themes/<theme>/views/starter`, termasuk `errors`, `templates`, auth, profile, settings, log, dan user management. Logic universal tidak boleh memuat class/asset template secara langsung di luar registry/adapter theme.
 - Landing adalah area kustom project host dan wajib berada di
-  `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder clone
+  `app/Livewire/Landing` serta `resources/views/landing`, bukan di folder snapshot
   starterkit. Installer membuat landing minimum hanya bila project belum
   memiliki root landing. Ketika instalasi tidak membuat App pertama, landing
   minimum berfungsi sebagai onboarding yang menjelaskan hierarki App → Module →
@@ -144,8 +145,8 @@ database/migrations/apps/<subdomain>/
   `AGENTS.md`; instruksi project di luar marker block wajib dipertahankan.
 - Improvement universal wajib berasal dari repository starterkit canonical,
   diverifikasi pada Laravel host, di-commit, dan dipush sebelum commit tersebut
-  ditarik manual pada clone project pengguna. Perubahan langsung pada clone embedded
-  project tidak boleh menjadi source of truth core.
+  disalin manual ke snapshot project pengguna. Perubahan langsung pada snapshot
+  embedded project tidak boleh menjadi source of truth core.
 
 ## Registrasi route
 

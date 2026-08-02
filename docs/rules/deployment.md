@@ -49,6 +49,8 @@ php artisan starter:setup --company="Nama Perusahaan"
 Deployment berikutnya:
 
 ```bash
+git status --short
+# Output wajib kosong. Jika tidak, hentikan deployment dan amankan perubahan server terlebih dahulu.
 git pull --ff-only origin master
 composer install --no-dev --optimize-autoloader
 php artisan starter:sync
@@ -123,6 +125,10 @@ Project harus tetap shared-hosting friendly: utamakan middleware/config Laravel 
   mengecualikan `.git/`, lalu verifikasi, commit, dan push repository project.
   Production hanya menarik repository project, kemudian menjalankan Composer
   dan `starter:sync` dari root host.
+- Checkout production tidak boleh dipakai untuk edit source. Sebelum pull,
+  `git status --short` wajib kosong dan pull wajib memakai `--ff-only`; bila
+  salah satu syarat gagal, hentikan deployment. Jangan memakai `git reset`,
+  `checkout`, `stash`, merge, atau rebase otomatis di production.
 - Migration, asset, registry, security check, dan cache production ditangani
   oleh `starter:sync`.
 - Pastikan asset Livewire yang dipublish sesuai versi package setelah update dependency.

@@ -53,6 +53,7 @@ Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal
   memberi contoh prompt yang benar; detailnya mengikuti
   `docs/rules/feature-development.md`.
 - Secara otomatis terapkan authorization, validation, proteksi injection/mass-assignment, server-side pagination untuk data yang dapat tumbuh, query efisien, audit log, transaksi, locale/format, pola Livewire/Alpine, UI state, migration production-safe, dan test sesuai rule pemilik.
+- Setiap module manajemen entitas bisnis menerapkan lifecycle CRUD lengkap secara default—create, edit/update, arsip/soft delete, pulihkan, dan hard delete—serta checkbox aksi massal dan aksi by-filter. Terapkan kontrak scope, konfirmasi berbahaya, relasi, audit, performa, dan pengecualian data turunan/append-only dari `ui-ux.md`, `performance.md`, `audit-logging.md`, `code-style.md`, dan `testing.md` tanpa menunggu developer mengulangnya.
 - Seluruh feature untuk app/subdomain wajib mengikuti struktur `Apps/<Subdomain>` pada layer yang dipakai. Baca `docs/rules/architecture.md` sebelum membuat file feature app baru; jangan mencampurnya dengan folder Starter atau root project.
 - Migration feature app wajib berada di `database/migrations/apps/<subdomain>/`, bukan root `database/migrations`; folder tersebut dimuat otomatis saat perintah Artisan migration berjalan.
 - Endpoint API App wajib berada di `routes/apps/<subdomain>.api.php`. API memakai

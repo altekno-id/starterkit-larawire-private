@@ -64,6 +64,10 @@
 - Input untuk sort/filter/raw expression wajib memakai allowlist dan parameter binding; jangan interpolasi input ke SQL.
 - Jangan menambah `client_id`; satu instalasi hanya satu perusahaan.
 - Gunakan transaksi untuk aksi yang harus atomik.
+- Entitas bisnis yang dikelola lewat CRUD memakai Laravel `SoftDeletes` dan kolom `deleted_at` berindex secara default, kecuali source membuktikan data tersebut append-only, turunan, atau tidak boleh diarsipkan. Query daftar wajib menentukan secara eksplisit apakah memakai active-only, `withTrashed()`, atau `onlyTrashed()`.
+- Arsip memakai `delete()`, pulihkan memakai `restore()`, dan hard delete memakai `forceDelete()` hanya dari service yang sudah memvalidasi bahwa target berada di arsip. Jangan menyamarkan hard delete sebagai status biasa atau menjalankan raw delete tanpa audit/transaction.
+- Ownership relasi hard delete wajib eksplisit pada schema/service. Gunakan foreign key cascade hanya ketika child benar-benar tidak bermakna tanpa parent; relation shared/reference memakai restrict/detach yang sesuai. Tambahkan test yang membuktikan seluruh child milik target terhapus dan data shared tetap aman.
+- Migration penambahan soft delete pada tabel existing wajib production-safe: nullable `deleted_at`, tidak mengubah row aktif existing, reversible, serta menambah index hanya bila pola filter/query membutuhkannya.
 
 ## Format dan generator
 

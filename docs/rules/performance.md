@@ -51,6 +51,10 @@ Aturan ini berlaku otomatis untuk starterkit dan seluruh project turunannya. Use
 - Audit log tetap sinkron agar perubahan bisnis dapat dibuktikan pada shared hosting.
 - Bulk update/delete yang sengaja melewati event model wajib menghasilkan satu audit summary manual berisi scope dan jumlah record; jangan membuat ribuan audit row identik tanpa kebutuhan bisnis.
 - Jangan menonaktifkan audit, validation, atau transaksi hanya untuk mengejar query count.
+- Bulk action dari checkbox memproses ID tervalidasi dalam batas aman dan memakai chunk bila jumlahnya besar. Jangan memuat model beserta seluruh relasi hanya untuk mengubah state atau menghapusnya.
+- Aksi by-filter wajib membangun ulang query server-side dari filter, search, dan authorization yang sudah dinormalisasi/di-allowlist; jangan percaya daftar ID, count, atau deskripsi filter dari browser. Query count untuk dialog dan query mutation harus memakai scope yang sama.
+- Bulk arsip/pulihkan memakai bulk update atau chunk yang aman sesuai kebutuhan audit/event. Hard delete dengan relasi wajib memakai chunk dan transaksi per chunk atau batas transaksi yang aman untuk shared hosting; jangan membuat satu transaksi tidak terbatas untuk seluruh tabel besar.
+- Hard delete by-filter wajib memiliki guard scope kosong: ketika tidak ada filter aktif, UI dan server harus membedakan secara eksplisit operasi seluruh dataset dan meminta konfirmasi yang lebih tegas. Jangan menganggap filter kosong sebagai filter aman.
 
 ## Asset
 

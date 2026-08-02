@@ -64,3 +64,7 @@ Untuk bulk action, utamakan satu query/chunk yang aman dan satu audit summary de
 - Jangan memasukkan password, token, isi file, atau payload sensitif ke old/new/metadata.
 - Jangan menulis langsung ke `starter_logs` dari feature; gunakan service.
 - Tambahkan test yang membuktikan action, actor, table, event, dan grouping bila multi-tabel.
+- Gunakan action key terpisah dan stabil untuk lifecycle data: `<domain>.archive`, `<domain>.restore`, dan `<domain>.delete_permanently`; jangan mencatat arsip atau pulihkan sebagai hard delete.
+- Arsip dan pulihkan wajib mencatat old/new `deleted_at` atau state lifecycle yang setara. Hard delete mencatat ringkasan identitas target serta jumlah relasi yang terhapus tanpa menyimpan payload sensitif atau isi data besar.
+- Aksi massal/by-filter memakai satu action group dan audit summary yang mencantumkan mode scope (`selected`, `filtered`, atau `all`), filter aman yang diterapkan, jumlah berhasil, dan jumlah gagal/diabaikan. Jangan membuat ribuan log identik bila summary sudah memadai.
+- Hard delete hanya boleh dilakukan melalui service dalam transaksi setelah target diarsipkan, kecuali model append-only/derived memiliki kontrak lifecycle lain yang disetujui. Service harus menghapus atau membuktikan cascade seluruh relasi yang dimiliki entitas agar tidak meninggalkan orphan.

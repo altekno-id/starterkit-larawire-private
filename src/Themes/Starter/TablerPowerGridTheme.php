@@ -35,6 +35,41 @@ class TablerPowerGridTheme extends Bootstrap5
         ]);
     }
 
+    public function filterBoolean(): array
+    {
+        return array_replace(parent::filterBoolean(), [
+            'base' => 'starter-pg-filter starter-pg-filter-boolean',
+        ]);
+    }
+
+    public function filterInputText(): array
+    {
+        return array_replace(parent::filterInputText(), [
+            'base' => 'starter-pg-filter starter-pg-filter-text',
+        ]);
+    }
+
+    public function filterMultiSelect(): array
+    {
+        return array_replace(parent::filterMultiSelect(), [
+            'base' => 'starter-pg-filter starter-pg-filter-multiselect',
+        ]);
+    }
+
+    public function filterNumber(): array
+    {
+        return array_replace(parent::filterNumber(), [
+            'base' => 'starter-pg-filter starter-pg-filter-number',
+        ]);
+    }
+
+    public function filterSelect(): array
+    {
+        return array_replace(parent::filterSelect(), [
+            'base' => 'starter-pg-filter starter-pg-filter-select',
+        ]);
+    }
+
     public function searchBox(): array
     {
         return array_replace(parent::searchBox(), [

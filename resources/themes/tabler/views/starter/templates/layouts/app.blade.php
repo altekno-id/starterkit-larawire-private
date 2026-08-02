@@ -21,6 +21,33 @@
             display: none !important;
         }
 
+        .starter-pg-filter {
+            width: 100%;
+        }
+
+        .starter-pg-filter-text {
+            min-width: 11rem;
+        }
+
+        .starter-pg-filter-select,
+        .starter-pg-filter-multiselect {
+            min-width: 9.5rem;
+        }
+
+        .starter-pg-filter-boolean {
+            min-width: 8.5rem;
+        }
+
+        .starter-pg-filter-number {
+            min-width: 10rem;
+        }
+
+        .starter-pg-filter input,
+        .starter-pg-filter select {
+            min-width: 100%;
+            width: 100%;
+        }
+
         .navbar-vertical {
             --tblr-navbar-bg: #182433;
         }

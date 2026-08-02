@@ -303,8 +303,7 @@ class SyncCommand extends Command
         string $modCode,
         array $menus,
         Collection $sourceRouteNames,
-    ): void
-    {
+    ): void {
         foreach ($menus as $menu) {
             if (! is_array($menu) || blank($menu['label'] ?? null)) {
                 $this->fail("Every menu in module [{$subdomain}.{$modCode}] must define a label.");

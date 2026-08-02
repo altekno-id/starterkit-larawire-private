@@ -104,6 +104,7 @@ try {
             ),
         );
         ensureIgnored($gitignorePath, '/public/vendor/');
+        ensureIgnored($gitignorePath, '/'.STARTER_DIRECTORY.'/');
 
         if (! is_file($envPath)) {
             if (! is_file($envExamplePath)) {

@@ -22,30 +22,37 @@
         }
 
         .starter-pg-filter {
-            width: 100%;
+            display: inline-block;
+            max-width: none;
+            width: fit-content;
         }
 
-        .starter-pg-filter-text {
-            min-width: 11rem;
+        .starter-pg-filter-text > div {
+            width: fit-content;
         }
 
-        .starter-pg-filter-select,
-        .starter-pg-filter-multiselect {
-            min-width: 9.5rem;
+        .starter-pg-filter input {
+            field-sizing: content;
+            min-width: 6.5rem;
+            width: 8rem;
         }
 
-        .starter-pg-filter-boolean {
-            min-width: 8.5rem;
-        }
-
-        .starter-pg-filter-number {
-            min-width: 10rem;
-        }
-
-        .starter-pg-filter input,
         .starter-pg-filter select {
-            min-width: 100%;
-            width: 100%;
+            field-sizing: content;
+            min-width: 0;
+            width: auto;
+        }
+
+        .starter-pg-filter-text input {
+            max-width: 11rem;
+        }
+
+        .starter-pg-filter-number input {
+            max-width: 9rem;
+        }
+
+        .starter-pg-filter-multiselect {
+            min-width: 8rem;
         }
 
         .navbar-vertical {

@@ -227,16 +227,10 @@ function assertLaravelHost(string $hostRoot, string $starterRoot): void
     foreach ($required as $path) {
         if (! is_file($path)) {
             throw new RuntimeException(
-                'Clone starterkit harus berada tepat pada <laravel>/starterkit. '
+                'Clone starterkit harus berada tepat pada <laravel>/'.STARTER_DIRECTORY.'. '
                 ."File host tidak ditemukan: {$path}",
             );
         }
-    }
-
-    if (basename($starterRoot) !== 'starterkit') {
-        throw new RuntimeException(
-            "Folder clone wajib bernama 'starterkit', saat ini: ".basename($starterRoot),
-        );
     }
 }
 

@@ -71,7 +71,9 @@ class ActivityLogsTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::datetimepicker('created_at_label', 'created_at'),
+            Filter::inputText('created_at_label', 'created_at')
+                ->operators(['starts_with'])
+                ->placeholder('YYYY-MM-DD'),
             Filter::inputText('action_label')->operators(['contains']),
             Filter::inputText('actor_name')->operators(['contains']),
             Filter::inputText('actor_role')->operators(['contains']),

@@ -95,7 +95,9 @@ class UsersTable extends PowerGridComponent
                 ['value' => 'inactive', 'label' => 'Nonaktif'],
                 ['value' => 'locked', 'label' => 'Terkunci'],
             ])->optionValue('value')->optionLabel('label'),
-            Filter::datetimepicker('last_login_label', 'starter_client_logins.last_login_at'),
+            Filter::inputText('last_login_label', 'starter_client_logins.last_login_at')
+                ->operators(['starts_with'])
+                ->placeholder('YYYY-MM-DD'),
         ];
     }
 

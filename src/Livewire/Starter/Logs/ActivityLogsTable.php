@@ -20,6 +20,8 @@ class ActivityLogsTable extends PowerGridComponent
 
     public string $primaryKey = 'action_id';
 
+    public bool $showFilters = true;
+
     private ActivityLogInterface $activityLogs;
 
     private AuthenticatedLoginService $authenticatedLogins;
@@ -32,6 +34,8 @@ class ActivityLogsTable extends PowerGridComponent
 
     public function setUp(): array
     {
+        $this->persist(['filters', 'sorting']);
+
         return [
             PowerGrid::header()->showSearchInput(),
             PowerGrid::footer()->showPerPage(25, [25, 50, 100])->showRecordCount(),
@@ -71,15 +75,15 @@ class ActivityLogsTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::inputText('created_at_label', 'created_at')
-                ->operators(['starts_with'])
-                ->placeholder('YYYY-MM-DD'),
+            Filter::datetimepicker('created_at_label', 'created_at'),
             Filter::inputText('action_label')->operators(['contains']),
             Filter::inputText('actor_name')->operators(['contains']),
             Filter::inputText('actor_role')->operators(['contains']),
             Filter::inputText('app_key')->operators(['contains']),
             Filter::inputText('route_name')->operators(['contains']),
             Filter::inputText('ip_address')->operators(['starts_with']),
+            Filter::number('changes_count')->placeholder('Min', 'Max'),
+            Filter::number('tables_count')->placeholder('Min', 'Max'),
         ];
     }
 

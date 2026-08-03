@@ -23,7 +23,7 @@ class ActivityLogRepository implements ActivityLogInterface
 
     public function tableQueryForViewer(ClientLogin $viewer): Builder
     {
-        return $this->viewerQuery($viewer)
+        $actions = $this->viewerQuery($viewer)
             ->selectRaw('MAX(id) as id')
             ->selectRaw('action_id')
             ->selectRaw('MAX(created_at) as created_at')
@@ -38,6 +38,8 @@ class ActivityLogRepository implements ActivityLogInterface
             ->selectRaw('COUNT(*) as changes_count')
             ->selectRaw('COUNT(DISTINCT table_name) as tables_count')
             ->groupBy('action_id');
+
+        return ActivityLog::query()->fromSub($actions, 'starter_activity_log_actions');
     }
 
     public function paginateActionsForViewer(

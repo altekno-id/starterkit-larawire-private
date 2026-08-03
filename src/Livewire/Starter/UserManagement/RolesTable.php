@@ -21,6 +21,8 @@ class RolesTable extends PowerGridComponent
 
     public string $archiveStatus = 'active';
 
+    public bool $showFilters = true;
+
     public ?string $pendingAction = null;
 
     /** @var list<int> */
@@ -39,6 +41,7 @@ class RolesTable extends PowerGridComponent
     public function setUp(): array
     {
         $this->showCheckBox();
+        $this->persist(['filters', 'sorting']);
 
         return [
             PowerGrid::header()->showSearchInput()->includeViewOnTop('starter.user-management.powergrid.roles-toolbar'),
@@ -80,6 +83,10 @@ class RolesTable extends PowerGridComponent
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('code')->operators(['contains']),
             Filter::inputText('desc')->operators(['contains']),
+            Filter::number('client_logins_count')->placeholder('Min', 'Max')
+                ->builder(fn (Builder $query, array $values): Builder => $this->filterRelationCount($query, 'clientLogins', $values)),
+            Filter::number('mods_count')->placeholder('Min', 'Max')
+                ->builder(fn (Builder $query, array $values): Builder => $this->filterRelationCount($query, 'mods', $values)),
             Filter::boolean('settings_label', 'can_manage_settings')->label('Ya', 'Tidak'),
             Filter::boolean('logs_label', 'can_view_logs')->label('Ya', 'Tidak'),
         ];
@@ -140,6 +147,20 @@ class RolesTable extends PowerGridComponent
         abort_unless(in_array($action, ['archive', 'restore', 'forceDelete'], true), 422);
         $this->pendingIds = collect($ids)->map(fn ($id): int => (int) $id)->filter()->unique()->values()->all();
         $this->pendingAction = $this->pendingIds === [] ? null : $action;
+    }
+
+    /** @param array{start?: int|string, end?: int|string} $values */
+    private function filterRelationCount(Builder $query, string $relation, array $values): Builder
+    {
+        if (filled($values['start'] ?? null)) {
+            $query->has($relation, '>=', (int) $values['start']);
+        }
+
+        if (filled($values['end'] ?? null)) {
+            $query->has($relation, '<=', (int) $values['end']);
+        }
+
+        return $query;
     }
 
     private function login(): ClientLogin

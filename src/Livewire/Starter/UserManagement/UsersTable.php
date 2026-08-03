@@ -20,6 +20,8 @@ class UsersTable extends PowerGridComponent
 
     public string $archiveStatus = 'active';
 
+    public bool $showFilters = true;
+
     public ?string $pendingAction = null;
 
     /** @var list<int> */
@@ -38,6 +40,7 @@ class UsersTable extends PowerGridComponent
     public function setUp(): array
     {
         $this->showCheckBox();
+        $this->persist(['filters', 'sorting']);
 
         return [
             PowerGrid::header()->showSearchInput()->includeViewOnTop('starter.user-management.powergrid.users-toolbar'),
@@ -95,9 +98,7 @@ class UsersTable extends PowerGridComponent
                 ['value' => 'inactive', 'label' => 'Nonaktif'],
                 ['value' => 'locked', 'label' => 'Terkunci'],
             ])->optionValue('value')->optionLabel('label'),
-            Filter::inputText('last_login_label', 'starter_client_logins.last_login_at')
-                ->operators(['starts_with'])
-                ->placeholder('YYYY-MM-DD'),
+            Filter::datetimepicker('last_login_label', 'starter_client_logins.last_login_at'),
         ];
     }
 

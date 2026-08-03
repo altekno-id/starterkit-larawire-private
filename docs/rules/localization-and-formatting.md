@@ -1,28 +1,8 @@
-# Localization dan Format Nilai
+# Localization and Value Formatting
 
-## Locale
-
-- Project memakai `laravel-lang/common`; jangan membuat ulang terjemahan framework yang sudah tersedia.
-- Bahasa aplikasi mengikuti `APP_LOCALE`, fallback mengikuti `APP_FALLBACK_LOCALE`, dan Faker mengikuti `APP_FAKER_LOCALE`.
-- Default project adalah `id`, `id`, dan `id_ID`.
-- Setelah update dependency bahasa, jalankan `php artisan lang:update --no-interaction` dan review perubahan sebelum commit.
-- Label bisnis tetap ditulis jelas dalam Bahasa Indonesia; istilah familiar seperti username, password, email, role, dan module boleh dipertahankan.
-
-## Angka dan Currency
-
-- Gunakan `Altekno\StarterKit\Support\Starter\StarterNumber`, bukan `number_format()` tersebar di view.
-- Format angka Indonesia memakai titik untuk ribuan dan koma untuk pecahan: `1.234` dan `1.234,5`.
-- Currency default adalah IDR dan harus menampilkan simbol/kode sesuai locale; pecahan currency ditampilkan dua digit hanya bila nilai memang memiliki pecahan.
-- Nilai database, input API, kalkulasi, dan validation tetap menggunakan tipe numerik mentah; format locale hanya pada presentation boundary.
-- Parsing input berformat locale harus dilakukan eksplisit dan diuji; jangan cast string `1.234,5` langsung ke float.
-
-## Tanggal dan Waktu
-
-- Simpan timestamp database dalam format native dan tampilkan sesuai timezone `APP_TIMEZONE`.
-- Gunakan translator/formatter locale pada UI; jangan menyimpan nama hari/bulan hasil format ke database.
-
-## Test Minimum
-
-- Locale mengikuti env/config aplikasi.
-- Angka bulat, angka pecahan, nilai negatif, dan currency diuji.
-- Formatter tidak mengubah nilai persistence atau business calculation.
+- Use `laravel-lang/common`; do not recreate framework translations. Locale, fallback locale, and Faker locale follow `APP_LOCALE`, `APP_FALLBACK_LOCALE`, and `APP_FAKER_LOCALE` (default: `id`, `id`, `id_ID`). After language dependency updates run `php artisan lang:update --no-interaction` and review the diff.
+- Business labels are Indonesian; familiar terms such as username, password, email, role, and module may remain English.
+- Format displayed numbers/currency through `Altekno\StarterKit\Support\Starter\StarterNumber`, not scattered `number_format()`. Indonesian formatting uses `1.234` and `1.234,5`; IDR shows locale-appropriate symbol/code and decimals only when present.
+- Database/API/input/calculation values remain raw numeric values. Parse locale-formatted input explicitly and test it; never cast `1.234,5` directly to float.
+- Store native timestamps and present them in `APP_TIMEZONE` with locale formatter/translator; never persist rendered day/month names.
+- Test locale configuration, integer/decimal/negative/currency rendering, and that presentation formatting never changes persisted/calculated values.

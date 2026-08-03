@@ -1,98 +1,28 @@
-# App dan Subdomain Baru
+# New App and Subdomain
 
-## App pertama saat instalasi
+## Creation
 
-- Installer interaktif menanyakan kode/subdomain dan nama App pertama setelah
-  konfirmasi reset database.
-- Input kode boleh dikosongkan. Instalasi tanpa App tetap valid; root landing,
-  autentikasi, profil, pengaturan, user/role, dan log tetap dapat digunakan.
-- Tanpa App, redirect setelah login jatuh ke halaman global pertama yang
-  diizinkan dan landing onboarding menjadi petunjuk pembuatan App.
-- Jangan membuat App dummy hanya agar instalasi berhasil. Buat App pertama saat
-  boundary bisnis dan subdomainnya sudah diketahui.
-
-## Generator resmi
+- The installer asks for the first App code/subdomain and name after database-reset confirmation. Empty input is valid: root landing, auth, profile, settings, users/roles, and logs remain usable; never create a dummy App.
+- Create an App with:
 
 ```bash
-php artisan starter:make-app <subdomain> \
-  --name="Nama App" \
-  --description="Deskripsi singkat" \
-  --icon=apps
+php artisan starter:make-app <subdomain> --name="App Name" --description="Short description" --icon=apps
 ```
 
-Subdomain hanya boleh berisi huruf kecil, angka, dan tanda hubung internal.
-Kode `api` dicadangkan untuk gateway bersama dan tidak boleh menjadi App.
-Command membuat:
+- A subdomain contains lowercase letters, digits, and internal hyphens only; `api` is reserved. The generator creates App config/web/API routes, dashboard Livewire/view, route test, and runs `starter:sync` unless `--no-sync` is required before completing the files.
+- Complete config modules/menus and routes named `<subdomain>.<module>.<action>`, dry-run then force sync, assign modules to roles, configure DNS/vhost to `public`, confirm session cookie scope, and test generator, route, authorization, and browser behavior.
 
-- `config/apps/<subdomain>.php`
-- `routes/apps/<subdomain>.php`
-- `routes/apps/<subdomain>.api.php`
-- dashboard Livewire
-- view dashboard
-- feature test route
-- metadata database melalui `starter:sync`
+## App migration and navigation
 
-Gunakan `--no-sync` hanya jika file perlu dilengkapi sebelum metadata diterapkan.
+- App migrations live in `database/migrations/apps/<subdomain>/`; tables use `{subdomain}_{module}_{entity}`. Generate the model and migration separately with an explicit migration path. The separation is source ownership only: `php artisan migrate` runs all pending App migrations.
+- Build root/auth/App URLs with named routes and `StarterNavigation`, never manual hosts or auth URLs. Navigation across origins/subdomains is full-page browser navigation, never `wire:navigate` or CORS.
+- `APP_URL` points to the root matching `APP_DOMAIN`; use a POST+CSRF logout form and a safe redirect. Test login, session, lock screen, and logout at root and App domains locally and in production.
 
-## Setelah generate
+## API gateway
 
-1. Periksa namespace/class hasil generator.
-2. Lengkapi module dan menu di config.
-3. Lengkapi route bernama `<subdomain>.<module>.<action>`.
-4. Jalankan `starter:sync <subdomain> --dry-run`, lalu `--force`.
-5. Berikan module kepada role yang relevan.
-6. Konfigurasikan DNS/vhost wildcard atau subdomain eksplisit menuju folder `public`.
-7. Pastikan cookie/session domain mendukung root dan subdomain sesuai environment.
-8. Jalankan test generator, route, authorization, dan browser.
+- APIs are a shared gateway, not Apps: `api.<APP_DOMAIN>`. They are absent by default and register only with `STARTER_API_ENABLED=true`.
+- Put each App's endpoints only in `routes/apps/<subdomain>.api.php`. The registrar supplies `api.<APP_DOMAIN>/<subdomain>`, `api` middleware/rate limit, and `api.<subdomain>.*` route names; write only App-relative paths.
+- API routes do not enter `starter:sync`, web menu/module metadata, landing selection, or web `starter.authorize`. Each business endpoint declares suitable API authentication and authorization.
+- Scramble serves API docs/OpenAPI; production docs require authenticated Superuser. CORS is closed by default; an approved cross-origin need must specify a narrow origin/credential allowlist—never wildcard authenticated endpoints.
 
-## Migration app
-
-- Saat app memerlukan tabel, letakkan migration di `database/migrations/apps/<subdomain>/`. Folder dibuat otomatis oleh `make:migration` bila belum ada dan akan dimuat otomatis oleh starter saat `php artisan migrate` dijalankan.
-- Gunakan nama tabel berpola `{subdomain}_{module}_{entity}` dan buat model tanpa flag `-m`, lalu migration dengan path eksplisit. Lihat `code-style.md` untuk perintah dan aturan production-safe.
-- Satu deployment tetap menjalankan semua migration pending dari seluruh app lewat `php artisan migrate`; pemisahan folder adalah ownership source code, bukan database atau proses deployment terpisah.
-
-## Navigasi lintas subdomain
-
-- URL root/auth/app dibentuk melalui named route dan `StarterNavigation`; jangan merangkai host atau URL login/logout secara manual di view.
-- Perpindahan origin antara root/auth dan app subdomain wajib memakai full-page
-  browser navigation. Jangan memakai `wire:navigate` pada link yang lintas
-  subdomain atau yang respons akhirnya dapat diarahkan middleware ke subdomain
-  lain; CORS bukan solusi untuk navigasi halaman terautentikasi.
-- `APP_URL` harus menunjuk root domain yang sama dengan `APP_DOMAIN`; middleware trusted hosts otomatis mengizinkan root dan app subdomain tanpa daftar manual.
-- Form logout selalu memakai method `POST`, CSRF, action route root yang valid, dan redirect tujuan yang lolos pemeriksaan safe redirect.
-- Uji login, session, lock screen, dan logout dari root domain serta app subdomain pada environment lokal dan domain production.
-
-## API App
-
-- API adalah gateway terpisah, bukan App: domainnya selalu
-  `api.<APP_DOMAIN>` dan tidak memiliki config/module/menu pada registry.
-- API nonaktif secara default. `STARTER_API_ENABLED=true` mendaftarkan
-  dokumentasi pada root domain API dan file API seluruh App; `false` tidak
-  mendaftarkan keduanya.
-- Endpoint satu App hanya ditulis pada `routes/apps/<subdomain>.api.php`.
-  Registrar otomatis memberi domain API, prefix URI `/<subdomain>`, middleware
-  `api`, rate limit dasar, dan prefix nama route `api.<subdomain>.`.
-- File API hanya menulis path relatif terhadap App. Contoh
-  `Route::get('/prospek', ...)->name('prospek.index')` menjadi
-  `api.example.com/sales/prospek` dengan nama `api.sales.prospek.index`.
-- Route API tidak masuk `starter:sync`, metadata module, menu, landing role,
-  atau middleware `starter.authorize` web. Setiap endpoint bisnis wajib
-  mendefinisikan authentication dan authorization API yang sesuai konsumennya;
-  jangan menganggap session web sebagai kontrak API.
-- Scramble menjadi source dokumentasi otomatis. Root `api.<APP_DOMAIN>` adalah
-  UI dokumentasi dan `/openapi.json` adalah dokumen OpenAPI. Development dapat
-  membukanya langsung; production hanya dapat dibuka Superuser yang sudah
-  terautentikasi.
-- Default tidak membuka CORS. Bila browser dari origin lain harus memakai API,
-  requirement wajib menyebut origin dan credential yang dibutuhkan agar
-  allowlist CORS dibuat secara sempit; jangan memakai wildcard untuk endpoint
-  berautentikasi.
-
-## Jangan dilakukan
-
-- Jangan menambah daftar app manual di provider: registry melakukan discovery.
-- Jangan membuat app hanya dengan config atau hanya dengan route; keduanya wajib ada.
-- Jangan memakai route name dengan prefix app/module yang berbeda.
-- Jangan membuat route app global di `routes/starter/global.php` atau `routes/starter/web.php`.
-- Jangan menaruh endpoint App di `routes/api.php`, route web App, atau file API
-  milik App lain.
+Do not manually register Apps in a provider, create config without routes (or vice versa), use mismatched route prefixes, place App web routes in starter global/web routes, or put App APIs in `routes/api.php`/another App's API file.

@@ -1,19 +1,12 @@
-# Instruksi AI Project
+# Project AI Instructions
 
-Project Laravel ini menggunakan `{{STARTERKIT_DIRECTORY}}/` sebagai fondasi dan kontrak
-agentic coding.
+This Laravel project uses `{{STARTERKIT_DIRECTORY}}/` as its agentic-coding foundation and execution contract.
 
-Sebelum merencanakan atau mengubah code:
+Before planning or changing code:
 
-1. Baca `{{STARTERKIT_DIRECTORY}}/AGENTS.md` secara lengkap sebagai kontrak utama.
-2. Baca hanya rule dalam `{{STARTERKIT_DIRECTORY}}/docs/rules/` yang dirujuk oleh router tugas.
-3. Perlakukan path `docs/...` yang disebut oleh kontrak starterkit sebagai
-   `{{STARTERKIT_DIRECTORY}}/docs/...`; path feature seperti `app/`, `routes/apps/`,
-   `resources/views/apps/`, `database/migrations/apps/`, `tests/`, dan
-   `issues/` berada pada root Laravel ini.
-4. Jangan mengubah source di `{{STARTERKIT_DIRECTORY}}/` untuk kebutuhan feature project.
-   Perubahan di sana hanya untuk improvement universal starterkit.
+1. Read `{{STARTERKIT_DIRECTORY}}/AGENTS.md` in full as the primary contract.
+2. Read only the rules in `{{STARTERKIT_DIRECTORY}}/docs/rules/` routed to the task.
+3. Treat `docs/...` mentioned by the starter contract as `{{STARTERKIT_DIRECTORY}}/docs/...`; feature paths such as `app/`, `routes/apps/`, `resources/views/apps/`, `database/migrations/apps/`, `tests/`, and `issues/` are at this Laravel root.
+4. Do not change `{{STARTERKIT_DIRECTORY}}/` for a project feature. Changes there are universal starter improvements only.
 
-Developer cukup memberikan konteks bisnis. Agent wajib menerapkan workflow,
-keamanan, performa, validasi, audit, pagination, UI, testing, dan struktur file
-sesuai rules tanpa meminta developer mengulang standar teknis tersebut.
+Developers provide business context. The agent applies the required workflow, security, performance, validation, audit, pagination, UI, testing, and file ownership standards without asking the developer to repeat them.

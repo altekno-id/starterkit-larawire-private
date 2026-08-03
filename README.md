@@ -4,10 +4,12 @@ Starterkit Laravel untuk aplikasi internal perusahaan. Fondasi login, user,
 role, App, module, menu, audit, keamanan, API, serta UI bertema **Tabler**
 sudah disiapkan agar developer fokus pada fitur bisnis dan agentic coding.
 
-Repository ini bukan aplikasi mandiri. Clone sebagai repository Git mandiri ke
-folder `starterkit-larawire-private` di dalam Laravel fresh, lalu jalankan
-installer. Repository Laravel host mengabaikan folder tersebut; update source
-starterkit dilakukan manual dari clone itu sendiri.
+Repository ini bukan aplikasi mandiri. Simpan clone Git canonical di luar
+Laravel host, lalu salin snapshot tanpa `.git` ke folder
+`starterkit-larawire-private` di dalam Laravel fresh sebelum menjalankan
+installer. Snapshot tersebut wajib dilacak sebagai file biasa oleh repository
+Laravel host; update source dilakukan dari clone canonical lalu disinkronkan ke
+snapshot dan di-commit bersama project.
 
 ## Agentic-ready — tujuan rules
 
@@ -83,10 +85,13 @@ Theme aktif ditentukan saat instalasi:
 STARTER_THEME=tabler
 ```
 
-View theme berada di `resources/themes/tabler`, asset khusus theme di
-`public/themes/tabler`, dan atlas UI di `docs/template/tabler`. Theme baru wajib
-menyediakan ketiga area tersebut serta adapter PowerGrid tanpa menyalin logic
-core.
+Folder `docs/template/<theme>/` menyimpan bundle vendor lengkap—asset, HTML,
+dan atlas UI—agar template baru dapat langsung di-copy-paste ke satu lokasi.
+Blade runtime hasil adaptasi tetap berada di `resources/themes/<theme>/views`,
+sedangkan asset runtime yang dipublish ke `public/assets` bersumber dari
+`public/themes/<theme>/assets`. Untuk theme baru, paste vendor lengkap ke docs,
+adaptasikan Blade/runtime asset, lalu daftarkan path dan adapter PowerGrid pada
+`config/starter.php`.
 
 ## Standar tabel — Livewire PowerGrid
 

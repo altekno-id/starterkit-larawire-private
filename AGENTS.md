@@ -1,206 +1,90 @@
 # AI Entry Point
 
-Dokumen ini adalah kontrak eksekusi untuk setiap model AI yang mengembangkan project turunan dari starterkit ini. Jangan membaca seluruh `docs/` pada setiap tugas; baca konteks inti dan rule yang relevan.
+This is the execution contract for AI working on projects derived from this starter kit. Do not read all of `docs/` for every task; read this file, `project-context.md` when needed, and only the rules routed to the task.
 
-Repository ini hanya berisi source core starterkit dan tidak dapat dijalankan sebagai aplikasi Laravel mandiri. Semua perintah Composer, Artisan, Pint, Pest, migration, dan setup dijalankan dari root Laravel host yang memuat snapshot source ini pada folder `starterkit-larawire-private/`.
+This repository is core source only, not a runnable Laravel application. Run Composer, Artisan, Pint, Pest, migrations, and setup commands from the Laravel host that contains this snapshot at `starterkit-larawire-private/`. The installer maintains a connector in the host `AGENTS.md`; `docs/...` in this contract means `starterkit-larawire-private/docs/...`, while `app/`, `routes/apps/`, `resources/views/apps/`, `database/migrations/apps/`, `tests/`, and `issues/` belong to the host.
 
-Installer membuat connector terkelola pada `AGENTS.md` di root Laravel host.
-Connector tersebut mengarahkan agent ke file canonical ini tanpa menyalin
-seluruh rules, sehingga perubahan rules langsung terbaca setelah snapshot
-starterkit project diperbarui. Bila bekerja dari root Laravel host,
-referensi `docs/...` dalam file ini berarti `starterkit-larawire-private/docs/...`; path feature
-seperti `app/`, `routes/apps/`, `resources/views/apps/`,
-`database/migrations/apps/`, `tests/`, dan `issues/` tetap milik Laravel host.
+## Required context
 
-## Konteks wajib
+- This is a private/internal-company application, not a SaaS product.
+- Use the versions locked by the host dependencies. Inspect the active source before assuming a brand, framework/package API, theme, or icon set.
+- Access is module-based: a role can own many modules; routes and menus follow modules. Superuser is a hidden system account and non-superusers cannot view, modify, or delete it.
+- App/module/route/menu metadata is code-first and synchronized to the database. UI is Indonesian except familiar terms such as username, password, email, role, and module.
+- Do not enable config cache in development; use it only for production deployment.
+- The core clone may contain only starter source, core migrations/routes/views/assets, documentation/rules, and `installer/`; never add a Laravel shell, sample app, development database, or project landing.
 
-- Project private/internal company, bukan SaaS.
-- PHP, Laravel, Livewire, dan Pest mengikuti versi terbaru yang kompatibel serta sudah dikunci oleh dependency project. Template UI mengikuti aset/template aktif project; jangan mengasumsikan brand, versi, API, atau icon set tertentu tanpa memeriksa source aktual.
-- Hak akses berbasis module: satu role dapat mengakses banyak module; route dan menu mengikuti module.
-- Superuser adalah akun sistem tersembunyi bagi non-superuser dan tidak boleh diubah/dihapus.
-- Metadata app, module, route, dan menu didefinisikan di source code lalu disinkronkan ke database.
-- UI menggunakan Bahasa Indonesia, kecuali istilah familiar seperti username, password, email, role, dan module.
-- Selama development jangan aktifkan config cache; gunakan config cache hanya pada deployment production.
-- Root clone starterkit hanya boleh memiliki folder bootstrap `installer/`,
-  source core, migration inti, route inti, view inti, asset, dokumentasi, dan
-  rules. Jangan menambahkan shell Laravel seperti `artisan`, `bootstrap/`,
-  `app/`, `vendor/`, database development, landing project, atau app contoh.
+Read [project context](docs/rules/project-context.md) once when unfamiliar with the project or after context loss.
 
-Baca [project-context](docs/rules/project-context.md) sekali saat belum mengenal project atau ketika konteks percakapan hilang.
+## Default implementation contract
 
-## Kontrak default request implementasi
+- The developer supplies business need, flow, data, and relevant roles; do not ask them to repeat starter technical standards.
+- Before changing feature behavior or fixing a bug, require: chat confirmation, a detailed specification in `issues/`, then explicit approval of that file. Use `issues/feature_<name>_<YYYY_MM_DD_HHMMSS>.md` or `issues/bug_<name>_<YYYY_MM_DD_HHMMSS>.md`; archive only completed, verified work as `issues/archives/done_<original-name>.md`.
+- Do not enter the specification gate for a new module until its owning App, module name, and menu shape (single or parent/children) are known. Follow `feature-development.md`.
+- Apply authorization, validation, injection/mass-assignment protection, server-side pagination, efficient queries, audit logging, transactions, locale/formatting, Livewire/Alpine patterns, UI state, production-safe migrations, and relevant tests by default.
+- Mutable business-entity modules provide create, update, archive/soft delete, restore, permanent delete, selection, bulk actions, and by-filter actions unless the relevant owner rule documents and tests an exception (derived, append-only, audit/compliance, pivot, or system metadata data).
+- **Every tabular data presentation in a Livewire project must use `power-components/livewire-powergrid` with the active-theme adapter.** Data source, search, enabled column filters, sorting, and pagination are server-side.
+- **Column filters are enabled by default for every meaningful data column** and must match its type: text search for text, select/multi-select or boolean control for enumerations/booleans, and inclusive date-from/date-to ranges for dates/datetimes. They update live (debounced where querying), never behind an Apply/Search button, and their state—including pagination reset behavior—survives a page reload via the supported PowerGrid/Livewire URL/session mechanism.
+- A single card-form filter row above the grid is optional and may contain only cross-column, composite, high-value, or otherwise non-redundant controls. Do not duplicate a column filter there. Keep column widths proportional to both filter controls and displayed values; maintain readability and responsive behavior, and use horizontal table scrolling when necessary.
+- App features follow `Apps/<Subdomain>` ownership. Read `architecture.md` before creating files. App migrations live in `database/migrations/apps/<subdomain>/`; App APIs live in `routes/apps/<subdomain>.api.php` at `api.<APP_DOMAIN>/<subdomain>` with no `/api` prefix and only when `STARTER_API_ENABLED=true`.
+- Keep each complete upstream vendor template—its `assets/` and HTML together—at `docs/template/<theme>/` so it can be pasted there intact. Then generate the runtime starter Blade at `resources/themes/<theme>/views/starter/`, copy required runtime assets to `public/themes/<theme>/assets/`, register theme paths/PowerGrid adapter, and verify publishing. Keep page CSS/JS beside its owning Blade view. Prefer Alpine for small presentation state, Livewire only for server work, and deferred model binding for normal forms. Start UI from the closest active-theme example; never invent a generic cross-theme PowerGrid appearance.
+- Browser-native dialogs (`alert`, `confirm`, `prompt`, and equivalents) are forbidden. Replace every dialog with an active-template, theme-consistent modal. Use it for every user-action confirmation and compact, single-purpose mini form; complex, multi-step, or page-defining forms remain on a dedicated page. Follow `ui-ux.md` for modal validation, loading, and destructive-action behavior.
+- Skip irrelevant standards instead of adding ceremonial code. Explain risk and obtain explicit approval for a requested deviation.
 
-- User/developer cukup menjelaskan kebutuhan bisnis, flow, data, dan role yang relevan. Jangan meminta mereka mengulang standar teknis starterkit.
-- Setiap request implementasi feature, perubahan perilaku, atau bug wajib
-  melewati tiga gerbang sebelum code diubah: konfirmasi pemahaman di chat,
-  spesifikasi teknis terperinci di `issues/`, lalu persetujuan eksplisit
-  developer atas file tersebut. Jangan membuat file issue sebelum developer
-  menyatakan konfirmasi chat sudah benar.
-- Gunakan `issues/feature_<nama>_<YYYY_MM_DD_HHMMSS>.md` untuk feature baru atau
-  perubahan feature, dan `issues/bug_<nama>_<YYYY_MM_DD_HHMMSS>.md` untuk bug.
-  Timestamp mengikuti waktu lokal project/developer dan berfungsi sebagai
-  serial unik seperti migration.
-- Spesifikasi wajib cukup lengkap agar programmer junior atau model AI yang
-  lebih hemat dapat mengimplementasikannya secara presisi tanpa menebak
-  keputusan bisnis, arsitektur, file, test, atau acceptance criteria.
-- Setelah implementasi benar-benar selesai dan seluruh verifikasi relevan
-  lulus, pindahkan file menjadi
-  `issues/archives/done_<nama-file-asli>.md`. Jangan arsipkan pekerjaan parsial,
-  gagal, dibatalkan, atau masih menunggu keputusan.
-- Permintaan module baru belum boleh masuk gerbang spesifikasi bila developer
-  belum menyebut App pemilik, nama module, dan struktur menu (single atau parent
-  beserta child). Respons pertama wajib menjelaskan informasi yang kurang dan
-  memberi contoh prompt yang benar; detailnya mengikuti
-  `docs/rules/feature-development.md`.
-- Secara otomatis terapkan authorization, validation, proteksi injection/mass-assignment, server-side pagination untuk data yang dapat tumbuh, query efisien, audit log, transaksi, locale/format, pola Livewire/Alpine, UI state, migration production-safe, dan test sesuai rule pemilik.
-- Setiap module manajemen entitas bisnis menerapkan lifecycle CRUD lengkap secara default—create, edit/update, arsip/soft delete, pulihkan, dan hard delete—serta checkbox aksi massal dan aksi by-filter. Terapkan kontrak scope, konfirmasi berbahaya, relasi, audit, performa, dan pengecualian data turunan/append-only dari `ui-ux.md`, `performance.md`, `audit-logging.md`, `code-style.md`, dan `testing.md` tanpa menunggu developer mengulangnya.
-- Setiap penyajian data berbentuk tabel pada project Livewire wajib memakai
-  `power-components/livewire-powergrid`. Datasource, pencarian, filter setiap
-  kolom yang relevan, sorting, dan pagination wajib berjalan server-side.
-  Tabel manajemen mutable wajib menyediakan checkbox, aksi massal/by-filter,
-  serta lifecycle arsip, pulihkan, dan hapus permanen. Pengecualian filter atau
-  lifecycle hanya untuk kolom/data yang memang tidak relevan, turunan,
-  append-only, audit/compliance, pivot, atau metadata sistem dan alasannya wajib
-  dibuktikan serta diuji.
-- Seluruh feature untuk app/subdomain wajib mengikuti struktur `Apps/<Subdomain>` pada layer yang dipakai. Baca `docs/rules/architecture.md` sebelum membuat file feature app baru; jangan mencampurnya dengan folder Starter atau root project.
-- Migration feature app wajib berada di `database/migrations/apps/<subdomain>/`, bukan root `database/migrations`; folder tersebut dimuat otomatis saat perintah Artisan migration berjalan.
-- Endpoint API App wajib berada di `routes/apps/<subdomain>.api.php`. API memakai
-  gateway `api.<APP_DOMAIN>/<subdomain>`, tidak memakai prefix `/api`, tidak
-  menjadi metadata menu/module web, dan hanya didaftarkan ketika
-  `STARTER_API_ENABLED=true`.
-- Asset CSS/JS custom halaman app wajib berada pada Blade asset yang berdekatan dengan view pemiliknya. Gunakan Alpine untuk UI kecil, Livewire hanya untuk kebutuhan server, dan `wire:model.defer` untuk form normal; baca `ui-ux.md` serta `performance.md` sebelum membuat interaksi atau memakai library baru.
-- UI wajib berangkat dari contoh terdekat di `docs/template/<theme>`. Gunakan `docs/template/<theme>/template.md` sebagai atlas pencarian yang tidak mengikat: cari beberapa kandidat lintas konteks, buka satu sampai tiga sumber HTML, lalu pilih/komposisikan pola template UI aktif yang paling tepat. PowerGrid wajib memakai adapter/komponen theme aktif, bukan tampilan generik lintas theme. Jangan membuat desain/komponen hanya berdasarkan selera. Pilih komponen berdasarkan konteks, jenis, dan volume data agar halaman padat, informatif, responsif, serta profesional.
-- Bila sebuah standar tidak relevan, lewati tanpa menambah code seremonial. Bila requirement meminta deviasi, jelaskan risiko dan minta keputusan eksplisit.
+## Evidence and change discipline
 
-## Kontrak anti-asumsi
+- Trace existing flow before planning or changing code: route/menu → Livewire/controller → service → interface/repository → model/migration → related test/config.
+- Call something existing only when source, schema, config, tests, or command output proves it. Separate confirmed requirements, findings, proposals, and open questions.
+- Stop and ask for a material business/authorization/data decision that cannot be discovered. Reuse the existing source of truth and closest sibling; do not add a layer, package, config, service, daemon, web-server configuration, or abstraction without verified need and approval.
+- Verify installed versions from host lock/config files. Make the smallest root-cause change, preserve unrelated worktree changes, and update an affected rule/context when an approved exception changes a core standard.
 
-- Sebelum merencanakan atau mengubah code, telusuri flow existing dari route/menu → Livewire/controller → service → interface/repository → model/migration → test/config terkait.
-- Nyatakan sesuatu sebagai kondisi existing hanya setelah dibuktikan dari code, schema, config, test, atau output command. Jangan mengarang route, tabel, kolom, role, status, config key, integration, atau business rule.
-- Pisahkan requirement terkonfirmasi, temuan existing, proposal teknis, dan pertanyaan terbuka. Proposal tidak boleh ditulis seolah-olah keputusan user.
-- Jika keputusan bisnis/authorization/data yang tidak dapat ditemukan akan mengubah hasil secara material, hentikan bagian yang bergantung padanya dan minta keputusan; jangan memilih diam-diam.
-- Gunakan source of truth existing dan sibling terdekat. Jangan membuat layer, abstraction, helper, config, atau dependency baru bila pola project yang ada sudah menyelesaikan kebutuhan.
-- Verifikasi versi framework/package dari `composer.lock`, lockfile frontend, atau file konfigurasi aktual milik Laravel host sebelum memakai API; jangan mengasumsikan dokumentasi versi terbaru cocok dengan dependency terpasang.
-- Jika requirement project bertentangan dengan rule inti, jelaskan rule yang terdampak, alasan, risiko, dan perubahan arsitekturnya. Deviasi hanya dilakukan setelah keputusan eksplisit dan rule/context terkait diperbarui pada perubahan yang sama.
-- Terapkan perubahan terkecil yang menyelesaikan root cause. Pertahankan perubahan user dan bagian worktree lain yang tidak terkait.
-- Jangan menambah package, base directory, service production, daemon, atau konfigurasi web server khusus tanpa kebutuhan terverifikasi dan persetujuan eksplisit.
+## Rule router
 
-## Router dokumen
-
-| Jika tugas menyangkut | Baca hanya |
+| Task | Read |
 |---|---|
-| Menambah/mengubah feature dalam app | `docs/rules/feature-development.md` |
-| App atau subdomain baru | `docs/rules/app-subdomain.md` |
-| Route, menu, module, atau role | `docs/rules/access-control.md` |
-| Model, create/update/delete, transaksi | `docs/rules/audit-logging.md` |
-| Livewire, form, tabel, modal, loader | `docs/rules/ui-ux.md` |
-| Konfigurasi, upload, login, lock screen | `docs/rules/security-and-config.md` |
-| PHP/Laravel conventions | `docs/rules/code-style.md` |
-| Query, pagination, cache, bulk action, atau asset | `docs/rules/performance.md` |
-| Locale, angka, tanggal, atau currency | `docs/rules/localization-and-formatting.md` |
-| Pengujian dan definition of done | `docs/rules/testing.md` |
-| Shared hosting/deployment | `docs/rules/deployment.md` |
-| Hubungan layer dan source of truth | `docs/rules/architecture.md` |
-| Install/update clone starterkit, theme, atau extension project | `README.md` |
+| App feature | `feature-development.md` |
+| New App/subdomain | `app-subdomain.md` |
+| Route/menu/module/role | `access-control.md` |
+| Model/mutation/transaction | `audit-logging.md` |
+| Livewire/form/table/modal/loader | `ui-ux.md` |
+| Config/upload/login/lock screen | `security-and-config.md` |
+| PHP/Laravel conventions | `code-style.md` |
+| Query/pagination/cache/bulk/assets | `performance.md` |
+| Locale/number/date/currency | `localization-and-formatting.md` |
+| Testing/definition of done | `testing.md` |
+| Shared hosting/deployment | `deployment.md` |
+| Layer ownership/source of truth | `architecture.md` |
+| Starter install/update/theme/extension | `README.md` |
 
-## Profil baca minimum
+Start with the minimum rules below, then add every owner rule touched by the change.
 
-Profil ini menentukan titik mulai pembacaan, bukan izin untuk mengabaikan rule lain yang tersentuh oleh requirement. Tambahkan rule pemilik setiap kali perubahan menyentuh topiknya.
+| Task type | Minimum |
+|---|---|
+| Small known bug/refactor | `feature-development.md`, closest sibling/test, owner rule |
+| Existing-App CRUD | `feature-development.md`, `architecture.md`, `audit-logging.md`, `testing.md` |
+| UI/interaction | `ui-ux.md`, `testing.md`, template atlas search |
+| Schema/data change | `feature-development.md`, `code-style.md`, `testing.md` |
+| New App/subdomain | `app-subdomain.md`, `architecture.md`, `access-control.md`, `testing.md` |
+| Configuration/auth/security/deployment | `security-and-config.md`, `deployment.md`, `testing.md` |
 
-| Jenis tugas | Baca minimum | Tambahkan bila tersentuh |
-|---|---|---|
-| Bug/refactor kecil pada area yang sudah dikenal | `feature-development.md`, sibling code/test, dan rule pemilik area | `testing.md` untuk perubahan perilaku; rule lain sesuai dampak |
-| Feature CRUD pada app existing | `feature-development.md`, `architecture.md`, `audit-logging.md`, `testing.md` | `code-style.md` bila model/migration; `performance.md` bila daftar/query; `ui-ux.md` bila UI/interaksi |
-| Halaman atau interaksi UI | `ui-ux.md`, `testing.md`, dan pencarian atlas template | `performance.md` untuk daftar/asset/library; `security-and-config.md` untuk upload, sesi, atau kredensial |
-| Schema, migration, atau perubahan data | `feature-development.md`, `code-style.md`, `testing.md` | `audit-logging.md` untuk mutation bisnis; `performance.md` untuk query/index |
-| App/subdomain baru | `app-subdomain.md`, `architecture.md`, `access-control.md`, `testing.md` | `deployment.md` dan `security-and-config.md` bila domain/session/config berubah |
-| Konfigurasi, autentikasi, security, atau deployment | `security-and-config.md`, `deployment.md`, `testing.md` | `access-control.md`, `audit-logging.md`, atau `app-subdomain.md` sesuai dampak |
+## Priority and efficient workflow
 
-## Prioritas rule
+Priority: (1) platform/developer instructions and current explicit user decisions; (2) confirmed business, authorization, security, and data-integrity requirements; (3) the most specific architecture/owner rule; (4) proven source of truth; (5) conventions and UI examples. Never use a lower level to override a higher one; report a same-level conflict and request a decision.
 
-Jika terjadi benturan atau ketidakjelasan, gunakan urutan berikut di dalam repository:
+1. Locate files with `rg` and read the nearest sibling before editing.
+2. For implementation requests, do read-only discovery for the standard chat confirmation; after approval, write one detailed issue specification.
+3. For UI, search `docs/template/<theme>/template.md`, then open only one to three relevant HTML sources.
+4. Do not repeat general rules in feature documents or create issues for read-only diagnosis, status reports, or documentation-only work.
 
-1. Instruksi platform/developer dan keputusan eksplisit user untuk tugas saat ini.
-2. Requirement bisnis, authorization, keamanan, dan integritas data yang telah terkonfirmasi.
-3. Konteks arsitektur project serta rule pemilik yang paling spesifik untuk area tersebut.
-4. Source of truth existing—schema, config, route, test, dan implementasi sibling yang telah dibuktikan.
-5. Konvensi umum, contoh template UI, dan preferensi implementasi.
+## Execution, installation, and verification
 
-Rule pada tingkat lebih rendah tidak boleh dipakai untuk membatalkan tingkat lebih tinggi. Jika dua aturan setingkat benar-benar bertentangan, hentikan bagian yang terdampak, jelaskan konflik, dan minta keputusan; jangan memilih diam-diam.
+- In a host project, `starterkit-larawire-private/` is a tracked, read-only snapshot: no nested `.git`, ignore rule, subtree, or submodule. Universal improvements are made, verified, committed, and pushed in the canonical starter repository before manual snapshot sync, host verification, host commit, and host push.
+- Ignore `installer/` after setup unless the task concerns the installer. Install only a fresh Laravel app and new database with `php starterkit-larawire-private/installer/install.php`; it must warn about `migrate:fresh` and stop before mutation unless the developer confirms `y`. Never use installation for updates, existing projects/databases, or routine deployment.
+- `--reset` is local/development only; require `y`, then `RESET`, run `migrate:fresh`, preserve project source and uploads, and reject production before mutation.
+- First deployment: `composer install`, then `starter:setup`. Updates: `composer install`, then `starter:sync`. Neither may reset existing credentials; only create the app key when empty.
+- The installer manages only its marked connector block in host `AGENTS.md`; preserve every project instruction outside it. Do not ask developers to copy core source or edit individual connectors.
+- After specification approval, wait for explicit execution approval. Re-read the approved issue before execution; return to confirmation/specification if a new instruction materially changes scope.
+- Documentation-only/typo work may proceed directly if it does not change business flow, authorization, data, API, or deployment. For code work, run `php artisan make:* --no-interaction` from the host, create production-safe migrations, update relevant tests, run Pint after core PHP changes, then focused integration tests followed by the relevant suite. Never delete tests without approval.
 
-## Cara kerja hemat token
+## Rule evolution
 
-1. Cari file terkait dengan `rg`; baca sibling terdekat sebelum mengubah code.
-2. Untuk request implementasi, lakukan discovery baca-saja secukupnya untuk
-   mengisi konfirmasi chat baku. Setelah developer menjawab bahwa pemahaman
-   sudah benar, tulis satu spesifikasi teknis bernama
-   `issues/<jenis>_<slug>_<YYYY_MM_DD_HHMMSS>.md`.
-3. Untuk UI, cari `docs/template/<theme>/template.md` dengan `rg` berdasarkan konteks dan komponen, lalu buka 1–3 HTML sumber yang paling relevan. Jangan membaca seluruh atlas atau source template sekaligus.
-4. Jangan menyalin ulang aturan umum ke dokumen feature.
-5. Jangan membuat file issue sebelum konfirmasi chat disetujui. Folder
-   `issues/archives/` hanya untuk spesifikasi yang implementasinya sudah selesai;
-   diagnosis baca-saja, status report, dan dokumentasi murni tidak membuat issue
-   otomatis karena tidak meminta implementasi code.
-
-## Aturan eksekusi
-
-- Pada project pemakai, folder `starterkit-larawire-private/` adalah snapshot core read-only untuk feature project dan wajib dilacak sebagai file biasa oleh repository project. Folder ini tidak boleh memiliki `.git` sendiri, tidak diabaikan, dan bukan subtree, submodule, atau gitlink. Update dilakukan manual di lokal dengan menarik repository canonical, menyalin snapshot tanpa `.git`, memverifikasi host, lalu commit dan push repository project.
-- Folder `starterkit-larawire-private/installer/` hanya dimiliki bootstrap instalasi. Setelah
-  setup berhasil, developer dan AI feature wajib mengabaikannya; baca atau ubah
-  folder tersebut hanya saat tugas memang menyangkut installer.
-- Instalasi standar hanya boleh dilakukan pada Laravel fresh dengan database
-  khusus yang baru melalui `php starterkit-larawire-private/installer/install.php`. Installer
-  wajib memeriksa source target, menjelaskan bahwa `migrate:fresh` menghapus
-  seluruh tabel/data, dan berhenti sebelum mutation kecuali developer
-  mengonfirmasi dengan `y`. Installer wajib menanyakan kode/subdomain dan nama
-  App pertama serta menerima input kosong untuk instalasi tanpa App. Tanpa App,
-  landing onboarding wajib menjelaskan App, module, menu, submenu, generator,
-  struktur source, dan alur sync. Jangan memakai `starterkit:install` untuk
-  update, deploy rutin, project berjalan, atau database existing.
-- Installer boleh menyediakan `--reset` hanya untuk reset database pada
-  `APP_ENV=local|development`, wajib meminta konfirmasi `y` lalu `RESET`, dan
-  menjalankan `migrate:fresh` serta setup ulang dari source existing. Mode ini
-  tidak boleh menghapus source App, landing, migration, route, view, test,
-  asset, upload, issue feature, atau source project lain; production wajib
-  ditolak sebelum mutation.
-- Deployment pertama diringkas menjadi `composer install` lalu
-  `starter:setup`; update berikutnya menjadi `composer install` lalu
-  `starter:sync`. Kedua command Artisan memiliki orchestration migration,
-  security check, asset, registry, storage link best-effort, asset Livewire,
-  dan cache production sesuai ownership masing-masing. APP key hanya boleh
-  dibuat bila masih kosong; update rutin tidak boleh mereset akun/password.
-- Setiap perubahan core starterkit wajib dikerjakan pada repository starterkit
-  canonical yang memiliki remote `origin`, diverifikasi melalui Laravel host,
-  lalu dibuat sebagai commit terfokus dan dipush sebelum disinkronkan ke folder
-  snapshot starterkit project pengguna. Jangan meninggalkan improvement universal hanya
-  sebagai perubahan lokal/embedded. Setelah sync, verifikasi, commit, dan push
-  perubahan integrasi pada repository project pengguna.
-- Jangan meminta developer menyalin source core atau mengedit connector satu per
-  satu pada instalasi Laravel fresh yang masih memakai struktur standar.
-- Installer wajib membuat atau memperbarui block connector terkelola pada
-  `AGENTS.md` root Laravel host tanpa menimpa instruksi project di luar block
-  tersebut. File canonical `starterkit-larawire-private/AGENTS.md` tetap menjadi source of truth
-  agar update rules tidak memerlukan copy manual.
-- Setelah konfirmasi chat disetujui dan file issue dibuat, jangan langsung
-  mengeksekusi code. Beri tahu developer bahwa detail teknis siap diperiksa dan
-  tunggu persetujuan eksplisit atas file untuk melanjutkan implementasi.
-- Saat developer memerintahkan eksekusi, baca ulang file issue yang disetujui
-  sebagai kontrak scope. Jika instruksi baru mengubah scope atau keputusan
-  material, kembali ke konfirmasi chat dan revisi spesifikasi sebelum coding.
-- Setelah acceptance criteria terpenuhi dan verifikasi relevan lulus, pindahkan
-  file issue yang sama ke `issues/archives/` dengan prefix `done_` dalam commit
-  implementasi. Jangan membuat salinan sehingga hanya ada satu source of truth.
-- Perubahan trivial seperti typo/dokumentasi murni dapat langsung dikerjakan bila tidak mengubah business flow, authorization, data, API, atau deployment.
-- Jika user hanya meminta planning/review/diagnosis, jangan mengubah code atau state di luar artefak planning yang diminta.
-- Jalankan `php artisan make:* --no-interaction` dari root Laravel host untuk file project.
-- Migration wajib aman untuk data production dan data existing; jangan mengandalkan database kosong.
-- Setiap perubahan code/perilaku wajib memiliki atau memperbarui test yang relevan; perubahan dokumentasi murni wajib melewati pemeriksaan link dan konsistensi.
-- Setelah mengubah PHP core, jalankan `vendor/bin/pint --dirty --format agent` dari Laravel host.
-- Jalankan test integrasi terfokus dari Laravel host lebih dahulu, lalu suite yang relevan.
-- Jangan menghapus test tanpa persetujuan.
-
-## Evolusi rules
-
-- Sebelum mengeksekusi code, nilai apakah instruksi baru dari user/developer bersifat reusable dan cocok menjadi standar starterkit atau project turunannya.
-- Jika cocok, minta konfirmasi singkat sebelum eksekusi. Setelah disetujui, perbarui rule pemilik yang paling relevan dalam perubahan yang sama tanpa menunggu permintaan lanjutan.
-- Jangan menjadikan keputusan bisnis sekali pakai, detail satu feature, nilai rahasia, atau workaround sementara sebagai rule global.
-- Tulis rule secara umum, ringkas, dapat dieksekusi, dan tidak menduplikasi rule lain. Jika bertentangan dengan rule existing, jelaskan konflik dan minta keputusan eksplisit sebelum menggantinya.
+Before code execution, assess whether a new instruction is reusable. Request short confirmation before making it a starter/project standard; then update the most specific owner rule in the same change. Do not globalize one-off business decisions, secrets, temporary workarounds, or feature details. Keep rules general, concise, executable, and non-duplicative; explain and get approval before replacing a conflicting rule.

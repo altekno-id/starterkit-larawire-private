@@ -1,86 +1,23 @@
-# Security dan Konfigurasi Dinamis
+# Security and Dynamic Configuration
 
-## Konfigurasi
+## Configuration
 
-- Konfigurasi runtime yang boleh diubah admin disimpan di `starter_configs`.
-- Akses selalu melalui `StarterConfigService`; jangan query tabel langsung dari feature.
-- Default aman didefinisikan di service untuk kondisi sebelum migration/table tersedia.
-- Perubahan config harus menghapus cache key terkait dan tercatat di audit log.
-- Rahasia dan setting environment/infrastruktur tetap di `.env` + `config/*.php`, bukan database.
-- Setiap penambahan atau perubahan environment key untuk development lokal wajib diterapkan ke `.env` dan dicerminkan pada `.env.example` dalam perubahan yang sama. `.env.example` hanya memuat placeholder/default aman dan penjelasan yang diperlukan, tidak pernah nilai rahasia dari `.env`.
-- Jangan meminta developer menambahkan environment key secara manual bila perubahan tersebut dapat diterapkan langsung pada checkout lokal. Untuk production, dokumentasikan nilai atau pola nilainya melalui `.env.example` dan rule deployment.
-- Credential awal Superuser local/testing wajib terlihat eksplisit pada `.env`
-  dan `.env.example` agar setup tidak bergantung pada fallback tersembunyi.
-  Default `STARTER_SUPERUSER_PASSWORD=superuser123` hanya boleh dipakai pada
-  local/development/testing; production wajib menggantinya dengan password kuat dan
-  `starter:security-check --production` wajib menolaknya.
+- Admin-changeable runtime configuration lives in `starter_configs` and is accessed only through `StarterConfigService`, which supplies typed safe fallbacks before table/migration availability. Changes invalidate their cache and are audited.
+- Secrets and environment/infrastructure settings stay in `.env`/`config/*.php`, never the database. Any local environment-key change updates `.env` and `.env.example` together; the example contains safe placeholders/defaults and required guidance, never secrets.
+- Do not make developers manually add a key that can be changed in the local checkout. Document production value/pattern in `.env.example` and deployment rules.
+- Local/testing Superuser credentials must be explicit in `.env` and `.env.example`; `STARTER_SUPERUSER_PASSWORD=superuser123` is local/development/testing only. Production needs a strong replacement and `starter:security-check --production` must reject the default.
+- Existing dynamic configuration includes API gateway enablement (`STARTER_API_ENABLED`, default false), remember-me, lock-screen enablement/timeout, login attempts/decay, and maximum image upload. New config requires an idempotent migration/seed, typed fallback/accessor/clamp, optional Settings UI, all consumers, validation, audit, invalidation, and tests.
 
-Konfigurasi existing:
+## Sessions, lock screen, and uploads
 
-- Gateway API `api.<APP_DOMAIN>` aktif/tidak melalui
-  `STARTER_API_ENABLED` dengan default `false`.
-- Remember me aktif/tidak.
-- Lock screen aktif/tidak dan timeout menit.
-- Batas percobaan login dan decay.
-- Maksimum upload image.
+- Use file session/cache. Leave `SESSION_DOMAIN=null` unless a deployment truly needs a different scope; session config derives `.<APP_DOMAIN>` outside localhost. Session `starter.auth_version` must match `starter_client_logins.auth_version`; an old session may be adopted only when database version is initial `1`. Password change/reset increments auth version, rotates `remember_token`, keeps only the freshly confirmed actor session, and invalidates other sessions server-side.
+- Remember-me follows dynamic config. `starter.lock` is server-side protection; browser runtime throttles activity and rechecks timeout on visibility/focus/sleep/back-forward restoration. Expired sessions go to lock screen through full-page navigation. Timeout is 60 seconds to 24 hours; unlock requires a rate-limited password and safe return URL.
+- Server-validate upload MIME/type/size and use `StarterConfigService::uploadImageMaxKilobytes()`; temporary upload ceiling is 10 MB and profile/logo images are at most 4096×4096. Generate filenames, never trust user filenames/paths/URL fields, preserve legacy values without rendering arbitrary external paths, delete only verified owned-storage paths, and use `object-fit: contain` for previews.
 
-## Menambah config
+## Security baseline
 
-1. Tambahkan row melalui migration/seeding yang idempotent.
-2. Tambahkan fallback bertipe pada `StarterConfigService`.
-3. Tambahkan accessor/clamp bila nilainya memiliki batas keamanan.
-4. Tambahkan field UI Pengaturan bila boleh diubah admin.
-5. Gunakan config tersebut di seluruh consumer.
-6. Tambahkan validation, audit log, cache invalidation, dan test.
-
-## Session dan lock screen
-
-- Session dan cache memakai driver `file` untuk satu project/shared hosting.
-- `SESSION_DOMAIN=null` adalah default untuk arsitektur ini. `config/session.php` otomatis memakai `.<APP_DOMAIN>` saat `APP_DOMAIN` bukan `localhost`, sehingga cookie session tersedia pada root domain dan seluruh app subdomain.
-- Isi `SESSION_DOMAIN` secara eksplisit hanya jika deployment membutuhkan scope cookie yang berbeda dari `APP_DOMAIN`; jangan menduplikasi `.<APP_DOMAIN>` tanpa kebutuhan khusus.
-- Setiap session login menyimpan `starter.auth_version` yang harus sama dengan `starter_client_logins.auth_version`. Session existing tanpa key hanya boleh diadopsi saat versi database masih initial `1`, sehingga deployment migration tidak memutus seluruh user tetapi reset password berikutnya tetap mencabut session lama.
-- Setiap perubahan atau reset password wajib menaikkan `auth_version`, merotasi `remember_token`, dan mempertahankan hanya session pelaku yang baru memverifikasi password. Session perangkat lain dihentikan server-side pada request berikutnya.
-- Remember me mengikuti config dinamis.
-- Middleware `starter.lock` menjadi pertahanan server.
-- Runtime JavaScript mengunci otomatis dan menyentuh session secara throttled saat ada aktivitas browser. Saat tab kembali terlihat, window kembali fokus, atau halaman dipulihkan setelah sleep/back-forward cache, runtime wajib menghitung ulang timeout sebelum menyentuh session. Jika timeout telah lewat, lock screen harus dibuka dengan full-page navigation agar loader Livewire lama tidak dapat tertinggal/stuck.
-- Timeout minimal 60 detik dan maksimal 24 jam.
-- Unlock memerlukan password, rate-limited, dan kembali ke URL aman sebelumnya.
-
-## Upload
-
-- Ambil limit dari `StarterConfigService::uploadImageMaxKilobytes()`.
-- Validasi MIME, ukuran, dan jenis file di server.
-- Temporary upload memiliki absolute ceiling 10 MB dan validasi feature boleh lebih ketat. Gambar profil/logo dibatasi maksimal 4096×4096 piksel untuk melindungi resource shared hosting.
-- Simpan nama file generated; jangan percaya nama/path dari user.
-- Jangan menyediakan field URL/path string untuk foto, avatar, atau logo. Form hanya mengirim file upload/reset intent; path file existing dan hasil penyimpanan baru tetap dimiliki server.
-- Jangan merender URL eksternal atau path arbitrary dari data legacy. Nilai existing boleh dipertahankan agar data production tidak dihapus diam-diam, tetapi UI hanya menggunakan path storage yang sesuai prefix kepemilikan record.
-- Penghapusan file lama hanya boleh memakai path yang berasal dari record server dan sudah diverifikasi berada pada storage/direktori yang diizinkan.
-- Preview/logo harus memakai `object-fit: contain` agar rasio tidak merusak layout.
-
-## Baseline
-
-- CSRF wajib untuk action web.
-- Security header sederhana diterapkan middleware global tanpa Content Security Policy.
-- Response terautentikasi, login, konfirmasi password, dan lock screen memakai `Cache-Control: no-store`.
-- Trusted hosts memakai middleware Laravel dan diturunkan otomatis dari `APP_URL`, termasuk seluruh app subdomain. `APP_URL` host wajib sama dengan `APP_DOMAIN`.
-- Redirect lintas subdomain hanya menerima HTTP/HTTPS, host root/subdomain yang dipercaya, tanpa userinfo, dan tanpa port yang menyimpang dari `APP_URL`.
-- Redirect wajib memakai scheme yang sama dengan `APP_URL` agar production HTTPS tidak dapat diturunkan ke HTTP.
-- HSTS hanya dikirim pada production HTTPS.
-- Login failure dibatasi per kombinasi username/IP dan secara agregat per IP agar rotasi username tidak memenuhi cache atau melewati throttle. Username tidak disimpan mentah pada cache key, dan akun tidak dikenal tetap menjalankan password hash check untuk mengurangi timing enumeration.
-- Login password yang berhasil dihitung sebagai konfirmasi terbaru agar user tidak diminta mengulang password pada navigasi pertama.
-- Area pengaturan sensitif wajib memakai middleware `password.confirm`, menerima login password yang baru berhasil sebagai konfirmasi terbaru, dan meminta verifikasi ulang setelah timeout.
-- Security event mengikuti `audit-logging.md`.
-- Production: `APP_DEBUG=false`, HTTPS, cookie secure, permission storage minimal.
-- `php artisan starter:security-check` wajib lulus sebelum deployment production. `starter:setup` menjalankannya otomatis pada environment production.
-- Jangan log password, token, secret, credential, atau isi file.
-- Password/credential pada state Livewire wajib memiliki batas panjang dan dibersihkan setelah action berhasil maupun gagal; jangan mempertahankannya untuk kenyamanan form.
-- Semua input dianggap tidak tepercaya: validasi tipe/panjang/enum, gunakan authorization pada action, allowlist mass assignment, escape output, dan gunakan binding Eloquent/query builder. Raw SQL/HTML hanya boleh memakai nilai internal yang sudah dibuktikan aman.
-- API nonaktif wajib tidak mendaftarkan endpoint maupun dokumentasi. Saat aktif,
-  endpoint bisnis memakai authentication/authorization eksplisit dan rate
-  limit sesuai risiko. Dokumentasi API production hanya untuk Superuser;
-  jangan membuka gate Scramble secara publik.
-- Opsi installer `--reset` hanya boleh berjalan pada
-  `APP_ENV=local|development` setelah konfirmasi `y` dan `RESET`. Mode tersebut
-  menjalankan `migrate:fresh`, setup, dan sync ulang tanpa menghapus source atau
-  upload project; production wajib ditolak sebelum mutation. Backup data tetap
-  menjadi tanggung jawab developer.
+- Require CSRF for web mutations; apply simple global security headers (no CSP); send `Cache-Control: no-store` for authenticated/login/confirmation/lock responses. Trusted hosts derive from matching `APP_URL`/`APP_DOMAIN`; HSTS is production HTTPS only.
+- Cross-subdomain redirects allow only HTTP(S), trusted root/subdomain hosts, no userinfo or unexpected port, and the `APP_URL` scheme. Rate-limit login per username/IP and aggregate IP without raw usernames in cache keys; unknown accounts still do password-hash work to reduce enumeration.
+- Sensitive settings require recent `password.confirm`. Log security events per `audit-logging.md`. Production requires debug off, HTTPS, secure cookies, minimal storage permissions, and passing `starter:security-check`.
+- Never log passwords/tokens/secrets/credentials/file contents. Bound and clear password/credential Livewire state after both success and failure. Treat input as untrusted: validate type/length/enum, authorize mutations, allowlist assignment, escape output, and bind queries; raw SQL/HTML only accepts proven safe internal values.
+- Disabled API registers neither endpoints nor docs. Enabled API has explicit authentication/authorization/rate limits and production documentation is Superuser-only. `--reset` is local/development only after `y` then `RESET`; it may reset the database/setup/sync but never source/uploads and must reject production before mutation.

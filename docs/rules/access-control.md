@@ -1,55 +1,17 @@
-# Module, Route, Menu, dan Role
+# Modules, Routes, Menus, and Roles
 
-## Model akses
+## Access model
 
-- Satu role dapat memiliki banyak module.
-- Module memberikan akses ke seluruh route yang nama route-nya berada pada module tersebut.
-- Menu mengikuti module yang dimiliki role dan hanya menjadi navigasi.
-- Landing menentukan halaman awal role pada setiap app.
-- Superuser bypass akses module.
+- A role may own many modules. A module authorizes every route whose name belongs to that module; menus are navigation only; each App landing selects the role's initial page. Superuser bypasses module access.
+- If a read-only operator needs a materially different page from an administrator, create a dedicated module, route, and view (for example `employee_view`); do not stack role conditionals onto a full CRUD page.
+- Global static capabilities are `can_manage_settings` (Settings, Roles, Users, Company Profile, Security) and `can_view_logs` (Activity Log). They are configured in the role form and stored in `starter_client_roles`; Superuser has both.
 
-Contoh:
+## Mandatory protection
 
-```text
-role: operator
-  -> kepegawaian.pegawai
-     -> kepegawaian.pegawai.index
-     -> kepegawaian.pegawai.show
-  -> keuangan.dashboard
-```
+- Every App route uses `auth:web`, `starter.active`, `starter.password-change`, and `starter.lock`; module pages also use `starter.authorize`.
+- Every Livewire action validates and authorizes the manipulated data. Hidden menus/buttons are not security.
+- Non-superusers cannot see, edit, move, or delete the Superuser role/user. Superuser password cannot be reset through User Management—even by Superuser—and can be changed only through My Profile. Enforce system-account restrictions in both UI and server/service code.
 
-Jika Operator membutuhkan page read-only yang berbeda dari Administrator, buat module seperti `pegawai_view` dengan route/view sendiri. Jangan menumpuk conditional role pada page CRUD penuh.
+## Synchronization
 
-## Capability global
-
-Route statik tidak dimiliki module app:
-
-- `can_manage_settings`: akses Pengaturan, Roles, Users, Profil Perusahaan, dan Keamanan.
-- `can_view_logs`: akses Log Aktivitas.
-
-Middleware:
-
-- `starter.admin` memeriksa `canManageSettings()`.
-- `starter.logs` memeriksa `canViewLogs()`.
-- Superuser selalu memiliki keduanya.
-
-Capability global ditentukan pada form role dan disimpan di `starter_client_roles`.
-
-## Perlindungan wajib
-
-- Seluruh route app: `auth:web`, `starter.active`, `starter.password-change`, `starter.lock`.
-- Seluruh route page module: `starter.authorize`.
-- Action Livewire tetap harus memvalidasi dan mengotorisasi data yang dimanipulasi.
-- Jangan mengandalkan menu tersembunyi sebagai security.
-- Role/user Superuser tidak boleh terlihat, diedit, dipindahkan, atau dihapus oleh non-superuser.
-- Password akun Superuser tidak boleh di-reset dari User Management, termasuk ketika actor adalah Superuser itu sendiri. Superuser hanya mengubah password miliknya melalui Edit Profil Saya.
-- Larangan terhadap akun sistem harus ditegakkan pada UI dan service/action server; menyembunyikan tombol saja tidak cukup.
-
-## Sinkronisasi
-
-`starter:sync` memetakan module dari segmen kedua nama route. Karena itu:
-
-- benar: `kepegawaian.pegawai.index`
-- salah: `kepegawaian.data-pegawai.index` jika code config adalah `pegawai`
-
-Selalu dry run sebelum sync yang menulis database.
+`starter:sync` maps a module from the second route-name segment: `hr.employee.index` matches module `employee`; `hr.employee-data.index` does not. Always dry-run before a database-writing sync.

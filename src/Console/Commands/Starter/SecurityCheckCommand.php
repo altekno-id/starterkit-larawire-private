@@ -85,8 +85,7 @@ class SecurityCheckCommand extends Command
             ),
             $this->check(
                 'Starter UI theme',
-                StarterTheme::key() === 'tabler'
-                    && class_exists(StarterTheme::powerGridTheme()),
+                class_exists(StarterTheme::powerGridTheme()),
                 'STARTER_THEME must reference a registered theme with a PowerGrid adapter.',
             ),
         ];

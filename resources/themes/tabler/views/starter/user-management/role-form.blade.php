@@ -234,13 +234,13 @@
 
             <div class="col-12 col-xl-7" data-role-access-panel>
                 <div class="card position-xl-sticky" style="top: 1rem;">
-                    <div class="card-header">
-                        <div>
-                            <h3 class="card-title">Akses Module dan Halaman Awal</h3>
-                            <p class="card-subtitle">Pilih module per app, kemudian tentukan halaman pertama setelah login.</p>
+                    <div class="card-header d-flex align-items-center">
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <h3 class="card-title text-truncate">Akses Module dan Halaman Awal</h3>
+                            <p class="card-subtitle text-wrap">Pilih module per app, kemudian tentukan halaman pertama setelah login.</p>
                         </div>
-                        <div class="card-actions flex-shrink-0">
-                            <span class="badge {{ $isSuperuserRole ? 'bg-green-lt text-green' : 'bg-blue-lt text-blue' }} text-nowrap">
+                        <div class="card-actions ms-3 flex-shrink-0">
+                            <span class="badge {{ $isSuperuserRole ? 'bg-green-lt text-green' : 'bg-blue-lt text-blue' }}" style="white-space: nowrap !important; min-width: max-content;">
                                 {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppCount) }} / {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appTotal) }} app
                             </span>
                         </div>

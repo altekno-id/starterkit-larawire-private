@@ -141,6 +141,9 @@ try {
 
     output('');
     output('Starterkit terpasang. Seluruh command berikutnya dijalankan dari root Laravel host.');
+    output('');
+    output('INFO PENTING: Pastikan variabel APP_URL di dalam file .env diset dengan benar (contoh: https://domainanda.com)');
+    output('              agar logo dan resource SVG lainnya dapat dimuat dengan sempurna.');
 } catch (Throwable $exception) {
     fwrite(STDERR, PHP_EOL.'ERROR  '.$exception->getMessage().PHP_EOL);
     exit(1);
@@ -792,7 +795,7 @@ function mergeEnvironment(string $path): void
         'DB_QUEUE_BATCH_TABLE' => 'x_job_batches',
         'DB_QUEUE_FAILED_TABLE' => 'x_failed_jobs',
         'SESSION_SECURE_COOKIE' => $secure,
-        'SESSION_DOMAIN' => 'null',
+        'SESSION_DOMAIN' => $domain === 'localhost' ? 'localhost' : '.' . $domain,
         'SESSION_TABLE' => 'x_sessions',
         'STARTER_SUPERUSER_USERNAME' => 'superuser',
         'STARTER_SUPERUSER_EMAIL' => 'developer@example.test',

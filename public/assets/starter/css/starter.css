@@ -311,3 +311,19 @@ body.starter-livewire-is-loading .starter-livewire-loader {
 .navbar-vertical .starter-sidebar-details[open] > .starter-sidebar-submenu {
     display: block;
 }
+
+/* Custom Brand Logo Dimensions for varying ratios */
+.starter-sidebar-brand-image {
+    height: 2rem;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+    object-position: left center;
+}
+.starter-page-loader-brand-image {
+    height: 2.25rem;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+    object-position: center;
+}

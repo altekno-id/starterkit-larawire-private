@@ -32,6 +32,7 @@ return new class extends Migration
             $table->boolean('can_manage_settings')->default(false);
             $table->boolean('can_view_logs')->default(false);
             $table->timestamps();
+            $table->softDeletes()->index();
         });
 
         Schema::create('starter_client_logins', function (Blueprint $table): void {
@@ -53,6 +54,7 @@ return new class extends Migration
             $table->foreignId('client_role_id')->constrained('starter_client_roles')->restrictOnDelete();
             $table->unsignedInteger('auth_version')->default(1);
             $table->timestamps();
+            $table->softDeletes()->index();
 
             $table->index(['status', 'locked_until']);
         });

@@ -152,7 +152,13 @@ navigasi Livewire hanya boleh ditambahkan bila URL dijamin tetap pada origin
 yang sama. Navigasi App/module pada sidebar tidak menggunakan raw Blade
 extension—daftarkan melalui `config/apps/<app>.php` lalu jalankan `starter:sync`.
 
-## Instalasi — mulai dari sini
+## Persyaratan Sistem
+
+- **PHP 8.2+**
+- **Laravel 11.x** (Instalasi Fresh)
+- **Database** (MySQL / PostgreSQL / SQLite)
+
+## Instalasi di Local / Development
 
 > Wajib memakai Laravel fresh dan database baru. Installer menjalankan
 > `migrate:fresh`, sehingga seluruh tabel dan data pada database akan dihapus.
@@ -175,6 +181,8 @@ Installer meminta:
 1. konfirmasi reset database;
 2. kode App pertama, misalnya `sales`—boleh dikosongkan;
 3. nama App yang ditampilkan.
+
+**INFO PENTING:** Setelah instalasi selesai, pastikan Anda mengatur `APP_URL` di file `.env` sesuai dengan URL lokal yang Anda gunakan (contoh: `http://namaproject.test` atau `http://localhost:8000`). Jika tidak diatur dengan benar, asset seperti logo SVG dan file lainnya tidak akan termuat karena isu *Mixed Content*.
 
 Setelah itu dependency, connector Laravel, connector AI `AGENTS.md`, `.env`,
 APP key, locale, asset, migration, Superuser, landing, App pertama, sync, dan
@@ -419,7 +427,7 @@ Tambahkan `composer install --no-dev --optimize-autoloader` hanya jika
 Gunakan `php artisan starter:sync --dry-run` terlebih dahulu bila ingin
 memeriksa perubahan registry tanpa migration, publish asset, atau mutation.
 
-## Deployment shared hosting
+## Instalasi di Production / Shared Hosting
 
 Deployment pertama setelah repository project—termasuk snapshot
 `starterkit-larawire-private`—dan `.env` production tersedia:

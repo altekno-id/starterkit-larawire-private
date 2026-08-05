@@ -240,7 +240,7 @@
                             <p class="card-subtitle text-wrap">Pilih module per app, kemudian tentukan halaman pertama setelah login.</p>
                         </div>
                         <div class="card-actions ms-3 flex-shrink-0">
-                            <span class="badge {{ $isSuperuserRole ? 'bg-green-lt text-green' : 'bg-blue-lt text-blue' }}" style="white-space: nowrap !important; min-width: max-content;">
+                            <span class="d-inline-flex align-items-center justify-content-center px-2 py-1 rounded border {{ $isSuperuserRole ? 'border-success text-success bg-green-lt' : 'border-primary text-primary bg-blue-lt' }} text-nowrap" style="font-size: 0.75rem; font-weight: 600; line-height: 1;">
                                 {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppCount) }} / {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appTotal) }} app
                             </span>
                         </div>

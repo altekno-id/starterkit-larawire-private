@@ -240,7 +240,7 @@
                             <p class="card-subtitle">Pilih module per app, kemudian tentukan halaman pertama setelah login.</p>
                         </div>
                         <div class="card-actions">
-                            <span class="status {{ $isSuperuserRole ? 'status-green' : 'status-blue' }} status-lite">
+                            <span class="status {{ $isSuperuserRole ? 'status-green' : 'status-blue' }} status-lite text-nowrap">
                                 {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppCount) }} / {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appTotal) }} app
                             </span>
                         </div>

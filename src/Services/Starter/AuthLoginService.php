@@ -148,10 +148,12 @@ class AuthLoginService
             return $this->redirects->firstAuthorizedUrl($authenticatedLogin);
         }
 
+        session()->pull('url.intended');
+
         return $this->redirects->forLogin(
             $authenticatedLogin,
             $redirect,
-            session()->pull('url.intended'),
+            null,
         );
     }
 

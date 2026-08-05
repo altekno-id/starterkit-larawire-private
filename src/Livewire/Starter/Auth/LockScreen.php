@@ -30,8 +30,8 @@ class LockScreen extends Component
 
     public function mount(
         StarterConfigService $configs,
-        NavigationAuthorizedRedirectService $redirects,
-    ): mixed {
+        NavigationAuthorizedRedirectService $redirects
+    ) {
         $login = $this->login();
 
         if (! $configs->boolean('security.lock_screen_enabled')) {
@@ -60,8 +60,8 @@ class LockScreen extends Component
     public function unlock(
         StarterConfigService $configs,
         NavigationAuthorizedRedirectService $redirects,
-        AuditLogService $auditLogs,
-    ): mixed {
+        AuditLogService $auditLogs
+    ) {
         try {
             $this->validate([
                 'password' => ['required', 'string', 'max:1024'],

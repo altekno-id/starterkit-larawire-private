@@ -37,7 +37,7 @@ class ActivityLogsTable extends PowerGridComponent
         $this->persist(['filters', 'sorting']);
 
         return [
-            PowerGrid::header()->showSearchInput(),
+            PowerGrid::header()->includeViewOnTop('starter.logs.powergrid.activity-logs-toolbar'),
             PowerGrid::footer()->showPerPage(25, [25, 50, 100])->showRecordCount(),
         ];
     }
@@ -59,6 +59,7 @@ class ActivityLogsTable extends PowerGridComponent
     public function columns(): array
     {
         return [
+            Column::action('Aksi'),
             Column::make('Waktu', 'created_at_label', 'created_at')->sortable(),
             Column::make('Aktivitas', 'action_label')->searchable()->sortable(),
             Column::make('Aktor', 'actor_name')->searchable()->sortable(),
@@ -68,14 +69,13 @@ class ActivityLogsTable extends PowerGridComponent
             Column::make('IP', 'ip_address')->searchable()->sortable(),
             Column::make('Perubahan', 'changes_count')->sortable(),
             Column::make('Tabel', 'tables_count')->sortable(),
-            Column::action('Detail'),
         ];
     }
 
     public function filters(): array
     {
         return [
-            Filter::datetimepicker('created_at_label', 'created_at'),
+            Filter::datetimepicker('created_at_label', 'created_at')->params(['mode' => 'range']),
             Filter::inputText('action_label')->operators(['contains']),
             Filter::inputText('actor_name')->operators(['contains']),
             Filter::inputText('actor_role')->operators(['contains']),
@@ -87,11 +87,9 @@ class ActivityLogsTable extends PowerGridComponent
         ];
     }
 
-    public function actions(ActivityLog $row): array
+    public function actionsFromView(ActivityLog $row): \Illuminate\View\View
     {
-        return [
-            Button::add('detail')->slot('Lihat')->dispatch('starter-log-detail-request', ['actionId' => $row->action_id])->class('btn btn-sm btn-outline-primary'),
-        ];
+        return view('starter.logs.powergrid.logs-row-actions', ['row' => $row]);
     }
 
     private function login(): ClientLogin

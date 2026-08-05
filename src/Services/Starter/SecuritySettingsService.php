@@ -20,8 +20,7 @@ class SecuritySettingsService
      *     lock_screen_enabled: bool,
      *     lock_screen_timeout_minutes: int,
      *     login_max_attempts: int,
-     *     login_decay_seconds: int,
-     *     max_image_size_kb: int
+     *     login_decay_seconds: int
      * }  $values
      */
     public function update(ClientLogin $actor, array $values): void
@@ -39,7 +38,6 @@ class SecuritySettingsService
                         'security.lock_screen_timeout_minutes' => (int) $values['lock_screen_timeout_minutes'],
                         'security.login_max_attempts' => (int) $values['login_max_attempts'],
                         'security.login_decay_seconds' => (int) $values['login_decay_seconds'],
-                        'uploads.max_image_size_kb' => (int) $values['max_image_size_kb'],
                     ]);
 
                     if (! $values['remember_me_enabled']) {

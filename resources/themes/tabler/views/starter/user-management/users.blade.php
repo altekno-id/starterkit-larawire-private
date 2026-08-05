@@ -15,11 +15,6 @@
                 </div>
             </div>
         </div>
-    @else
-        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-            <div class="alert alert-info mb-0 flex-fill" role="note">User hanya dapat dikelola oleh pengguna yang memiliki akses pengaturan.</div>
-            <a href="{{ route('starter.user-management.users.create') }}" class="btn btn-primary" data-starter-navigate>Tambah User</a>
-        </div>
     @endunless
 
     @if ($temporaryPassword)

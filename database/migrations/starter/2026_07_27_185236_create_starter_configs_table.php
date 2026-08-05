@@ -79,17 +79,7 @@ return new class extends Migration
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-            [
-                'group' => 'uploads',
-                'key' => 'uploads.max_image_size_kb',
-                'value' => '2048',
-                'type' => 'integer',
-                'label' => 'Ukuran Maksimum Gambar',
-                'description' => 'Batas upload logo dan foto profil, dalam KB.',
-                'order' => 10,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
+
         ]);
     }
 

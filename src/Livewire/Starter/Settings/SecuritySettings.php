@@ -10,6 +10,8 @@ use Livewire\Component;
 
 class SecuritySettings extends Component
 {
+    public bool $embedded = false;
+
     private AuthenticatedLoginService $authenticatedLogins;
 
     /**
@@ -18,8 +20,7 @@ class SecuritySettings extends Component
      *     lock_screen_enabled: bool,
      *     lock_screen_timeout_minutes: int,
      *     login_max_attempts: int,
-     *     login_decay_seconds: int,
-     *     max_image_size_kb: int
+     *     login_decay_seconds: int
      * }
      */
     public array $securityForm = [
@@ -28,7 +29,6 @@ class SecuritySettings extends Component
         'lock_screen_timeout_minutes' => 15,
         'login_max_attempts' => 5,
         'login_decay_seconds' => 60,
-        'max_image_size_kb' => 2048,
     ];
 
     public function boot(AuthenticatedLoginService $authenticatedLogins): void
@@ -45,7 +45,6 @@ class SecuritySettings extends Component
             'lock_screen_timeout_minutes' => $configs->integer('security.lock_screen_timeout_minutes'),
             'login_max_attempts' => $configs->integer('security.login_max_attempts'),
             'login_decay_seconds' => $configs->integer('security.login_decay_seconds'),
-            'max_image_size_kb' => $configs->integer('uploads.max_image_size_kb'),
         ];
     }
 
@@ -59,14 +58,12 @@ class SecuritySettings extends Component
             'securityForm.lock_screen_timeout_minutes' => ['required', 'integer', 'min:1', 'max:1440'],
             'securityForm.login_max_attempts' => ['required', 'integer', 'min:1', 'max:20'],
             'securityForm.login_decay_seconds' => ['required', 'integer', 'min:30', 'max:3600'],
-            'securityForm.max_image_size_kb' => ['required', 'integer', 'min:256', 'max:10240'],
         ], [], [
             'securityForm.remember_me_enabled' => 'remember me',
             'securityForm.lock_screen_enabled' => 'lock screen',
             'securityForm.lock_screen_timeout_minutes' => 'waktu lock screen',
             'securityForm.login_max_attempts' => 'batas percobaan login',
             'securityForm.login_decay_seconds' => 'durasi pembatasan login',
-            'securityForm.max_image_size_kb' => 'ukuran maksimum gambar',
         ])['securityForm'];
 
         $securitySettings->update($login, $validated);

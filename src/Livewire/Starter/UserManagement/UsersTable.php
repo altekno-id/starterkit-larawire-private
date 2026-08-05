@@ -43,7 +43,7 @@ class UsersTable extends PowerGridComponent
         $this->persist(['filters', 'sorting']);
 
         return [
-            PowerGrid::header()->showSearchInput()->includeViewOnTop('starter.user-management.powergrid.users-toolbar'),
+            PowerGrid::header()->includeViewOnTop('starter.user-management.powergrid.users-toolbar'),
             PowerGrid::footer()->showPerPage(10, [10, 25, 50, 100])->showRecordCount(),
         ];
     }
@@ -76,13 +76,13 @@ class UsersTable extends PowerGridComponent
     public function columns(): array
     {
         return [
+            Column::action('Aksi'),
             Column::make('Nama', 'name', 'starter_client_logins.name')->searchable()->sortable(),
             Column::make('Username', 'username', 'starter_client_logins.username')->searchable()->sortable(),
             Column::make('Email', 'email', 'starter_client_logins.email')->searchable()->sortable(),
             Column::make('Role', 'role_name', 'list_role.name')->searchable()->sortable(),
             Column::make('Status', 'status_label', 'starter_client_logins.status')->sortable(),
             Column::make('Login terakhir', 'last_login_label', 'starter_client_logins.last_login_at')->sortable(),
-            Column::action('Aksi'),
         ];
     }
 
@@ -98,27 +98,13 @@ class UsersTable extends PowerGridComponent
                 ['value' => 'inactive', 'label' => 'Nonaktif'],
                 ['value' => 'locked', 'label' => 'Terkunci'],
             ])->optionValue('value')->optionLabel('label'),
-            Filter::datetimepicker('last_login_label', 'starter_client_logins.last_login_at'),
+            Filter::datetimepicker('last_login_label', 'starter_client_logins.last_login_at')->params(['mode' => 'range']),
         ];
     }
 
-    public function actions(ClientLogin $row): array
+    public function actionsFromView(ClientLogin $row): \Illuminate\View\View
     {
-        $buttons = [];
-
-        if (! $row->trashed()) {
-            $buttons[] = Button::add('edit')->slot('Edit')->route('starter.user-management.users.edit', ['userLoginId' => $row->id])->class('btn btn-sm btn-outline-primary');
-
-            if (! (bool) $row->role_is_system && $row->role_code !== 'superuser') {
-                $buttons[] = Button::add('reset-password')->slot('Reset password')->dispatch('starter-user-reset-request', ['id' => $row->id])->class('btn btn-sm btn-outline-secondary');
-                $buttons[] = Button::add('archive')->slot('Arsipkan')->dispatchSelf('prepare-row-action', ['action' => 'archive', 'id' => $row->id])->class('btn btn-sm btn-outline-warning');
-            }
-        } else {
-            $buttons[] = Button::add('restore')->slot('Pulihkan')->dispatchSelf('prepare-row-action', ['action' => 'restore', 'id' => $row->id])->class('btn btn-sm btn-outline-success');
-            $buttons[] = Button::add('force-delete')->slot('Hapus permanen')->dispatchSelf('prepare-row-action', ['action' => 'forceDelete', 'id' => $row->id])->class('btn btn-sm btn-outline-danger');
-        }
-
-        return $buttons;
+        return view('starter.user-management.powergrid.users-row-actions', ['row' => $row]);
     }
 
     public function prepareBulkAction(string $action): void

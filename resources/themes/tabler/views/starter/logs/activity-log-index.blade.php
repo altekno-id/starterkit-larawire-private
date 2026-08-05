@@ -99,7 +99,9 @@
         </div>
     </div>
 
-    <livewire:starter.logs.activity-logs-table />
+    <div class="card">
+        <livewire:starter.logs.activity-logs-table />
+    </div>
 
     {{-- Legacy filter/table markup is intentionally not rendered; PowerGrid is the server-side table authority. --}}
     @if (false)
@@ -348,7 +350,7 @@
     @endif
 
     @if ($detailModalOpen)
-        <div class="modal modal-blur fade show d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="activity-log-detail-title">
+        <div class="modal modal-blur fade show d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="activity-log-detail-title" wire:click.self="closeActionDetail">
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
                 <div class="modal-content">
                     <div class="modal-header">

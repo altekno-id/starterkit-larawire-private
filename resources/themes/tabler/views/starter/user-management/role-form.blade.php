@@ -130,76 +130,7 @@
                             </div>
                         </div>
 
-                        <div class="rounded border p-3 mb-4" data-role-system-access>
-                            <div class="subheader mb-3">Akses Sistem</div>
-                            <div class="d-flex align-items-start gap-3">
-                                <span class="avatar avatar-sm bg-azure-lt text-azure flex-shrink-0">
-                                    @include('starter.templates.layouts.icon', ['name' => 'settings', 'class' => 'icon-sm m-0'])
-                                </span>
-                                <div class="min-w-0 flex-fill">
-                                    <label class="form-label mb-1" for="role-can-manage-settings">Akses Pengaturan</label>
-                                    <div class="small text-secondary">
-                                        Izinkan role membuka Pusat Pengaturan serta mengelola role, user, dan profil perusahaan.
-                                    </div>
-                                    @if ($isSuperuserRole)
-                                        <div class="small text-danger mt-2">
-                                            Selalu aktif untuk role sistem Superuser dan tidak dapat diubah.
-                                        </div>
-                                    @endif
-                                </div>
-                                <label class="form-check form-switch m-0 flex-shrink-0">
-                                    <input
-                                        id="role-can-manage-settings"
-                                        type="checkbox"
-                                        class="form-check-input"
-                                        wire:model.defer="roleForm.can_manage_settings"
-                                        @disabled($isSuperuserRole)
-                                        aria-describedby="role-settings-access-description"
-                                    >
-                                    <span class="visually-hidden">Izinkan akses Pengaturan</span>
-                                </label>
-                            </div>
-                            <div id="role-settings-access-description" class="visually-hidden">
-                                Akses ini tidak mengubah module operasional yang dipilih di panel sebelah kanan.
-                            </div>
-                            @error('roleForm.can_manage_settings') <div class="invalid-feedback d-block mt-2">{{ $message }}</div> @enderror
-
-                            <div class="border-top my-3"></div>
-
-                            <div class="d-flex align-items-start gap-3">
-                                <span class="avatar avatar-sm bg-purple-lt text-purple flex-shrink-0">
-                                    @include('starter.templates.layouts.icon', ['name' => 'history', 'class' => 'icon-sm m-0'])
-                                </span>
-                                <div class="min-w-0 flex-fill">
-                                    <label class="form-label mb-1" for="role-can-view-logs">Lihat Log Aktivitas</label>
-                                    <div class="small text-secondary">
-                                        Izinkan role melihat riwayat pembuatan, perubahan, dan penghapusan data pada seluruh app perusahaan.
-                                    </div>
-                                    @if ($isSuperuserRole)
-                                        <div class="small text-danger mt-2">
-                                            Selalu aktif untuk role sistem Superuser dan tidak dapat diubah.
-                                        </div>
-                                    @endif
-                                </div>
-                                <label class="form-check form-switch m-0 flex-shrink-0">
-                                    <input
-                                        id="role-can-view-logs"
-                                        type="checkbox"
-                                        class="form-check-input"
-                                        wire:model.defer="roleForm.can_view_logs"
-                                        @disabled($isSuperuserRole)
-                                        aria-describedby="role-logs-access-description"
-                                    >
-                                    <span class="visually-hidden">Izinkan akses Log Aktivitas</span>
-                                </label>
-                            </div>
-                            <div id="role-logs-access-description" class="visually-hidden">
-                                Akses Log Aktivitas berdiri sendiri dari akses Pengaturan dan module operasional.
-                            </div>
-                            @error('roleForm.can_view_logs') <div class="invalid-feedback d-block mt-2">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="row g-3">
+                        <div class="row g-3 mb-4">
                             <div class="col-12">
                                 <label class="form-label required">Kode</label>
                                 <input
@@ -227,12 +158,63 @@
                                 <label class="form-label">Deskripsi</label>
                                 <textarea
                                     class="form-control @error('roleForm.desc') is-invalid @enderror"
-                                    rows="4"
+                                    rows="3"
                                     placeholder="Jelaskan tanggung jawab dan batasan akses role ini."
                                     wire:model.defer="roleForm.desc"
                                     @readonly($isSuperuserRole)
                                 ></textarea>
                                 @error('roleForm.desc') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <h3 class="card-title mt-4">Akses Sistem Khusus</h3>
+                        <div class="row g-3" data-role-system-access>
+                            <div class="col-12">
+                                <label class="form-check form-switch mb-4">
+                                    <input
+                                        id="role-can-manage-settings"
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        wire:model.defer="roleForm.can_manage_settings"
+                                        @disabled($isSuperuserRole)
+                                    >
+                                    <span class="form-check-label">
+                                        <span class="d-flex align-items-center gap-2 fw-semibold mb-1">
+                                            @include('starter.templates.layouts.icon', ['name' => 'settings', 'class' => 'icon-sm text-azure'])
+                                            Akses Pengaturan
+                                        </span>
+                                        <span class="d-block small text-secondary">
+                                            Izinkan mengelola role, user, dan profil perusahaan.
+                                        </span>
+                                        @if ($isSuperuserRole)
+                                            <span class="d-block small text-danger mt-1">Selalu aktif untuk role sistem.</span>
+                                        @endif
+                                    </span>
+                                </label>
+                                @error('roleForm.can_manage_settings') <div class="invalid-feedback d-block mt-n3 mb-3">{{ $message }}</div> @enderror
+
+                                <label class="form-check form-switch m-0">
+                                    <input
+                                        id="role-can-view-logs"
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        wire:model.defer="roleForm.can_view_logs"
+                                        @disabled($isSuperuserRole)
+                                    >
+                                    <span class="form-check-label">
+                                        <span class="d-flex align-items-center gap-2 fw-semibold mb-1">
+                                            @include('starter.templates.layouts.icon', ['name' => 'history', 'class' => 'icon-sm text-purple'])
+                                            Lihat Log Aktivitas
+                                        </span>
+                                        <span class="d-block small text-secondary">
+                                            Izinkan melihat riwayat perubahan data pada seluruh app perusahaan.
+                                        </span>
+                                        @if ($isSuperuserRole)
+                                            <span class="d-block small text-danger mt-1">Selalu aktif untuk role sistem.</span>
+                                        @endif
+                                    </span>
+                                </label>
+                                @error('roleForm.can_view_logs') <div class="invalid-feedback d-block mt-2">{{ $message }}</div> @enderror
                             </div>
                         </div>
 

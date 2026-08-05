@@ -12,15 +12,16 @@ class TablerPowerGridTheme extends Bootstrap5
             'layout' => [
                 'base' => 'p-0 align-middle d-block',
                 'div' => 'table-responsive m-0',
-                'table' => 'table table-vcenter table-hover card-table mb-0',
+                'table' => 'table table-vcenter table-hover card-table border-top mb-0',
                 'container' => 'm-0',
                 'actions' => 'd-flex align-items-center justify-content-end gap-1',
             ],
             'header' => [
-                'th' => 'text-secondary text-nowrap small py-2',
+                'th' => 'bg-surface-secondary text-secondary text-nowrap small px-3 py-2',
             ],
             'body' => [
                 'td' => 'align-middle px-3 py-2',
+                'tdFilters' => 'px-3 py-2',
                 'tdEmpty' => 'p-4 text-secondary text-center',
                 'tdActionsContainer' => 'd-flex align-items-center justify-content-end gap-1',
             ],
@@ -32,6 +33,15 @@ class TablerPowerGridTheme extends Bootstrap5
         return array_replace(parent::footer(), [
             'select' => 'form-select form-select-sm w-auto',
             'footer' => 'border-top px-3 py-2 w-100 d-flex flex-wrap gap-2 align-items-center justify-content-between',
+        ]);
+    }
+
+    public function checkbox(): array
+    {
+        return array_replace(parent::checkbox(), [
+            'th' => 'fs-6 text-center text-nowrap',
+            'base' => 'm-0 d-flex align-items-center justify-content-center',
+            'input' => 'form-check-input m-0 align-middle',
         ]);
     }
 

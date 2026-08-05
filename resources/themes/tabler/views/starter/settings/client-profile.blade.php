@@ -10,9 +10,11 @@
         </div>
     @endunless
 
-    <form class="card" wire:submit="save">
+    <form class="{{ $embedded ? '' : 'card' }}" wire:submit="save">
         <div class="card-body">
-            <h2 class="mb-4">Pengaturan Perusahaan</h2>
+            @if(! $embedded)
+                <h2 class="mb-4">Pengaturan Perusahaan</h2>
+            @endif
 
             <h3 class="card-title">Logo</h3>
             <div class="row align-items-center">
@@ -77,7 +79,7 @@
             </div>
         </div>
 
-        <div class="card-footer bg-transparent mt-auto">
+        <div class="{{ $embedded ? 'card-body border-top bg-transparent' : 'card-footer bg-transparent mt-auto' }}">
             <div class="btn-list justify-content-end">
                 <button type="submit" class="btn btn-primary">
                     @include('starter.templates.layouts.icon', ['name' => 'check', 'class' => 'me-1'])

@@ -12,7 +12,7 @@
 
 - Use file session/cache. Leave `SESSION_DOMAIN=null` unless a deployment truly needs a different scope; session config derives `.<APP_DOMAIN>` outside localhost. Session `starter.auth_version` must match `starter_client_logins.auth_version`; an old session may be adopted only when database version is initial `1`. Password change/reset increments auth version, rotates `remember_token`, keeps only the freshly confirmed actor session, and invalidates other sessions server-side.
 - Remember-me follows dynamic config. `starter.lock` is server-side protection; browser runtime throttles activity and rechecks timeout on visibility/focus/sleep/back-forward restoration. Expired sessions go to lock screen through full-page navigation. Timeout is 60 seconds to 24 hours; unlock requires a rate-limited password and safe return URL.
-- Server-validate upload MIME/type/size and use `StarterConfigService::uploadImageMaxKilobytes()`; temporary upload ceiling is 10 MB and profile/logo images are at most 4096×4096. Generate filenames, never trust user filenames/paths/URL fields, preserve legacy values without rendering arbitrary external paths, delete only verified owned-storage paths, and use `object-fit: contain` for previews.
+- Server-validate upload MIME/type/size; temporary upload ceiling is 10 MB and profile/logo images are at most 4096×4096. Generate filenames, never trust user filenames/paths/URL fields, preserve legacy values without rendering arbitrary external paths, delete only verified owned-storage paths, and use `object-fit: contain` for previews.
 
 ## Security baseline
 

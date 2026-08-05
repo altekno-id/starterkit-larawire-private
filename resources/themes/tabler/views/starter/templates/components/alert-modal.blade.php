@@ -30,7 +30,7 @@
     $passwordErrorMessage = isset($errors) && $errors->has($passwordErrorKey) ? $errors->first($passwordErrorKey) : null;
 @endphp
 
-<div class="modal modal-blur fade {{ $visible ? 'show d-block' : '' }} {{ $modalClass }}" id="{{ $id }}" tabindex="-1" role="dialog" aria-hidden="{{ $visible ? 'false' : 'true' }}">
+<div class="modal modal-blur fade {{ $visible ? 'show d-block' : '' }} {{ $modalClass }}" id="{{ $id }}" tabindex="-1" role="dialog" aria-hidden="{{ $visible ? 'false' : 'true' }}" @if ($cancelAction) wire:click.self="{{ $cancelAction }}" @else data-bs-dismiss="modal" @endif>
     <div class="modal-dialog modal-{{ $size }}" role="document">
         <div class="modal-content">
             @if ($closeButton)

@@ -32,6 +32,12 @@
                 <h2 class="page-title">Pengaturan</h2>
                 <div class="text-secondary">Kelola akses, akun user, dan identitas perusahaan dari satu tempat.</div>
             </div>
+            <div class="col-auto ms-auto d-none d-md-block">
+                <div class="d-flex align-items-center gap-2 text-secondary small">
+                    @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm'])
+                    Perubahan konfigurasi sistem tercatat di audit log.
+                </div>
+            </div>
         </div>
     </div>
 
@@ -95,70 +101,54 @@
     </div>
 
     <div class="row row-cards align-items-start">
-        <div class="col-12 col-lg-3 col-xxl-2">
+        <div class="col-12">
             <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <span class="avatar avatar-md bg-primary-lt text-primary">
-                            @include('starter.templates.layouts.icon', ['name' => 'settings', 'class' => 'icon'])
-                        </span>
-                        <div class="overflow-hidden">
-                            <div class="fw-semibold">Pusat Pengaturan</div>
-                            <div class="small text-secondary text-truncate">{{ $client->name }}</div>
-                        </div>
-                    </div>
-
-                    <h3 class="subheader mb-2">Manajemen</h3>
-                    <div class="list-group list-group-transparent">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
                         @foreach ($sections as $sectionKey => $sectionItem)
-                            <a
-                                href="{{ route('starter.settings', ['section' => $sectionKey]) }}"
-                                class="list-group-item list-group-item-action d-flex align-items-start gap-2 {{ $section === $sectionKey ? 'active' : '' }}"
-                                @if ($section === $sectionKey) aria-current="page" @endif
-                                data-starter-navigate
-                            >
-                                <span class="mt-1 flex-shrink-0">
-                                    @include('starter.templates.layouts.icon', ['name' => $sectionItem['icon'], 'class' => 'icon-sm'])
-                                </span>
-                                <span>
-                                    <span class="d-block fw-semibold">{{ $sectionItem['label'] }}</span>
-                                    <span class="d-block small text-secondary">{{ $sectionItem['description'] }}</span>
-                                </span>
-                            </a>
+                            <li class="nav-item">
+                                <a href="{{ route('starter.settings', ['section' => $sectionKey]) }}" 
+                                   class="nav-link {{ $section === $sectionKey ? 'active fw-bold' : 'text-secondary' }}" 
+                                   @if ($section === $sectionKey) aria-current="page" @endif
+                                   data-starter-navigate>
+                                    @include('starter.templates.layouts.icon', ['name' => $sectionItem['icon'], 'class' => 'icon me-2'])
+                                    {{ $sectionItem['label'] }}
+                                </a>
+                            </li>
                         @endforeach
-                    </div>
-
-                    <div class="alert alert-info mt-4 mb-0" role="note">
-                        <div class="d-flex gap-2">
-                            @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm flex-shrink-0 mt-1'])
-                            <div class="small">
-                                Perubahan akses dan akun tercatat otomatis dalam audit log.
-                            </div>
+                    </ul>
+                </div>
+                <div class="card-body border-bottom">
+                    <div class="d-flex align-items-start justify-content-between pb-1">
+                        <div>
+                            <h3 class="card-title mb-1">{{ $activeSection['label'] }}</h3>
+                            <p class="text-secondary mb-0">{{ $activeSection['description'] }}</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            @if ($section === 'roles')
+                                <a href="{{ route('starter.settings.roles.create') }}" class="btn btn-primary" data-starter-navigate>
+                                    @include('starter.templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
+                                    Tambah Role
+                                </a>
+                            @elseif ($section === 'users')
+                                <a href="{{ route('starter.user-management.users.create') }}" class="btn btn-primary" data-starter-navigate>
+                                    @include('starter.templates.layouts.icon', ['name' => 'user-plus', 'class' => 'icon-sm me-1'])
+                                    Tambah User
+                                </a>
+                            @endif
                         </div>
                     </div>
-            </div>
-            </div>
-        </div>
+                </div>
 
-        <div class="col-12 col-lg-9 col-xxl-10">
-            <div class="card">
-                <div class="card-header bg-body">
-                    <div>
-                        <h3 class="card-title">{{ $activeSection['label'] }}</h3>
-                        <p class="card-subtitle">{{ $activeSection['description'] }}</p>
-                    </div>
-                </div>
-                <div class="card-body">
-                    @if ($section === 'roles')
-                        <livewire:starter.user-management.roles :embedded="true" key="settings-roles" />
-                    @elseif ($section === 'users')
-                        <livewire:starter.user-management.users :embedded="true" key="settings-users" />
-                    @elseif ($section === 'company')
-                        <livewire:starter.settings.client-profile :embedded="true" key="settings-company" />
-                    @else
-                        <livewire:starter.settings.security-settings key="settings-security" />
-                    @endif
-                </div>
+                @if ($section === 'roles')
+                    <livewire:starter.user-management.roles :embedded="true" key="settings-roles" />
+                @elseif ($section === 'users')
+                    <livewire:starter.user-management.users :embedded="true" key="settings-users" />
+                @elseif ($section === 'company')
+                    <livewire:starter.settings.client-profile :embedded="true" key="settings-company" />
+                @else
+                    <livewire:starter.settings.security-settings :embedded="true" key="settings-security" />
+                @endif
             </div>
         </div>
     </div>

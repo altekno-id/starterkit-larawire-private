@@ -72,7 +72,7 @@ class ClientProfile extends Component
                 'nullable',
                 'image',
                 'dimensions:max_width=4096,max_height=4096',
-                'max:'.$this->configs->uploadImageMaxKilobytes(),
+                'max:2048',
             ],
         ], [], [
             'clientForm.name' => 'client name',

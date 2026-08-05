@@ -50,6 +50,7 @@
         'users',
         'users-group',
         'world',
+        'search',
     ];
 
     $icon = in_array($icon, $allowedIcons, true) ? $icon : 'circle';
@@ -253,6 +254,11 @@
             <path d="M14 11v6" />
             <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
             <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+            @break
+
+        @case('search')
+            <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+            <path d="M21 21l-6 -6" />
             @break
 
         @case('user')

@@ -44,7 +44,7 @@ class RolesTable extends PowerGridComponent
         $this->persist(['filters', 'sorting']);
 
         return [
-            PowerGrid::header()->showSearchInput()->includeViewOnTop('starter.user-management.powergrid.roles-toolbar'),
+            PowerGrid::header()->includeViewOnTop('starter.user-management.powergrid.roles-toolbar'),
             PowerGrid::footer()->showPerPage(10, [10, 25, 50, 100])->showRecordCount(),
         ];
     }
@@ -66,6 +66,7 @@ class RolesTable extends PowerGridComponent
     public function columns(): array
     {
         return [
+            Column::action('Aksi'),
             Column::make('Role', 'name')->searchable()->sortable(),
             Column::make('Kode', 'code')->searchable()->sortable(),
             Column::make('Deskripsi', 'desc')->searchable()->sortable(),
@@ -73,7 +74,6 @@ class RolesTable extends PowerGridComponent
             Column::make('Modul', 'mods_count')->sortable(),
             Column::make('Pengaturan', 'settings_label', 'can_manage_settings')->sortable(),
             Column::make('Log', 'logs_label', 'can_view_logs')->sortable(),
-            Column::action('Aksi'),
         ];
     }
 
@@ -92,24 +92,9 @@ class RolesTable extends PowerGridComponent
         ];
     }
 
-    public function actions(ClientRole $row): array
+    public function actionsFromView(ClientRole $row): \Illuminate\View\View
     {
-        $buttons = [];
-
-        if (! $row->trashed()) {
-            $buttons[] = Button::add('users')->slot('User')->dispatch('starter-role-users-request', ['id' => $row->id])->class('btn btn-sm btn-outline-secondary');
-            $buttons[] = Button::add('access')->slot('Akses')->dispatch('starter-role-access-request', ['id' => $row->id])->class('btn btn-sm btn-outline-secondary');
-            $buttons[] = Button::add('edit')->slot('Edit')->route('starter.settings.roles.edit', ['roleId' => $row->id])->class('btn btn-sm btn-outline-primary');
-
-            if (! $row->isSuperuser()) {
-                $buttons[] = Button::add('archive')->slot('Arsipkan')->dispatchSelf('prepare-row-action', ['action' => 'archive', 'id' => $row->id])->class('btn btn-sm btn-outline-warning');
-            }
-        } else {
-            $buttons[] = Button::add('restore')->slot('Pulihkan')->dispatchSelf('prepare-row-action', ['action' => 'restore', 'id' => $row->id])->class('btn btn-sm btn-outline-success');
-            $buttons[] = Button::add('force-delete')->slot('Hapus permanen')->dispatchSelf('prepare-row-action', ['action' => 'forceDelete', 'id' => $row->id])->class('btn btn-sm btn-outline-danger');
-        }
-
-        return $buttons;
+        return view('starter.user-management.powergrid.roles-row-actions', ['row' => $row]);
     }
 
     public function prepareBulkAction(string $action): void

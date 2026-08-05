@@ -18,7 +18,6 @@ class StarterConfigService
         'security.lock_screen_timeout_minutes' => 15,
         'security.login_max_attempts' => 5,
         'security.login_decay_seconds' => 60,
-        'uploads.max_image_size_kb' => 2048,
     ];
 
     private ?bool $tableExists = null;
@@ -73,10 +72,6 @@ class StarterConfigService
         }
     }
 
-    public function uploadImageMaxKilobytes(): int
-    {
-        return max(256, min(10240, $this->integer('uploads.max_image_size_kb')));
-    }
 
     private function hasTable(): bool
     {

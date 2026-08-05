@@ -1,0 +1,118 @@
+/* 
+ * Starter Kit Global Custom Styles 
+ * Used across the application for overarching design tweaks 
+ */
+
+[x-cloak] {
+    display: none !important;
+}
+
+.dt--top-section, .dt--bottom-section {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+}
+
+.dt--top-section {
+    padding-top: 1.25rem;
+    padding-bottom: 0.5rem;
+}
+
+.dt--bottom-section {
+    padding-top: 0.5rem;
+    padding-bottom: 1.25rem;
+}
+
+.starter-pg-filter {
+    display: inline-block;
+    max-width: none;
+    width: fit-content;
+}
+
+.starter-pg-filter-text > div {
+    width: fit-content;
+}
+
+.starter-pg-filter input {
+    field-sizing: content;
+    min-width: 6.5rem;
+    width: 8rem;
+}
+
+.starter-pg-filter select {
+    field-sizing: content;
+    min-width: 0;
+    width: auto;
+}
+
+.starter-pg-filter-text input {
+    max-width: 11rem;
+}
+
+.starter-pg-filter-number input {
+    max-width: 9rem;
+}
+
+.starter-pg-filter-multiselect {
+    min-width: 8rem;
+}
+
+.navbar-vertical {
+    --tblr-navbar-bg: #182433;
+}
+
+.livewire-powergrid .table-responsive {
+    padding-bottom: 8rem;
+}
+
+/* PowerGrid Active Filters Style Override */
+[wire\:click\.prevent^="clearAllFilters"],
+[wire\:click\.prevent^="clearFilter("] {
+    margin-bottom: 0.75rem;
+}
+
+/* Fix left margin regardless of whether Clear All is present */
+div[class*="table-responsive"] > [wire\:click\.prevent^="clearAllFilters"]:first-child,
+div[class*="table-responsive"] > [wire\:click\.prevent^="clearFilter("]:first-child {
+    margin-left: 0.75rem;
+}
+
+[wire\:click\.prevent^="clearFilter("] .badge {
+    background-color: var(--tblr-bg-surface-secondary) !important;
+    color: var(--tblr-secondary) !important;
+    border: 1px solid var(--tblr-border-color);
+    border-radius: 4px;
+    font-weight: normal;
+    padding: 0.25rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+[wire\:click\.prevent^="clearAllFilters"] .badge {
+    background-color: var(--tblr-danger-lt) !important;
+    color: var(--tblr-danger) !important;
+    border-radius: 4px;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0 !important;
+    gap: 0;
+}
+
+[wire\:click\.prevent^="clearAllFilters"] .badge svg {
+    display: none;
+}
+[wire\:click\.prevent^="clearAllFilters"] .badge::after {
+    content: "Hapus Filter";
+    font-size: 0.75rem;
+}
+
+[wire\:click\.prevent^="clearFilter("] .badge svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2.5;
+}

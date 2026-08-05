@@ -82,15 +82,6 @@ try {
 
         $composer = readJson($composerPath);
         $composer['autoload']['psr-4'][STARTER_NAMESPACE] = STARTER_AUTOLOAD_PATH;
-        $postAutoloadScripts = array_values(array_filter(
-            $composer['scripts']['post-autoload-dump'] ?? [],
-            fn (string $script): bool => ! in_array($script, [STARTER_CLEAR_SCRIPT, STARTER_PUBLISH_SCRIPT], true),
-        ));
-        $composer['scripts']['post-autoload-dump'] = array_values(array_unique([
-            ...$postAutoloadScripts,
-            STARTER_CLEAR_SCRIPT,
-            STARTER_PUBLISH_SCRIPT,
-        ]));
 
         writeJson($composerPath, $composer);
         writeIfChanged($bootstrapPath, $bootstrap);
@@ -135,6 +126,18 @@ try {
         'starterkit:install',
         ...$arguments,
     ]);
+
+    $composer = readJson($composerPath);
+    $postAutoloadScripts = array_values(array_filter(
+        $composer['scripts']['post-autoload-dump'] ?? [],
+        fn (string $script): bool => ! in_array($script, [STARTER_CLEAR_SCRIPT, STARTER_PUBLISH_SCRIPT], true),
+    ));
+    $composer['scripts']['post-autoload-dump'] = array_values(array_unique([
+        ...$postAutoloadScripts,
+        STARTER_CLEAR_SCRIPT,
+        STARTER_PUBLISH_SCRIPT,
+    ]));
+    writeJson($composerPath, $composer);
 
     output('');
     output('Starterkit terpasang. Seluruh command berikutnya dijalankan dari root Laravel host.');

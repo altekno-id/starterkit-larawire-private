@@ -239,8 +239,8 @@
                             <h3 class="card-title">Akses Module dan Halaman Awal</h3>
                             <p class="card-subtitle">Pilih module per app, kemudian tentukan halaman pertama setelah login.</p>
                         </div>
-                        <div class="card-actions">
-                            <span class="status {{ $isSuperuserRole ? 'status-green' : 'status-blue' }} status-lite text-nowrap">
+                        <div class="card-actions flex-shrink-0">
+                            <span class="badge {{ $isSuperuserRole ? 'bg-green-lt text-green' : 'bg-blue-lt text-blue' }}">
                                 {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppCount) }} / {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appTotal) }} app
                             </span>
                         </div>

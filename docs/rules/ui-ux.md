@@ -57,3 +57,7 @@ When introducing a new theme, first paste its vendor distribution intact into `d
 - Test menu entry, redirects, primary actions, loaders, modal/toast/validation states, empty/low/high data volumes, and relevant desktop/laptop/mobile widths.
 - For PowerGrid, test live global and per-column filtering, date from/to boundaries, persisted reload state, sort, pagination/last page, empty result, and role-specific scope.
 - For CSS changes, verify normal, focus, invalid, and invalid+focus states; inspect DOM/computed style when a screenshot is inconclusive.
+
+## Safe Area Resolution
+
+- Dalam mengatur tata letak (layout) komponen UI, selalu mengacu pada resolusi **1280x768** sebagai titik aman (safe area) agar tampilan tetap proporsional dan tidak terpotong pada berbagai layar.

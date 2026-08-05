@@ -44,6 +44,10 @@ class LockScreen extends Component
 
         $redirect = request()->query('redirect');
 
+        if (blank($redirect) && url()->previous() !== url()->current()) {
+            $redirect = url()->previous();
+        }
+
         if (is_string($redirect) && StarterNavigation::isSafeRedirect($redirect)) {
             session()->put('starter.lock.intended', $redirect);
         }

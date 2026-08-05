@@ -30,10 +30,6 @@ class LogoutController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        $redirect = $request->input('redirect', url('/'));
-
-        return redirect(StarterNavigation::authLoginUrl(
-            StarterNavigation::isSafeRedirect($redirect) ? $redirect : url('/')
-        ));
+        return redirect(StarterNavigation::authLoginUrl());
     }
 }

@@ -34,7 +34,6 @@
         @endif
         <form method="POST" action="{{ route('auth.logout') }}" data-starter-logout-form>
             @csrf
-            <input type="hidden" name="redirect" value="{{ url()->current() }}" data-starter-logout-redirect>
             <button type="submit" class="dropdown-item text-danger">
                 @include('starter.templates.layouts.icon', ['name' => 'logout', 'class' => 'icon dropdown-item-icon'])
                 Logout

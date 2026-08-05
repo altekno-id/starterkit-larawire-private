@@ -13,8 +13,8 @@ interface AppRouteInterface
     public function nameForGetUriAndAppSubdomain(string $uri, string $appSubdomain): ?string;
 
     /**
-     * @param  array<int, int>  $modIds
+     * @param  array<int, int>|null  $modIds
      * @return Collection<int, AppRoute>
      */
-    public function getRoutesForModIds(array $modIds, ?string $appSubdomain = null): Collection;
+    public function getRoutesForModIds(?array $modIds, ?string $appSubdomain = null): Collection;
 }

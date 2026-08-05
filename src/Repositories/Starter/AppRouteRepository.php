@@ -37,11 +37,11 @@ class AppRouteRepository implements AppRouteInterface
             ->value('name');
     }
 
-    public function getRoutesForModIds(array $modIds, ?string $appSubdomain = null): Collection
+    public function getRoutesForModIds(?array $modIds, ?string $appSubdomain = null): Collection
     {
         return AppRoute::query()
             ->with('mod.app')
-            ->whereIn('app_mod_id', $modIds)
+            ->when($modIds !== null, fn ($query) => $query->whereIn('app_mod_id', $modIds))
             ->where('method', 'GET')
             ->when($appSubdomain, function ($query) use ($appSubdomain): void {
                 $query->whereHas('mod.app', function ($query) use ($appSubdomain): void {

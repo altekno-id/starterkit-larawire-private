@@ -62,18 +62,18 @@ class NavigationAuthorizedRedirectService
 
     public function firstAuthorizedUrl(ClientLogin $login): string
     {
+        $route = $this->firstAuthorizedRoute($login);
+
+        if ($route instanceof AppRoute && Route::has($route->name)) {
+            return route($route->name);
+        }
+
         if ($login->role?->hasFullAccess()) {
             foreach (StarterAppRegistry::keys() as $appKey) {
                 if (Route::has("{$appKey}.dashboard")) {
                     return route("{$appKey}.dashboard");
                 }
             }
-        }
-
-        $route = $this->firstAuthorizedRoute($login);
-
-        if ($route instanceof AppRoute && Route::has($route->name)) {
-            return route($route->name);
         }
 
         return Route::has('starter.profile.edit')
@@ -178,16 +178,18 @@ class NavigationAuthorizedRedirectService
 
     private function firstAuthorizedRoute(ClientLogin $login, ?string $appKey = null): ?AppRoute
     {
+        $hasFullAccess = $login->role?->hasFullAccess() ?? false;
+
         $modIds = $login->role
             ? $this->clientRoles->modIds($login->role)
             : collect();
 
-        if ($modIds->isEmpty()) {
+        if (! $hasFullAccess && $modIds->isEmpty()) {
             return null;
         }
 
         return $this->appRoutes
-            ->getRoutesForModIds($modIds->all(), $appKey)
+            ->getRoutesForModIds($hasFullAccess ? null : $modIds->all(), $appKey)
             ->filter(fn (AppRoute $route): bool => Route::has($route->name))
             ->sortBy(fn (AppRoute $route): array => [
                 $this->routeScore($route->name),

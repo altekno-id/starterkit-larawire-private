@@ -6,6 +6,8 @@ use RuntimeException;
 
 class StarterTheme
 {
+    private const LAYOUTS = ['vertical', 'horizontal'];
+
     public static function key(): string
     {
         $key = strtolower(trim((string) config('starter.theme', 'tabler')));
@@ -21,6 +23,22 @@ class StarterTheme
     public static function viewPath(string $path = ''): string
     {
         return self::configuredPath('views', $path);
+    }
+
+    public static function layout(): string
+    {
+        $layout = strtolower(trim((string) config('starter.layout', 'vertical')));
+
+        if (! self::supportsLayout($layout)) {
+            throw new RuntimeException("Unsupported starter layout [{$layout}].");
+        }
+
+        return $layout;
+    }
+
+    public static function supportsLayout(string $layout): bool
+    {
+        return in_array(strtolower(trim($layout)), self::LAYOUTS, true);
     }
 
     public static function assetPath(string $path = ''): string

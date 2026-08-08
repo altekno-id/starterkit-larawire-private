@@ -220,8 +220,8 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
             bootstrap.Dropdown.getOrCreateInstance(element);
         });
     },
-    activateSidebar() {
-        const sidebar = document.querySelector('#starter-sidebar-menu');
+    activateNavigation() {
+        const navigations = Array.from(document.querySelectorAll('[data-starter-navigation]'));
 
         document.querySelectorAll('[data-starter-menu-url]').forEach((link) => {
             link.classList.remove('active');
@@ -229,8 +229,10 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
             link.closest('.nav-item')?.classList.remove('active');
         });
 
-        sidebar?.querySelectorAll('.starter-sidebar-details[open]').forEach((detail) => {
-            detail.removeAttribute('open');
+        navigations.forEach((navigation) => {
+            navigation.querySelectorAll('.starter-navigation-details[open]').forEach((detail) => {
+                detail.removeAttribute('open');
+            });
         });
 
         const activeLinks = Array.from(document.querySelectorAll('[data-starter-menu-url]'))
@@ -241,16 +243,18 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
             activeLink.setAttribute('data-current', 'true');
             activeLink.closest('.nav-item')?.classList.add('active');
 
-            if (! sidebar?.contains(activeLink)) {
+            const navigation = activeLink.closest('[data-starter-navigation]');
+
+            if (! navigation) {
                 return;
             }
 
-            let detail = activeLink.closest('.starter-sidebar-details');
+            let detail = activeLink.closest('.starter-navigation-details');
 
-            while (detail && sidebar.contains(detail)) {
+            while (detail && navigation.contains(detail)) {
                 detail.setAttribute('open', '');
                 detail.closest('.nav-item')?.classList.add('active');
-                detail = detail.parentElement?.closest('.starter-sidebar-details') ?? null;
+                detail = detail.parentElement?.closest('.starter-navigation-details') ?? null;
             }
         });
     },
@@ -750,7 +754,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
     init() {
         this.bind();
         this.bindLivewire();
-        this.activateSidebar();
+        this.activateNavigation();
         this.activateAppSwitcher();
         this.prepareDropdowns();
         this.prepareClientBranding();

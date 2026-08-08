@@ -9,6 +9,8 @@ return [
 
     'theme' => env('STARTER_THEME', 'tabler'),
 
+    'layout' => env('STARTER_LAYOUT', 'vertical'),
+
     'themes' => [
         'tabler' => [
             'views' => 'resources/themes/tabler/views',

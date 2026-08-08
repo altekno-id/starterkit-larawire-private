@@ -186,6 +186,26 @@ STARTER_SUPERUSER_PASSWORD=superuser123
 
 Password default hanya boleh dipakai untuk local/development.
 
+### Pilih layout navigasi
+
+Installer otomatis menambahkan pilihan template dan layout berikut ke `.env`:
+
+```env
+STARTER_THEME=tabler
+STARTER_LAYOUT=vertical
+```
+
+Gunakan `vertical` untuk menu di sisi kiri. Jika ingin menu horizontal yang
+sticky di bagian atas, cukup ubah satu nilai:
+
+```env
+STARTER_LAYOUT=horizontal
+```
+
+Nilai layout yang tersedia hanya `vertical` dan `horizontal`. Jika config
+Laravel pernah di-cache, jalankan `php artisan optimize:clear` setelah mengubah
+`.env`.
+
 ## Membuat App setelah instalasi
 
 Jika App pertama dikosongkan saat instalasi, buat App Sales, HR, dan Gudang:

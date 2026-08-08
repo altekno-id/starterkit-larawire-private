@@ -17,13 +17,17 @@
     <link rel="stylesheet" href="{{ asset('assets/tabler/dist/css/tabler-vendors.min.css') }}?v={{ filemtime(public_path('assets/tabler/dist/css/tabler-vendors.min.css')) }}">
     <link rel="stylesheet" href="{{ asset('assets/starter/vendor/flatpickr/flatpickr.min.css') }}?v={{ filemtime(public_path('assets/starter/vendor/flatpickr/flatpickr.min.css')) }}">
     <link rel="stylesheet" href="{{ asset('vendor/livewire-powergrid/bootstrap5.css') }}?v={{ filemtime(public_path('vendor/livewire-powergrid/bootstrap5.css')) }}">
-        <link rel="stylesheet" href="{{ asset('assets/starter/css/starter.css') }}?v={{ file_exists(public_path('assets/starter/css/starter.css')) ? filemtime(public_path('assets/starter/css/starter.css')) : time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/starter/css/starter.css') }}?v={{ file_exists(public_path('assets/starter/css/starter.css')) ? filemtime(public_path('assets/starter/css/starter.css')) : time() }}">
     @includeIf('extensions.starter.layout.head')
     @stack('page-styles')
     @livewireStyles
 </head>
 
-<body data-starter-app-shell>
+@php
+    $starterLayout = \Altekno\StarterKit\Support\Starter\StarterTheme::layout();
+@endphp
+
+<body data-starter-app-shell data-starter-layout="{{ $starterLayout }}">
     <script src="{{ asset('assets/tabler/dist/js/tabler-theme.min.js') }}?v={{ filemtime(public_path('assets/tabler/dist/js/tabler-theme.min.js')) }}"></script>
 
     @php
@@ -35,7 +39,59 @@
 
     @include('starter.templates.components.toast')
 
-    <div class="page">
+    <div class="page starter-layout-{{ $starterLayout }}">
+        @if ($starterLayout === 'horizontal')
+            <header class="navbar navbar-expand-md navbar-overlap sticky-top d-print-none starter-navbar-horizontal" data-bs-theme="dark">
+                <div class="container-fluid starter-content-container">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#starter-horizontal-menu" aria-controls="starter-horizontal-menu" aria-expanded="false" aria-label="Buka atau tutup navigasi">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="navbar-brand navbar-brand-autodark me-2 me-md-3">
+                        <a href="{{ $currentDashboardUrl }}" class="starter-sidebar-brand" aria-label="{{ $brandLogoAlt }}" data-starter-navigate>
+                            <img
+                                src="{{ $brandLogoUrl }}"
+                                class="starter-sidebar-brand-image"
+                                alt="{{ $brandLogoAlt }}"
+                                data-starter-brand-logo
+                                data-fallback-src="{{ $defaultBrandLogoUrl }}"
+                                @if ($clientLogoUrl) data-company-logo="true" @endif
+                            >
+                        </a>
+                    </div>
+
+                    <div class="navbar-nav flex-row order-md-last ms-auto align-items-center gap-2" x-persist="{{ $accountPersistBase }}-horizontal">
+                        @includeIf('extensions.starter.header-actions.index', ['compact' => true])
+                        @include('starter.templates.layouts.app-switcher', ['compact' => true])
+                        @include('starter.templates.layouts.account-menu')
+                    </div>
+
+                    <div class="collapse navbar-collapse" id="starter-horizontal-menu" data-starter-navigation>
+                        <ul class="navbar-nav">
+                            <li class="nav-item d-md-none px-2 pt-3 pb-2">
+                                <div class="small text-secondary">App Aktif</div>
+                                <div class="fw-semibold text-truncate" data-starter-current-app-name>{{ $currentAppName ?? 'App' }}</div>
+                            </li>
+
+                            @forelse ($sidebarMods as $mod)
+                                @foreach ($mod['menus'] as $menu)
+                                    @include('starter.templates.layouts.menu-item-horizontal', ['menu' => $menu])
+                                @endforeach
+                            @empty
+                                <li class="nav-item">
+                                    <span class="nav-link disabled">
+                                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                            @include('starter.templates.layouts.icon', ['name' => 'circle'])
+                                        </span>
+                                        <span class="nav-link-title">Belum ada menu</span>
+                                    </span>
+                                </li>
+                            @endforelse
+                        </ul>
+                    </div>
+                </div>
+            </header>
+        @else
         <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
             <div class="container-fluid">
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#starter-sidebar-menu" aria-controls="starter-sidebar-menu" aria-expanded="false" aria-label="Buka atau tutup navigasi">
@@ -61,7 +117,7 @@
                     @include('starter.templates.layouts.account-menu')
                 </div>
 
-                <div class="collapse navbar-collapse" id="starter-sidebar-menu">
+                <div class="collapse navbar-collapse" id="starter-sidebar-menu" data-starter-navigation>
                     <ul class="navbar-nav pt-lg-3">
                         <li class="nav-item d-lg-none px-0 pt-3 pb-2">
                             <div class="small text-secondary">App Aktif</div>
@@ -106,6 +162,7 @@
                 </div>
             </div>
         </header>
+        @endif
 
         <div class="page-wrapper">
             <div class="page-body starter-page-body" wire:transition="starter-page">

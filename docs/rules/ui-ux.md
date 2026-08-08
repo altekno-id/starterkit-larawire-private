@@ -11,6 +11,8 @@ Use the installed active theme. `docs/template/<theme>/` is the complete upstrea
 
 When introducing a new theme, first paste its vendor distribution intact into `docs/template/<theme>/`; then generate the starter Blade contract in `resources/themes/<theme>/views/starter/`, copy required runtime assets to `public/themes/<theme>/assets/`, register the three paths and PowerGrid adapter in `config/starter.php`, and verify `starter:publish-assets`, the active layout, modal, auth/error pages, and PowerGrid.
 
+The active template is selected by `STARTER_THEME`; the application navigation layout is selected only by `STARTER_LAYOUT=vertical|horizontal`. Every registered theme must preserve the same shell features and responsive behavior in both layouts. Do not add per-layout environment keys.
+
 ## Base rules
 
 - The starter owns shell layout, account dropdown, auth, lock screen, and error pages. Project features extend only the documented extension paths; never copy or override core views.

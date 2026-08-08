@@ -1127,6 +1127,7 @@ function mergeEnvironment(string $path): void
         'APP_FAKER_LOCALE' => 'id_ID',
         'STARTER_API_ENABLED' => 'false',
         'STARTER_THEME' => 'tabler',
+        'STARTER_LAYOUT' => 'vertical',
         'DB_MIGRATIONS_TABLE' => 'x_migrations',
         'DB_CACHE_TABLE' => 'x_cache',
         'DB_CACHE_LOCK_TABLE' => 'x_cache_locks',

@@ -88,6 +88,11 @@ class SecurityCheckCommand extends Command
                 class_exists(StarterTheme::powerGridTheme()),
                 'STARTER_THEME must reference a registered theme with a PowerGrid adapter.',
             ),
+            $this->check(
+                'Starter UI layout',
+                StarterTheme::supportsLayout((string) config('starter.layout')),
+                'STARTER_LAYOUT must be vertical or horizontal.',
+            ),
         ];
     }
 

@@ -3,7 +3,7 @@
 ## Prerequisites and environment
 
 - Deploy the starter commit tracked by the Laravel repository's initialized Git submodule. PHP must match locked dependencies, `intl` and MySQL must exist, document root must be `public`, root/App subdomains point to the same install, and `storage/` plus `bootstrap/cache/` are writable.
-- Production baseline: `APP_ENV=production`, `APP_DEBUG=false`, HTTPS `APP_URL`, matching scheme-free `APP_DOMAIN`, `STARTER_API_ENABLED=false` unless needed, active `STARTER_THEME`, production DB credentials, file session/cache, sync queue, secure cookie on HTTPS, strong `STARTER_SUPERUSER_PASSWORD`, and `id`/`id`/`id_ID` locales.
+- Production baseline: `APP_ENV=production`, `APP_DEBUG=false`, HTTPS `APP_URL`, matching scheme-free `APP_DOMAIN`, `STARTER_API_ENABLED=false` unless needed, active `STARTER_THEME`, `STARTER_LAYOUT=vertical|horizontal`, production DB credentials, file session/cache, sync queue, secure cookie on HTTPS, strong `STARTER_SUPERUSER_PASSWORD`, and `id`/`id`/`id_ID` locales.
 - The installer derives `APP_DOMAIN`, `SESSION_DOMAIN`, and `SESSION_SECURE_COOKIE` from `APP_URL`; verify the generated production values and test root/auth/App cookie sharing on a real domain. If API is enabled, point `api.<APP_DOMAIN>` to the same `public`; docs still require Superuser in production.
 
 ## Deployment flow

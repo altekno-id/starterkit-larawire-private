@@ -217,6 +217,58 @@ php artisan starter:sync
 
 Update ini tidak menjalankan reset database.
 
+## Membuat App baru
+
+Pastikan terminal berada di root Laravel. Buat App menggunakan kode subdomain
+huruf kecil, angka, atau tanda hubung. Contoh berikut membuat App Sales pada
+`sales.<APP_DOMAIN>`. Kode `api` tidak boleh digunakan karena dicadangkan untuk
+gateway API:
+
+```bash
+php artisan starter:make-app sales --name="Sales"
+```
+
+Command tersebut membuat kerangka App dan langsung menjalankan
+`starter:sync`. File utama yang dihasilkan adalah:
+
+```text
+config/apps/sales.php                    Identitas App, module, menu, dan landing
+routes/apps/sales.php                    Route web App Sales
+routes/apps/sales.api.php                Route API opsional
+app/Livewire/Apps/Sales/                 Component Livewire
+resources/views/apps/sales/              Tampilan App
+tests/Feature/Apps/Sales/                Test App
+```
+
+Setelah App dibuat:
+
+1. Ganti module dan menu contoh pada `config/apps/sales.php` sesuai kebutuhan.
+2. Buat halaman Livewire/view dan route pada `routes/apps/sales.php`. Gunakan
+   nama route `<app>.<module>.<action>`, misalnya `sales.prospect.index`.
+3. Pastikan nilai `route` pada setiap menu sama persis dengan nama route web dan
+   kode module sama dengan bagian kedua nama route.
+4. Letakkan migration bisnis pada `database/migrations/apps/sales/`. Isi
+   `routes/apps/sales.api.php` hanya jika App membutuhkan API.
+5. Periksa dan terapkan metadata terbaru:
+
+```bash
+php artisan starter:sync sales --dry-run
+php artisan starter:sync sales --force
+```
+
+6. Buka Role Management, berikan module App kepada role yang berhak, lalu pilih
+   landing page awal App tersebut.
+7. Arahkan subdomain lokal/production ke folder `public` Laravel yang sama,
+   kemudian uji login, menu, halaman yang diizinkan, dan penolakan akses role
+   yang tidak memiliki module.
+
+Jika ingin menyelesaikan config, route, dan halaman sebelum metadata pertama
+kali disinkronkan, gunakan:
+
+```bash
+php artisan starter:make-app sales --name="Sales" --no-sync
+```
+
 ## Agentic-ready — tujuan rules
 
 Starterkit ini terutama dirancang untuk pengembangan dengan agent AI, bukan

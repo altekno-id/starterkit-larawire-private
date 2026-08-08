@@ -35,11 +35,10 @@ dibuka langsung atau melalui Git submodule pada Laravel host.
   `master`, bukan detached HEAD, sebelum commit dan push.
 - Verifikasi core melalui Laravel host bila perubahan menyentuh integrasi
   framework, installer, Artisan, migration, route, Livewire, theme, atau asset.
-- Setelah commit starterkit dipush, sinkronkan perubahan ke seluruh Laravel host
-  terkait yang diketahui. Saat ini host terkait adalah `dosen/dosen-bo` dan
-  `starterkit-test`.
-- Ikuti mekanisme integrasi aktual setiap host: perbarui dan rekam gitlink pada
-  host yang memakai Git submodule; sinkronkan seluruh source tanpa metadata
-  `.git` pada host yang masih memakai snapshot terlacak.
-- Jalankan `composer install`, `php artisan starter:sync`, dan verifikasi relevan
-  dari setiap host sebelum commit dan push perubahan host yang sudah terlacak.
+- Jangan menyinkronkan commit starterkit ke Laravel host mana pun, termasuk
+  `dosen/dosen-bo` dan `starterkit-test`, kecuali developer memerintahkannya
+  secara eksplisit pada task yang sedang berjalan. Permintaan perubahan atau
+  push repository canonical tidak otomatis mengizinkan sinkronisasi host.
+- Jika sinkronisasi host diperintahkan, ikuti mekanisme integrasi aktual host,
+  perbarui gitlink submodule, lalu jalankan dependency, `starter:sync`, dan
+  verifikasi relevan sebelum commit atau push host sesuai instruksi developer.

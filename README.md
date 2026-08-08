@@ -1,5 +1,7 @@
 > Starterkit ini dibangun dengan dukungan karya open-source dari
+> [Laravel](https://laravel.com/),
 > [Laravel Livewire](https://livewire.laravel.com/),
+> [Laravel Lang](https://laravel-lang.com/),
 > [Livewire PowerGrid](https://livewire-powergrid.com/), dan
 > [Tabler](https://tabler.io/admin-template). Terima kasih kepada seluruh author
 > dan contributor yang mengembangkan serta memelihara package tersebut.

@@ -10,7 +10,7 @@
         <span class="badge bg-primary"></span>
     </a>
 
-    <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+    <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" data-starter-app-menu>
         <div class="card">
             <div class="card-header">
                 <div class="card-title">App Saya</div>

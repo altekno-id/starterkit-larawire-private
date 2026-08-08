@@ -17,6 +17,10 @@ return [
             'assets' => 'public/themes/tabler/assets',
             'docs' => 'docs/template/tabler',
             'powergrid' => TablerPowerGridTheme::class,
+            'layouts' => [
+                'vertical' => 'starter.templates.layouts.navigation.vertical',
+                'horizontal' => 'starter.templates.layouts.navigation.horizontal',
+            ],
         ],
     ],
 

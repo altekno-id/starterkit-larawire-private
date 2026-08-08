@@ -89,9 +89,14 @@ class SecurityCheckCommand extends Command
                 'STARTER_THEME must reference a registered theme with a PowerGrid adapter.',
             ),
             $this->check(
+                'Starter theme layout registry',
+                StarterTheme::hasCompleteLayoutRegistry(),
+                'The active theme must provide existing Blade views for vertical and horizontal layouts.',
+            ),
+            $this->check(
                 'Starter UI layout',
-                StarterTheme::supportsLayout((string) config('starter.layout')),
-                'STARTER_LAYOUT must be vertical or horizontal.',
+                StarterTheme::hasLayoutView((string) config('starter.layout')),
+                'STARTER_LAYOUT must be registered by the active theme and its Blade view must exist.',
             ),
         ];
     }

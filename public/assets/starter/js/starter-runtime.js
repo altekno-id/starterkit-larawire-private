@@ -20,8 +20,8 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
     isSameNavigationUrl(url, compareUrl = window.location.href) {
         return this.normalizeNavigationUrl(url) === this.normalizeNavigationUrl(compareUrl);
     },
-    bootstrap() {
-        return window.bootstrap || window.tabler?.bootstrap || null;
+    themeAdapter() {
+        return window.StarterThemeAdapter || {};
     },
     showNavigateLoader() {
         this.navigating = true;
@@ -155,26 +155,16 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
 
         this.closeAppSwitchers();
 
-        document.querySelectorAll('.navbar-collapse.show').forEach((element) => {
-            const instance = this.bootstrap()?.Collapse?.getInstance(element);
-            instance ? instance.hide() : element.classList.remove('show');
-        });
+        this.themeAdapter().closeNavigation?.();
     },
-    disposeBootstrap() {
+    disposeTheme() {
         document.querySelectorAll('[data-starter-details][open]').forEach((element) => {
             element.removeAttribute('open');
         });
 
         this.closeAppSwitchers();
 
-        document.querySelectorAll('.dropdown-menu.show').forEach((element) => element.classList.remove('show'));
-        document.querySelectorAll('.dropdown-toggle[aria-expanded="true"]').forEach((element) => element.setAttribute('aria-expanded', 'false'));
-
-        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach((element) => {
-            this.bootstrap()?.Collapse?.getInstance(element)?.dispose();
-        });
-
-        document.querySelectorAll('.collapse.show').forEach((element) => element.classList.remove('show'));
+        this.themeAdapter().dispose?.();
     },
     closeAppSwitchers(except = null) {
         document.querySelectorAll('[data-starter-app-switcher]').forEach((switcher) => {
@@ -184,15 +174,15 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
 
             switcher.classList.remove('show');
             switcher.querySelector('[data-starter-app-toggle]')?.setAttribute('aria-expanded', 'false');
-            const menu = switcher.querySelector('.dropdown-menu');
+            const menu = switcher.querySelector('[data-starter-app-menu]');
 
             menu?.classList.remove('show');
-            menu?.removeAttribute('data-bs-popper');
+            this.themeAdapter().closeAppMenu?.(menu);
         });
     },
     toggleAppSwitcher(toggle) {
         const switcher = toggle.closest('[data-starter-app-switcher]');
-        const menu = switcher?.querySelector('.dropdown-menu');
+        const menu = switcher?.querySelector('[data-starter-app-menu]');
 
         if (! switcher || ! menu) {
             return;
@@ -206,19 +196,13 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         toggle.setAttribute('aria-expanded', String(! isOpen));
 
         if (isOpen) {
-            menu.removeAttribute('data-bs-popper');
+            this.themeAdapter().closeAppMenu?.(menu);
         } else {
-            menu.setAttribute('data-bs-popper', 'static');
+            this.themeAdapter().openAppMenu?.(menu);
         }
     },
-    prepareDropdowns() {
-        const bootstrap = this.bootstrap();
-
-        if (! bootstrap?.Dropdown) return;
-
-        document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach((element) => {
-            bootstrap.Dropdown.getOrCreateInstance(element);
-        });
+    prepareTheme() {
+        this.themeAdapter().prepare?.();
     },
     activateNavigation() {
         const navigations = Array.from(document.querySelectorAll('[data-starter-navigation]'));
@@ -226,11 +210,11 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         document.querySelectorAll('[data-starter-menu-url]').forEach((link) => {
             link.classList.remove('active');
             link.removeAttribute('data-current');
-            link.closest('.nav-item')?.classList.remove('active');
+            link.closest('[data-starter-menu-item]')?.classList.remove('active');
         });
 
         navigations.forEach((navigation) => {
-            navigation.querySelectorAll('.starter-navigation-details[open]').forEach((detail) => {
+            navigation.querySelectorAll('[data-starter-navigation-details][open]').forEach((detail) => {
                 detail.removeAttribute('open');
             });
         });
@@ -241,7 +225,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         activeLinks.forEach((activeLink) => {
             activeLink.classList.add('active');
             activeLink.setAttribute('data-current', 'true');
-            activeLink.closest('.nav-item')?.classList.add('active');
+            activeLink.closest('[data-starter-menu-item]')?.classList.add('active');
 
             const navigation = activeLink.closest('[data-starter-navigation]');
 
@@ -249,12 +233,12 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
                 return;
             }
 
-            let detail = activeLink.closest('.starter-navigation-details');
+            let detail = activeLink.closest('[data-starter-navigation-details]');
 
             while (detail && navigation.contains(detail)) {
                 detail.setAttribute('open', '');
-                detail.closest('.nav-item')?.classList.add('active');
-                detail = detail.parentElement?.closest('.starter-navigation-details') ?? null;
+                detail.closest('[data-starter-menu-item]')?.classList.add('active');
+                detail = detail.parentElement?.closest('[data-starter-navigation-details]') ?? null;
             }
         });
     },
@@ -756,7 +740,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         this.bindLivewire();
         this.activateNavigation();
         this.activateAppSwitcher();
-        this.prepareDropdowns();
+        this.prepareTheme();
         this.prepareClientBranding();
         this.consumeFlashToasts();
         this.configureAutoLock();
@@ -766,7 +750,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
 document.addEventListener('DOMContentLoaded', () => window.StarterTemplate.init());
 document.addEventListener('livewire:initialized', () => window.StarterTemplate.bindLivewire());
 document.addEventListener('livewire:navigate', () => window.StarterTemplate.showNavigateLoader());
-document.addEventListener('livewire:navigating', () => window.StarterTemplate.disposeBootstrap());
+document.addEventListener('livewire:navigating', () => window.StarterTemplate.disposeTheme());
 document.addEventListener('livewire:navigated', () => {
     window.StarterTemplate.hideNavigateLoader();
     window.StarterTemplate.clearLivewireLoader();

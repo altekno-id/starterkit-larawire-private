@@ -206,6 +206,24 @@ Nilai layout yang tersedia hanya `vertical` dan `horizontal`. Jika config
 Laravel pernah di-cache, jalankan `php artisan optimize:clear` setelah mengubah
 `.env`.
 
+### Menambahkan template baru ke starterkit
+
+Bagian ini hanya untuk maintenance repository starterkit. Untuk menambahkan
+template seperti Vuexy, salin bundle template aslinya tanpa perubahan ke
+`docs/template/vuexy/`, lalu minta agent mengintegrasikannya sebagai theme
+starterkit.
+
+Agent harus membuat Blade, asset runtime, adapter JavaScript, adapter PowerGrid,
+serta layout `vertical` dan `horizontal` milik Vuexy. Setelah theme diregistrasi,
+project Laravel cukup memilihnya melalui:
+
+```env
+STARTER_THEME=vuexy
+STARTER_LAYOUT=horizontal
+```
+
+Tidak diperlukan environment tambahan khusus template atau layout.
+
 ## Membuat App setelah instalasi
 
 Jika App pertama dikosongkan saat instalasi, buat App Sales, HR, dan Gudang:

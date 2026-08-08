@@ -2,11 +2,13 @@
 
 namespace Altekno\StarterKit\Support\Starter;
 
+use Illuminate\Support\Facades\View;
 use RuntimeException;
 
 class StarterTheme
 {
-    private const LAYOUTS = ['vertical', 'horizontal'];
+    /** @var list<string> */
+    private const REQUIRED_LAYOUTS = ['vertical', 'horizontal'];
 
     public static function key(): string
     {
@@ -30,7 +32,9 @@ class StarterTheme
         $layout = strtolower(trim((string) config('starter.layout', 'vertical')));
 
         if (! self::supportsLayout($layout)) {
-            throw new RuntimeException("Unsupported starter layout [{$layout}].");
+            throw new RuntimeException(
+                "Starter theme [".self::key()."] does not support layout [{$layout}].",
+            );
         }
 
         return $layout;
@@ -38,7 +42,51 @@ class StarterTheme
 
     public static function supportsLayout(string $layout): bool
     {
-        return in_array(strtolower(trim($layout)), self::LAYOUTS, true);
+        $layout = strtolower(trim($layout));
+
+        if (preg_match('/^[a-z0-9][a-z0-9_-]*$/', $layout) !== 1) {
+            return false;
+        }
+
+        $view = config('starter.themes.'.self::key().'.layouts.'.$layout);
+
+        return self::isSafeViewName($view);
+    }
+
+    public static function hasLayoutView(string $layout): bool
+    {
+        if (! self::supportsLayout($layout)) {
+            return false;
+        }
+
+        return View::exists((string) config(
+            'starter.themes.'.self::key().'.layouts.'.strtolower(trim($layout)),
+        ));
+    }
+
+    public static function hasCompleteLayoutRegistry(): bool
+    {
+        foreach (self::REQUIRED_LAYOUTS as $layout) {
+            if (! self::hasLayoutView($layout)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static function layoutView(): string
+    {
+        $layout = self::layout();
+        $view = (string) config('starter.themes.'.self::key().'.layouts.'.$layout);
+
+        if (! View::exists($view)) {
+            throw new RuntimeException(
+                "Starter theme [".self::key()."] layout [{$layout}] view [{$view}] was not found.",
+            );
+        }
+
+        return $view;
     }
 
     public static function assetPath(string $path = ''): string
@@ -72,5 +120,13 @@ class StarterTheme
         }
 
         return StarterPaths::path($relative.($path === '' ? '' : '/'.ltrim($path, '/\\')));
+    }
+
+    private static function isSafeViewName(mixed $view): bool
+    {
+        return is_string($view)
+            && $view !== ''
+            && ! str_contains($view, '..')
+            && preg_match('/^[a-z0-9][a-z0-9_.-]*$/i', $view) === 1;
     }
 }

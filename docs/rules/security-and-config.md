@@ -5,7 +5,7 @@
 - Admin-changeable runtime configuration lives in `starter_configs` and is accessed only through `StarterConfigService`, which supplies typed safe fallbacks before table/migration availability. Changes invalidate their cache and are audited.
 - Secrets and environment/infrastructure settings stay in `.env`/`config/*.php`, never the database. Any local environment-key change updates `.env` and `.env.example` together; the example contains safe placeholders/defaults and required guidance, never secrets.
 - Do not make developers manually add a key that can be changed in the local checkout. Document production value/pattern in `.env.example` and deployment rules.
-- `STARTER_LAYOUT` is infrastructure UI configuration with the allowlisted values `vertical` and `horizontal`; installer default is `vertical` and no additional per-layout environment key is allowed.
+- `STARTER_LAYOUT` is infrastructure UI configuration validated against the active theme's registered layout-to-view map. Every current theme must register `vertical` and `horizontal`; installer default is `vertical` and no additional per-layout environment key is allowed.
 - Local/testing Superuser credentials must be explicit in `.env` and `.env.example`; `STARTER_SUPERUSER_PASSWORD=superuser123` is local/development/testing only. Production needs a strong replacement and `starter:security-check --production` must reject the default.
 - Existing dynamic configuration includes API gateway enablement (`STARTER_API_ENABLED`, default false), remember-me, lock-screen enablement/timeout, login attempts/decay, and maximum image upload. New config requires an idempotent migration/seed, typed fallback/accessor/clamp, optional Settings UI, all consumers, validation, audit, invalidation, and tests.
 

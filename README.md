@@ -2,8 +2,9 @@
 > [Laravel](https://laravel.com/),
 > [Laravel Livewire](https://livewire.laravel.com/),
 > [Laravel Lang](https://laravel-lang.com/),
-> [Livewire PowerGrid](https://livewire-powergrid.com/), dan
-> [Tabler](https://tabler.io/admin-template). Terima kasih kepada seluruh author
+> [Livewire PowerGrid](https://livewire-powergrid.com/),
+> [Tabler](https://tabler.io/admin-template), dan
+> [Dashcode](https://codeshaper.net/). Terima kasih kepada seluruh author
 > dan contributor yang mengembangkan serta memelihara package tersebut.
 
 # Apa itu Starterkit Larawire Private?
@@ -20,7 +21,7 @@ Starterkit ini juga menyediakan:
 - satu atau beberapa App/subdomain dalam satu project Laravel;
 - menu dan route yang disinkronkan dari kode;
 - audit log, konfigurasi perusahaan, dan gateway API opsional;
-- UI Tabler, Livewire, dan tabel Livewire PowerGrid;
+- pilihan UI Tabler atau Dashcode, Livewire, dan tabel Livewire PowerGrid;
 - installer, setup production, update, migration, dan publish asset;
 - rules yang membantu agent AI mengembangkan aplikasi secara konsisten.
 
@@ -197,6 +198,18 @@ STARTER_THEME=tabler
 STARTER_LAYOUT=vertical
 ```
 
+Tema yang tersedia:
+
+```env
+STARTER_THEME=tabler
+# atau
+STARTER_THEME=dashcode
+```
+
+Kedua tema menyediakan layout `vertical` dan `horizontal`. Informasi, fitur,
+route, menu, dan hak akses tetap sama; yang berubah hanya struktur tampilan dan
+komponen visual sesuai template yang dipilih.
+
 Installer juga membuat nama `SESSION_COOKIE` yang unik berdasarkan `APP_URL`.
 Cookie Laravel yang mungkin terbentuk sebelum instalasi tidak akan mengganggu
 sesi login bersama antara domain utama dan subdomain App.
@@ -208,9 +221,13 @@ sticky di bagian atas, cukup ubah satu nilai:
 STARTER_LAYOUT=horizontal
 ```
 
-Nilai layout yang tersedia hanya `vertical` dan `horizontal`. Jika config
-Laravel pernah di-cache, jalankan `php artisan optimize:clear` setelah mengubah
-`.env`.
+Nilai layout yang tersedia hanya `vertical` dan `horizontal`. Dashcode memakai
+mekanisme layout aslinya: `vertical` menampilkan sidebar, sedangkan `horizontal`
+menampilkan top menu. Starterkit menentukan mekanisme tersebut langsung dari
+`.env`, jadi Theme Customizer dan localStorage Dashcode tidak diperlukan.
+
+Jika config Laravel pernah di-cache, jalankan `php artisan optimize:clear`
+setelah mengubah `.env`.
 
 ### Menambahkan template baru ke starterkit
 

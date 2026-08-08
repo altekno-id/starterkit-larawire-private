@@ -1,5 +1,6 @@
 <?php
 
+use Altekno\StarterKit\Themes\Starter\DashcodePowerGridTheme;
 use Altekno\StarterKit\Themes\Starter\TablerPowerGridTheme;
 
 $domain = env('APP_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost');
@@ -12,6 +13,16 @@ return [
     'layout' => env('STARTER_LAYOUT', 'vertical'),
 
     'themes' => [
+        'dashcode' => [
+            'views' => 'resources/themes/dashcode/views',
+            'assets' => 'public/themes/dashcode/assets',
+            'docs' => 'docs/template/dashcode',
+            'powergrid' => DashcodePowerGridTheme::class,
+            'layouts' => [
+                'vertical' => 'starter.templates.layouts.navigation.vertical',
+                'horizontal' => 'starter.templates.layouts.navigation.horizontal',
+            ],
+        ],
         'tabler' => [
             'views' => 'resources/themes/tabler/views',
             'assets' => 'public/themes/tabler/assets',

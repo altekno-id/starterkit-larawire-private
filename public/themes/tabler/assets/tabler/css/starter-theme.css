@@ -65,6 +65,14 @@ html {
     scrollbar-gutter: auto !important;
 }
 
+@supports (-moz-appearance: none) {
+    html {
+        /* Firefox can inset the root box symmetrically when the page scrolls. */
+        margin: 0 !important;
+        width: 100vw !important;
+    }
+}
+
 body[data-starter-layout="horizontal"] {
     /*
      * Keep classic browser scrollbar gutters visually continuous with the

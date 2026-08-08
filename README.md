@@ -1,9 +1,24 @@
-# Starterkit Larawire Private
+# Apa itu Starterkit Larawire Private
 
-Starterkit aplikasi internal perusahaan berbasis **Laravel** dan **Livewire**.
-Fondasi login, user, role, App, module, menu, audit, keamanan, API, serta UI
-bertema **Tabler** sudah disiapkan agar developer fokus pada fitur bisnis dan
-agentic coding.
+Starterkit Larawire Private adalah fondasi awal untuk membuat aplikasi
+**Laravel** berbasis **Livewire**. Fungsinya mirip dengan Laravel Starter Kits
+Auth bawaan Laravel yang menyediakan autentikasi siap pakai, tetapi starterkit
+ini sudah diperluas untuk kebutuhan aplikasi internal perusahaan.
+
+Fitur yang sudah tersedia:
+
+- autentikasi, login, logout, lock screen, dan pengaturan keamanan akun;
+- pengelolaan user, role, module, dan hak akses;
+- dukungan satu atau beberapa App/subdomain dengan satu login dan database;
+- sinkronisasi App, module, route, dan menu dari konfigurasi code ke database;
+- dashboard dan komponen UI berbasis Livewire, PowerGrid, serta tema Tabler;
+- audit log aktivitas, konfigurasi aplikasi, dan gateway API;
+- command instalasi, setup, sync, publish asset, dan pemeriksaan keamanan;
+- rules pengembangan yang siap digunakan oleh agent AI.
+
+Dengan fondasi tersebut, developer dapat langsung mengerjakan fitur bisnis
+tanpa membangun ulang autentikasi, hak akses, navigasi, tampilan dasar, dan
+infrastruktur aplikasi dari awal.
 
 Repository ini bukan aplikasi mandiri. Pasang repository sebagai Git submodule
 `starterkit-larawire-private` di dalam project Laravel. Repository Laravel melacak

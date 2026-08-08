@@ -36,15 +36,15 @@ login**. App hanya membagi fitur berdasarkan area bisnis.
 Contoh:
 
 ```text
-erp.perusahaan.com          Login, profil, user, role, pengaturan, dan log
-sales.erp.perusahaan.com    App Sales
-hr.erp.perusahaan.com       App HR
+perusahaan.com          Login, profil, user, role, pengaturan, dan log
+sales.perusahaan.com    App Sales
+hr.perusahaan.com       App HR
 ```
 
 | Istilah | Artinya |
 |---|---|
 | **App** | Area bisnis utama, misalnya Sales atau HR. |
-| **Subdomain** | Alamat App, misalnya `sales.erp.perusahaan.com`. |
+| **Subdomain** | Alamat App, misalnya `sales.perusahaan.com`. |
 | **Module** | Kelompok fitur sekaligus batas hak akses. |
 | **Route** | Alamat halaman atau aksi yang dapat dibuka. |
 | **Menu** | Link di sidebar yang menuju sebuah route. |
@@ -100,14 +100,14 @@ Struktur yang mudah dipahami adalah:
 
 ```text
 ERP perusahaan                                  Satu project dan satu database
-├── erp.perusahaan.com                          Login dan pengaturan global
-├── sales.erp.perusahaan.com                    App Sales
+├── perusahaan.com                              Login dan pengaturan global
+├── sales.perusahaan.com                        App Sales
 │   ├── Module Customer
 │   └── Module Penjualan
-├── hr.erp.perusahaan.com                       App HR
+├── hr.perusahaan.com                           App HR
 │   ├── Module Karyawan
 │   └── Module Absensi
-└── gudang.erp.perusahaan.com                   App Gudang
+└── gudang.perusahaan.com                       App Gudang
     ├── Module Stok
     └── Module Mutasi Barang
 ```
@@ -115,7 +115,7 @@ ERP perusahaan                                  Satu project dan satu database
 Karyawan ditempatkan sebagai module di dalam App HR karena masih satu area
 bisnis. Jika Karyawan nantinya harus menjadi area yang benar-benar terpisah,
 Anda dapat membuat App `karyawan` dengan subdomain
-`karyawan.erp.perusahaan.com`.
+`karyawan.perusahaan.com`.
 
 Setelah starterkit selesai diinstal, App awal dapat dibuat dengan:
 
@@ -125,10 +125,10 @@ php artisan starter:make-app hr --name="HR"
 php artisan starter:make-app gudang --name="Gudang"
 ```
 
-Jika `APP_URL=http://erp.test`, alamat local App tersebut menjadi
-`sales.erp.test`, `hr.erp.test`, dan `gudang.erp.test`. Arahkan semuanya ke
-folder `public` project Laravel yang sama melalui aplikasi web server local
-yang Anda gunakan.
+Jika `APP_URL=http://perusahaan.test`, alamat local App tersebut menjadi
+`sales.perusahaan.test`, `hr.perusahaan.test`, dan `gudang.perusahaan.test`.
+Arahkan semuanya ke folder `public` project Laravel yang sama melalui aplikasi
+web server local yang Anda gunakan.
 
 Setelah itu, isi module dan menu masing-masing App pada `config/apps/`, lalu
 buat halaman dan route pada `routes/apps/`. Role Sales dapat diberi module milik
@@ -163,7 +163,7 @@ git submodule add https://github.com/altekno-id/starterkit-larawire-private.git 
 Contoh menggunakan MySQL untuk project ERP local:
 
 ```env
-APP_URL=http://erp.test
+APP_URL=http://perusahaan.test
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -312,24 +312,24 @@ Contoh pengarahannya:
 
 | Domain | Document root |
 |---|---|
-| `erp.perusahaan.com` | `/home/user/erp/public` |
-| `sales.erp.perusahaan.com` | `/home/user/erp/public` |
-| `hr.erp.perusahaan.com` | `/home/user/erp/public` |
-| `gudang.erp.perusahaan.com` | `/home/user/erp/public` |
-| `api.erp.perusahaan.com` | `/home/user/erp/public` |
+| `perusahaan.com` | `/home/user/erp/public` |
+| `sales.perusahaan.com` | `/home/user/erp/public` |
+| `hr.perusahaan.com` | `/home/user/erp/public` |
+| `gudang.perusahaan.com` | `/home/user/erp/public` |
+| `api.perusahaan.com` | `/home/user/erp/public` |
 
 Buat DNS setiap subdomain menuju server yang sama, lalu atur document root-nya
 melalui web server atau panel hosting. Anda juga dapat memakai wildcard DNS
-`*.erp.perusahaan.com` jika didukung penyedia DNS dan hosting.
+`*.perusahaan.com` jika didukung penyedia DNS dan hosting.
 
 Siapkan `.env` production sebelum menjalankan setup:
 
 ```env
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://erp.perusahaan.com
-APP_DOMAIN=erp.perusahaan.com
-SESSION_DOMAIN=.erp.perusahaan.com
+APP_URL=https://perusahaan.com
+APP_DOMAIN=perusahaan.com
+SESSION_DOMAIN=.perusahaan.com
 SESSION_SECURE_COOKIE=true
 ```
 

@@ -133,10 +133,12 @@ summary::-webkit-details-marker {
     background: var(--starter-slate-800);
 }
 
+.light body .starter-sidebar-dark .black_logo,
 .starter-sidebar-dark .black_logo {
     display: none;
 }
 
+.light body .starter-sidebar-dark .white_logo,
 .starter-sidebar-dark .white_logo {
     display: block;
 }
@@ -271,9 +273,14 @@ summary::-webkit-details-marker {
 }
 
 .sidebar-submenu {
+    display: none;
     margin: .15rem 0 .35rem 1.05rem;
     padding-left: .95rem;
     position: relative;
+}
+
+.starter-sidebar-details[open] > .sidebar-submenu {
+    display: block;
 }
 
 .sidebar-submenu::before {
@@ -379,6 +386,16 @@ summary::-webkit-details-marker {
     position: absolute;
     top: calc(100% - .25rem);
     z-index: 1000;
+}
+
+.starter-horizontal-details > .sub-menu,
+.starter-horizontal-details > .starter-horizontal-nested {
+    display: none;
+}
+
+.starter-horizontal-details[open] > .sub-menu,
+.starter-horizontal-details[open] > .starter-horizontal-nested {
+    display: block;
 }
 
 .starter-horizontal-submenu-link {

@@ -1329,7 +1329,13 @@ body.dashcode-auth {
     .modal { padding: .5rem; }
     .modal-dialog { max-width: 100%; }
     .starter-account-panel { right: -.25rem; }
-    .starter-app-panel { right: -3rem; }
+    .starter-app-panel {
+        left: 1rem;
+        position: fixed;
+        right: 1rem;
+        top: 4.25rem;
+        width: auto;
+    }
     .dashcode-landing .container-xl { padding-left: 1rem; padding-right: 1rem; }
     .dashcode-landing .py-6 { padding-bottom: 3rem; padding-top: 3rem; }
 }

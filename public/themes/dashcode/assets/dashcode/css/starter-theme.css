@@ -144,7 +144,7 @@ summary::-webkit-details-marker {
 }
 
 .starter-sidebar-dark .sidebar-menu-title {
-    color: var(--starter-slate-400) !important;
+    color: var(--starter-slate-300) !important;
 }
 
 .starter-sidebar-dark .sidebar-menu .navItem {
@@ -161,22 +161,38 @@ summary::-webkit-details-marker {
 
 .starter-sidebar-dark .navItem .icon-arrow,
 .starter-sidebar-dark .starter-submenu-link .icon-arrow {
-    background: rgba(148, 163, 184, .16);
+    background: var(--starter-slate-700);
     color: var(--starter-slate-300);
 }
 
+.starter-sidebar-dark .sidebar-menu li.active > details > .navItem .icon-arrow {
+    background: rgba(148, 163, 184, .3);
+    color: #fff;
+}
+
 .starter-sidebar-dark .sidebar-submenu::before {
-    background: var(--starter-slate-600);
+    display: none;
 }
 
 .starter-sidebar-dark .sidebar-menu .sidebar-submenu .starter-submenu-link {
-    color: var(--starter-slate-400);
+    color: var(--starter-slate-300);
 }
 
 .starter-sidebar-dark .sidebar-menu .sidebar-submenu .starter-submenu-link:hover,
 .starter-sidebar-dark .sidebar-menu .sidebar-submenu .starter-submenu-link.active {
-    background: rgba(148, 163, 184, .12);
+    background: transparent;
     color: #fff;
+}
+
+.starter-sidebar-dark .sidebar-menu .sidebar-submenu .starter-submenu-link::before {
+    border-color: var(--starter-slate-300);
+    box-shadow: 0 0 0 0 rgba(203, 213, 225, .2);
+}
+
+.starter-sidebar-dark .sidebar-menu .sidebar-submenu .starter-submenu-link.active::before {
+    background: var(--starter-slate-300);
+    border-color: var(--starter-slate-300);
+    box-shadow: 0 0 0 4px rgba(203, 213, 225, .2);
 }
 
 .starter-sidebar-dark .starter-icon-button {
@@ -274,8 +290,8 @@ summary::-webkit-details-marker {
 
 .sidebar-submenu {
     display: none;
-    margin: .15rem 0 .35rem 1.05rem;
-    padding-left: .95rem;
+    margin: .625rem 0 .35rem;
+    padding-left: 0;
     position: relative;
 }
 
@@ -284,24 +300,22 @@ summary::-webkit-details-marker {
 }
 
 .sidebar-submenu::before {
-    background: var(--starter-slate-200);
-    bottom: .4rem;
-    content: "";
-    left: 0;
-    position: absolute;
-    top: .4rem;
-    width: 1px;
+    display: none;
 }
 
 .starter-submenu-link {
     align-items: center;
-    border-radius: .25rem;
+    border-radius: 0;
     color: var(--starter-slate-500);
     cursor: pointer;
     display: flex;
-    font-size: .8125rem;
+    font-size: .875rem;
+    font-weight: 500;
     justify-content: space-between;
-    padding: .48rem .65rem;
+    line-height: 1.25rem;
+    padding: .375rem 0 .375rem 2rem;
+    position: relative;
+    white-space: nowrap;
     transition: color .15s ease, background-color .15s ease;
 }
 
@@ -454,6 +468,17 @@ summary::-webkit-details-marker {
 .starter-account-chevron {
     height: .85rem;
     width: .85rem;
+}
+
+.starter-account-name {
+    color: var(--starter-slate-700);
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    max-width: 9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .starter-account-menu[open] .starter-account-chevron {
@@ -870,6 +895,17 @@ summary::-webkit-details-marker {
 .btn-ghost-danger { background: transparent; border-color: transparent; color: var(--starter-danger); }
 .btn-action { height: 2.25rem; padding: 0; width: 2.25rem; }
 .btn-list { align-items: center; display: flex; flex-wrap: wrap; gap: .5rem; }
+.starter-button-content {
+    align-items: center;
+    display: inline-flex;
+    gap: .5rem;
+    justify-content: center;
+    line-height: 1.25rem;
+}
+.starter-button-content .starter-icon {
+    height: 1.25rem;
+    width: 1.25rem;
+}
 
 .badge {
     align-items: center;
@@ -1191,8 +1227,9 @@ body.dashcode-auth {
 .dashcode-auth .left-column,
 .dashcode-auth .right-column { min-width: 0; }
 .dashcode-auth .inner-content { min-height: 100vh; }
-.starter-auth-logo { height: 2.25rem; max-width: 12rem; object-fit: contain; }
-.loginwrapper .left-column > div:first-child { padding-left: 3rem; padding-right: 3rem; }
+.starter-auth-logo { height: 2rem; max-width: 12rem; object-fit: contain; width: auto; }
+.starter-auth-intro { padding-left: 5rem; padding-right: 3rem; padding-top: 5rem; }
+.starter-auth-heading { color: var(--starter-slate-600); font-size: 2.5rem; font-weight: 600; line-height: 3rem; margin-top: 2.5rem; }
 .starter-auth-illustration { bottom: 0; height: 60%; left: 0; overflow: hidden; pointer-events: none; position: absolute; width: 100%; }
 .starter-auth-illustration img { height: 100%; object-fit: contain; width: 100%; }
 .auth-box { max-width: 25rem; }
@@ -1202,6 +1239,43 @@ body.dashcode-auth {
 .starter-error-code { color: var(--starter-primary); font-size: .8rem; font-weight: 700; letter-spacing: .12em; margin-bottom: .5rem; }
 .starter-error-content h1 { color: var(--starter-slate-900); font-size: 2rem; font-weight: 700; }
 .starter-error-content p { color: var(--starter-slate-500); margin: .75rem auto 1.5rem; }
+
+/* Settings summary cards follow Dashcode's colored statistic widgets. */
+.starter-settings-stat {
+    border: 0;
+    box-shadow: none;
+    min-height: 6.25rem;
+}
+.starter-settings-stat .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem;
+}
+.starter-settings-stat-company { background: #e5f9ff; }
+.starter-settings-stat-role { background: #ffede5; }
+.starter-settings-stat-user { background: #eaf9f2; }
+.starter-settings-stat-app { background: #eae5ff; }
+.starter-settings-stat-icon {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    justify-content: center;
+}
+.starter-settings-stat-icon .starter-icon {
+    height: 2.75rem;
+    width: 2.75rem;
+}
+.starter-settings-stat-company .starter-settings-stat-icon { color: #0cb9e8; }
+.starter-settings-stat-role .starter-settings-stat-icon { color: #f9734f; }
+.starter-settings-stat-user .starter-settings-stat-icon { color: #16a36a; }
+.starter-settings-stat-app .starter-settings-stat-icon { color: #6650d8; }
+.starter-settings-stat-label {
+    color: var(--starter-slate-700);
+    font-size: .875rem;
+    font-weight: 500;
+    margin-bottom: .2rem;
+}
 
 /* Starter-specific previews and empty states */
 .starter-client-logo-preview { align-items: center; background: var(--starter-slate-50); border: 1px dashed var(--starter-slate-300); border-radius: .375rem; display: flex; justify-content: center; min-height: 8rem; padding: 1rem; }
@@ -1329,6 +1403,7 @@ body.dashcode-auth {
     .modal { padding: .5rem; }
     .modal-dialog { max-width: 100%; }
     .starter-account-panel { right: -.25rem; }
+    .starter-account-name { display: none; }
     .starter-app-panel {
         left: 1rem;
         position: fixed;

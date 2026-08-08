@@ -1,11 +1,8 @@
 <details class="starter-account-menu {{ $class ?? '' }}" data-starter-details>
     <summary class="starter-account-summary" role="button" aria-label="Buka menu user" data-starter-account-summary>
         <span class="starter-avatar starter-avatar-sm" style="background-image: url({{ $loginAvatarUrl }})" data-starter-account-avatar></span>
-        <span class="hidden min-w-0 text-left xl:block">
-            <span class="block truncate text-sm font-medium text-slate-800" data-starter-account-name>{{ $loginName ?? 'User' }}</span>
-            <span class="mt-0.5 block truncate text-xs text-slate-500" data-starter-account-role>{{ $loginRoleName ?? 'Role' }}</span>
-        </span>
-        @include('starter.templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'starter-account-chevron hidden xl:block'])
+        <span class="starter-account-name" data-starter-account-name>{{ $loginName ?? 'User' }}</span>
+        @include('starter.templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'starter-account-chevron'])
     </summary>
 
     <div class="starter-account-panel">

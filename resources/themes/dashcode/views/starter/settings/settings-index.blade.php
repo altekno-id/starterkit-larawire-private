@@ -43,14 +43,14 @@
 
     <div class="row row-cards mb-3">
         <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm">
+            <div class="card card-sm starter-settings-stat starter-settings-stat-company">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="avatar bg-primary-lt text-primary me-3">
-                            {{ str($client->name)->substr(0, 1)->upper() }}
+                    <div class="d-flex align-items-center gap-4">
+                        <span class="starter-settings-stat-icon" aria-hidden="true">
+                            @include('starter.templates.layouts.icon', ['name' => 'building'])
                         </span>
                         <div class="overflow-hidden">
-                            <div class="text-secondary">Perusahaan</div>
+                            <div class="starter-settings-stat-label">Perusahaan</div>
                             <div class="fw-semibold text-truncate">{{ $client->name }}</div>
                         </div>
                     </div>
@@ -58,12 +58,14 @@
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm">
+            <div class="card card-sm starter-settings-stat starter-settings-stat-role">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="avatar bg-purple-lt text-purple me-3">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($roleCount) }}</span>
+                    <div class="d-flex align-items-center gap-4">
+                        <span class="starter-settings-stat-icon" aria-hidden="true">
+                            @include('starter.templates.layouts.icon', ['name' => 'shield-lock'])
+                        </span>
                         <div>
-                            <div class="text-secondary">Role</div>
+                            <div class="starter-settings-stat-label">Role</div>
                             <div class="fw-semibold">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($roleCount) }} role terdaftar</div>
                         </div>
                     </div>
@@ -71,12 +73,14 @@
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm">
+            <div class="card card-sm starter-settings-stat starter-settings-stat-user">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="avatar bg-green-lt text-green me-3">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($userCount) }}</span>
+                    <div class="d-flex align-items-center gap-4">
+                        <span class="starter-settings-stat-icon" aria-hidden="true">
+                            @include('starter.templates.layouts.icon', ['name' => 'users'])
+                        </span>
                         <div>
-                            <div class="text-secondary">User</div>
+                            <div class="starter-settings-stat-label">User</div>
                             <div class="fw-semibold">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($userCount) }} akun dikelola</div>
                         </div>
                     </div>
@@ -84,14 +88,14 @@
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card card-sm">
+            <div class="card card-sm starter-settings-stat starter-settings-stat-app">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <span class="avatar bg-azure-lt text-azure me-3">
-                            @include('starter.templates.layouts.icon', ['name' => 'apps', 'class' => 'icon-sm'])
+                    <div class="d-flex align-items-center gap-4">
+                        <span class="starter-settings-stat-icon" aria-hidden="true">
+                            @include('starter.templates.layouts.icon', ['name' => 'apps'])
                         </span>
                         <div>
-                            <div class="text-secondary">Total Aplikasi</div>
+                            <div class="starter-settings-stat-label">Total Aplikasi</div>
                             <div class="fw-semibold">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appCount) }} aplikasi tersedia</div>
                         </div>
                     </div>
@@ -127,13 +131,17 @@
                         <div class="d-flex align-items-center gap-3">
                             @if ($section === 'roles')
                                 <a href="{{ route('starter.settings.roles.create') }}" class="btn btn-primary" data-starter-navigate>
-                                    @include('starter.templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
-                                    Tambah Role
+                                    <span class="starter-button-content">
+                                        @include('starter.templates.layouts.icon', ['name' => 'file-plus'])
+                                        <span>Tambah Role</span>
+                                    </span>
                                 </a>
                             @elseif ($section === 'users')
                                 <a href="{{ route('starter.user-management.users.create') }}" class="btn btn-primary" data-starter-navigate>
-                                    @include('starter.templates.layouts.icon', ['name' => 'user-plus', 'class' => 'icon-sm me-1'])
-                                    Tambah User
+                                    <span class="starter-button-content">
+                                        @include('starter.templates.layouts.icon', ['name' => 'user-plus'])
+                                        <span>Tambah User</span>
+                                    </span>
                                 </a>
                             @endif
                         </div>

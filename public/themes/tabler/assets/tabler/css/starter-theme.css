@@ -248,6 +248,36 @@ body.starter-livewire-is-loading .starter-livewire-loader {
     min-width: 13.5rem;
 }
 
+.starter-account-summary {
+    gap: .5rem;
+}
+
+.starter-account-name {
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    max-width: 9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.starter-account-chevron {
+    height: 1rem;
+    transition: transform .15s ease;
+    width: 1rem;
+}
+
+.starter-account-menu[open] .starter-account-chevron {
+    transform: rotate(180deg);
+}
+
+@media (max-width: 575.98px) {
+    .starter-account-name {
+        display: none;
+    }
+}
+
 .starter-role-access-trigger {
     appearance: none;
     color: inherit;

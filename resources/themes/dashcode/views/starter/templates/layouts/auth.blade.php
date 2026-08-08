@@ -29,11 +29,11 @@
     <main class="loginwrapper">
         <div class="lg-inner-column">
             <section class="left-column relative z-[1]" aria-label="Identitas aplikasi">
-                <div class="max-w-[520px] pt-16 ltr:pl-16 rtl:pr-16">
+                <div class="starter-auth-intro max-w-[520px]">
                     <a href="{{ url('/') }}" data-starter-navigate>
                         <img src="{{ asset('assets/dashcode/images/logo/logo.svg') }}" alt="{{ config('app.name') }}" class="starter-auth-logo">
                     </a>
-                    <h2 class="mt-10 text-3xl font-semibold leading-tight text-slate-800">
+                    <h2 class="starter-auth-heading">
                         Akses aplikasi perusahaan<br>
                         <span class="font-bold">dengan aman.</span>
                     </h2>

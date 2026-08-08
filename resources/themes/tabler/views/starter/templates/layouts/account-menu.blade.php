@@ -1,10 +1,8 @@
 <details class="nav-item dropdown position-relative starter-account-menu {{ $class ?? '' }}" data-starter-details>
     <summary class="nav-link d-flex align-items-center lh-1 p-0 px-2 cursor-pointer user-select-none starter-account-summary" aria-label="Buka menu user" data-starter-account-summary>
         <span class="avatar avatar-sm flex-shrink-0 starter-account-avatar" style="background-image: url({{ $loginAvatarUrl }})" data-starter-account-avatar></span>
-        <div class="d-none d-xl-block ps-2">
-            <div data-starter-account-name>{{ $loginName ?? 'User' }}</div>
-            <div class="mt-1 small text-secondary" data-starter-account-role>{{ $loginRoleName ?? 'Role' }}</div>
-        </div>
+        <span class="starter-account-name" data-starter-account-name>{{ $loginName ?? 'User' }}</span>
+        @include('starter.templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'starter-account-chevron'])
     </summary>
 
     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow end-0 top-100 mt-1 starter-account-panel">

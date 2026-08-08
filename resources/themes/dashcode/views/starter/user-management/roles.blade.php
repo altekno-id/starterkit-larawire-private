@@ -9,8 +9,10 @@
                 </div>
                 <div class="col-auto">
                     <a href="{{ route('starter.settings.roles.create') }}" class="btn btn-primary" data-starter-navigate>
-                        @include('starter.templates.layouts.icon', ['name' => 'file-plus', 'class' => 'icon-sm me-1'])
-                        Tambah Role
+                        <span class="starter-button-content">
+                            @include('starter.templates.layouts.icon', ['name' => 'file-plus'])
+                            <span>Tambah Role</span>
+                        </span>
                     </a>
                 </div>
             </div>

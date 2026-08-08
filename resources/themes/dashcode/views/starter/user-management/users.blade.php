@@ -9,8 +9,10 @@
                 </div>
                 <div class="col-auto ms-auto">
                     <a href="{{ route('starter.user-management.users.create') }}" class="btn btn-primary" data-starter-navigate>
-                        @include('starter.templates.layouts.icon', ['name' => 'user-plus', 'class' => 'icon-sm me-1'])
-                        Tambah User
+                        <span class="starter-button-content">
+                            @include('starter.templates.layouts.icon', ['name' => 'user-plus'])
+                            <span>Tambah User</span>
+                        </span>
                     </a>
                 </div>
             </div>

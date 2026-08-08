@@ -69,6 +69,7 @@ html {
     html {
         /* Firefox can inset the root box symmetrically when the page scrolls. */
         margin: 0 !important;
+        overflow-x: clip;
         width: 100vw !important;
     }
 }

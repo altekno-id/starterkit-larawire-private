@@ -64,6 +64,7 @@ Each theme owns its navigation partials, theme CSS, JavaScript adapter, icons, a
 - Test menu entry, redirects, primary actions, loaders, modal/toast/validation states, empty/low/high data volumes, and relevant desktop/laptop/mobile widths.
 - For PowerGrid, test live global and per-column filtering, date from/to boundaries, persisted reload state, sort, pagination/last page, empty result, and role-specific scope.
 - For CSS changes, verify normal, focus, invalid, and invalid+focus states; inspect DOM/computed style when a screenshot is inconclusive.
+- For layout or global CSS changes, test both a short page and a vertically long page in Chromium at the `1280x768` safe area. Verify document/root overflow, horizontal and vertical scrollbars, and sticky navigation. Firefox verification is excluded by default and is required only when the developer explicitly requests it or reports a Firefox-specific bug; default verification must not depend on desktop-control permission.
 
 ## Safe Area Resolution
 

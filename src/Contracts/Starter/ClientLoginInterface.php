@@ -10,6 +10,7 @@ interface ClientLoginInterface
 {
     public function tableQueryForViewer(ClientLogin $viewer, string $archiveStatus = 'active'): Builder;
 
+    /** Find a login account by its username or email address. */
     public function findByUsername(string $username): ?ClientLogin;
 
     /**

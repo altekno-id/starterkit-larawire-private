@@ -1,9 +1,9 @@
 <div>
     <form wire:submit="authenticate" autocomplete="on">
         <div class="mb-3">
-            <label class="form-label" for="username">Username</label>
-            <input type="text" class="form-control @error('form.username') is-invalid @enderror" id="username" wire:model.defer="form.username" placeholder="Username" autofocus autocomplete="username">
-            @error('form.username')
+            <label class="form-label" for="username">Username atau Email</label>
+            <input type="text" class="form-control @error('form.identifier') is-invalid @enderror" id="username" name="username" wire:model.defer="form.identifier" placeholder="Contoh: superuser atau nama@perusahaan.com" autofocus autocomplete="username" autocapitalize="none" spellcheck="false">
+            @error('form.identifier')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>

@@ -25,9 +25,9 @@ class AuthLoginService
 
     public function attempt(string $username, string $password, bool $remember = false, ?string $redirect = null): string
     {
-        $username = str($username)->lower()->trim()->toString();
+        $identifier = str($username)->lower()->trim()->toString();
         $ipAddress = (string) request()->ip();
-        $accountThrottleKey = $this->accountThrottleKey($username, $ipAddress);
+        $accountThrottleKey = $this->accountThrottleKey($identifier, $ipAddress);
         $ipThrottleKey = $this->ipThrottleKey($ipAddress);
         $maxAttempts = max(1, min(20, $this->configs->integer('security.login_max_attempts')));
         $maxIpAttempts = min(100, $maxAttempts * 5);
@@ -47,14 +47,14 @@ class AuthLoginService
             );
 
             throw ValidationException::withMessages([
-                'form.username' => 'Terlalu banyak percobaan login. Coba lagi dalam '.max(
+                'form.identifier' => 'Terlalu banyak percobaan login. Coba lagi dalam '.max(
                     RateLimiter::availableIn($accountThrottleKey),
                     RateLimiter::availableIn($ipThrottleKey),
                 ).' detik.',
             ]);
         }
 
-        $login = $this->clientLogins->findByUsername($username);
+        $login = $this->clientLogins->findByUsername($identifier);
         $passwordMatches = Hash::check($password, $login?->password ?: self::DUMMY_PASSWORD_HASH);
 
         if (! $login || ! $login->password || ! $passwordMatches) {
@@ -87,7 +87,7 @@ class AuthLoginService
             );
 
             throw ValidationException::withMessages([
-                'form.username' => __('auth.failed'),
+                'form.identifier' => __('auth.failed'),
             ]);
         }
 
@@ -100,7 +100,7 @@ class AuthLoginService
             );
 
             throw ValidationException::withMessages([
-                'form.username' => 'Perusahaan tidak aktif atau belum disetujui.',
+                'form.identifier' => 'Perusahaan tidak aktif atau belum disetujui.',
             ]);
         }
 
@@ -113,7 +113,7 @@ class AuthLoginService
             );
 
             throw ValidationException::withMessages([
-                'form.username' => 'Akun tidak aktif atau sedang dikunci. Hubungi administrator.',
+                'form.identifier' => 'Akun tidak aktif atau sedang dikunci. Hubungi administrator.',
             ]);
         }
 
@@ -157,9 +157,9 @@ class AuthLoginService
         );
     }
 
-    private function accountThrottleKey(string $username, string $ipAddress): string
+    private function accountThrottleKey(string $identifier, string $ipAddress): string
     {
-        return 'login-account:'.hash('sha256', $username.'|'.$ipAddress);
+        return 'login-account:'.hash('sha256', $identifier.'|'.$ipAddress);
     }
 
     private function ipThrottleKey(string $ipAddress): string

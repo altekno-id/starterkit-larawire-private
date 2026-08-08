@@ -83,7 +83,7 @@ class StarterEnsureActiveUser
         $request->session()->regenerateToken();
 
         return redirect()->route('auth.login')->withErrors([
-            'username' => $message,
+            'form.identifier' => $message,
         ]);
     }
 }

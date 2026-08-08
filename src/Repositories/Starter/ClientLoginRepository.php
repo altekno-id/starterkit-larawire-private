@@ -37,7 +37,11 @@ class ClientLoginRepository implements ClientLoginInterface
     {
         return ClientLogin::query()
             ->with('role')
-            ->where('username', $username)
+            ->where(function (Builder $query) use ($username): void {
+                $query
+                    ->where('username', $username)
+                    ->orWhere('email', $username);
+            })
             ->first();
     }
 

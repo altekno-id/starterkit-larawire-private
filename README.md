@@ -181,9 +181,11 @@ Login development awal mengikuti nilai berikut pada `.env`:
 
 ```env
 STARTER_SUPERUSER_USERNAME=superuser
+STARTER_SUPERUSER_EMAIL=developer@example.test
 STARTER_SUPERUSER_PASSWORD=superuser123
 ```
 
+Form login menerima username maupun email tersebut.
 Password default hanya boleh dipakai untuk local/development.
 
 ### Pilih layout navigasi

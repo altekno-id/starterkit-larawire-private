@@ -16,10 +16,10 @@ class Login extends Component
     private StarterConfigService $configs;
 
     /**
-     * @var array{username: string, password: string, remember: bool}
+     * @var array{identifier: string, password: string, remember: bool}
      */
     public array $form = [
-        'username' => '',
+        'identifier' => '',
         'password' => '',
         'remember' => false,
     ];
@@ -40,15 +40,15 @@ class Login extends Component
     {
         try {
             $this->validate([
-                'form.username' => ['required', 'string', 'max:255'],
+                'form.identifier' => ['required', 'string', 'max:255'],
                 'form.password' => ['required', 'string', 'max:1024'],
             ], [], [
-                'form.username' => 'username',
+                'form.identifier' => 'username atau email',
                 'form.password' => 'password',
             ]);
 
             $target = $loginService->attempt(
-                username: $this->form['username'],
+                username: $this->form['identifier'],
                 password: $this->form['password'],
                 remember: $this->form['remember'],
                 redirect: $this->redirect,

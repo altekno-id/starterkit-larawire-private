@@ -1,13 +1,19 @@
-# Apa itu Starterkit Larawire Private
+> Starterkit ini dibangun dengan dukungan karya open-source dari
+> [Laravel Livewire](https://livewire.laravel.com/),
+> [Livewire PowerGrid](https://livewire-powergrid.com/), dan
+> [Tabler](https://tabler.io/admin-template). Terima kasih kepada seluruh author
+> dan contributor yang mengembangkan serta memelihara package tersebut.
+
+# Apa itu Starterkit Larawire Private?
 
 Starterkit Larawire Private adalah fondasi awal untuk membuat aplikasi
 **Laravel** berbasis **Livewire**. Fungsinya mirip dengan Laravel Starter Kits
 Auth bawaan Laravel yang menyediakan autentikasi siap pakai, tetapi starterkit
-ini sudah diperluas untuk kebutuhan aplikasi internal perusahaan.
+ini sudah diperluas untuk kebutuhan aplikasi internal anda.
 
 Fitur yang sudah tersedia:
 
-- autentikasi, login, logout, lock screen, dan pengaturan keamanan akun;
+- autentikasi, login, logout, lock screen otomatis, dan pengaturan keamanan akun;
 - pengelolaan user, role, module, dan hak akses;
 - dukungan satu atau beberapa App/subdomain dengan satu login dan database;
 - sinkronisasi App, module, route, dan menu dari konfigurasi code ke database;
@@ -24,6 +30,111 @@ Repository ini bukan aplikasi mandiri. Pasang repository sebagai Git submodule
 `starterkit-larawire-private` di dalam project Laravel. Repository Laravel melacak
 commit starterkit melalui gitlink submodule sehingga core dapat diperbarui dan
 dipush secara terpisah tanpa menyalin source manual.
+
+## Cara kerja App, subdomain, module, route, menu, dan authorization
+
+Starterkit tetap menjalankan **satu project Laravel, satu database, dan satu
+login**. App hanya membagi sistem menjadi beberapa area bisnis. Setiap App dapat
+memakai subdomain sendiri, misalnya `sales.perusahaan.com` untuk Sales dan
+`hr.perusahaan.com` untuk HR. Jika sistem hanya membutuhkan satu App, mekanisme
+yang sama tetap dapat digunakan tanpa membuat project Laravel lain.
+
+Hubungan komponennya adalah:
+
+| Komponen | Penjelasan sederhana |
+|---|---|
+| **App** | Area bisnis utama, misalnya Sales, HR, atau Keuangan. |
+| **Subdomain** | Alamat App, misalnya `sales.perusahaan.com`. |
+| **Module** | Kelompok fitur sekaligus batas hak akses, misalnya `prospect` atau `report`. |
+| **Route** | Alamat halaman dan nama aksi yang benar-benar dapat dibuka. |
+| **Menu** | Link navigasi menuju route; menu bukan pengaman akses. |
+| **Role** | Kumpulan module yang boleh diakses oleh user. |
+
+Strukturnya dapat dibayangkan seperti ini:
+
+```text
+Satu project Laravel
+├── domain utama        → login, profil, user, role, pengaturan, dan log
+├── App Sales           → sales.perusahaan.com
+│   ├── Module Prospect → route dan menu Prospect
+│   └── Module Report   → route dan menu Report
+└── App HR              → hr.perusahaan.com
+    └── Module Employee → route dan menu Employee
+```
+
+Pengelolaan akses dilakukan dari Role Management. Admin memilih module yang
+dimiliki sebuah role dan landing page awal untuk setiap App, lalu role diberikan
+kepada user. Satu role dapat memiliki beberapa module dari beberapa App. User
+hanya dapat membuka route milik module tersebut, sedangkan Superuser dapat
+mengakses seluruh module.
+
+### Dua file yang menghubungkan halaman dan menu
+
+Setiap App memiliki dua source of truth dengan nama App yang sama:
+
+```text
+config/apps/sales.php   → identitas App, module, menu, icon, dan landing page
+routes/apps/sales.php   → URL halaman web dan nama route pada App Sales
+```
+
+File config menu berfungsi seperti konfigurasi JSON yang deklaratif, tetapi
+format sebenarnya adalah **array PHP** agar dapat dibaca langsung oleh Laravel.
+Contoh sederhananya:
+
+```php
+return [
+    'name' => 'Sales',
+    'mods' => [
+        'prospect' => [
+            'name' => 'Prospek',
+            'menus' => [
+                [
+                    'label' => 'Daftar Prospek',
+                    'route' => 'sales.prospect.index',
+                    'landing' => true,
+                ],
+            ],
+        ],
+    ],
+];
+```
+
+Route tujuan tersebut dibuat pada file route App:
+
+```php
+Route::name('sales.')->group(function () {
+    Route::middleware([
+        'auth:web',
+        'starter.active',
+        'starter.password-change',
+        'starter.lock',
+        'starter.authorize',
+    ])->group(function () {
+        Route::livewire('/prospects', ProspectIndex::class)
+            ->name('prospect.index');
+    });
+});
+```
+
+Hasil akhirnya adalah route bernama `sales.prospect.index` pada subdomain
+`sales.perusahaan.com`. Nama route selalu mengikuti pola:
+
+```text
+<app>.<module>.<action>
+sales.prospect.index
+```
+
+Bagian kedua dari nama route, yaitu `prospect`, harus sama dengan kode module
+di `config/apps/sales.php`. Saat halaman dibuka, middleware memastikan user
+sudah login dan aktif, lalu `starter.authorize` memeriksa apakah role user
+memiliki module `prospect`. Menyembunyikan menu saja tidak memberi keamanan;
+route dan setiap aksi perubahan data tetap harus dilindungi di server.
+
+Setelah config atau route diubah, jalankan `php artisan starter:sync`. Command
+ini memvalidasi bahwa route menu benar-benar tersedia dan dimiliki module yang
+sesuai, lalu menyinkronkan metadata App, module, route, dan menu ke database.
+Karena itu, perubahan dilakukan pada file config dan route—bukan langsung pada
+tabel metadata database.
 
 ## Instalasi di Local / Development
 
@@ -286,75 +397,6 @@ Yang berjalan otomatis:
   kali jalan tanpa membuat ulang akun atau mereset password. Cache bootstrap
   lama dibersihkan lalu cache production dibangun ulang pada tahap akhir; asset
   starter hanya disalin ulang saat isinya berubah.
-
-## Multi-domain itu seperti apa?
-
-Contoh berikut adalah satu sistem CRM yang dipecah menjadi beberapa App sesuai
-area bisnis. Setiap App memakai subdomain sendiri, tetapi semuanya tetap berada
-dalam satu project Laravel, satu database, satu login, dan satu pengaturan
-global.
-
-```text
-Sistem CRM
-│
-├── domainxx.com                             Area global
-│   └── Landing, login, profil, user, role, pengaturan, dan log
-│
-├── sales.domainxx.com                       App Sales
-│   ├── Modul Prospek
-│   │   ├── Menu: Daftar Prospek
-│   │   └── Menu: Sumber Prospek
-│   └── Modul Penjualan
-│       ├── Menu: Pipeline
-│       ├── Menu: Penawaran
-│       └── Menu: Transaksi
-│
-├── customer.domainxx.com                    App Customer
-│   ├── Modul Pelanggan
-│   │   ├── Menu: Data Pelanggan
-│   │   └── Menu: Kontak
-│   └── Modul Aktivitas
-│       ├── Menu: Riwayat Interaksi
-│       └── Menu: Catatan
-│
-├── marketing.domainxx.com                   App Marketing
-│   ├── Modul Campaign
-│   │   ├── Menu: Daftar Campaign
-│   │   └── Menu: Segmentasi
-│   └── Modul Analitik
-│       └── Menu: Performa Campaign
-│
-├── support.domainxx.com                     App Customer Support
-│   ├── Modul Tiket
-│   │   ├── Menu: Daftar Tiket
-│   │   └── Menu: Eskalasi
-│   └── Modul Layanan
-│       ├── Menu: SLA
-│       └── Menu: Knowledge Base
-│
-└── api.domainxx.com                         Gateway API opsional
-    ├── /sales
-    ├── /customer
-    ├── /marketing
-    └── /support
-```
-
-Ringkasnya:
-
-```text
-Sistem CRM = satu project dan satu ekosistem bisnis
-App = area bisnis besar yang memakai subdomain
-Module (Modul) = kelompok fitur sekaligus batas akses role
-Menu/Submenu = navigasi halaman milik modul
-```
-
-Setiap App mempunyai module, menu, route, tampilan, test, dan code sendiri.
-User dapat mengakses satu atau beberapa App sesuai module yang diberikan kepada
-role-nya.
-
-Starterkit juga dapat dipakai hanya dengan satu App. Istilah “multi-domain” di
-dokumentasi ini berarti multi-subdomain dalam satu root domain, bukan beberapa
-project atau database yang terpisah.
 
 ## Struktur yang dibuat untuk setiap App
 

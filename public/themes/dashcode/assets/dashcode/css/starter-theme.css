@@ -169,12 +169,12 @@ summary::-webkit-details-marker {
     background: var(--starter-slate-600);
 }
 
-.starter-sidebar-dark .starter-submenu-link {
+.starter-sidebar-dark .sidebar-menu .sidebar-submenu .starter-submenu-link {
     color: var(--starter-slate-400);
 }
 
-.starter-sidebar-dark .starter-submenu-link:hover,
-.starter-sidebar-dark .starter-submenu-link.active {
+.starter-sidebar-dark .sidebar-menu .sidebar-submenu .starter-submenu-link:hover,
+.starter-sidebar-dark .sidebar-menu .sidebar-submenu .starter-submenu-link.active {
     background: rgba(148, 163, 184, .12);
     color: #fff;
 }

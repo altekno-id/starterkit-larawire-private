@@ -1120,6 +1120,7 @@ function mergeEnvironment(string $path): void
     $sessionDomain = in_array($domain, ['localhost', '127.0.0.1', '::1'], true)
         ? 'null'
         : '.'.$domain;
+    $sessionCookie = trim((string) preg_replace('/[^a-z0-9]+/', '_', $domain), '_').'_session';
 
     $required = [
         'APP_LOCALE' => 'id',
@@ -1158,6 +1159,12 @@ function mergeEnvironment(string $path): void
         $contents,
         'STARTER_SUPERUSER_PASSWORD',
         'superuser123',
+    );
+    $contents = setEnvironmentValueIfEmptyOrLegacyDefault(
+        $contents,
+        'SESSION_COOKIE',
+        $sessionCookie,
+        ['laravel-session', 'laravel_session'],
     );
     $contents = setEnvironmentDefault($contents, 'SESSION_SAME_SITE', 'lax');
 
@@ -1208,11 +1215,19 @@ function setEnvironmentDefault(string $contents, string $key, string $value): st
     return setEnvironmentValue($contents, $key, $value);
 }
 
-function setEnvironmentValueIfEmptyOrLegacyDefault(string $contents, string $key, string $value): string
+/**
+ * @param  list<string>  $legacyDefaults
+ */
+function setEnvironmentValueIfEmptyOrLegacyDefault(
+    string $contents,
+    string $key,
+    string $value,
+    array $legacyDefaults = ['rahasia123'],
+): string
 {
     $current = trim(environmentValueFromContents($contents, $key), "\"' ");
 
-    return in_array($current, ['', 'rahasia123'], true)
+    return in_array($current, ['', ...$legacyDefaults], true)
         ? setEnvironmentValue($contents, $key, $value)
         : $contents;
 }

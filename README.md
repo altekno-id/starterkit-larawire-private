@@ -195,6 +195,10 @@ STARTER_THEME=tabler
 STARTER_LAYOUT=vertical
 ```
 
+Installer juga membuat nama `SESSION_COOKIE` yang unik berdasarkan `APP_URL`.
+Cookie Laravel yang mungkin terbentuk sebelum instalasi tidak akan mengganggu
+sesi login bersama antara domain utama dan subdomain App.
+
 Gunakan `vertical` untuk menu di sisi kiri. Jika ingin menu horizontal yang
 sticky di bagian atas, cukup ubah satu nilai:
 

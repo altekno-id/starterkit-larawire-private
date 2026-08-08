@@ -4,7 +4,7 @@
     $triggerLabel = $triggerLabel ?? ($activeApp['name'] ?? $currentAppName ?? 'App');
 @endphp
 
-<div class="starter-app-switcher {{ $compact ? '' : 'hidden md:block' }}" data-starter-app-switcher>
+<div class="starter-app-switcher" data-starter-app-switcher>
     <button type="button" class="starter-icon-button starter-app-toggle" aria-label="Tampilkan menu app" aria-expanded="false" data-starter-app-toggle>
         @include('starter.templates.layouts.icon', ['name' => 'apps'])
         <span class="starter-notification-dot"></span>

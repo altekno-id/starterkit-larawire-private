@@ -1,5 +1,5 @@
 <details class="starter-account-menu {{ $class ?? '' }}" data-starter-details>
-    <summary class="starter-account-summary" aria-label="Buka menu user" data-starter-account-summary>
+    <summary class="starter-account-summary" role="button" aria-label="Buka menu user" data-starter-account-summary>
         <span class="starter-avatar starter-avatar-sm" style="background-image: url({{ $loginAvatarUrl }})" data-starter-account-avatar></span>
         <span class="hidden min-w-0 text-left xl:block">
             <span class="block truncate text-sm font-medium text-slate-800" data-starter-account-name>{{ $loginName ?? 'User' }}</span>

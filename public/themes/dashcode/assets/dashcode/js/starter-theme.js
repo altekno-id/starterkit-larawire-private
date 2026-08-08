@@ -4,6 +4,11 @@ window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
             details.querySelector(':scope > summary')?.setAttribute('aria-expanded', String(details.open));
         });
     },
+    syncDisclosureDetails(root = document) {
+        root.querySelectorAll('details[data-starter-details]').forEach((details) => {
+            details.querySelector(':scope > summary')?.setAttribute('aria-expanded', String(details.open));
+        });
+    },
     toggleNavigationDetails(summary) {
         const details = summary?.parentElement;
 
@@ -83,6 +88,7 @@ window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
     },
     prepare() {
         this.syncNavigationDetails();
+        this.syncDisclosureDetails();
 
         if (this.eventsBound) return;
 
@@ -130,6 +136,10 @@ window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
         document.addEventListener('toggle', (event) => {
             if (event.target.matches?.('[data-starter-navigation-details]')) {
                 this.syncNavigationDetails(event.target.closest('[data-starter-navigation]') || document);
+            }
+
+            if (event.target.matches?.('details[data-starter-details]')) {
+                this.syncDisclosureDetails(event.target.parentElement || document);
             }
         }, true);
 

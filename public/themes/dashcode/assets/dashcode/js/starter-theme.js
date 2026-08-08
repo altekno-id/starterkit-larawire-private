@@ -1,4 +1,32 @@
 window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
+    syncNavigationDetails(root = document) {
+        root.querySelectorAll('[data-starter-navigation-details]').forEach((details) => {
+            details.querySelector(':scope > summary')?.setAttribute('aria-expanded', String(details.open));
+        });
+    },
+    toggleNavigationDetails(summary) {
+        const details = summary?.parentElement;
+
+        if (! details?.matches('[data-starter-navigation-details]')) return;
+
+        const opening = ! details.open;
+        const navigation = details.closest('[data-starter-navigation]');
+
+        if (opening && navigation) {
+            navigation.querySelectorAll('[data-starter-navigation-details][open]').forEach((openDetails) => {
+                const related = openDetails === details
+                    || openDetails.contains(details)
+                    || details.contains(openDetails);
+
+                if (! related) {
+                    openDetails.open = false;
+                }
+            });
+        }
+
+        details.open = opening;
+        this.syncNavigationDetails(navigation || document);
+    },
     closeNavigation() {
         document.querySelectorAll('.sidebar-wrapper.starter-sidebar-open').forEach((sidebar) => {
             sidebar.classList.remove('starter-sidebar-open');
@@ -54,6 +82,8 @@ window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
         document.querySelectorAll('.modal.show, .modal.d-block').forEach((modal) => this.closeModal(modal));
     },
     prepare() {
+        this.syncNavigationDetails();
+
         if (this.eventsBound) return;
 
         document.addEventListener('click', (event) => {
@@ -68,6 +98,14 @@ window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
             if (event.target.closest('[data-starter-sidebar-close]')) {
                 event.preventDefault();
                 this.closeNavigation();
+                return;
+            }
+
+            const navigationSummary = event.target.closest('[data-starter-navigation-details] > summary');
+
+            if (navigationSummary) {
+                event.preventDefault();
+                this.toggleNavigationDetails(navigationSummary);
                 return;
             }
 
@@ -88,6 +126,12 @@ window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
                 this.closeModal(modalDismiss.closest('.modal'));
             }
         });
+
+        document.addEventListener('toggle', (event) => {
+            if (event.target.matches?.('[data-starter-navigation-details]')) {
+                this.syncNavigationDetails(event.target.closest('[data-starter-navigation]') || document);
+            }
+        }, true);
 
         document.addEventListener('keydown', (event) => {
             if (event.key !== 'Escape') return;

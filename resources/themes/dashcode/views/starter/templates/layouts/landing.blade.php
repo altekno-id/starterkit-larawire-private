@@ -11,7 +11,7 @@
     @stack('page-styles')
     @livewireStyles
 </head>
-<body class="font-inter bg-white" data-starter-theme="dashcode">
+<body class="font-inter bg-white dashcode-landing" data-starter-theme="dashcode">
     {{ $slot }}
     @livewireScripts
     @stack('page-scripts')

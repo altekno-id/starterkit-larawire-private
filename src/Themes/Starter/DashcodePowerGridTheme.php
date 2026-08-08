@@ -11,7 +11,7 @@ class DashcodePowerGridTheme extends Tailwind
         return array_replace_recursive(parent::table(), [
             'layout' => [
                 'base' => 'starter-pg-table align-middle inline-block min-w-full w-full',
-                'div' => 'starter-pg-frame relative overflow-hidden',
+                'div' => 'starter-pg-frame relative overflow-x-auto',
                 'table' => 'min-w-full starter-table',
                 'container' => 'overflow-x-auto',
                 'actions' => 'flex items-center justify-end gap-2',

@@ -1,4 +1,4 @@
-<aside class="sidebar-wrapper group" data-starter-navigation-shell>
+<aside class="sidebar-wrapper starter-sidebar-dark group" data-starter-navigation-shell>
     <button type="button" class="starter-sidebar-overlay" data-starter-sidebar-close aria-label="Tutup navigasi"></button>
 
     <div class="logo-segment">

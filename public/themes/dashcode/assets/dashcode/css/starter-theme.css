@@ -906,6 +906,26 @@ summary::-webkit-details-marker {
     height: 1.25rem;
     width: 1.25rem;
 }
+.starter-button-content .starter-button-chevron {
+    height: .875rem;
+    margin-left: -.125rem;
+    transition: transform .15s ease;
+    width: .875rem;
+}
+.dropdown-toggle.show .starter-button-chevron {
+    transform: rotate(180deg);
+}
+.starter-bulk-dropdown {
+    position: relative;
+}
+.starter-bulk-dropdown-menu {
+    left: 0;
+    margin: .35rem 0 0;
+    min-width: 11rem;
+    position: absolute;
+    top: 100%;
+    z-index: 1000;
+}
 
 .badge {
     align-items: center;

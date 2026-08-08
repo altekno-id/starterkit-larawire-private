@@ -5,12 +5,15 @@
     <div class="row g-3 align-items-center">
 
         <div class="col-auto">
-            <div class="dropdown" x-data="{ open: false }" @click.outside="open = false">
+            <div class="dropdown starter-bulk-dropdown" x-data="{ open: false }" @click.outside="open = false">
                 <button type="button" class="btn dropdown-toggle" @click="open = !open" :class="{ 'show': open }" :aria-expanded="open">
-                    @include('starter.templates.layouts.icon', ['name' => 'table', 'class' => 'icon-sm me-1'])
-                    Aksi
+                    <span class="starter-button-content">
+                        @include('starter.templates.layouts.icon', ['name' => 'table'])
+                        <span>Aksi</span>
+                        @include('starter.templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'starter-button-chevron'])
+                    </span>
                 </button>
-                <ul class="dropdown-menu" :class="{ 'show': open }" x-show="open" style="position: absolute; z-index: 1000; inset: 0px auto auto 0px; transform: translate3d(0px, 40px, 0px);">
+                <ul class="dropdown-menu starter-bulk-dropdown-menu" :class="{ 'show': open }" x-show="open" x-cloak>
                     @if ($archiveStatus !== 'archived')
                         <li>
                             <button type="button" class="dropdown-item {{ empty($checkboxValues) ? 'disabled' : '' }}" wire:click="prepareBulkAction('archive')" @click="open = false">

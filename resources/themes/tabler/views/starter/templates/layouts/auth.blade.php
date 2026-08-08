@@ -145,7 +145,7 @@
                                 <p class="text-secondary text-center mb-4">
                                     {{ ($title ?? null) === 'Layar Dikunci'
                                         ? 'Aplikasi dikunci untuk melindungi sesi Anda.'
-                                        : 'Masukkan username dan password untuk melanjutkan.' }}
+                                        : 'Masukkan username atau email dan password untuk melanjutkan.' }}
                                 </p>
                                 @if (session('starter-auth-message'))
                                     <div class="alert alert-warning" role="alert">

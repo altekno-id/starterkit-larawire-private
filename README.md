@@ -36,15 +36,15 @@ login**. App hanya membagi fitur berdasarkan area bisnis.
 Contoh:
 
 ```text
-perusahaan.com          Login, profil, user, role, pengaturan, dan log
-sales.perusahaan.com    App Sales
-hr.perusahaan.com       App HR
+erp.perusahaan.com          Login, profil, user, role, pengaturan, dan log
+sales.erp.perusahaan.com    App Sales
+hr.erp.perusahaan.com       App HR
 ```
 
 | Istilah | Artinya |
 |---|---|
 | **App** | Area bisnis utama, misalnya Sales atau HR. |
-| **Subdomain** | Alamat App, misalnya `sales.perusahaan.com`. |
+| **Subdomain** | Alamat App, misalnya `sales.erp.perusahaan.com`. |
 | **Module** | Kelompok fitur sekaligus batas hak akses. |
 | **Route** | Alamat halaman atau aksi yang dapat dibuka. |
 | **Menu** | Link di sidebar yang menuju sebuah route. |
@@ -89,27 +89,94 @@ config atau route berubah, `php artisan starter:sync` memvalidasi hubungan
 tersebut dan menyimpan metadata App, module, route, serta menu ke database.
 Jangan mengubah tabel metadata starterkit secara manual.
 
+## Studi kasus sederhana: aplikasi ERP perusahaan
+
+Misalnya Anda ingin membuat aplikasi ERP internal dengan area Sales, HR,
+Gudang, dan Karyawan. Semuanya tetap dibuat dalam **satu project Laravel**.
+Area bisnis yang besar dijadikan App, sedangkan fitur di dalamnya dijadikan
+module.
+
+Struktur yang mudah dipahami adalah:
+
+```text
+ERP perusahaan                                  Satu project dan satu database
+├── erp.perusahaan.com                          Login dan pengaturan global
+├── sales.erp.perusahaan.com                    App Sales
+│   ├── Module Customer
+│   └── Module Penjualan
+├── hr.erp.perusahaan.com                       App HR
+│   ├── Module Karyawan
+│   └── Module Absensi
+└── gudang.erp.perusahaan.com                   App Gudang
+    ├── Module Stok
+    └── Module Mutasi Barang
+```
+
+Karyawan ditempatkan sebagai module di dalam App HR karena masih satu area
+bisnis. Jika Karyawan nantinya harus menjadi area yang benar-benar terpisah,
+Anda dapat membuat App `karyawan` dengan subdomain
+`karyawan.erp.perusahaan.com`.
+
+Setelah starterkit selesai diinstal, App awal dapat dibuat dengan:
+
+```bash
+php artisan starter:make-app sales --name="Sales"
+php artisan starter:make-app hr --name="HR"
+php artisan starter:make-app gudang --name="Gudang"
+```
+
+Jika `APP_URL=http://erp.test`, alamat local App tersebut menjadi
+`sales.erp.test`, `hr.erp.test`, dan `gudang.erp.test`. Arahkan semuanya ke
+folder `public` project Laravel yang sama melalui aplikasi web server local
+yang Anda gunakan.
+
+Setelah itu, isi module dan menu masing-masing App pada `config/apps/`, lalu
+buat halaman dan route pada `routes/apps/`. Role Sales dapat diberi module milik
+App Sales saja, sedangkan role HR dapat diberi module Karyawan dan Absensi.
+Semua user tetap login melalui akun yang sama.
+
 ## Instalasi local/development
 
-Siapkan project Laravel, Git, Composer, dan database. Terminal harus berada di
-root project Laravel.
+Yang perlu disiapkan:
 
-### 1. Pasang submodule
+1. project Laravel fresh;
+2. database baru/kosong dan koneksinya;
+3. domain local pada `APP_URL`;
+4. Git dan Composer.
+
+Terminal harus berada di root project Laravel.
+
+### 1. Pastikan Laravel masih fresh
+
+Gunakan project Laravel yang baru dibuat. Installer boleh dipakai pada project
+yang sudah berisi code, tetapi akan meminta konfirmasi karena seluruh data
+database tetap dihapus.
+
+### 2. Pasang submodule
 
 ```bash
 git submodule add https://github.com/altekno-id/starterkit-larawire-private.git starterkit-larawire-private
 ```
 
-### 2. Atur domain local
+### 3. Atur database dan APP_URL
 
-Sesuaikan `APP_URL` dan koneksi database pada `.env`. Variabel starterkit
-lainnya akan ditambahkan otomatis oleh installer.
+Contoh menggunakan MySQL untuk project ERP local:
 
 ```env
-APP_URL=http://namaproject.test
+APP_URL=http://erp.test
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=erp_local
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-### 3. Jalankan installer
+Pastikan database `erp_local` sudah dibuat. Variabel starterkit lainnya akan
+ditambahkan otomatis oleh installer.
+
+### 4. Jalankan installer
 
 ```bash
 php starterkit-larawire-private/installer/install.php --company="Nama Perusahaan"
@@ -120,7 +187,7 @@ environment, migration, asset, data perusahaan, dan akun Superuser.
 
 > **Peringatan database:** installer menjalankan `migrate:fresh`. Seluruh tabel
 > dan data pada database yang terhubung akan dihapus. Laravel fresh dilanjutkan
-> otomatis setelah pemberitahuan. Laravel yang sudah memiliki code aplikasi
+> otomatis setelah pemberitahuan. Laravel yang sudah memiliki kode aplikasi
 > akan meminta konfirmasi terlebih dahulu.
 
 Saat installer meminta App pertama, masukkan kode subdomain seperti `sales`
@@ -229,10 +296,45 @@ Laravel yang sama.
 
 ## Deployment production
 
-Sebelum menjalankan command, buat `.env` production dan isi database, domain,
-`APP_ENV=production`, `APP_DEBUG=false`, `APP_URL`, `APP_DOMAIN`, serta password
-Superuser yang kuat. Document root domain dan seluruh subdomain harus mengarah
-ke folder `public`.
+### Arahkan semua domain ke project Laravel yang sama
+
+Domain utama dan seluruh subdomain App **tidak memakai project atau folder yang
+berbeda**. Semuanya diarahkan ke folder `public` dari satu project Laravel.
+
+Contoh lokasi project di server:
+
+```text
+/home/user/erp/
+└── public/                  Document root untuk semua domain dan subdomain
+```
+
+Contoh pengarahannya:
+
+| Domain | Document root |
+|---|---|
+| `erp.perusahaan.com` | `/home/user/erp/public` |
+| `sales.erp.perusahaan.com` | `/home/user/erp/public` |
+| `hr.erp.perusahaan.com` | `/home/user/erp/public` |
+| `gudang.erp.perusahaan.com` | `/home/user/erp/public` |
+| `api.erp.perusahaan.com` | `/home/user/erp/public` |
+
+Buat DNS setiap subdomain menuju server yang sama, lalu atur document root-nya
+melalui web server atau panel hosting. Anda juga dapat memakai wildcard DNS
+`*.erp.perusahaan.com` jika didukung penyedia DNS dan hosting.
+
+Siapkan `.env` production sebelum menjalankan setup:
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://erp.perusahaan.com
+APP_DOMAIN=erp.perusahaan.com
+SESSION_DOMAIN=.erp.perusahaan.com
+SESSION_SECURE_COOKIE=true
+```
+
+Isi juga koneksi database dan `STARTER_SUPERUSER_PASSWORD` dengan password yang
+kuat. Jangan commit `.env` production ke Git.
 
 ### Deployment pertama
 

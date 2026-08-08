@@ -60,6 +60,11 @@
     --tblr-navbar-bg: #182433;
 }
 
+html {
+    /* Prevent classic scrollbars from reserving a mirrored gutter on long pages. */
+    scrollbar-gutter: auto !important;
+}
+
 body[data-starter-layout="horizontal"] {
     /*
      * Keep classic browser scrollbar gutters visually continuous with the

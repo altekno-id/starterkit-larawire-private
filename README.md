@@ -28,6 +28,35 @@ Repository ini bukan aplikasi Laravel yang berdiri sendiri. Repository dipasang
 sebagai Git submodule bernama `starterkit-larawire-private` di dalam project
 Laravel.
 
+## Studi kasus sederhana: aplikasi ERP perusahaan
+
+Misalnya Anda ingin membuat aplikasi ERP internal dengan area Sales, HR,
+Gudang, dan Karyawan. Semuanya tetap dibuat dalam **satu project Laravel**.
+Area bisnis yang besar dijadikan App, sedangkan fitur di dalamnya dijadikan
+module.
+
+```text
+ERP perusahaan                                  Satu project dan satu database
+├── perusahaan.com                              Login dan pengaturan global
+├── sales.perusahaan.com                        App Sales
+│   ├── Module Customer
+│   └── Module Penjualan
+├── hr.perusahaan.com                           App HR
+│   ├── Module Karyawan
+│   └── Module Absensi
+└── gudang.perusahaan.com                       App Gudang
+    ├── Module Stok
+    └── Module Mutasi Barang
+```
+
+Karyawan ditempatkan sebagai module di dalam App HR karena masih satu area
+bisnis. Jika Karyawan harus menjadi area yang benar-benar terpisah, buat App
+`karyawan` dengan subdomain `karyawan.perusahaan.com`.
+
+Role Sales dapat diberi module milik App Sales saja, sedangkan role HR dapat
+diberi module Karyawan dan Absensi. Semua user tetap memakai akun dan halaman
+login yang sama.
+
 ## Memahami App, module, route, menu, dan role
 
 Starterkit tetap memakai **satu project Laravel, satu database, dan satu sistem
@@ -89,52 +118,6 @@ config atau route berubah, `php artisan starter:sync` memvalidasi hubungan
 tersebut dan menyimpan metadata App, module, route, serta menu ke database.
 Jangan mengubah tabel metadata starterkit secara manual.
 
-## Studi kasus sederhana: aplikasi ERP perusahaan
-
-Misalnya Anda ingin membuat aplikasi ERP internal dengan area Sales, HR,
-Gudang, dan Karyawan. Semuanya tetap dibuat dalam **satu project Laravel**.
-Area bisnis yang besar dijadikan App, sedangkan fitur di dalamnya dijadikan
-module.
-
-Struktur yang mudah dipahami adalah:
-
-```text
-ERP perusahaan                                  Satu project dan satu database
-├── perusahaan.com                              Login dan pengaturan global
-├── sales.perusahaan.com                        App Sales
-│   ├── Module Customer
-│   └── Module Penjualan
-├── hr.perusahaan.com                           App HR
-│   ├── Module Karyawan
-│   └── Module Absensi
-└── gudang.perusahaan.com                       App Gudang
-    ├── Module Stok
-    └── Module Mutasi Barang
-```
-
-Karyawan ditempatkan sebagai module di dalam App HR karena masih satu area
-bisnis. Jika Karyawan nantinya harus menjadi area yang benar-benar terpisah,
-Anda dapat membuat App `karyawan` dengan subdomain
-`karyawan.perusahaan.com`.
-
-Setelah starterkit selesai diinstal, App awal dapat dibuat dengan:
-
-```bash
-php artisan starter:make-app sales --name="Sales"
-php artisan starter:make-app hr --name="HR"
-php artisan starter:make-app gudang --name="Gudang"
-```
-
-Jika `APP_URL=http://perusahaan.test`, alamat local App tersebut menjadi
-`sales.perusahaan.test`, `hr.perusahaan.test`, dan `gudang.perusahaan.test`.
-Arahkan semuanya ke folder `public` project Laravel yang sama melalui aplikasi
-web server local yang Anda gunakan.
-
-Setelah itu, isi module dan menu masing-masing App pada `config/apps/`, lalu
-buat halaman dan route pada `routes/apps/`. Role Sales dapat diberi module milik
-App Sales saja, sedangkan role HR dapat diberi module Karyawan dan Absensi.
-Semua user tetap login melalui akun yang sama.
-
 ## Instalasi local/development
 
 Yang perlu disiapkan:
@@ -191,7 +174,8 @@ environment, migration, asset, data perusahaan, dan akun Superuser.
 > akan meminta konfirmasi terlebih dahulu.
 
 Saat installer meminta App pertama, masukkan kode subdomain seperti `sales`
-atau kosongkan jika App ingin dibuat nanti.
+atau kosongkan jika App ingin dibuat nanti. Untuk mengikuti studi kasus ini dari
+awal, Anda dapat mengosongkannya lalu membuat semua App pada langkah berikutnya.
 
 Login development awal mengikuti nilai berikut pada `.env`:
 
@@ -202,17 +186,22 @@ STARTER_SUPERUSER_PASSWORD=superuser123
 
 Password default hanya boleh dipakai untuk local/development.
 
-## Membuat App baru
+## Membuat App setelah instalasi
 
-Contoh berikut membuat App Sales pada `sales.<APP_DOMAIN>`:
+Jika App pertama dikosongkan saat instalasi, buat App Sales, HR, dan Gudang:
 
 ```bash
 php artisan starter:make-app sales --name="Sales"
+php artisan starter:make-app hr --name="HR"
+php artisan starter:make-app gudang --name="Gudang"
 ```
+
+Jika installer sudah membuat App Sales, jangan membuatnya lagi; jalankan hanya
+command untuk App HR dan Gudang.
 
 Kode App hanya boleh berisi huruf kecil, angka, dan tanda hubung. Kode `api`
 dicadangkan untuk gateway API. Command tersebut membuat dan langsung
-menyinkronkan:
+menyinkronkan App. Contoh file yang dibuat untuk App Sales:
 
 ```text
 config/apps/sales.php
@@ -223,6 +212,11 @@ resources/views/apps/sales/
 tests/Feature/Apps/Sales/
 ```
 
+Dengan `APP_URL=http://perusahaan.test`, alamat App menjadi
+`sales.perusahaan.test`, `hr.perusahaan.test`, dan `gudang.perusahaan.test`.
+Arahkan semuanya ke folder `public` project Laravel yang sama melalui aplikasi
+web server local yang digunakan.
+
 Setelah App dibuat:
 
 1. Ganti module dan menu contoh pada `config/apps/sales.php`.
@@ -232,6 +226,25 @@ Setelah App dibuat:
    awal App.
 5. Arahkan subdomain ke folder `public` Laravel yang sama, lalu uji role yang
    boleh dan tidak boleh mengakses App.
+
+## Mulai mengembangkan fitur dengan agent AI
+
+Installer membuat `AGENTS.md` di root Laravel. File tersebut mengarahkan agent
+AI ke rules starterkit agar authorization, validasi, audit, struktur kode,
+migration, UI, performa, dan testing mengikuti standar yang sama.
+
+Untuk meminta fitur, jelaskan App, module, menu, role, dan kebutuhan bisnisnya.
+Contoh:
+
+```text
+Buat module Penjualan pada App sales. Menu Penjualan memiliki submenu Pipeline
+dan Transaksi. Role Sales dapat mengelola data, sedangkan Manager hanya dapat
+melihat laporan.
+```
+
+Agent akan memeriksa project, meminta konfirmasi pemahaman, lalu membuat
+spesifikasi di folder `issues/` sebelum mengubah kode aplikasi. Prosedur tersebut
+berlaku untuk fitur project Laravel, bukan maintenance repository starterkit.
 
 ## Mengambil update starterkit
 
@@ -258,42 +271,6 @@ php artisan starter:setup --company="Nama Perusahaan"
 `starter:setup` menjalankan migration, membuat data perusahaan dan Superuser,
 kemudian menjalankan `starter:sync` secara otomatis.
 
-## Pengembangan dengan agent AI
-
-Installer membuat `AGENTS.md` di root Laravel. File tersebut mengarahkan agent
-AI ke rules starterkit agar authorization, validasi, audit, struktur code,
-migration, UI, performa, dan testing mengikuti standar yang sama.
-
-Untuk meminta fitur, jelaskan App, module, menu, role, dan kebutuhan bisnisnya.
-Contoh:
-
-```text
-Buat module Penjualan pada App sales. Menu Penjualan memiliki submenu Pipeline
-dan Transaksi. Role Sales dapat mengelola data, sedangkan Manager hanya dapat
-melihat laporan.
-```
-
-Agent akan memeriksa project, meminta konfirmasi pemahaman, lalu membuat
-spesifikasi di folder `issues/` sebelum mengubah kode aplikasi. Prosedur tersebut
-berlaku untuk fitur project Laravel, bukan maintenance repository starterkit.
-
-## Gateway API opsional
-
-API tidak aktif secara default. Aktifkan hanya jika aplikasi membutuhkan API:
-
-```env
-STARTER_API_ENABLED=true
-```
-
-Route API setiap App berada di `routes/apps/<app>.api.php` dan tersedia melalui:
-
-```text
-api.<APP_DOMAIN>/<app>
-```
-
-Subdomain `api` dan seluruh subdomain App harus diarahkan ke folder `public`
-Laravel yang sama.
-
 ## Deployment production
 
 ### Arahkan semua domain ke project Laravel yang sama
@@ -316,7 +293,7 @@ Contoh pengarahannya:
 | `sales.perusahaan.com` | `/home/user/erp/public` |
 | `hr.perusahaan.com` | `/home/user/erp/public` |
 | `gudang.perusahaan.com` | `/home/user/erp/public` |
-| `api.perusahaan.com` | `/home/user/erp/public` |
+| `api.perusahaan.com` (jika API aktif) | `/home/user/erp/public` |
 
 Buat DNS setiap subdomain menuju server yang sama, lalu atur document root-nya
 melalui web server atau panel hosting. Anda juga dapat memakai wildcard DNS
@@ -362,6 +339,24 @@ php artisan starter:sync
 `starter:sync` menangani migration baru, asset, registry App, storage link, dan
 cache production. Tidak perlu menjalankan `migrate`, `storage:link`, atau
 `optimize` secara terpisah.
+
+## Gateway API opsional
+
+Lewati bagian ini jika aplikasi tidak membutuhkan API. API tidak aktif secara
+default. Untuk mengaktifkannya:
+
+```env
+STARTER_API_ENABLED=true
+```
+
+Route API setiap App berada di `routes/apps/<app>.api.php` dan tersedia melalui:
+
+```text
+api.<APP_DOMAIN>/<app>
+```
+
+Subdomain `api` diarahkan ke folder `public` Laravel yang sama seperti domain
+utama dan subdomain App.
 
 ## Hal penting
 

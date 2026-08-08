@@ -477,26 +477,6 @@ php artisan starter:sync layanan --dry-run
 php artisan starter:sync layanan --force
 ```
 
-## Perubahan core starterkit
-
-Repository starterkit adalah satu-satunya source of truth untuk perubahan core.
-Perubahan universal dapat dikerjakan langsung dari submodule pada Laravel host.
-Pastikan submodule berada di branch `master`, verifikasi melalui Laravel host,
-commit dan push repository starterkit, lalu commit gitlink baru pada repository
-Laravel.
-
-```bash
-git -C starterkit-larawire-private checkout master
-git -C starterkit-larawire-private pull --ff-only origin master
-# ubah dan verifikasi core dari Laravel host
-git -C starterkit-larawire-private add .
-git -C starterkit-larawire-private commit -m "fix: describe starterkit change"
-git -C starterkit-larawire-private push origin master
-git add starterkit-larawire-private
-git commit -m "chore: update starterkit submodule"
-git push origin master
-```
-
 ## Instalasi di Production / Shared Hosting
 
 Clone pertama repository Laravel di production dengan submodule:

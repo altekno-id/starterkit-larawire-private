@@ -311,56 +311,6 @@ maintenance repository canonical starterkit. Perubahan core yang diminta
 developer langsung dieksekusi dan diverifikasi mengikuti
 [`core-maintenance.md`](docs/rules/core-maintenance.md).
 
-## Theme UI — Tabler
-
-Theme default starterkit ini adalah **Tabler**. Logic private Livewire tetap
-universal dan tidak dimiliki theme. Tabler
-menyediakan pola layout admin responsif, sidebar, navbar, card, table, form,
-badge, alert, dropdown, modal, pagination, empty state, halaman autentikasi,
-dan komponen visual lain untuk membangun UI yang konsisten dan profesional.
-
-- Layout, halaman starter, dan error page sudah terintegrasi dengan Tabler.
-- Interaksi server memakai Livewire; interaksi ringan di browser memakai
-  Alpine.js tanpa mengubah pola navigasi yang sudah berjalan.
-- CSS, JavaScript, icon, dan asset inti Tabler disimpan lokal sehingga tidak
-  bergantung pada CDN, Vite development server, atau konfigurasi production
-  tambahan.
-- [`docs/template/tabler/template.md`](docs/template/tabler/template.md) adalah atlas komponen
-  untuk membantu agent AI menemukan contoh Tabler yang tepat tanpa membaca
-  seluruh file HTML.
-- Source contoh di [`docs/template/tabler`](docs/template/tabler) menjadi acuan sebelum
-  memilih atau menyusun komponen baru. Komponen custom tetap mengikuti bahasa
-  visual Tabler.
-
-Tabler adalah lapisan presentasi starterkit ini. Laravel, Livewire, aturan
-keamanan, performa, dan pemisahan App tetap menjadi fondasi arsitekturnya.
-
-Theme aktif ditentukan saat instalasi:
-
-```env
-STARTER_THEME=tabler
-```
-
-Folder `docs/template/<theme>/` menyimpan bundle vendor lengkap—asset, HTML,
-dan atlas UI—agar template baru dapat langsung di-copy-paste ke satu lokasi.
-Blade runtime hasil adaptasi tetap berada di `resources/themes/<theme>/views`,
-sedangkan asset runtime yang dipublish ke `public/assets` bersumber dari
-`public/themes/<theme>/assets`. Untuk theme baru, paste vendor lengkap ke docs,
-adaptasikan Blade/runtime asset, lalu daftarkan path dan adapter PowerGrid pada
-`config/starter.php`.
-
-## Standar tabel — Livewire PowerGrid
-
-Semua tabel Livewire memakai `power-components/livewire-powergrid`. Search,
-filter setiap kolom yang relevan, sorting, dan pagination berjalan di database.
-Tabel manajemen mutable menyediakan checkbox, aksi individual/massal/by-filter,
-arsip, pulihkan, dan hapus permanen. Log, pivot, metadata sistem, data turunan,
-dan append-only mengikuti pengecualian yang dibuktikan pada flow dan test.
-
-PowerGrid memakai adapter theme aktif. Theme Tabler menggunakan adapter
-Bootstrap 5 yang disesuaikan dengan card, table, filter, pagination, checkbox,
-empty state, dan modal Tabler; source vendor tidak diubah.
-
 ## Extension UI project
 
 Blade core starterkit bersifat read-only bagi feature project. Tambahkan elemen

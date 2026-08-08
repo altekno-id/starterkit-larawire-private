@@ -17,6 +17,7 @@ $arguments = array_slice($argv, 1);
 
 try {
     assertLaravelHost($hostRoot, $starterRoot);
+    assertGitSubmodule($hostRoot, $starterRoot);
     $reset = hasArgument($arguments, '--reset');
 
     if ($reset) {
@@ -42,13 +43,18 @@ try {
             $arguments[] = '--skip-default-app';
         }
     } else {
-        assertFreshLaravelInstallation($hostRoot);
-    }
+        $freshnessFindings = laravelFreshnessFindings($hostRoot);
 
-    if (! $reset && ! hasArgument($arguments, '--skip-migration')) {
-        confirmFreshDatabaseReset();
+        if (hasArgument($arguments, '--skip-migration')) {
+            reportLaravelFreshness($freshnessFindings, databaseWillReset: false);
+        } elseif ($freshnessFindings === []) {
+            reportLaravelFreshness($freshnessFindings, databaseWillReset: true);
+        } else {
+            confirmNonFreshDatabaseReset($hostRoot, $freshnessFindings);
+        }
 
-        if (! hasArgument($arguments, '--force')) {
+        if (! hasArgument($arguments, '--skip-migration')
+            && ! hasArgument($arguments, '--force')) {
             $arguments[] = '--force';
         }
     }
@@ -68,7 +74,7 @@ try {
 
     if (! $reset) {
         ensureDirectory($issuesArchivePath);
-        removeFreshLaravelMigrations($hostRoot);
+        removeLaravelDefaultMigrations($hostRoot);
         configureFrameworkTableNames($hostRoot);
 
         $composer = readJson($composerPath);
@@ -141,9 +147,7 @@ try {
 
     output('');
     output('Starterkit terpasang. Seluruh command berikutnya dijalankan dari root Laravel host.');
-    output('');
-    output('INFO PENTING: Pastikan variabel APP_URL di dalam file .env diset dengan benar (contoh: https://domainanda.com)');
-    output('              agar logo dan resource SVG lainnya dapat dimuat dengan sempurna.');
+    output('Domain starterkit dikonfigurasi dari APP_URL: '.environmentValue($envPath, 'APP_URL'));
 } catch (Throwable $exception) {
     fwrite(STDERR, PHP_EOL.'ERROR  '.$exception->getMessage().PHP_EOL);
     exit(1);
@@ -233,44 +237,103 @@ function assertLaravelHost(string $hostRoot, string $starterRoot): void
     foreach ($required as $path) {
         if (! is_file($path)) {
             throw new RuntimeException(
-                'Snapshot starterkit harus berada tepat pada <laravel>/'.STARTER_DIRECTORY.'. '
+                'Submodule starterkit harus berada tepat pada <laravel>/'.STARTER_DIRECTORY.'. '
                 ."File host tidak ditemukan: {$path}",
             );
         }
     }
 }
 
-function assertFreshLaravelInstallation(string $hostRoot): void
+function assertGitSubmodule(string $hostRoot, string $starterRoot): void
+{
+    $gitModulesPath = $hostRoot.'/.gitmodules';
+
+    if (! is_file($gitModulesPath)) {
+        throw new RuntimeException(
+            'Starterkit harus dipasang sebagai Git submodule. Jalankan dari root Laravel: '
+            .'git submodule add https://github.com/altekno-id/starterkit-larawire-private.git '
+            .STARTER_DIRECTORY,
+        );
+    }
+
+    $gitModules = readRequiredFile($gitModulesPath);
+    preg_match_all('/^\s*path\s*=\s*(.+?)\s*$/m', $gitModules, $matches);
+    $registeredPaths = array_map(
+        static fn (string $path): string => trim(trim($path), "\"'"),
+        $matches[1] ?? [],
+    );
+
+    if (! in_array(STARTER_DIRECTORY, $registeredPaths, true)) {
+        throw new RuntimeException(
+            'File .gitmodules tidak mendaftarkan starterkit pada path ['.STARTER_DIRECTORY.'].',
+        );
+    }
+
+    if (! is_file($starterRoot.'/.git')) {
+        throw new RuntimeException(
+            'Folder '.STARTER_DIRECTORY.' bukan working tree Git submodule yang valid.',
+        );
+    }
+
+    $hostTopLevel = commandOutput($hostRoot, ['git', 'rev-parse', '--show-toplevel']);
+    $superproject = commandOutput($starterRoot, ['git', 'rev-parse', '--show-superproject-working-tree']);
+
+    if (realpath($hostTopLevel) !== realpath($hostRoot)
+        || $superproject === ''
+        || realpath($superproject) !== realpath($hostRoot)) {
+        throw new RuntimeException(
+            'Starterkit harus menjadi Git submodule langsung dari repository Laravel host.',
+        );
+    }
+}
+
+/**
+ * @return list<string>
+ */
+function laravelFreshnessFindings(string $hostRoot): array
 {
     $bootstrapPath = $hostRoot.'/bootstrap/app.php';
     $composerPath = $hostRoot.'/composer.json';
     $providersPath = $hostRoot.'/bootstrap/providers.php';
-    $violations = [];
+    $findings = [];
 
     if (! isFreshLaravelBootstrap(readRequiredFile($bootstrapPath))) {
-        $violations[] = 'bootstrap/app.php sudah dikustomisasi';
+        $findings[] = 'bootstrap/app.php sudah dikustomisasi';
     }
 
     $composer = readJson($composerPath);
 
     if (isset($composer['autoload']['psr-4'][STARTER_NAMESPACE])) {
-        $violations[] = 'starterkit sudah terhubung pada composer.json';
+        $findings[] = 'starterkit sudah terhubung pada composer.json';
     }
 
     if (str_contains(readRequiredFile($providersPath), 'StarterServiceProvider::class')) {
-        $violations[] = 'StarterServiceProvider sudah terdaftar';
+        $findings[] = 'StarterServiceProvider sudah terdaftar';
     }
 
-    foreach ([
-        'app/Livewire',
-        'config/apps',
-        'database/migrations/apps',
-        'resources/views/apps',
-        'routes/apps',
-    ] as $directory) {
-        if (directoryHasFiles($hostRoot.'/'.$directory)) {
-            $violations[] = "{$directory} sudah berisi code project";
-        }
+    $unexpectedAppFiles = unexpectedDirectoryFiles($hostRoot.'/app', [
+        'Http/Controllers/Controller.php',
+        'Models/User.php',
+        'Providers/AppServiceProvider.php',
+    ]);
+
+    if ($unexpectedAppFiles !== []) {
+        $findings[] = 'app memiliki file selain bawaan Laravel: '.implode(', ', $unexpectedAppFiles);
+    }
+
+    $unexpectedViews = unexpectedDirectoryFiles($hostRoot.'/resources/views', [
+        'welcome.blade.php',
+        'welcome.php',
+    ]);
+
+    if ($unexpectedViews !== []) {
+        $findings[] = 'resources/views memiliki file selain welcome: '.implode(', ', $unexpectedViews);
+    }
+
+    $webRoutesPath = $hostRoot.'/routes/web.php';
+
+    if (is_file($webRoutesPath) && ! isFreshLaravelWebRoutes(readRequiredFile($webRoutesPath))) {
+        $findings[] = 'routes/web.php sudah memiliki route aplikasi';
     }
 
     $allowedMigrations = [
@@ -278,25 +341,51 @@ function assertFreshLaravelInstallation(string $hostRoot): void
         '0001_01_01_000001_create_cache_table.php',
         '0001_01_01_000002_create_jobs_table.php',
     ];
-    $migrationFiles = glob($hostRoot.'/database/migrations/*.php') ?: [];
-    $unexpectedMigrations = array_values(array_filter(
-        $migrationFiles,
-        fn (string $path): bool => ! in_array(basename($path), $allowedMigrations, true),
-    ));
+    $unexpectedMigrations = unexpectedDirectoryFiles(
+        $hostRoot.'/database/migrations',
+        $allowedMigrations,
+    );
 
     if ($unexpectedMigrations !== []) {
-        $violations[] = 'database/migrations memiliki migration di luar bawaan Laravel fresh';
+        $findings[] = 'database/migrations memiliki migration aplikasi: '.implode(', ', $unexpectedMigrations);
     }
 
-    if ($violations === []) {
-        return;
+    return $findings;
+}
+
+/**
+ * @param  list<string>  $allowed
+ * @return list<string>
+ */
+function unexpectedDirectoryFiles(string $path, array $allowed): array
+{
+    if (! is_dir($path)) {
+        return [];
     }
 
-    throw new RuntimeException(
-        "Installer hanya boleh dijalankan pada project Laravel fresh.\n- "
-        .implode("\n- ", $violations)
-        ."\nGunakan alur update pada README untuk project yang sudah memakai starterkit.",
+    $files = [];
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
     );
+
+    foreach ($iterator as $item) {
+        if (! $item->isFile()) {
+            continue;
+        }
+
+        $relativePath = str_replace('\\', '/', substr($item->getPathname(), strlen($path) + 1));
+
+        if (in_array(basename($relativePath), ['.DS_Store', '.gitkeep'], true)
+            || in_array($relativePath, $allowed, true)) {
+            continue;
+        }
+
+        $files[] = $relativePath;
+    }
+
+    sort($files);
+
+    return $files;
 }
 
 function assertStarterkitInstallation(string $hostRoot): void
@@ -365,26 +454,7 @@ function confirmDevelopmentDatabaseReset(string $hostRoot): void
     output('');
 }
 
-function directoryHasFiles(string $path): bool
-{
-    if (! is_dir($path)) {
-        return false;
-    }
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
-    );
-
-    foreach ($iterator as $item) {
-        if ($item->isFile()) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function removeFreshLaravelMigrations(string $hostRoot): void
+function removeLaravelDefaultMigrations(string $hostRoot): void
 {
     $paths = [
         $hostRoot.'/database/migrations/0001_01_01_000000_create_users_table.php',
@@ -555,15 +625,51 @@ function defaultAppName(string $app): string
     return ucwords((string) $words);
 }
 
-function confirmFreshDatabaseReset(): void
+/**
+ * @param  list<string>  $findings
+ */
+function reportLaravelFreshness(array $findings, bool $databaseWillReset): void
 {
     output('');
-    output('PERINGATAN INSTALASI AWAL');
-    output('Starterkit hanya boleh dipasang pada project Laravel fresh dengan database khusus yang baru.');
-    output('Proses ini menjalankan migrate:fresh: SEMUA TABEL DAN DATA pada database di .env akan dihapus.');
-    output('Jangan lanjutkan jika database pernah dipakai oleh aplikasi lain atau memiliki data penting.');
+    output($findings === [] ? 'INFO LARAVEL FRESH' : 'INFO LARAVEL TIDAK FRESH');
+    output($findings === []
+        ? 'Struktur project masih bawaan Laravel. Instalasi dilanjutkan otomatis tanpa konfirmasi.'
+        : 'Struktur project sudah berisi code aplikasi. Database tidak diubah karena --skip-migration dipakai.');
+
+    foreach ($findings as $finding) {
+        output('- '.$finding);
+    }
+
+    if ($databaseWillReset) {
+        output('Installer akan menjalankan migrate:fresh dan menghapus seluruh tabel/data pada database di .env.');
+    }
+
     output('');
-    fwrite(STDOUT, 'Lanjutkan instalasi dan reset database? Ketik y untuk lanjut [y/N]: ');
+}
+
+/**
+ * @param  non-empty-list<string>  $findings
+ */
+function confirmNonFreshDatabaseReset(string $hostRoot, array $findings): void
+{
+    $database = is_file($hostRoot.'/.env')
+        ? trim(effectiveEnvironmentValue($hostRoot.'/.env', 'DB_DATABASE'), "\"' ")
+        : '';
+
+    output('');
+    output('PERINGATAN LARAVEL TIDAK FRESH');
+    output('Installer menemukan code atau konfigurasi aplikasi yang bukan bawaan Laravel fresh:');
+
+    foreach ($findings as $finding) {
+        output('- '.$finding);
+    }
+
+    output('');
+    output('Instalasi tetap dapat dilanjutkan, tetapi migrate:fresh akan menghapus seluruh tabel dan data aplikasi.');
+    output('Controller, model, view, route, dan migration aplikasi tetap dipertahankan.');
+    output('Database target: '.($database !== '' ? $database : '(tidak terdefinisi)'));
+    output('');
+    fwrite(STDOUT, 'Reset seluruh data aplikasi dan lanjutkan instalasi? Ketik y [y/N]: ');
 
     $answer = fgets(STDIN);
 
@@ -574,7 +680,7 @@ function confirmFreshDatabaseReset(): void
     }
 
     output('');
-    output('Instalasi dibatalkan. Tidak ada file project atau database yang diubah.');
+    output('Instalasi dibatalkan. Source project dan database tidak diubah.');
     exit(0);
 }
 
@@ -635,7 +741,7 @@ function connectedProviders(string $contents): string
     if (! str_contains($contents, 'return [')) {
         throw new RuntimeException(
             'bootstrap/providers.php tidak memakai struktur Laravel yang didukung. '
-            .'Gunakan project Laravel fresh sesuai '.STARTER_DIRECTORY.'/README.md.',
+            .'Sesuaikan struktur providers lalu ikuti panduan '.STARTER_DIRECTORY.'/README.md.',
         );
     }
 
@@ -663,14 +769,189 @@ function connectedBootstrap(string $current, string $connector): string
     }
 
     if (! isFreshLaravelBootstrap($current)) {
-        throw new RuntimeException(
-            'bootstrap/app.php sudah memiliki kustomisasi yang tidak aman untuk ditimpa otomatis. '
-            .'Gabungkan '.STARTER_DIRECTORY.'/installer/templates/bootstrap-app.php secara manual, '
-            .'lalu jalankan ulang installer.',
+        $current = connectBootstrapRouting($current);
+        $current = connectBootstrapCallback(
+            $current,
+            'withMiddleware',
+            'configureMiddleware',
+        );
+
+        return connectBootstrapCallback(
+            $current,
+            'withExceptions',
+            'configureExceptions',
+            appendJsonRendering: true,
         );
     }
 
     return $connector;
+}
+
+function connectBootstrapRouting(string $contents): string
+{
+    if (str_contains($contents, 'StarterBootstrap::registerRoutes()')) {
+        return $contents;
+    }
+
+    [$open, $close] = methodCallBounds($contents, 'withRouting');
+    $arguments = substr($contents, $open + 1, $close - $open - 1);
+
+    foreach (['using:', 'then:'] as $namedClosure) {
+        $namedPosition = strpos($arguments, $namedClosure);
+
+        if ($namedPosition === false) {
+            continue;
+        }
+
+        $brace = strpos($arguments, '{', $namedPosition);
+
+        if ($brace === false) {
+            throw new RuntimeException('Callback '.$namedClosure.' pada bootstrap/app.php tidak didukung.');
+        }
+
+        $insertion = "\n            \\Altekno\\StarterKit\\Support\\Starter\\StarterBootstrap::registerRoutes();";
+
+        return substr_replace($contents, $insertion, $open + 1 + $brace + 1, 0);
+    }
+
+    $trimmedArguments = rtrim($arguments);
+    $separator = $trimmedArguments === '' || str_ends_with($trimmedArguments, ',') ? '' : ',';
+    $replacement = $trimmedArguments.$separator
+        ."\n        then: function (): void {"
+        ."\n            \\Altekno\\StarterKit\\Support\\Starter\\StarterBootstrap::registerRoutes();"
+        ."\n        },\n    ";
+
+    return substr_replace($contents, $replacement, $open + 1, $close - $open - 1);
+}
+
+function connectBootstrapCallback(
+    string $contents,
+    string $method,
+    string $starterMethod,
+    bool $appendJsonRendering = false,
+): string {
+    if (str_contains($contents, "StarterBootstrap::{$starterMethod}(")) {
+        return $contents;
+    }
+
+    [$open, $close] = methodCallBounds($contents, $method);
+    $arguments = substr($contents, $open + 1, $close - $open - 1);
+
+    if (preg_match('/function\s*\((?P<parameters>[^)]*)\)/s', $arguments, $matches) !== 1
+        || preg_match('/\$(?P<variable>[A-Za-z_][A-Za-z0-9_]*)/', $matches['parameters'], $variableMatch) !== 1) {
+        throw new RuntimeException("Callback {$method} pada bootstrap/app.php tidak didukung.");
+    }
+
+    $brace = strpos($arguments, '{', (int) strpos($arguments, $matches[0]));
+
+    if ($brace === false) {
+        throw new RuntimeException("Callback {$method} pada bootstrap/app.php tidak memiliki body.");
+    }
+
+    $variable = $variableMatch['variable'];
+    $insertion = "\n        \\Altekno\\StarterKit\\Support\\Starter\\StarterBootstrap::{$starterMethod}(\${$variable});";
+
+    if ($appendJsonRendering) {
+        $insertion .= "\n\n        \${$variable}->shouldRenderJsonWhen("
+            ."\n            fn (\\Illuminate\\Http\\Request \$request) => \$request->is('api/*'),"
+            ."\n        );";
+    }
+
+    return substr_replace($contents, $insertion, $open + 1 + $brace + 1, 0);
+}
+
+/**
+ * @return array{0: int, 1: int}
+ */
+function methodCallBounds(string $contents, string $method): array
+{
+    $needle = '->'.$method.'(';
+    $methodPosition = strpos($contents, $needle);
+
+    if ($methodPosition === false) {
+        throw new RuntimeException("bootstrap/app.php tidak memiliki {$method}() yang didukung.");
+    }
+
+    $open = $methodPosition + strlen($needle) - 1;
+    $depth = 0;
+    $quote = null;
+    $escaped = false;
+    $lineComment = false;
+    $blockComment = false;
+    $length = strlen($contents);
+
+    for ($position = $open; $position < $length; $position++) {
+        $character = $contents[$position];
+        $nextCharacter = $position + 1 < $length ? $contents[$position + 1] : null;
+
+        if ($lineComment) {
+            if ($character === "\n") {
+                $lineComment = false;
+            }
+
+            continue;
+        }
+
+        if ($blockComment) {
+            if ($character === '*' && $nextCharacter === '/') {
+                $blockComment = false;
+                $position++;
+            }
+
+            continue;
+        }
+
+        if ($quote !== null) {
+            if ($escaped) {
+                $escaped = false;
+
+                continue;
+            }
+
+            if ($character === '\\') {
+                $escaped = true;
+
+                continue;
+            }
+
+            if ($character === $quote) {
+                $quote = null;
+            }
+
+            continue;
+        }
+
+        if (($character === '/' && $nextCharacter === '/') || $character === '#') {
+            $lineComment = true;
+
+            if ($nextCharacter === '/') {
+                $position++;
+            }
+
+            continue;
+        }
+
+        if ($character === '/' && $nextCharacter === '*') {
+            $blockComment = true;
+            $position++;
+
+            continue;
+        }
+
+        if ($character === "'" || $character === '"') {
+            $quote = $character;
+
+            continue;
+        }
+
+        if ($character === '(') {
+            $depth++;
+        } elseif ($character === ')' && --$depth === 0) {
+            return [$open, $position];
+        }
+    }
+
+    throw new RuntimeException("Pemanggilan {$method}() pada bootstrap/app.php tidak lengkap.");
 }
 
 function isFreshLaravelBootstrap(string $contents): bool
@@ -679,6 +960,17 @@ function isFreshLaravelBootstrap(string $contents): bool
         || ! str_contains($contents, "web: __DIR__.'/../routes/web.php'")
         || ! str_contains($contents, "commands: __DIR__.'/../routes/console.php'")
         || ! str_contains($contents, "health: '/up'")) {
+        return false;
+    }
+
+    preg_match_all('/->(?P<method>[A-Za-z_][A-Za-z0-9_]*)\s*\(/', $contents, $methodMatches);
+
+    if (($methodMatches['method'] ?? []) !== [
+        'withRouting',
+        'withMiddleware',
+        'withExceptions',
+        'create',
+    ]) {
         return false;
     }
 
@@ -704,7 +996,52 @@ function isFreshLaravelBootstrap(string $contents): bool
         }
     }
 
-    return true;
+    return isEmptyLaravelBootstrapCallback($contents, 'withMiddleware')
+        && isEmptyLaravelBootstrapCallback($contents, 'withExceptions');
+}
+
+function isEmptyLaravelBootstrapCallback(string $contents, string $method): bool
+{
+    try {
+        [$open, $close] = methodCallBounds($contents, $method);
+    } catch (RuntimeException) {
+        return false;
+    }
+
+    $arguments = substr($contents, $open + 1, $close - $open - 1);
+
+    if (preg_match('/^\s*function\s*\([^)]*\)\s*(?::\s*void\s*)?\{(?P<body>.*)\}\s*$/s', $arguments, $matches) !== 1) {
+        return false;
+    }
+
+    $body = preg_replace([
+        '~/\*.*?\*/~s',
+        '/^\s*\/\/.*$/m',
+    ], '', $matches['body']);
+
+    return trim((string) $body) === '';
+}
+
+function isFreshLaravelWebRoutes(string $contents): bool
+{
+    $defaultWelcomePattern = <<<'REGEX'
+~Route::get\(\s*['"]\/['"]\s*,\s*function\s*\(\)\s*\{\s*return\s+view\(\s*['"]welcome['"]\s*\)\s*;\s*\}\s*\)\s*;~
+REGEX;
+    $defaultViewPattern = '~Route::view\(\s*[\'"]\/[\'"]\s*,\s*[\'"]welcome[\'"]\s*\)\s*;~';
+    $remaining = preg_replace([$defaultWelcomePattern, $defaultViewPattern], '', $contents);
+
+    if ($remaining === null || $remaining === $contents) {
+        return false;
+    }
+
+    $remaining = preg_replace([
+        '/<\?php/',
+        '/use\s+Illuminate\\\\Support\\\\Facades\\\\Route\s*;/',
+        '~/\*.*?\*/~s',
+        '/^\s*\/\/.*$/m',
+    ], '', $remaining);
+
+    return trim((string) $remaining) === '';
 }
 
 function ensureIgnored(string $path, string $entry): void
@@ -776,13 +1113,15 @@ function mergeEnvironment(string $path): void
 
     $contents = readRequiredFile($path);
     $url = environmentValueFromContents($contents, 'APP_URL') ?: 'http://localhost';
-    $domain = (string) (parse_url(trim($url, "\"'"), PHP_URL_HOST) ?: 'localhost');
+    $domain = strtolower(rtrim((string) (parse_url(trim($url, "\"'"), PHP_URL_HOST) ?: 'localhost'), '.'));
     $secure = strtolower((string) parse_url(trim($url, "\"'"), PHP_URL_SCHEME)) === 'https'
         ? 'true'
         : 'false';
+    $sessionDomain = in_array($domain, ['localhost', '127.0.0.1', '::1'], true)
+        ? 'null'
+        : '.'.$domain;
 
     $required = [
-        'APP_DOMAIN' => $domain,
         'APP_LOCALE' => 'id',
         'APP_FALLBACK_LOCALE' => 'id',
         'APP_FAKER_LOCALE' => 'id_ID',
@@ -794,8 +1133,6 @@ function mergeEnvironment(string $path): void
         'DB_QUEUE_TABLE' => 'x_jobs',
         'DB_QUEUE_BATCH_TABLE' => 'x_job_batches',
         'DB_QUEUE_FAILED_TABLE' => 'x_failed_jobs',
-        'SESSION_SECURE_COOKIE' => $secure,
-        'SESSION_DOMAIN' => $domain === 'localhost' ? 'localhost' : '.' . $domain,
         'SESSION_TABLE' => 'x_sessions',
         'STARTER_SUPERUSER_USERNAME' => 'superuser',
         'STARTER_SUPERUSER_EMAIL' => 'developer@example.test',
@@ -807,6 +1144,9 @@ function mergeEnvironment(string $path): void
     }
 
     foreach ([
+        'APP_DOMAIN' => $domain,
+        'SESSION_SECURE_COOKIE' => $secure,
+        'SESSION_DOMAIN' => $sessionDomain,
         'SESSION_ENCRYPT' => 'true',
         'SESSION_HTTP_ONLY' => 'true',
     ] as $key => $value) {
@@ -905,6 +1245,42 @@ function run(string $workingDirectory, array $command): void
     if ($exitCode !== 0) {
         throw new RuntimeException("Command gagal dengan exit code {$exitCode}: {$printable}");
     }
+}
+
+/**
+ * @param  list<string>  $command
+ */
+function commandOutput(string $workingDirectory, array $command): string
+{
+    $process = proc_open(
+        $command,
+        [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ],
+        $pipes,
+        $workingDirectory,
+    );
+
+    if (! is_resource($process)) {
+        throw new RuntimeException('Git tidak dapat dijalankan untuk memvalidasi submodule starterkit.');
+    }
+
+    fclose($pipes[0]);
+    $stdout = stream_get_contents($pipes[1]);
+    $stderr = stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    $exitCode = proc_close($process);
+
+    if ($exitCode !== 0) {
+        throw new RuntimeException(
+            'Validasi Git submodule gagal: '.(trim((string) $stderr) ?: 'command Git gagal.'),
+        );
+    }
+
+    return trim((string) $stdout);
 }
 
 function relativeHostPath(string $path): string

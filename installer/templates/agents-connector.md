@@ -1,6 +1,6 @@
 # Project AI Instructions
 
-This Laravel project uses `{{STARTERKIT_DIRECTORY}}/` as its agentic-coding foundation and execution contract.
+This Laravel project uses the `{{STARTERKIT_DIRECTORY}}/` Git submodule as its agentic-coding foundation and execution contract.
 
 Before planning or changing code:
 

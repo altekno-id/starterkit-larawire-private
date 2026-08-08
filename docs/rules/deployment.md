@@ -2,15 +2,19 @@
 
 ## Prerequisites and environment
 
-- Deploy the tracked starter snapshot with the host repository; it has no nested `.git`. PHP must match locked dependencies, `intl` and MySQL must exist, document root must be `public`, root/App subdomains point to the same install, and `storage/` plus `bootstrap/cache/` are writable.
+- Deploy the starter commit tracked by the Laravel repository's initialized Git submodule. PHP must match locked dependencies, `intl` and MySQL must exist, document root must be `public`, root/App subdomains point to the same install, and `storage/` plus `bootstrap/cache/` are writable.
 - Production baseline: `APP_ENV=production`, `APP_DEBUG=false`, HTTPS `APP_URL`, matching scheme-free `APP_DOMAIN`, `STARTER_API_ENABLED=false` unless needed, active `STARTER_THEME`, production DB credentials, file session/cache, sync queue, secure cookie on HTTPS, strong `STARTER_SUPERUSER_PASSWORD`, and `id`/`id`/`id_ID` locales.
-- Keep `SESSION_DOMAIN=null` unless a different cookie scope is verified. Test root/auth/App cookie sharing on a real domain. If API is enabled, point `api.<APP_DOMAIN>` to the same `public`; docs still require Superuser in production.
+- The installer derives `APP_DOMAIN`, `SESSION_DOMAIN`, and `SESSION_SECURE_COOKIE` from `APP_URL`; verify the generated production values and test root/auth/App cookie sharing on a real domain. If API is enabled, point `api.<APP_DOMAIN>` to the same `public`; docs still require Superuser in production.
 
 ## Deployment flow
 
 First deployment:
 
 ```bash
+git clone --recurse-submodules <repository-laravel> <folder-project>
+cd <folder-project>
+cp .env.example .env
+# configure production values in .env
 composer install --no-dev --optimize-autoloader
 php artisan starter:setup --company="Company Name"
 ```
@@ -20,6 +24,8 @@ Routine update:
 ```bash
 git status --short
 git pull --ff-only origin master
+git submodule sync --recursive
+git submodule update --init --recursive
 composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 ```
@@ -32,4 +38,4 @@ php artisan starter:sync
 
 Run `composer audit --locked --no-dev --format=summary --no-interaction` only when requested, in a security review, or after dependency changes; report affected package/advisory and do not update dependencies without approval.
 
-Verify `/up`, root/auth/App domains, enabled API docs/OpenAPI/endpoints, login/remember/lock/logout, password session revocation, synchronized role/module/menu, uploads, and audit logs. Add scheduler/cron only when a feature requires it. Update the canonical starter in development, copy snapshot excluding `.git`, verify, commit/push host integration; never edit source directly in production.
+Verify `/up`, root/auth/App domains, enabled API docs/OpenAPI/endpoints, login/remember/lock/logout, password session revocation, synchronized role/module/menu, uploads, and audit logs. Add scheduler/cron only when a feature requires it. Update the canonical starter on the submodule's `master` branch in development, push that core commit, then verify and commit/push the Laravel host's updated gitlink; never edit source directly in production.

@@ -1,15 +1,93 @@
 # Starterkit Larawire Private
 
-Starterkit Laravel untuk aplikasi internal perusahaan. Fondasi login, user,
-role, App, module, menu, audit, keamanan, API, serta UI bertema **Tabler**
-sudah disiapkan agar developer fokus pada fitur bisnis dan agentic coding.
+Starterkit aplikasi internal perusahaan berbasis **Laravel** dan **Livewire**.
+Fondasi login, user, role, App, module, menu, audit, keamanan, API, serta UI
+bertema **Tabler** sudah disiapkan agar developer fokus pada fitur bisnis dan
+agentic coding.
 
-Repository ini bukan aplikasi mandiri. Simpan clone Git canonical di luar
-Laravel host, lalu salin snapshot tanpa `.git` ke folder
-`starterkit-larawire-private` di dalam Laravel fresh sebelum menjalankan
-installer. Snapshot tersebut wajib dilacak sebagai file biasa oleh repository
-Laravel host; update source dilakukan dari clone canonical lalu disinkronkan ke
-snapshot dan di-commit bersama project.
+Repository ini bukan aplikasi mandiri. Pasang repository sebagai Git submodule
+`starterkit-larawire-private` di dalam project Laravel. Repository Laravel melacak
+commit starterkit melalui gitlink submodule sehingga core dapat diperbarui dan
+dipush secara terpisah tanpa menyalin source manual.
+
+## Instalasi di Local / Development
+
+### Persyaratan sistem
+
+- **PHP 8.2+**
+- **Laravel 11.x**
+- **Database** (MySQL / PostgreSQL / SQLite)
+
+Pastikan terminal aktif di root project Laravel, lalu lakukan tiga langkah.
+
+1. Pasang starterkit sebagai Git submodule:
+
+```bash
+git submodule add https://github.com/altekno-id/starterkit-larawire-private.git starterkit-larawire-private
+```
+
+2. Sesuaikan local domain pada `.env`; variabel starterkit lainnya ditambahkan
+   otomatis oleh installer:
+
+```env
+APP_URL=http://namaproject.test
+```
+
+3. Jalankan installer:
+
+```bash
+php starterkit-larawire-private/installer/install.php --company="Nama Perusahaan"
+```
+
+Installer mendeteksi kondisi Laravel secara otomatis:
+
+- **Laravel fresh:** hanya file bawaan Laravel yang ditemukan—termasuk
+  `resources/views/welcome.blade.php`, `app/Http/Controllers/Controller.php`,
+  `app/Models/User.php`, dan migration bawaan. Installer hanya menampilkan
+  informasi bahwa `migrate:fresh` akan menghapus seluruh tabel dan data
+  database, kemudian langsung melanjutkan tanpa meminta konfirmasi reset.
+- **Laravel tidak fresh yang belum terpasang starterkit:** installer menampilkan
+  file atau konfigurasi aplikasi yang terdeteksi, lalu meminta konfirmasi sebelum
+  menjalankan `migrate:fresh`. Jika konfirmasi ditolak, installer berhenti
+  sebelum mengubah source atau database.
+
+Pada kedua kondisi, instalasi normal menjalankan `migrate:fresh`; seluruh tabel
+dan data pada database di `.env` akan dihapus. Controller, model, view, route,
+dan migration aplikasi yang sudah ada tetap dipertahankan. Installer selanjutnya
+meminta kode App pertama—boleh dikosongkan—beserta nama tampilannya.
+
+Dependency, connector Laravel, connector AI `AGENTS.md`, environment, APP key,
+locale, asset, migration, Superuser, landing, App pertama, sync, dan security
+check disiapkan otomatis. Tidak ada file yang perlu disalin atau disambungkan
+manual.
+
+## Mengganti ke database baru/kosong
+
+Jika starterkit sudah terpasang pada project Laravel yang sama, lalu koneksi
+`.env` diganti ke database baru atau kosong, jangan menjalankan `install.php`
+ulang dan jangan memakai opsi `--reset`. Jalankan dari root Laravel:
+
+```bash
+php artisan starter:setup --company="Nama Perusahaan"
+```
+
+`starter:setup` menjalankan migration, membuat client dan akun Superuser, lalu
+menjalankan `starter:sync` secara otomatis. Gunakan `starter:sync` tetap untuk
+update migration, asset, dan registry App pada database yang sudah disiapkan;
+command tersebut tidak membuat ulang akun Superuser.
+
+## Pull update starterkit
+
+Jika repository starterkit memiliki update, pastikan terminal aktif di root
+project Laravel, lalu jalankan:
+
+```bash
+git submodule update --init --remote starterkit-larawire-private
+composer install
+php artisan starter:sync
+```
+
+Update ini tidak menjalankan reset database.
 
 ## Agentic-ready — tujuan rules
 
@@ -23,9 +101,9 @@ performa query, pola Livewire/Alpine, UI, struktur folder, dan testing.
 Saat instalasi, connector `AGENTS.md` otomatis dibuat di root Laravel. Connector
 tersebut mengarahkan agent ke `starterkit-larawire-private/AGENTS.md` dan rule
 terkait tanpa menduplikasi seluruh isi. Karena source of truth tetap berada di
-clone starterkit, rules terbaru langsung tersedia setelah pull manual.
+submodule starterkit, rules terbaru tersedia setelah commit submodule diperbarui.
 
-Alur pengembangan feature:
+Alur pengembangan feature aplikasi Laravel turunan:
 
 1. Developer menjelaskan kebutuhan bisnis/bug serta App, module, dan area yang
    relevan.
@@ -54,6 +132,11 @@ kelengkapannya sambil memberi contoh prompt yang benar. Gerbang konfirmasi dan
 file issue berlaku untuk feature/perubahan feature/bug yang membutuhkan code;
 diagnosis baca-saja, status report, konsultasi, dan dokumentasi murni tidak
 membuat issue otomatis.
+
+Prosedur confirmation dan file `issues/*.md` tersebut tidak berlaku untuk
+maintenance repository canonical starterkit. Perubahan core yang diminta
+developer langsung dieksekusi dan diverifikasi mengikuti
+[`core-maintenance.md`](docs/rules/core-maintenance.md).
 
 ## Theme UI — Tabler
 
@@ -152,51 +235,14 @@ navigasi Livewire hanya boleh ditambahkan bila URL dijamin tetap pada origin
 yang sama. Navigasi App/module pada sidebar tidak menggunakan raw Blade
 extension—daftarkan melalui `config/apps/<app>.php` lalu jalankan `starter:sync`.
 
-## Persyaratan Sistem
-
-- **PHP 8.2+**
-- **Laravel 11.x** (Instalasi Fresh)
-- **Database** (MySQL / PostgreSQL / SQLite)
-
-## Instalasi di Local / Development
-
-> Wajib memakai Laravel fresh dan database baru. Installer menjalankan
-> `migrate:fresh`, sehingga seluruh tabel dan data pada database akan dihapus.
-
-Dari root Laravel fresh, siapkan snapshot source tanpa metadata `.git` lalu
-jalankan installer. Setelah instalasi, folder snapshot wajib ikut di-commit ke
-repository project:
-
-```bash
-git clone https://github.com/altekno-id/starterkit-larawire-private.git \
-  /path/di-luar-project/starterkit-larawire-private
-rsync -a --delete --exclude='.git/' \
-  /path/di-luar-project/starterkit-larawire-private/ \
-  starterkit-larawire-private/
-php starterkit-larawire-private/installer/install.php --company="Nama Aplikasi"
-```
-
-Installer meminta:
-
-1. konfirmasi reset database;
-2. kode App pertama, misalnya `sales`—boleh dikosongkan;
-3. nama App yang ditampilkan.
-
-**INFO PENTING:** Setelah instalasi selesai, pastikan Anda mengatur `APP_URL` di file `.env` sesuai dengan URL lokal yang Anda gunakan (contoh: `http://namaproject.test` atau `http://localhost:8000`). Jika tidak diatur dengan benar, asset seperti logo SVG dan file lainnya tidak akan termuat karena isu *Mixed Content*.
-
-Setelah itu dependency, connector Laravel, connector AI `AGENTS.md`, `.env`,
-APP key, locale, asset, migration, Superuser, landing, App pertama, sync, dan
-security check disiapkan otomatis. Tidak ada file yang perlu disalin atau
-disambungkan manual.
-
 ## Command utama
 
 Jalankan dari root Laravel.
 
 | Kebutuhan | Command |
 |---|---|
-| Instalasi awal | `php starterkit-larawire-private/installer/install.php --company="Nama Aplikasi"` |
-| Reset database development | `php starterkit-larawire-private/installer/install.php --reset --company="Nama Aplikasi"` |
+| Instalasi awal | `php starterkit-larawire-private/installer/install.php --company="Nama Perusahaan"` |
+| Menyiapkan database baru/kosong setelah starterkit terpasang | `php artisan starter:setup --company="Nama Perusahaan"` |
 | Membuat App | `php artisan starter:make-app sales --name="Sales"` |
 | Membuat App tanpa langsung sync | `php artisan starter:make-app sales --name="Sales" --no-sync` |
 | Memeriksa perubahan registry | `php artisan starter:sync sales --dry-run` |
@@ -205,7 +251,7 @@ Jalankan dari root Laravel.
 | Publish ulang asset | `php artisan starter:publish-assets` |
 | Cek keamanan lokal | `php artisan starter:security-check` |
 | Simulasi cek production | `php artisan starter:security-check --production` |
-| Deployment pertama | `php artisan starter:setup --company="Nama Aplikasi"` |
+| Deployment pertama | `php artisan starter:setup --company="Nama Perusahaan"` |
 
 `starterkit:install` adalah command internal yang dipanggil installer. Jangan
 menjalankannya langsung untuk update atau deployment.
@@ -377,62 +423,35 @@ php artisan starter:sync layanan --dry-run
 php artisan starter:sync layanan --force
 ```
 
-## Reset database development
-
-```bash
-php starterkit-larawire-private/installer/install.php --reset --company="Nama Aplikasi"
-```
-
-Opsi `--reset` hanya dapat berjalan pada `APP_ENV=local|development` setelah
-konfirmasi `y` dan `RESET`. Installer menjalankan `migrate:fresh`, setup data
-inti, dan sync ulang dari source yang tetap ada.
-
-Reset menghapus seluruh tabel/data database development, tetapi tidak pernah
-menghapus source App, landing, migration, route, view, test, asset, upload,
-atau issue feature. Production ditolak sebelum mutation. Backup data yang masih
-dibutuhkan sebelum menjalankannya.
-
 ## Perubahan core starterkit
 
 Repository starterkit adalah satu-satunya source of truth untuk perubahan core.
-Setiap perbaikan universal wajib dikerjakan pada repository canonical starterkit
-yang memiliki remote `origin`, diverifikasi melalui Laravel host, lalu dibuat
-sebagai commit terfokus dan dipush sebelum disinkronkan ke project pengguna.
-
-Jangan menyelesaikan perubahan core hanya di snapshot embedded `starterkit-larawire-private/`
-milik project. Setelah commit upstream tersedia, update folder starterkit pada
-project pengguna dari commit tersebut, jalankan verifikasi host, lalu commit dan
-push perubahan integrasinya pada repository project.
-
-## Update starterkit
-
-Update dilakukan manual di mesin development dan tidak me-reset database:
+Perubahan universal dapat dikerjakan langsung dari submodule pada Laravel host.
+Pastikan submodule berada di branch `master`, verifikasi melalui Laravel host,
+commit dan push repository starterkit, lalu commit gitlink baru pada repository
+Laravel.
 
 ```bash
-git -C /path/di-luar-project/starterkit-larawire-private pull --ff-only origin master
-rsync -a --delete --exclude='.git/' \
-  /path/di-luar-project/starterkit-larawire-private/ \
-  starterkit-larawire-private/
-composer install
-php artisan starter:sync
-php artisan test --compact
-git add starterkit-larawire-private composer.json composer.lock
-git commit -m "chore: update starterkit snapshot"
+git -C starterkit-larawire-private checkout master
+git -C starterkit-larawire-private pull --ff-only origin master
+# ubah dan verifikasi core dari Laravel host
+git -C starterkit-larawire-private add .
+git -C starterkit-larawire-private commit -m "fix: describe starterkit change"
+git -C starterkit-larawire-private push origin master
+git add starterkit-larawire-private
+git commit -m "chore: update starterkit submodule"
 git push origin master
 ```
 
-Tambahkan `composer install --no-dev --optimize-autoloader` hanya jika
-`composer.lock` pada project ikut berubah.
-
-Gunakan `php artisan starter:sync --dry-run` terlebih dahulu bila ingin
-memeriksa perubahan registry tanpa migration, publish asset, atau mutation.
-
 ## Instalasi di Production / Shared Hosting
 
-Deployment pertama setelah repository project—termasuk snapshot
-`starterkit-larawire-private`—dan `.env` production tersedia:
+Clone pertama repository Laravel di production dengan submodule:
 
 ```bash
+git clone --recurse-submodules <repository-laravel> <folder-project>
+cd <folder-project>
+cp .env.example .env
+# isi konfigurasi production pada .env
 composer install --no-dev --optimize-autoloader
 php artisan starter:setup --company="Nama Perusahaan"
 ```
@@ -441,6 +460,8 @@ Deployment berikutnya:
 
 ```bash
 git pull --ff-only origin master
+git submodule sync --recursive
+git submodule update --init --recursive
 composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 ```
@@ -477,12 +498,13 @@ dibuat.
 - Extension UI berada di `resources/views/extensions/starter/`.
 - `AGENTS.md` root Laravel adalah connector AI; rules canonical berada di
   folder `starterkit-larawire-private`.
-- Folder `starterkit-larawire-private` adalah snapshot terlacak dan core
-  read-only untuk feature project; tidak memiliki `.git` sendiri. Improvement
-  universal dilakukan melalui repository canonical, kemudian disalin dan
-  di-commit ke repository project.
-- Installer normal hanya untuk Laravel fresh dan database baru.
-- Installer menyediakan reset database khusus local/development, tetapi tidak
-  boleh menghapus source atau upload project.
+- Folder `starterkit-larawire-private` adalah Git submodule dan core read-only
+  untuk feature project. Improvement universal di-commit dan dipush ke
+  repository starterkit, lalu gitlink-nya di-commit pada repository Laravel.
+- Installer mendeteksi Laravel fresh/non-fresh yang belum terpasang starterkit;
+  host non-fresh wajib mengonfirmasi penghapusan seluruh data database sebelum
+  instalasi dilanjutkan.
+- Setelah starterkit terpasang, gunakan `starter:setup` untuk database baru atau
+  kosong dan `starter:sync` untuk update rutin pada database yang sudah siap.
 - Perubahan core starterkit wajib commit dan push pada repository starterkit
-  sebelum disinkronkan, diuji, di-commit, dan dipush pada project pengguna.
+  sebelum gitlink baru diuji, di-commit, dan dipush pada project pengguna.

@@ -60,6 +60,23 @@
     --tblr-navbar-bg: #182433;
 }
 
+body[data-starter-layout="horizontal"] {
+    /*
+     * Keep classic browser scrollbar gutters visually continuous with the
+     * horizontal shell. Long pages (for example PowerGrid tables) can expose
+     * the document gutter, while short pages do not have one.
+     */
+    background-color: var(--tblr-body-bg);
+    background-image: linear-gradient(
+        to bottom,
+        #182433 0,
+        #182433 12.5rem,
+        var(--tblr-body-bg) 12.5rem,
+        var(--tblr-body-bg) 100%
+    );
+    background-repeat: no-repeat;
+}
+
 .starter-layout-horizontal::before {
     background: #182433;
     content: "";

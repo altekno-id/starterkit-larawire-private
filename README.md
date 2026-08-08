@@ -249,16 +249,9 @@ Setelah App dibuat:
    kode module sama dengan bagian kedua nama route.
 4. Letakkan migration bisnis pada `database/migrations/apps/sales/`. Isi
    `routes/apps/sales.api.php` hanya jika App membutuhkan API.
-5. Periksa dan terapkan metadata terbaru:
-
-```bash
-php artisan starter:sync sales --dry-run
-php artisan starter:sync sales --force
-```
-
-6. Buka Role Management, berikan module App kepada role yang berhak, lalu pilih
+5. Buka Role Management, berikan module App kepada role yang berhak, lalu pilih
    landing page awal App tersebut.
-7. Arahkan subdomain lokal/production ke folder `public` Laravel yang sama,
+6. Arahkan subdomain lokal/production ke folder `public` Laravel yang sama,
    kemudian uji login, menu, halaman yang diizinkan, dan penolakan akses role
    yang tidak memiliki module.
 

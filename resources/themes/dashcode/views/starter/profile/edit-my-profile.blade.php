@@ -189,16 +189,6 @@
                         </span>
                     </header>
                     <div class="card-body">
-                        <div class="dashcode-profile-security-guide mb-4">
-                            <span class="dashcode-profile-security-guide-icon">
-                                @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'm-0'])
-                            </span>
-                            <div>
-                                <div class="dashcode-profile-security-guide-title">Syarat password baru</div>
-                                <div class="dashcode-profile-security-guide-copy">Minimal 10 karakter serta memiliki huruf besar, huruf kecil, dan angka.</div>
-                            </div>
-                        </div>
-
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label" for="profile-current-password">Password Saat Ini</label>
@@ -220,6 +210,17 @@
                                     </span>
                                 </div>
                                 @error('passwordForm.current_password') <div id="profile-current-password-error" class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <div class="dashcode-profile-security-guide h-100">
+                                    <span class="dashcode-profile-security-guide-icon">
+                                        @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'm-0'])
+                                    </span>
+                                    <div>
+                                        <div class="dashcode-profile-security-guide-title">Syarat password baru</div>
+                                        <div class="dashcode-profile-security-guide-copy">Minimal 10 karakter serta memiliki huruf besar, huruf kecil, dan angka.</div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label" for="profile-new-password">Password Baru</label>

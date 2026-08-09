@@ -191,16 +191,6 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="alert alert-info mb-4" role="note">
-                            <div class="d-flex gap-2">
-                                <span class="alert-icon flex-shrink-0">@include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'm-0'])</span>
-                                <div>
-                                    <div class="fw-medium">Syarat password baru</div>
-                                    <div class="small">Minimal 10 karakter serta memiliki huruf besar, huruf kecil, dan angka.</div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label" for="profile-current-password">Password Saat Ini</label>
@@ -214,6 +204,17 @@
                                     </span>
                                 </div>
                                 @error('passwordForm.current_password') <div id="profile-current-password-error" class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-info h-100 mb-0" role="note">
+                                    <div class="d-flex gap-2">
+                                        <span class="alert-icon flex-shrink-0">@include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'm-0'])</span>
+                                        <div>
+                                            <div class="fw-medium">Syarat password baru</div>
+                                            <div class="small">Minimal 10 karakter serta memiliki huruf besar, huruf kecil, dan angka.</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label" for="profile-new-password">Password Baru</label>

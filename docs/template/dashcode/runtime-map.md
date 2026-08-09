@@ -5,8 +5,9 @@ sama dengan theme lain; struktur serta presentasinya tidak.
 
 | Kebutuhan runtime | Sumber vendor | Pola Dashcode yang dipakai | Runtime utama | State verifikasi |
 |---|---|---|---|---|
-| Shell vertical/horizontal | `blank-page.html`, `assets/js/app.js` | `app-wrapper`, sidebar/horizontal menu native | `templates/layouts/*` | desktop, drawer mobile, collapse, sticky |
+| Shell vertical/horizontal | `blank-page.html`, `assets/js/app.js` | `app-wrapper`, sidebar light tetap terbuka di desktop, horizontal menu native | `templates/layouts/*` | desktop, drawer mobile, sticky |
 | Auth | `signin-one.html`, `signin-two.html` | split auth, card/form Dashcode | `auth/*`, `templates/layouts/auth.blade.php` | normal, error, loading |
+| Loader perpindahan halaman | shared runtime | komponen universal, tidak diberi style Dashcode | `starter-shared::components.navigate-loader` | tampil saat navigasi, hilang setelah selesai |
 | Navigasi akun | `blank-page.html`, `profile.html` | identity trigger dan dropdown Dashcode | `templates/layouts/profile-dropdown.blade.php` | open, keyboard, Livewire navigate |
 | Card dan statistik | `card.html`, `basic-widgets.html` | card putih dan statistic widget Dashcode | settings dan log aktivitas | 1280x768, teks panjang |
 | Button | `buttons.html` | solid/outline/light Dashcode, icon kiri | seluruh starter | hover, focus, disabled, loading |

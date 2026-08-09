@@ -19,6 +19,12 @@ The active template is selected by `STARTER_THEME`; the application navigation l
 
 Each theme owns its navigation partials, theme CSS, JavaScript adapter, icons, auth/error shell, and PowerGrid adapter. `public/assets/starter/` must remain theme-neutral; never place Bootstrap, Tabler, Vuexy, or another vendor selector/variable there. Shared runtime interactions use `data-starter-*` contracts and delegate vendor-specific collapse/dropdown lifecycle work to `window.StarterThemeAdapter` supplied by the active theme.
 
+The page-navigation loader is the deliberate universal visual exception. Every
+theme includes `starter-shared::components.navigate-loader` unchanged and uses
+only `public/assets/starter/css/starter.css` for its presentation. Theme assets
+must not override or duplicate this loader. Livewire action loaders remain a
+separate interaction and may follow the active theme.
+
 ## Cross-theme contract and visual ownership
 
 - Themes share only the product contract: the same information, actions, authorization, validation, loading/empty/error states, accessibility meaning, and responsive capability must remain available.

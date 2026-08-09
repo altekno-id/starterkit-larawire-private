@@ -228,8 +228,7 @@ div[class*="table-responsive"] > [wire\:click\.prevent^="clearFilter("]:first-ch
     stroke-width: 2.5;
 }
 
-/* Navigation and Loader Overlays */
-.starter-navigate-loader,
+/* Livewire action overlay; page navigation loader is shared across themes. */
 .starter-livewire-loader {
     background: color-mix(in srgb, var(--tblr-bg-surface) 88%, transparent);
     bottom: var(--starter-loader-bottom, 0);
@@ -253,17 +252,6 @@ div[class*="table-responsive"] > [wire\:click\.prevent^="clearFilter("]:first-ch
     -webkit-backdrop-filter: blur(4px);
 }
 
-body.starter-is-navigating .starter-navigate-loader {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-body.starter-is-navigating .starter-slot-area > [wire\:id] {
-    filter: blur(2px);
-    opacity: .55;
-    pointer-events: none;
-}
-
 body.starter-livewire-is-loading .starter-livewire-loader {
     opacity: 1;
     pointer-events: auto;
@@ -279,7 +267,6 @@ body.starter-livewire-is-loading .starter-livewire-loader {
 
 @media (prefers-reduced-motion: reduce) {
     .starter-page-body,
-    .starter-navigate-loader,
     .starter-livewire-loader,
     [data-starter-livewire-loading] {
         transition: none;
@@ -406,11 +393,6 @@ body.starter-livewire-is-loading .starter-livewire-loader {
     min-width: 10rem;
 }
 
-.starter-page-loader {
-    transform: translateY(-.75rem);
-    width: min(16rem, calc(100vw - 2rem));
-}
-
 .modal-backdrop {
     --tblr-backdrop-opacity: 0.4;
 }
@@ -531,11 +513,4 @@ body.starter-livewire-is-loading .starter-livewire-loader {
     width: auto;
     object-fit: contain;
     object-position: left center;
-}
-.starter-page-loader-brand-image {
-    height: 2.25rem;
-    max-width: 100%;
-    width: auto;
-    object-fit: contain;
-    object-position: center;
 }

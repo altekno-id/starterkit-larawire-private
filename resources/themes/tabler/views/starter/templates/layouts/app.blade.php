@@ -60,26 +60,7 @@
                             </div>
                         </div>
 
-                        <div class="starter-navigate-loader d-flex align-items-center justify-content-center rounded" aria-label="Memuat..." role="status">
-                            <div class="starter-page-loader text-center">
-                                <div class="mb-3">
-                                    <span class="navbar-brand navbar-brand-autodark justify-content-center">
-                                        <img
-                                            src="{{ $brandLogoUrl }}"
-                                            class="starter-page-loader-brand-image"
-                                            alt="{{ $brandLogoAlt }}"
-                                            data-starter-brand-logo
-                                            data-fallback-src="{{ $defaultBrandLogoUrl }}"
-                                            @if ($clientLogoUrl) data-company-logo="true" @endif
-                                        >
-                                    </span>
-                                </div>
-                                <div class="text-secondary mb-3">Memuat...</div>
-                                <div class="progress progress-sm">
-                                    <div class="progress-bar progress-bar-indeterminate"></div>
-                                </div>
-                            </div>
-                        </div>
+                        @include('starter-shared::components.navigate-loader')
                     </div>
                 </div>
             </div>

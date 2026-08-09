@@ -27,6 +27,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         this.navigating = true;
         clearTimeout(this.navigateLoaderTimer);
         this.positionNavigateLoader();
+        document.querySelector('.starter-navigate-loader')?.setAttribute('aria-hidden', 'false');
         document.body?.classList.add('starter-is-navigating');
     },
     hideNavigateLoader() {
@@ -34,6 +35,7 @@ window.StarterTemplate = Object.assign(window.StarterTemplate || {}, {
         clearTimeout(this.navigateLoaderTimer);
         this.navigateLoaderTimer = setTimeout(() => {
             if (! this.navigating) {
+                document.querySelector('.starter-navigate-loader')?.setAttribute('aria-hidden', 'true');
                 document.body?.classList.remove('starter-is-navigating');
             }
         }, 140);

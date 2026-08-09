@@ -56,13 +56,7 @@
                                 </div>
                             </div>
 
-                            <div class="starter-navigate-loader" aria-label="Memuat..." role="status">
-                                <div class="starter-page-loader text-center">
-                                    <img src="{{ $brandLogoDarkUrl }}" class="starter-page-loader-brand-image" alt="{{ $brandLogoAlt }}" data-starter-brand-logo data-fallback-src="{{ $defaultBrandLogoDarkUrl }}" @if ($clientLogoUrl) data-company-logo="true" @endif>
-                                    <div class="mt-3 text-sm text-slate-500">Memuat...</div>
-                                    <div class="starter-progress mt-3"><span></span></div>
-                                </div>
-                            </div>
+                            @include('starter-shared::components.navigate-loader')
                         </div>
                     </div>
                 </div>

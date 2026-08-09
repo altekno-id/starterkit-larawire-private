@@ -41,6 +41,11 @@ Markup yang terlihat dan CSS vendor tidak boleh dibagi. `data-bs-*` hanya boleh
 digunakan bila bundle vendor aktif memang menggunakannya; nama yang kebetulan
 sama bukan bukti bahwa sebuah pola berasal dari theme lain.
 
+Satu pengecualian visual lintas-theme adalah loader perpindahan halaman yang
+dimiliki shared runtime sesuai `ui-ux.md`. Theme wajib meng-include komponen itu
+tanpa menyalin markup atau memberi override visual. Loader action Livewire bukan
+bagian dari pengecualian ini.
+
 ## Larangan compatibility skin
 
 - Jangan membuat lapisan CSS yang mempertahankan markup theme lama dengan cara

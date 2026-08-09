@@ -168,19 +168,22 @@
                             </div>
                         </div>
 
-                        <h3 class="card-title mt-4">Akses Sistem Khusus</h3>
+                        <h3 class="starter-form-section-title mt-4">Akses Sistem Khusus</h3>
                         <div class="row g-3" data-role-system-access>
                             <div class="col-12">
-                                <label class="form-check form-switch mb-4">
-                                    <input
-                                        id="role-can-manage-settings"
-                                        type="checkbox"
-                                        class="form-check-input"
-                                        wire:model.defer="roleForm.can_manage_settings"
-                                        @disabled($isSuperuserRole)
-                                    >
-                                    <span class="form-check-label">
-                                        <span class="d-flex align-items-center gap-2 fw-semibold mb-1">
+                                <label class="starter-switch-row mb-4">
+                                    <span class="starter-switch-control">
+                                        <input
+                                            id="role-can-manage-settings"
+                                            type="checkbox"
+                                            class="starter-switch-input"
+                                            wire:model.defer="roleForm.can_manage_settings"
+                                            @disabled($isSuperuserRole)
+                                        >
+                                        <span class="starter-switch-track" aria-hidden="true"></span>
+                                    </span>
+                                    <span class="starter-switch-label">
+                                        <span class="starter-switch-title d-flex align-items-center gap-2">
                                             @include('starter.templates.layouts.icon', ['name' => 'settings', 'class' => 'icon-sm text-azure'])
                                             Akses Pengaturan
                                         </span>
@@ -194,16 +197,19 @@
                                 </label>
                                 @error('roleForm.can_manage_settings') <div class="invalid-feedback d-block mt-n3 mb-3">{{ $message }}</div> @enderror
 
-                                <label class="form-check form-switch m-0">
-                                    <input
-                                        id="role-can-view-logs"
-                                        type="checkbox"
-                                        class="form-check-input"
-                                        wire:model.defer="roleForm.can_view_logs"
-                                        @disabled($isSuperuserRole)
-                                    >
-                                    <span class="form-check-label">
-                                        <span class="d-flex align-items-center gap-2 fw-semibold mb-1">
+                                <label class="starter-switch-row m-0">
+                                    <span class="starter-switch-control">
+                                        <input
+                                            id="role-can-view-logs"
+                                            type="checkbox"
+                                            class="starter-switch-input"
+                                            wire:model.defer="roleForm.can_view_logs"
+                                            @disabled($isSuperuserRole)
+                                        >
+                                        <span class="starter-switch-track" aria-hidden="true"></span>
+                                    </span>
+                                    <span class="starter-switch-label">
+                                        <span class="starter-switch-title d-flex align-items-center gap-2">
                                             @include('starter.templates.layouts.icon', ['name' => 'history', 'class' => 'icon-sm text-purple'])
                                             Lihat Log Aktivitas
                                         </span>

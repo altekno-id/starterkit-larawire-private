@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            <h3 class="card-title mt-4">Profil Perusahaan</h3>
+            <h3 class="starter-form-section-title mt-4">Profil Perusahaan</h3>
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Nama Perusahaan</label>
@@ -69,7 +69,7 @@
                 </div>
             </div>
 
-            <h3 class="card-title mt-4">Kontak</h3>
+            <h3 class="starter-form-section-title mt-4">Kontak</h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Email Perusahaan</label>

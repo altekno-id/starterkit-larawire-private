@@ -1022,6 +1022,7 @@ summary::-webkit-details-marker {
 .badge {
     align-items: center;
     gap: .25rem;
+    text-transform: none;
 }
 
 .avatar,
@@ -1044,13 +1045,33 @@ summary::-webkit-details-marker {
 
 .form-select {
     appearance: none;
+    background-color: #fff;
     background-position: right .75rem center;
     background-repeat: no-repeat;
     background-size: 1rem .75rem;
+    border: 1px solid var(--starter-slate-200);
+    border-radius: .25rem;
+    color: var(--starter-slate-900);
     display: block;
+    font-size: .875rem;
+    line-height: 1.25rem;
     padding-left: .75rem;
     padding-right: 2.25rem;
+    padding-bottom: .5rem;
+    padding-top: .5rem;
+    transition: border-color .15s ease, box-shadow .15s ease;
     width: 100%;
+}
+
+.form-select:focus {
+    border-color: var(--starter-primary);
+    outline: 0;
+}
+
+.form-select:disabled {
+    background-color: var(--starter-slate-100);
+    color: var(--starter-slate-500);
+    cursor: not-allowed;
 }
 
 .form-control,
@@ -1078,6 +1099,18 @@ summary::-webkit-details-marker {
 .is-invalid ~ .invalid-feedback,
 .invalid-feedback.d-block { display: block; }
 .form-hint { color: var(--starter-slate-500); font-size: .75rem; margin-top: .4rem; }
+.form-label.required::after {
+    color: var(--starter-danger);
+    content: " *";
+}
+.starter-form-section-title,
+.starter-settings-section-title {
+    color: var(--starter-slate-900);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5rem;
+    margin-bottom: 1rem;
+}
 .form-control-plaintext { color: var(--starter-slate-700); display: block; padding: .5rem 0; width: 100%; }
 .form-footer { margin-top: 1.5rem; }
 
@@ -1672,7 +1705,6 @@ body.dashcode-auth {
 }
 
 /* Native Dashcode switch used for boolean settings. */
-.starter-settings-section-title { margin-bottom: 1rem; }
 .starter-switch-row {
     align-items: flex-start;
     cursor: pointer;
@@ -1722,6 +1754,7 @@ body.dashcode-auth {
 .starter-switch-input:focus-visible + .starter-switch-track {
     box-shadow: 0 0 0 3px rgba(70, 105, 250, .2);
 }
+.starter-switch-input:disabled + .starter-switch-track { opacity: .55; }
 .starter-switch-label { min-width: 0; }
 .starter-switch-title {
     color: var(--starter-slate-700);

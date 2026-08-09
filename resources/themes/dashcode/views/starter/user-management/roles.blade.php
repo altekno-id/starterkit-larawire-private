@@ -30,12 +30,14 @@
                             <h3 class="modal-title" id="role-users-modal-title">User dalam Role</h3>
                             <div class="text-secondary small">{{ $roleUsersRoleName }} · {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal(count($roleUsers)) }} user</div>
                         </div>
-                        <button type="button" class="btn-close" aria-label="Tutup" wire:click="closeRoleUsersModal"></button>
+                        <button type="button" class="dashcode-icon-button" aria-label="Tutup" wire:click="closeRoleUsersModal">
+                            @include('starter.templates.layouts.icon', ['name' => 'circle-x', 'class' => 'icon-sm'])
+                        </button>
                     </div>
                     <div class="modal-body overflow-auto" style="max-height: min(32rem, calc(100vh - 14rem));">
-                        <div class="list-group list-group-flush">
+                        <div class="dashcode-stacked-list dashcode-stacked-list-flush">
                             @forelse ($roleUsers as $user)
-                                <div class="list-group-item px-0">
+                                <div class="dashcode-stacked-list-item px-0">
                                     <div class="d-flex align-items-center gap-3">
                                         <span class="avatar avatar-sm">{{ str($user['name'])->substr(0, 1)->upper() }}</span>
                                         <div class="overflow-hidden">
@@ -45,9 +47,9 @@
                                     </div>
                                 </div>
                             @empty
-                                <div class="empty">
-                                    <p class="empty-title">Belum ada user</p>
-                                    <p class="empty-subtitle text-secondary">Role ini belum digunakan oleh akun login mana pun.</p>
+                                <div class="dashcode-empty-state">
+                                    <p class="dashcode-empty-state-title">Belum ada user</p>
+                                    <p class="dashcode-empty-state-description">Role ini belum digunakan oleh akun login mana pun.</p>
                                 </div>
                             @endforelse
                         </div>
@@ -74,11 +76,13 @@
                                 <span class="font-monospace">{{ $roleAccessRoleCode }}</span>
                             </div>
                         </div>
-                        <button type="button" class="btn-close" aria-label="Tutup" wire:click="closeRoleAccessModal"></button>
+                        <button type="button" class="dashcode-icon-button" aria-label="Tutup" wire:click="closeRoleAccessModal">
+                            @include('starter.templates.layouts.icon', ['name' => 'circle-x', 'class' => 'icon-sm'])
+                        </button>
                     </div>
                     <div class="modal-body">
                         @if ($roleAccessIsFull)
-                            <div class="alert alert-success" role="note">
+                            <div class="dashcode-alert dashcode-alert-success" role="note">
                                 <div class="d-flex gap-2">
                                     @include('starter.templates.layouts.icon', ['name' => 'shield-check', 'class' => 'icon-sm flex-shrink-0 mt-1'])
                                     <div>
@@ -91,8 +95,8 @@
 
                         @if (! $roleAccessIsFull)
                             <div class="card card-sm mb-3">
-                                <div class="list-group list-group-flush">
-                                    <div class="list-group-item">
+                                <div class="dashcode-stacked-list">
+                                    <div class="dashcode-stacked-list-item">
                                         <div class="d-flex gap-2">
                                             @include('starter.templates.layouts.icon', ['name' => $roleAccessCanManageSettings ? 'settings' : 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1 '.($roleAccessCanManageSettings ? 'text-azure' : 'text-secondary')])
                                             <div>
@@ -107,7 +111,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="list-group-item">
+                                    <div class="dashcode-stacked-list-item">
                                         <div class="d-flex gap-2">
                                             @include('starter.templates.layouts.icon', ['name' => $roleAccessCanViewLogs ? 'history' : 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1 '.($roleAccessCanViewLogs ? 'text-purple' : 'text-secondary')])
                                             <div>
@@ -134,9 +138,9 @@
                                         <div class="fw-semibold">{{ $app['name'] }}</div>
                                         <span class="badge bg-secondary-lt ms-auto">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal(count($app['modules'])) }} module</span>
                                     </div>
-                                    <div class="list-group list-group-flush">
+                                    <div class="dashcode-stacked-list">
                                         @foreach ($app['modules'] as $module)
-                                            <div class="list-group-item">
+                                            <div class="dashcode-stacked-list-item">
                                                 <div class="d-flex align-items-baseline gap-2">
                                                     <span class="fw-semibold">{{ $module['name'] }}</span>
                                                     <span class="small text-secondary font-monospace">{{ $module['code'] }}</span>
@@ -149,12 +153,12 @@
                                     </div>
                                 </div>
                             @empty
-                                <div class="empty py-4">
-                                    <div class="empty-icon">
+                                <div class="dashcode-empty-state py-4">
+                                    <div class="dashcode-empty-state-icon">
                                         @include('starter.templates.layouts.icon', ['name' => 'shield-lock'])
                                     </div>
-                                    <p class="empty-title">Belum ada akses module</p>
-                                    <p class="empty-subtitle text-secondary">Role ini belum memiliki app atau module yang dapat diakses.</p>
+                                    <p class="dashcode-empty-state-title">Belum ada akses module</p>
+                                    <p class="dashcode-empty-state-description">Role ini belum memiliki app atau module yang dapat diakses.</p>
                                 </div>
                             @endforelse
                         </div>

@@ -11,6 +11,10 @@ Use the installed active theme. `docs/template/<theme>/` is the complete upstrea
 
 When introducing a new theme, first paste its vendor distribution intact into `docs/template/<theme>/`; then generate the starter Blade contract in `resources/themes/<theme>/views/starter/`, copy required runtime assets to `public/themes/<theme>/assets/`, register paths, PowerGrid adapter, and the layout-to-view map in `config/starter.php`, and verify `starter:publish-assets`, every registered layout, modal, auth/error pages, and PowerGrid.
 
+The evidence gate, runtime component map, forbidden compatibility skin, and
+acceptance matrix for a new or audited theme are mandatory in
+`theme-integration.md`.
+
 The active template is selected by `STARTER_THEME`; the application navigation layout is selected only by `STARTER_LAYOUT`. Every theme owns its layout-to-view mapping and must register existing Blade views for the shared `vertical` and `horizontal` layout contract. Every registered theme must preserve the same shell features and responsive behavior in both layouts. Do not add per-layout environment keys.
 
 Each theme owns its navigation partials, theme CSS, JavaScript adapter, icons, auth/error shell, and PowerGrid adapter. `public/assets/starter/` must remain theme-neutral; never place Bootstrap, Tabler, Vuexy, or another vendor selector/variable there. Shared runtime interactions use `data-starter-*` contracts and delegate vendor-specific collapse/dropdown lifecycle work to `window.StarterThemeAdapter` supplied by the active theme.

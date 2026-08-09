@@ -106,11 +106,11 @@
 
                             <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
                                 @if ($isSuperuserRole)
-                                    <span class="status status-red status-lite">Role Sistem</span>
+                                    <span class="badge bg-danger-500 bg-opacity-30 text-danger-500 rounded-3xl">Role Sistem</span>
                                 @elseif ($isCreating)
-                                    <span class="status status-secondary status-lite">Belum Disimpan</span>
+                                    <span class="badge bg-slate-500 bg-opacity-30 text-slate-500 rounded-3xl">Belum Disimpan</span>
                                 @else
-                                    <span class="status status-blue status-lite">Role Aktif</span>
+                                    <span class="badge bg-primary-500 bg-opacity-30 text-primary-500 rounded-3xl">Role Aktif</span>
                                 @endif
                                 <span class="badge bg-primary-lt text-primary">
                                     {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppCount) }} app · {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedModuleCount) }} module
@@ -266,7 +266,7 @@
                         </div>
                     </div>
 
-                    <div class="accordion accordion-inverted" id="role-module-access">
+                    <div class="dashcode-access-accordion" id="role-module-access">
                         @forelse ($modules as $appName => $appModules)
                             @php
                                 $grantedAppModules = $isSuperuserRole
@@ -279,10 +279,10 @@
                                 $appAccordionId = 'role-app-modules-'.$appKey;
                             @endphp
 
-                            <div class="accordion-item" wire:key="role-app-modules-{{ $appKey }}">
-                                <div class="accordion-header">
+                            <div class="dashcode-access-accordion-item" wire:key="role-app-modules-{{ $appKey }}">
+                                <div class="dashcode-access-accordion-header">
                                     <button
-                                        class="accordion-button"
+                                        class="dashcode-access-accordion-button"
                                         type="button"
                                         x-on:click="toggleModuleApp(@js($appKey))"
                                         x-bind:class="{ collapsed: ! isModuleAppExpanded(@js($appKey)) }"
@@ -296,7 +296,7 @@
                                         <span class="badge {{ $grantedAppModules > 0 ? 'bg-primary-lt text-primary' : 'bg-secondary-lt' }}">
                                             {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($grantedAppModules) }} / {{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appModules->count()) }} module
                                         </span>
-                                        <div class="accordion-button-toggle">
+                                        <div class="dashcode-access-accordion-toggle">
                                             @include('starter.templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'icon-1'])
                                         </div>
                                     </button>
@@ -304,10 +304,10 @@
 
                                 <div
                                     id="{{ $appAccordionId }}"
-                                    class="accordion-collapse collapse"
+                                    class="dashcode-access-accordion-panel"
                                     x-bind:class="{ show: isModuleAppExpanded(@js($appKey)) }"
                                 >
-                                    <div class="accordion-body">
+                                    <div class="dashcode-access-accordion-body">
                                         <div class="vstack gap-3">
                                             @foreach ($appModules as $module)
                                                 @php
@@ -367,9 +367,9 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="empty py-5">
-                                <p class="empty-title">Belum ada app dan module</p>
-                                <p class="empty-subtitle text-secondary">Sinkronkan konfigurasi app sebelum membuat role.</p>
+                            <div class="dashcode-empty-state py-5">
+                                <p class="dashcode-empty-state-title">Belum ada app dan module</p>
+                                <p class="dashcode-empty-state-description">Sinkronkan konfigurasi app sebelum membuat role.</p>
                             </div>
                         @endforelse
                     </div>

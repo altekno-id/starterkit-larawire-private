@@ -47,6 +47,7 @@ Read [project context](docs/rules/project-context.md) once when unfamiliar with 
 | Route/menu/module/role | `access-control.md` |
 | Model/mutation/transaction | `audit-logging.md` |
 | Livewire/form/table/modal/loader | `ui-ux.md` |
+| Theme baru/audit atau adapter theme | `theme-integration.md`, `ui-ux.md` |
 | Config/upload/login/lock screen | `security-and-config.md` |
 | PHP/Laravel conventions | `code-style.md` |
 | Query/pagination/cache/bulk/assets | `performance.md` |
@@ -64,6 +65,7 @@ Start with the minimum rules below, then add every owner rule touched by the cha
 | Small known bug/refactor | `feature-development.md`, closest sibling/test, owner rule |
 | Existing-App CRUD | `feature-development.md`, `architecture.md`, `audit-logging.md`, `testing.md` |
 | UI/interaction | `ui-ux.md`, `testing.md`, template atlas search |
+| Theme baru/audit theme | `theme-integration.md`, `ui-ux.md`, `testing.md`, runtime map |
 | Schema/data change | `feature-development.md`, `code-style.md`, `testing.md` |
 | New App/subdomain | `app-subdomain.md`, `architecture.md`, `access-control.md`, `testing.md` |
 | Configuration/auth/security/deployment | `security-and-config.md`, `deployment.md`, `testing.md` |

@@ -4,6 +4,10 @@
 > vendor adalah referensi desain; runtime Laravel berada di
 > `resources/themes/dashcode/` dan `public/themes/dashcode/`.
 
+Pemetaan komponen yang benar-benar dipakai runtime dan state verifikasinya ada
+di [`runtime-map.md`](runtime-map.md). Atlas ini untuk menemukan kandidat;
+runtime map adalah evidence implementasinya.
+
 ## Cara memakai atlas
 
 1. Tentukan tujuan halaman, data, aksi utama, dan state yang perlu terlihat.

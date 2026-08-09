@@ -1,5 +1,5 @@
 <div class="dashcode-profile-page" x-data="{ activeTab: @js($activeTab) }">
-    <div class="page-header d-print-none mt-0 mb-3" aria-label="Header halaman">
+    <div class="page-header mt-0 mb-3" aria-label="Header halaman">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle">Starter / Profil Saya</div>
@@ -9,13 +9,13 @@
     </div>
 
     @if ($login->must_change_password)
-        <div class="alert alert-warning mb-3" role="alert">
+        <div class="dashcode-alert dashcode-alert-warning mb-3" role="alert">
             <div class="d-flex gap-3">
-                <span class="alert-icon flex-shrink-0">
+                <span class="dashcode-alert-icon flex-shrink-0">
                     @include('starter.templates.layouts.icon', ['name' => 'alert-triangle', 'class' => 'm-0'])
                 </span>
                 <div>
-                    <h3 class="alert-title">Password sementara harus diganti</h3>
+                    <h3 class="dashcode-alert-title">Password sementara harus diganti</h3>
                     <div>
                         Masukkan password sementara yang diberikan admin pada kolom <strong>Password Saat Ini</strong>,
                         kemudian buat <strong>Password Baru</strong>. Anda dapat melanjutkan ke halaman lain setelah password berhasil diubah.
@@ -41,10 +41,10 @@
                     </div>
 
                     <h4 class="subheader">Pengaturan Akun</h4>
-                    <div class="list-group list-group-transparent mb-4" id="profile-settings-tabs" role="tablist">
+                    <div class="dashcode-profile-nav mb-4" id="profile-settings-tabs" role="tablist">
                         <a
                             href="#account-details"
-                            class="list-group-item list-group-item-action d-flex align-items-center {{ $login->must_change_password ? 'disabled' : '' }}"
+                            class="dashcode-profile-nav-item d-flex align-items-center {{ $login->must_change_password ? 'disabled' : '' }}"
                             @unless ($login->must_change_password) x-on:click.prevent="activeTab = 'account-details'" @endunless
                             x-bind:class="{ active: activeTab === 'account-details' }"
                             role="tab"
@@ -58,7 +58,7 @@
                         </a>
                         <a
                             href="#security"
-                            class="list-group-item list-group-item-action d-flex align-items-center"
+                            class="dashcode-profile-nav-item d-flex align-items-center"
                             x-on:click.prevent="activeTab = 'security'"
                             x-bind:class="{ active: activeTab === 'security' }"
                             role="tab"
@@ -74,16 +74,16 @@
                     </div>
 
                     <h4 class="subheader">Ringkasan Login</h4>
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item px-0 d-flex justify-content-between">
+                    <div class="dashcode-stacked-list dashcode-stacked-list-flush">
+                        <div class="dashcode-stacked-list-item px-0 d-flex justify-content-between gap-3">
                             <span class="text-secondary">Email Terverifikasi</span>
                             <span class="fw-medium">{{ $login->email_verified_at?->format('d M Y H:i') ?? '-' }}</span>
                         </div>
-                        <div class="list-group-item px-0 d-flex justify-content-between">
+                        <div class="dashcode-stacked-list-item px-0 d-flex justify-content-between gap-3">
                             <span class="text-secondary">Metode Login</span>
                             <span class="fw-medium">Username: {{ $login->username }}</span>
                         </div>
-                        <div class="list-group-item px-0 d-flex justify-content-between">
+                        <div class="dashcode-stacked-list-item px-0 d-flex justify-content-between gap-3">
                             <span class="text-secondary">Login Terakhir</span>
                             <span class="fw-medium">{{ $login->last_login_at?->format('d M Y H:i') ?? '-' }}</span>
                         </div>

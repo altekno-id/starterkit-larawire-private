@@ -33,7 +33,9 @@
     <div class="modal-dialog modal-{{ $size }} relative w-auto pointer-events-none" role="document">
         <div class="modal-content relative flex w-full flex-col bg-white text-current pointer-events-auto">
             @if ($closeButton)
-                <button type="button" class="btn-close" @if ($cancelAction) wire:click="{{ $cancelAction }}" @else data-bs-dismiss="modal" @endif aria-label="Tutup"></button>
+                <button type="button" class="dashcode-icon-button dashcode-modal-close" @if ($cancelAction) wire:click="{{ $cancelAction }}" @else data-bs-dismiss="modal" @endif aria-label="Tutup">
+                    @include('starter.templates.layouts.icon', ['name' => 'circle-x', 'class' => 'icon-sm'])
+                </button>
             @endif
 
             @if ($password)

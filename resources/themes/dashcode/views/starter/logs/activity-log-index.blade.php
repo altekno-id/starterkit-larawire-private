@@ -85,7 +85,9 @@
                             <h3 class="modal-title" id="activity-log-detail-title">Detail Aktivitas</h3>
                             <div class="text-secondary small">Informasi pelaku, sumber akses, dan perubahan data.</div>
                         </div>
-                        <button type="button" class="btn-close" aria-label="Tutup" wire:click="closeActionDetail"></button>
+                        <button type="button" class="dashcode-icon-button" aria-label="Tutup" wire:click="closeActionDetail">
+                            @include('starter.templates.layouts.icon', ['name' => 'circle-x', 'class' => 'icon-sm'])
+                        </button>
                     </div>
                     <div class="modal-body p-0">
                         @if ($selectedLogs->isNotEmpty())
@@ -227,8 +229,8 @@
                                 </div>
                             </div>
                         @else
-                            <div class="empty py-5">
-                                <p class="empty-title">Detail aktivitas tidak ditemukan</p>
+                            <div class="dashcode-empty-state py-5">
+                                <p class="dashcode-empty-state-title">Detail aktivitas tidak ditemukan</p>
                             </div>
                         @endif
                     </div>

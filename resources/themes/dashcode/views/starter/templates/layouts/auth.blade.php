@@ -61,7 +61,7 @@
                         </div>
 
                         @if (session('starter-auth-message'))
-                            <div class="alert alert-warning mb-4" role="alert">{{ session('starter-auth-message') }}</div>
+                            <div class="dashcode-alert dashcode-alert-warning mb-4" role="alert">{{ session('starter-auth-message') }}</div>
                         @endif
 
                         {{ $slot }}

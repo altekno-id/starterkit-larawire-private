@@ -16,14 +16,19 @@
     </div>
 
     @if ($temporaryPassword)
-        <div class="alert alert-warning alert-dismissible" role="alert" data-temporary-credentials-alert>
-            <div>
-                <h3 class="alert-title">Simpan kredensial sementara ini sekarang</h3>
+        <div class="dashcode-alert dashcode-alert-warning" role="alert" data-temporary-credentials-alert>
+            <span class="dashcode-alert-icon flex-shrink-0">
+                @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'icon-sm'])
+            </span>
+            <div class="flex-fill">
+                <h3 class="dashcode-alert-title">Simpan kredensial sementara ini sekarang</h3>
                 <div>Username: <strong class="font-monospace">{{ $temporaryPasswordUsername }}</strong></div>
                 <div>Password: <strong class="font-monospace">{{ $temporaryPassword }}</strong></div>
                 <div class="small mt-1">Password tidak akan ditampilkan lagi. User wajib menggantinya setelah login.</div>
             </div>
-            <button type="button" class="btn-close" wire:click="dismissTemporaryPassword" aria-label="Tutup" data-temporary-credentials-dismiss></button>
+            <button type="button" class="dashcode-icon-button ms-auto" wire:click="dismissTemporaryPassword" aria-label="Tutup" data-temporary-credentials-dismiss>
+                @include('starter.templates.layouts.icon', ['name' => 'circle-x', 'class' => 'icon-sm'])
+            </button>
         </div>
     @endif
 
@@ -111,17 +116,22 @@
                     </div>
                     <div class="card-body">
                         @if (! $selectedRole)
-                            <div class="empty py-4">
-                                <div class="empty-icon">
+                            <div class="dashcode-empty-state py-4">
+                                <div class="dashcode-empty-state-icon">
                                     @include('starter.templates.layouts.icon', ['name' => 'shield-lock'])
                                 </div>
-                                <p class="empty-title">Pilih role</p>
-                                <p class="empty-subtitle text-secondary">Akses app dan module dari role akan ditampilkan di sini.</p>
+                                <p class="dashcode-empty-state-title">Pilih role</p>
+                                <p class="dashcode-empty-state-description">Akses app dan module dari role akan ditampilkan di sini.</p>
                             </div>
                         @elseif ($selectedRoleModules->isEmpty())
-                            <div class="alert alert-warning mb-0" role="alert">
-                                <h3 class="alert-title">Tidak ada akses module</h3>
-                                Role ini belum diberi akses ke module apa pun.
+                            <div class="dashcode-alert dashcode-alert-warning mb-0" role="alert">
+                                <span class="dashcode-alert-icon flex-shrink-0">
+                                    @include('starter.templates.layouts.icon', ['name' => 'alert-triangle', 'class' => 'icon-sm'])
+                                </span>
+                                <div>
+                                    <h3 class="dashcode-alert-title">Tidak ada akses module</h3>
+                                    Role ini belum diberi akses ke module apa pun.
+                                </div>
                             </div>
                         @else
                             <div class="vstack gap-4">
@@ -131,9 +141,9 @@
                                             <div class="fw-semibold">{{ $appName }}</div>
                                             <span class="badge bg-secondary-lt">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($modules->count()) }} module</span>
                                         </div>
-                                        <div class="list-group list-group-flush border rounded">
+                                        <div class="dashcode-stacked-list">
                                             @foreach ($modules as $module)
-                                                <div class="list-group-item" wire:key="role-access-module-{{ $module->id }}">
+                                                <div class="dashcode-stacked-list-item" wire:key="role-access-module-{{ $module->id }}">
                                                     <div class="fw-semibold">{{ $module->name }}</div>
                                                     <div class="small text-secondary">
                                                         <span class="font-monospace">{{ $module->code }}</span>

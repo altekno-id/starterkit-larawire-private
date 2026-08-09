@@ -5,7 +5,7 @@
         <div class="text-secondary">{{ $login->role?->name ?? 'User' }}</div>
     </div>
 
-    <div class="alert alert-info" role="status">
+    <div class="dashcode-alert dashcode-alert-info" role="status">
         <div class="d-flex gap-2">
             @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'icon-sm flex-shrink-0 mt-1'])
             <div>

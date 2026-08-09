@@ -14,12 +14,19 @@
     @endunless
 
     @if ($temporaryPassword)
-        <div class="alert alert-warning alert-dismissible" role="alert" data-temporary-credentials-alert>
-            <h3 class="alert-title">Simpan kredensial sementara ini sekarang</h3>
-            <div>Username: <strong class="font-monospace">{{ $temporaryPasswordUsername }}</strong></div>
-            <div>Password: <strong class="font-monospace">{{ $temporaryPassword }}</strong></div>
-            <div class="small mt-1">Password tidak akan ditampilkan lagi dan pengguna wajib menggantinya saat login.</div>
-            <button type="button" class="btn-close" wire:click="dismissTemporaryPassword" aria-label="Tutup"></button>
+        <div class="dashcode-alert dashcode-alert-warning" role="alert" data-temporary-credentials-alert>
+            <span class="dashcode-alert-icon flex-shrink-0">
+                @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'icon-sm'])
+            </span>
+            <div class="flex-fill">
+                <h3 class="dashcode-alert-title">Simpan kredensial sementara ini sekarang</h3>
+                <div>Username: <strong class="font-monospace">{{ $temporaryPasswordUsername }}</strong></div>
+                <div>Password: <strong class="font-monospace">{{ $temporaryPassword }}</strong></div>
+                <div class="small mt-1">Password tidak akan ditampilkan lagi dan pengguna wajib menggantinya saat login.</div>
+            </div>
+            <button type="button" class="dashcode-icon-button ms-auto" wire:click="dismissTemporaryPassword" aria-label="Tutup">
+                @include('starter.templates.layouts.icon', ['name' => 'circle-x', 'class' => 'icon-sm'])
+            </button>
         </div>
     @endif
 

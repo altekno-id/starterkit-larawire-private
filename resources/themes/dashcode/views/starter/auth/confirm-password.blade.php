@@ -7,7 +7,7 @@
         <div class="text-secondary">Verifikasi diperlukan sebelum membuka pengaturan sensitif.</div>
     </div>
 
-    <div class="alert alert-info" role="status">
+    <div class="dashcode-alert dashcode-alert-info" role="status">
         <div class="d-flex gap-2">
             @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm flex-shrink-0 mt-1'])
             <div>Konfirmasi ini berlaku sementara selama session aktif.</div>

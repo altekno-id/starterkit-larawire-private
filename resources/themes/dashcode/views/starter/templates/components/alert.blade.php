@@ -12,8 +12,8 @@
     };
 @endphp
 
-<div class="alert dashcode-alert alert-{{ $type }} {{ $extraClass }}" role="alert" data-starter-alert>
-    <span class="alert-icon flex-shrink-0">
+<div class="dashcode-alert dashcode-alert-{{ $type }} {{ $extraClass }}" role="alert" data-starter-alert>
+    <span class="dashcode-alert-icon flex-shrink-0">
         @include('starter.templates.layouts.icon', ['name' => $icon, 'class' => 'm-0'])
     </span>
 
@@ -26,6 +26,8 @@
     </div>
 
     @if ($dismissible)
-        <button type="button" class="btn-close ms-auto" aria-label="Tutup" data-starter-alert-dismiss></button>
+        <button type="button" class="dashcode-icon-button ms-auto" aria-label="Tutup" data-starter-alert-dismiss>
+            @include('starter.templates.layouts.icon', ['name' => 'circle-x', 'class' => 'icon-sm'])
+        </button>
     @endif
 </div>

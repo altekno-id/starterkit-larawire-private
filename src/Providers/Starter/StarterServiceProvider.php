@@ -283,6 +283,18 @@ class StarterServiceProvider extends ServiceProvider
             'datatable.multi_select.all' => 'Semua',
             'datatable.select.select' => 'Pilih',
             'datatable.select.all' => 'Semua',
+            'datatable.input_text_options.is' => 'Sama dengan',
+            'datatable.input_text_options.is_not' => 'Tidak sama dengan',
+            'datatable.input_text_options.contains' => 'Mengandung',
+            'datatable.input_text_options.contains_not' => 'Tidak mengandung',
+            'datatable.input_text_options.starts_with' => 'Dimulai dengan',
+            'datatable.input_text_options.ends_with' => 'Diakhiri dengan',
+            'datatable.input_text_options.is_null' => 'Tidak ada',
+            'datatable.input_text_options.is_not_null' => 'Ada',
+            'datatable.input_text_options.is_blank' => 'Kosong',
+            'datatable.input_text_options.is_not_blank' => 'Tidak kosong',
+            'datatable.input_text_options.is_empty' => 'Kosong atau tidak ada',
+            'datatable.input_text_options.is_not_empty' => 'Tidak kosong dan ada',
         ], (string) config('app.locale'), 'livewire-powergrid');
     }
 

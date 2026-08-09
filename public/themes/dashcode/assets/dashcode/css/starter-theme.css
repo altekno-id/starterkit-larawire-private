@@ -1598,16 +1598,10 @@ body.dashcode-auth {
 .starter-error-content h1 { color: var(--starter-slate-900); font-size: 2rem; font-weight: 700; }
 .starter-error-content p { color: var(--starter-slate-500); margin: .75rem auto 1.5rem; }
 
-/* Settings summary cards follow Dashcode's colored statistic widgets. */
-.dashcode-settings-summary {
-    background: #fff;
-    border: 1px solid var(--starter-slate-200);
-    box-shadow: none;
-}
-.dashcode-settings-summary > .card-body { padding: 1rem; }
+/* Settings summary follows Dashcode's white statistic-card widgets. */
 .starter-settings-stat {
+    background: #fff;
     border: 0;
-    box-shadow: none;
     min-height: 6.25rem;
 }
 .starter-settings-stat .card-body {
@@ -1616,29 +1610,34 @@ body.dashcode-auth {
     flex-direction: row;
     padding: 1rem;
 }
-.starter-settings-stat-company { background: #e5f9ff; }
-.starter-settings-stat-role { background: #ffede5; }
-.starter-settings-stat-user { background: #eaf9f2; }
-.starter-settings-stat-app { background: #eae5ff; }
 .starter-settings-stat-icon {
     align-items: center;
+    border-radius: 9999px;
     display: inline-flex;
     flex: 0 0 auto;
+    height: 3rem;
     justify-content: center;
+    width: 3rem;
 }
 .starter-settings-stat-icon .starter-icon {
-    height: 2.75rem;
-    width: 2.75rem;
+    height: 1.75rem;
+    width: 1.75rem;
 }
-.starter-settings-stat-company .starter-settings-stat-icon { color: #0cb9e8; }
-.starter-settings-stat-role .starter-settings-stat-icon { color: #f9734f; }
-.starter-settings-stat-user .starter-settings-stat-icon { color: #16a36a; }
-.starter-settings-stat-app .starter-settings-stat-icon { color: #6650d8; }
+.starter-settings-stat-company .starter-settings-stat-icon { background: #e5f9ff; color: #0cb9e8; }
+.starter-settings-stat-role .starter-settings-stat-icon { background: #ffede5; color: #f9734f; }
+.starter-settings-stat-user .starter-settings-stat-icon { background: #eaf9f2; color: #16a36a; }
+.starter-settings-stat-app .starter-settings-stat-icon { background: #eae5ff; color: #6650d8; }
 .starter-settings-stat-label {
     color: var(--starter-slate-700);
     font-size: .875rem;
     font-weight: 500;
     margin-bottom: .2rem;
+}
+.starter-settings-stat-value {
+    color: var(--starter-slate-900);
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.5rem;
 }
 
 /* Native Dashcode switch used for boolean settings. */

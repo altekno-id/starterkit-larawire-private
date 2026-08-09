@@ -37,9 +37,7 @@
         </div>
     </div>
 
-    <div class="card dashcode-settings-summary mb-5">
-      <div class="card-body p-4">
-       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="card starter-settings-stat starter-settings-stat-company">
             <div class="card-body flex items-center gap-4 p-4">
                 <span class="starter-settings-stat-icon" aria-hidden="true">
@@ -47,7 +45,7 @@
                 </span>
                 <div class="overflow-hidden">
                     <div class="starter-settings-stat-label">Perusahaan</div>
-                    <div class="fw-semibold text-truncate">{{ $client->name }}</div>
+                    <div class="starter-settings-stat-value text-truncate">{{ $client->name }}</div>
                 </div>
             </div>
         </div>
@@ -58,7 +56,7 @@
                 </span>
                 <div>
                     <div class="starter-settings-stat-label">Role</div>
-                    <div class="fw-semibold">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($roleCount) }} role terdaftar</div>
+                    <div class="starter-settings-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($roleCount) }} role terdaftar</div>
                 </div>
             </div>
         </div>
@@ -69,7 +67,7 @@
                 </span>
                 <div>
                     <div class="starter-settings-stat-label">User</div>
-                    <div class="fw-semibold">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($userCount) }} akun dikelola</div>
+                    <div class="starter-settings-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($userCount) }} akun dikelola</div>
                 </div>
             </div>
         </div>
@@ -80,12 +78,10 @@
                 </span>
                 <div>
                     <div class="starter-settings-stat-label">Total Aplikasi</div>
-                    <div class="fw-semibold">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appCount) }} aplikasi tersedia</div>
+                    <div class="starter-settings-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appCount) }} aplikasi tersedia</div>
                 </div>
             </div>
         </div>
-       </div>
-      </div>
     </div>
 
     <div class="card dashcode-settings-panel">

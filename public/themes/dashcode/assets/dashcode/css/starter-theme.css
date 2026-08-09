@@ -1365,11 +1365,16 @@ body.starter-is-navigating .starter-slot-area > [wire\:id],
 .starter-pg-pagination {
     align-items: center;
     display: flex;
-    flex-wrap: wrap;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
     gap: .75rem;
     justify-content: flex-end;
 }
-.starter-pg-record-count { color: var(--starter-slate-600); font-size: .875rem; }
+.starter-pg-record-count {
+    color: var(--starter-slate-600);
+    font-size: .75rem;
+    white-space: nowrap;
+}
 .starter-pg-pages { align-items: center; display: flex; gap: .3rem; }
 .starter-pg-page {
     align-items: center;

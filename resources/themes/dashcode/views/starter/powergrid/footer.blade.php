@@ -4,7 +4,6 @@
     <div class="{{ theme_style($theme, 'footer.footer_with_pagination') }}">
         @if (filled(data_get($setUp, 'footer.perPage')) && count(data_get($setUp, 'footer.perPageValues')) > 1)
             <label class="starter-pg-per-page">
-                <span>Data per halaman</span>
                 <span class="relative">
                     <select wire:model.live="setUp.footer.perPage" class="{{ theme_style($theme, 'footer.select') }}">
                         @foreach (data_get($setUp, 'footer.perPageValues') as $value)
@@ -15,6 +14,7 @@
                         <x-livewire-powergrid::icons.down class="w-4 h-4" />
                     </span>
                 </span>
+                <span>Data per halaman</span>
             </label>
         @endif
 

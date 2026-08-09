@@ -1331,7 +1331,12 @@ body.starter-is-navigating .starter-slot-area > [wire\:id],
 .starter-pg-filter-multiselect { min-width: 9rem; }
 .starter-pg-search { min-width: 15rem; padding-left: 2.35rem; }
 .starter-pg-search-icon { color: var(--starter-slate-400); height: 1.1rem; left: .7rem; position: absolute; top: 50%; transform: translateY(-50%); width: 1.1rem; }
-.starter-pg-page-size { min-height: 2.25rem; width: 5rem; }
+.starter-pg-page-size {
+    font-size: .75rem;
+    line-height: 1rem;
+    min-height: 2.25rem;
+    width: 5rem;
+}
 .starter-pg-footer {
     background: #fff;
     border-top: 1px solid var(--starter-slate-100);
@@ -1348,6 +1353,7 @@ body.starter-is-navigating .starter-slot-area > [wire\:id],
     display: inline-flex;
     font-size: .75rem;
     gap: .65rem;
+    line-height: 1rem;
     white-space: nowrap;
 }
 .starter-pg-per-page .relative { display: inline-block; position: relative; }
@@ -1373,6 +1379,7 @@ body.starter-is-navigating .starter-slot-area > [wire\:id],
 .starter-pg-record-count {
     color: var(--starter-slate-600);
     font-size: .75rem;
+    line-height: 1rem;
     white-space: nowrap;
 }
 .starter-pg-pages { align-items: center; display: flex; gap: .3rem; }

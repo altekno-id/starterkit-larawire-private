@@ -41,7 +41,7 @@ class TablerPowerGridTheme extends Bootstrap5
         return array_replace(parent::footer(), [
             'view' => 'starter.powergrid.footer',
             'select' => 'form-select form-select-sm w-auto',
-            'footer' => 'border-top px-3 py-2 w-100 d-flex flex-wrap gap-2 align-items-center justify-content-between',
+            'footer' => 'starter-pg-footer-layout border-top px-3 py-2 w-100',
         ]);
     }
 

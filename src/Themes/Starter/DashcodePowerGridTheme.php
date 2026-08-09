@@ -45,7 +45,7 @@ class DashcodePowerGridTheme extends Tailwind
             'view' => 'starter.powergrid.footer',
             'select' => 'starter-pg-control starter-pg-select starter-pg-page-size',
             'footer' => 'starter-pg-footer',
-            'footer_with_pagination' => 'starter-pg-footer-inner flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between',
+            'footer_with_pagination' => 'starter-pg-footer-inner starter-pg-footer-layout',
         ]);
     }
 

@@ -182,8 +182,6 @@ class StarterServiceProvider extends ServiceProvider
 
     private function registerViewPaths(): void
     {
-        View::addNamespace('starter-shared', StarterPaths::path('resources/views'));
-
         $viewPaths = (array) $this->app['config']->get('view.paths', [resource_path('views')]);
         $starterViewPaths = [
             StarterTheme::viewPath('starter'),
@@ -194,6 +192,8 @@ class StarterServiceProvider extends ServiceProvider
             ...$viewPaths,
             ...$starterViewPaths,
         ])));
+
+        View::addNamespace('starter-shared', StarterPaths::path('resources/views'));
     }
 
     private function loadAppMigrations(): void

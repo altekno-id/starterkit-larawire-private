@@ -1,57 +1,48 @@
-<style>
-    .dt--top-section { display: none !important; }
-</style>
-<div class="card-body border-bottom-0 pt-3 pb-3">
-    <div class="row g-3 align-items-center">
-
-        <div class="col-auto">
-            <div class="dropdown starter-bulk-dropdown" x-data="{ open: false }" @click.outside="open = false">
-                <button type="button" class="btn dropdown-toggle" @click="open = !open" :class="{ 'show': open }" :aria-expanded="open">
-                    <span class="starter-button-content">
-                        @include('starter.templates.layouts.icon', ['name' => 'table'])
-                        <span>Aksi</span>
-                        @include('starter.templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'starter-button-chevron'])
-                    </span>
-                </button>
-                <ul class="dropdown-menu starter-bulk-dropdown-menu" :class="{ 'show': open }" x-show="open" x-cloak>
-                    @if ($archiveStatus !== 'archived')
-                        <li>
-                            <button type="button" class="dropdown-item {{ empty($checkboxValues) ? 'disabled' : '' }}" wire:click="prepareBulkAction('archive')" @click="open = false">
-                                Arsipkan Terpilih
-                            </button>
-                        </li>
-                    @endif
-                    @if ($archiveStatus !== 'active')
-                        <li>
-                            <button type="button" class="dropdown-item {{ empty($checkboxValues) ? 'disabled' : '' }}" wire:click="prepareBulkAction('restore')" @click="open = false">
-                                Pulihkan Terpilih
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="dropdown-item {{ empty($checkboxValues) ? 'disabled' : '' }}" wire:click="prepareBulkAction('forceDelete')" @click="open = false">
-                                Hapus Permanen
-                            </button>
-                        </li>
-                    @endif
-                </ul>
-            </div>
+<div class="dashcode-pg-toolbar">
+    <div class="dashcode-pg-toolbar-actions">
+        <div class="starter-bulk-dropdown" x-data="{ open: false }" @click.outside="open = false">
+            <button type="button" class="btn btn-outline-dark inline-flex items-center gap-2" @click="open = !open" :class="{ 'show': open }" :aria-expanded="open">
+                @include('starter.templates.layouts.icon', ['name' => 'table'])
+                <span>Aksi</span>
+                @include('starter.templates.layouts.icon', ['name' => 'chevron-down', 'class' => 'starter-button-chevron'])
+            </button>
+            <ul class="dashcode-bulk-dropdown" :class="{ 'show': open }" x-show="open" x-cloak>
+                @if ($archiveStatus !== 'archived')
+                    <li>
+                        <button type="button" class="dashcode-table-dropdown-item {{ empty($checkboxValues) ? 'disabled' : '' }}" wire:click="prepareBulkAction('archive')" @click="open = false">
+                            Arsipkan Terpilih
+                        </button>
+                    </li>
+                @endif
+                @if ($archiveStatus !== 'active')
+                    <li>
+                        <button type="button" class="dashcode-table-dropdown-item {{ empty($checkboxValues) ? 'disabled' : '' }}" wire:click="prepareBulkAction('restore')" @click="open = false">
+                            Pulihkan Terpilih
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dashcode-table-dropdown-item dashcode-table-dropdown-danger {{ empty($checkboxValues) ? 'disabled' : '' }}" wire:click="prepareBulkAction('forceDelete')" @click="open = false">
+                            Hapus Permanen
+                        </button>
+                    </li>
+                @endif
+            </ul>
         </div>
+    </div>
 
-        <div class="col-auto ms-auto d-flex flex-column flex-md-row gap-3">
-            <select class="form-select w-auto" wire:model.live="archiveStatus" aria-label="Status arsip user">
-                <option value="active">Data aktif</option>
-                <option value="archived">Arsip</option>
-                <option value="all">Semua data</option>
-            </select>
+    <div class="dashcode-pg-toolbar-filters">
+        <select class="starter-pg-control starter-pg-select dashcode-pg-archive-filter" wire:model.live="archiveStatus" aria-label="Status arsip user">
+            <option value="active">Data aktif</option>
+            <option value="archived">Arsip</option>
+            <option value="all">Semua data</option>
+        </select>
 
-            <div class="input-icon" style="min-width: 250px;">
-                <span class="input-icon-addon">
-                    @include('starter.templates.layouts.icon', ['name' => 'search', 'class' => 'icon-sm'])
-                </span>
-                <input type="search" class="form-control" placeholder="Cari nama, username, atau email..." wire:model.live.debounce.350ms="search">
-            </div>
-        </div>
-
+        <label class="dashcode-pg-search-field">
+            <span class="dashcode-pg-search-icon">
+                @include('starter.templates.layouts.icon', ['name' => 'search'])
+            </span>
+            <input type="search" class="starter-pg-control" placeholder="Cari nama, username, atau email..." wire:model.live.debounce.350ms="search">
+        </label>
     </div>
 </div>
 

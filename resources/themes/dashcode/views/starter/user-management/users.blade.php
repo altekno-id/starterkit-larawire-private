@@ -1,21 +1,15 @@
-<div>
+<div class="dashcode-users-page">
     @unless ($embedded)
-        <div class="page-header d-print-none mt-0 mb-3">
-            <div class="row g-3 align-items-center">
-                <div class="col">
-                    <div class="page-pretitle">Starter / Manajemen User</div>
-                    <h2 class="page-title">Manajemen User</h2>
-                    <div class="text-secondary">Kelola user aktif, arsip, pemulihan, dan penghapusan permanen.</div>
-                </div>
-                <div class="col-auto ms-auto">
-                    <a href="{{ route('starter.user-management.users.create') }}" class="btn btn-primary" data-starter-navigate>
-                        <span class="starter-button-content">
-                            @include('starter.templates.layouts.icon', ['name' => 'user-plus'])
-                            <span>Tambah User</span>
-                        </span>
-                    </a>
-                </div>
+        <div class="page-header mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <div class="page-pretitle">Starter / Manajemen User</div>
+                <h2 class="page-title">Manajemen User</h2>
+                <div class="text-secondary">Kelola user aktif, arsip, pemulihan, dan penghapusan permanen.</div>
             </div>
+            <a href="{{ route('starter.user-management.users.create') }}" class="btn btn-primary inline-flex items-center justify-center gap-2 self-start md:self-auto" data-starter-navigate>
+                @include('starter.templates.layouts.icon', ['name' => 'user-plus'])
+                <span>Tambah User</span>
+            </a>
         </div>
     @endunless
 
@@ -29,7 +23,13 @@
         </div>
     @endif
 
-    <livewire:starter.user-management.users-table />
+    @if ($embedded)
+        <livewire:starter.user-management.users-table />
+    @else
+        <div class="card dashcode-table-card">
+            <livewire:starter.user-management.users-table />
+        </div>
+    @endif
 
     @include('starter.templates.components.danger-modal', [
         'id' => 'reset-user-password-modal',

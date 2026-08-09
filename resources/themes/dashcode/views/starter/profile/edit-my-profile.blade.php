@@ -1,4 +1,4 @@
-<div x-data="{ activeTab: @js($activeTab) }">
+<div class="dashcode-profile-page" x-data="{ activeTab: @js($activeTab) }">
     <div class="page-header d-print-none mt-0 mb-3" aria-label="Header halaman">
         <div class="row g-2 align-items-center">
             <div class="col">

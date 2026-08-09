@@ -1,4 +1,4 @@
-<div>
+<div class="dashcode-auth-form">
     <div class="text-center mb-4">
         <span class="avatar avatar-xl rounded-circle" style="background-image: url({{ app(\Altekno\StarterKit\Services\Starter\StarterContextService::class)->avatarUrl($login) }})"></span>
         <div class="mt-3 h3 mb-1">{{ $login->name }}</div>
@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    <form wire:submit="unlock" autocomplete="on">
+    <form class="space-y-4" wire:submit="unlock" autocomplete="on">
         <div class="mb-3">
             <label class="form-label" for="lock-screen-password">Password</label>
             <div class="input-group input-group-flat" x-data="{ visible: false }">
@@ -43,7 +43,7 @@
             @enderror
         </div>
 
-        <button class="btn btn-primary w-100" type="submit" wire:loading.attr="disabled">
+        <button class="btn btn-dark block w-full text-center" type="submit" wire:loading.attr="disabled">
             <span wire:loading.remove wire:target="unlock">
                 @include('starter.templates.layouts.icon', ['name' => 'lock', 'class' => 'icon'])
                 Buka Aplikasi

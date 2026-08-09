@@ -1,4 +1,4 @@
-<div>
+<div class="dashcode-company-form">
     @unless ($embedded)
         <div class="page-header d-print-none mt-0 mb-3" aria-label="Header halaman">
             <div class="row g-2 align-items-center">

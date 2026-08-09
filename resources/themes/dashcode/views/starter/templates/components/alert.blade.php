@@ -12,7 +12,7 @@
     };
 @endphp
 
-<div class="alert alert-{{ $type }} d-flex align-items-center gap-3 {{ $extraClass }}" role="alert" data-starter-alert>
+<div class="alert dashcode-alert alert-{{ $type }} {{ $extraClass }}" role="alert" data-starter-alert>
     <span class="alert-icon flex-shrink-0">
         @include('starter.templates.layouts.icon', ['name' => $icon, 'class' => 'm-0'])
     </span>

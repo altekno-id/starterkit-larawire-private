@@ -1,5 +1,9 @@
 # Template Discovery Atlas
 
+> Atlas ini hanya menjadi sumber visual untuk theme Tabler. Theme lain boleh
+> mempertahankan capability yang sama, tetapi tidak boleh menyalin markup,
+> class, atau tampilan Tabler sebagai presentation base.
+
 > Inventaris ini memetakan 402 HTML template UI yang tersedia di `docs/template` pada 28 Juli 2026. Ini adalah atlas penemuan, bukan router kaku atau keputusan desain otomatis.
 
 ## Tujuan

@@ -10,23 +10,23 @@ class DashcodePowerGridTheme extends Tailwind
     {
         return array_replace_recursive(parent::table(), [
             'layout' => [
-                'base' => 'starter-pg-table align-middle inline-block min-w-full w-full',
-                'div' => 'starter-pg-frame relative overflow-x-auto',
-                'table' => 'min-w-full starter-table',
-                'container' => 'overflow-x-auto',
-                'actions' => 'flex items-center justify-end gap-2',
+                'base' => 'starter-pg-table inline-block min-w-full align-middle',
+                'div' => 'starter-pg-frame overflow-x-auto',
+                'table' => 'min-w-full divide-y divide-slate-100 table-fixed',
+                'container' => 'starter-pg-container dashcode-data-table overflow-x-auto',
+                'actions' => 'flex items-center justify-center',
             ],
             'header' => [
-                'thead' => 'bg-slate-50',
-                'th' => 'table-th whitespace-nowrap',
+                'thead' => 'border-t border-slate-100',
+                'th' => 'table-th',
             ],
             'body' => [
-                'tbody' => 'bg-white text-slate-600',
-                'tr' => 'border-b border-slate-100 hover:bg-slate-50',
-                'td' => 'table-td align-middle whitespace-nowrap',
-                'tdFilters' => 'px-4 py-3 bg-slate-50',
-                'tdEmpty' => 'p-6 text-center text-slate-500',
-                'tdActionsContainer' => 'flex items-center justify-end gap-2',
+                'tbody' => 'bg-white divide-y divide-slate-100',
+                'tr' => '',
+                'td' => 'table-td whitespace-nowrap normal-case',
+                'tdFilters' => 'starter-pg-filter-cell',
+                'tdEmpty' => 'table-td p-6 text-center text-slate-500 normal-case',
+                'tdActionsContainer' => 'flex items-center justify-center',
             ],
         ]);
     }
@@ -34,16 +34,16 @@ class DashcodePowerGridTheme extends Tailwind
     public function footer(): array
     {
         return array_replace(parent::footer(), [
-            'select' => 'form-control starter-pg-page-size',
-            'footer' => 'starter-pg-footer border-t border-slate-100',
-            'footer_with_pagination' => 'flex w-full flex-col gap-3 bg-white px-4 py-3 md:flex-row md:items-center md:justify-between',
+            'select' => 'starter-pg-control starter-pg-select starter-pg-page-size',
+            'footer' => 'starter-pg-footer',
+            'footer_with_pagination' => 'starter-pg-footer-inner flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between',
         ]);
     }
 
     public function checkbox(): array
     {
         return array_replace(parent::checkbox(), [
-            'th' => 'table-th text-center whitespace-nowrap',
+            'th' => 'table-th text-center',
             'base' => 'flex items-center justify-center',
             'input' => 'table-checkbox',
         ]);
@@ -53,7 +53,15 @@ class DashcodePowerGridTheme extends Tailwind
     {
         return array_replace(parent::filterBoolean(), [
             'base' => 'starter-pg-filter starter-pg-filter-boolean',
-            'select' => 'form-control',
+            'select' => 'starter-pg-control starter-pg-select',
+        ]);
+    }
+
+    public function filterDatePicker(): array
+    {
+        return array_replace(parent::filterDatePicker(), [
+            'base' => 'starter-pg-filter starter-pg-filter-date',
+            'input' => 'flatpickr flatpickr-input starter-pg-control',
         ]);
     }
 
@@ -61,7 +69,8 @@ class DashcodePowerGridTheme extends Tailwind
     {
         return array_replace(parent::filterInputText(), [
             'base' => 'starter-pg-filter starter-pg-filter-text',
-            'input' => 'form-control',
+            'select' => 'starter-pg-control starter-pg-select',
+            'input' => 'starter-pg-control',
         ]);
     }
 
@@ -69,14 +78,14 @@ class DashcodePowerGridTheme extends Tailwind
     {
         return array_replace(parent::filterMultiSelect(), [
             'base' => 'starter-pg-filter starter-pg-filter-multiselect',
+            'select' => 'starter-pg-control starter-pg-select',
         ]);
     }
 
     public function filterNumber(): array
     {
         return array_replace(parent::filterNumber(), [
-            'base' => 'starter-pg-filter starter-pg-filter-number',
-            'input' => 'form-control',
+            'input' => 'starter-pg-control starter-pg-filter-number',
         ]);
     }
 
@@ -84,14 +93,14 @@ class DashcodePowerGridTheme extends Tailwind
     {
         return array_replace(parent::filterSelect(), [
             'base' => 'starter-pg-filter starter-pg-filter-select',
-            'select' => 'form-control',
+            'select' => 'starter-pg-control starter-pg-select',
         ]);
     }
 
     public function searchBox(): array
     {
         return array_replace(parent::searchBox(), [
-            'input' => 'form-control starter-pg-search',
+            'input' => 'starter-pg-control starter-pg-search',
             'iconSearch' => 'starter-pg-search-icon',
             'iconClose' => 'text-slate-400',
         ]);

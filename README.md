@@ -208,7 +208,11 @@ STARTER_THEME=dashcode
 
 Kedua tema menyediakan layout `vertical` dan `horizontal`. Informasi, fitur,
 route, menu, dan hak akses tetap sama; yang berubah hanya struktur tampilan dan
-komponen visual sesuai template yang dipilih.
+komponen visual sesuai template yang dipilih. Kesamaan fitur tidak berarti
+Dashcode dibuat menyerupai Tabler: tabel, form, tombol, dropdown, card, tab,
+modal, ikon, spacing, dan typography selalu mengikuti bundle vendor dari tema
+aktif. Contohnya, tabel Dashcode menggunakan pola `advance-table.html`, sedangkan
+tabel Tabler menggunakan komponen tabel Tabler sendiri.
 
 Installer juga membuat nama `SESSION_COOKIE` yang unik berdasarkan `APP_URL`.
 Cookie Laravel yang mungkin terbentuk sebelum instalasi tidak akan mengganggu
@@ -237,8 +241,9 @@ template seperti Vuexy, salin bundle template aslinya tanpa perubahan ke
 starterkit.
 
 Agent harus membuat Blade, asset runtime, adapter JavaScript, adapter PowerGrid,
-serta layout `vertical` dan `horizontal` milik Vuexy. Setelah theme diregistrasi,
-project Laravel cukup memilihnya melalui:
+serta layout `vertical` dan `horizontal` milik Vuexy berdasarkan komponen asli
+Vuexy—bukan menyalin presentation theme yang sudah ada. Setelah theme
+diregistrasi, project Laravel cukup memilihnya melalui:
 
 ```env
 STARTER_THEME=vuexy

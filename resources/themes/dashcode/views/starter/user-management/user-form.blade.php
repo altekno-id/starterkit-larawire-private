@@ -1,18 +1,16 @@
-<div>
-    <div class="page-header d-print-none mt-0 mb-3">
-        <div class="row g-3 align-items-center">
-            <div class="col">
+<div class="dashcode-user-form">
+    <div class="page-header mb-5 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div>
                 <div class="page-pretitle">Starter / Manajemen User / Users</div>
                 <h2 class="page-title">{{ $userLoginId ? 'Edit User' : 'Tambah User' }}</h2>
                 <div class="text-secondary">Atur identitas akun, role, dan status akun.</div>
             </div>
-            <div class="col-auto">
+            <div>
                 <a href="{{ route('starter.settings', ['section' => 'users']) }}" class="btn" data-starter-navigate>
                     @include('starter.templates.layouts.icon', ['name' => 'arrow-left', 'class' => 'icon-sm me-1'])
                     Kembali ke Users
                 </a>
             </div>
-        </div>
     </div>
 
     @if ($temporaryPassword)
@@ -28,8 +26,8 @@
     @endif
 
     <form wire:submit="save">
-        <div class="row row-cards">
-            <div class="col-xl-7">
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+            <div class="xl:col-span-7">
                 <div class="card h-100">
                     <div class="card-header">
                         <div>
@@ -38,24 +36,24 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
                                 <label class="form-label" for="user-name">Nama Tampilan</label>
                                 <input type="text" id="user-name" class="form-control @error('userForm.name') is-invalid @enderror" wire:model.defer="userForm.name" autocomplete="name">
                                 @error('userForm.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <div class="col-md-6">
+                            <div>
                                 <label class="form-label" for="user-username">Username</label>
                                 <input type="text" id="user-username" class="form-control @error('userForm.username') is-invalid @enderror" wire:model.defer="userForm.username" autocomplete="username">
                                 @error('userForm.username') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <div class="col-md-6">
+                            <div>
                                 <label class="form-label" for="user-email">Email</label>
                                 <input type="email" id="user-email" class="form-control @error('userForm.email') is-invalid @enderror" wire:model.defer="userForm.email" autocomplete="email">
                                 <div class="form-hint">Digunakan untuk notifikasi dan persiapan reset password mandiri.</div>
                                 @error('userForm.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <div class="col-md-6">
+                            <div>
                                 <label class="form-label" for="user-status">Status</label>
                                 <select id="user-status" class="form-select @error('userForm.status') is-invalid @enderror" wire:model.defer="userForm.status">
                                     <option value="active">Aktif</option>
@@ -64,7 +62,7 @@
                                 </select>
                                 @error('userForm.status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <div class="col-12">
+                            <div class="md:col-span-2">
                                 <label class="form-label" for="user-role">Role</label>
                                 <select id="user-role" class="form-select @error('userForm.role_id') is-invalid @enderror" wire:model.live="userForm.role_id">
                                     <option value="">Pilih Role</option>
@@ -94,7 +92,7 @@
                 </div>
             </div>
 
-            <div class="col-xl-5">
+            <div class="xl:col-span-5">
                 <div class="card h-100">
                     <div class="card-header">
                         <div>

@@ -112,6 +112,8 @@ bukan dari Theme Customizer atau localStorage.
 
 ## Batas implementasi
 
+- `advance-table.html` adalah sumber visual wajib untuk semua tabel PowerGrid Dashcode. Pertahankan pola `dashcode-data-table`, `table-th`, `table-td`, checkbox, filter/search, action dropdown, dan pagination Dashcode sambil membiarkan PowerGrid menangani data serta state server-side.
+- Kesamaan dengan theme lain hanya mencakup data, aksi, authorization, state, accessibility, dan responsive capability. Jangan menyalin markup, class, atau tampilan Tabler/Bootstrap ke runtime Dashcode.
 - Jangan memuat Google Fonts, Iconify API, unpkg, atau CDN lain di runtime.
 - Jangan menjalankan `settings.js` atau Theme Customizer pada aplikasi.
 - Jangan memuat `rt-plugins.js` secara global; gunakan Alpine/shared runtime

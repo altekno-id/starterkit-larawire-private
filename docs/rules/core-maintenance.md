@@ -35,6 +35,9 @@ dibuka langsung atau melalui Git submodule pada Laravel host.
   `master`, bukan detached HEAD, sebelum commit dan push.
 - Verifikasi core melalui Laravel host bila perubahan menyentuh integrasi
   framework, installer, Artisan, migration, route, Livewire, theme, atau asset.
+- Untuk perubahan theme, verifikasi terhadap HTML dan atlas vendor theme aktif,
+  bukan terhadap tampilan theme lain. Kesetaraan lintas theme hanya berlaku pada
+  capability dan perilaku; struktur dan visual tetap diverifikasi per theme.
 - Jangan menyinkronkan commit starterkit ke Laravel host mana pun, termasuk
   `dosen/dosen-bo` dan `starterkit-test`, kecuali developer memerintahkannya
   secara eksplisit pada task yang sedang berjalan. Permintaan perubahan atau

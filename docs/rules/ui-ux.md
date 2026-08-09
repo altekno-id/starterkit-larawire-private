@@ -15,6 +15,14 @@ The active template is selected by `STARTER_THEME`; the application navigation l
 
 Each theme owns its navigation partials, theme CSS, JavaScript adapter, icons, auth/error shell, and PowerGrid adapter. `public/assets/starter/` must remain theme-neutral; never place Bootstrap, Tabler, Vuexy, or another vendor selector/variable there. Shared runtime interactions use `data-starter-*` contracts and delegate vendor-specific collapse/dropdown lifecycle work to `window.StarterThemeAdapter` supplied by the active theme.
 
+## Cross-theme contract and visual ownership
+
+- Themes share only the product contract: the same information, actions, authorization, validation, loading/empty/error states, accessibility meaning, and responsive capability must remain available.
+- Every visual decision is theme-owned. Select the component, hierarchy, markup, class names, density, typography, spacing, color, icon treatment, and interaction presentation from the active vendor template.
+- Never use one theme as the visual fallback for another. In particular, Dashcode must not reuse Bootstrap/Tabler table, toolbar, dropdown, pagination, form, card, tab, alert, or modal presentation; Tabler must not be restyled to imitate Dashcode.
+- Shared `data-starter-*`, Livewire events, PHP data, and authorization may be reused. Theme Blade and theme assets must translate that shared behavior into their own vendor component patterns.
+- Identical theme view files are acceptable only when the file has no visual hierarchy of its own, such as a thin status/error forwarder. A rendered component or page with visible structure must be composed independently from its theme atlas.
+
 ## Base rules
 
 - The starter owns shell layout, account dropdown, auth, lock screen, and error pages. Project features extend only the documented extension paths; never copy or override core views.
@@ -28,6 +36,7 @@ Each theme owns its navigation partials, theme CSS, JavaScript adapter, icons, a
 ## PowerGrid table standard
 
 - Every Livewire table uses `power-components/livewire-powergrid` and the active-theme adapter. Data sources, search, filters, sorting, pagination, selection, and bulk/by-filter mutations are server-side.
+- The active vendor table is the visual source of truth. Dashcode PowerGrid follows `docs/template/dashcode/advance-table.html` (`dashcode-data-table`, `table-th`, `table-td`, Dashcode filters, action menu, and pagination treatment). Tabler PowerGrid follows the closest Tabler advanced-table example and Bootstrap adapter. Matching columns and behavior never justify matching visual markup.
 - Enable a type-appropriate per-column filter by default for every meaningful data column. Text columns use live text filtering; enum/relation/boolean columns use suitable option controls; numeric columns use an appropriate range/value control; date/datetime columns always provide inclusive **from** and **to** filters. Exclude only columns for which filtering is genuinely meaningless (for example actions, derived/audit-only/system metadata), document the reason, and test it.
 - Column filters query live—debounced where needed—without an Apply/Search button. Persist filter/sort/search state across reload using the supported PowerGrid/Livewire URL or session mechanism; reset pagination only when filtering/sorting scope changes.
 - An above-grid one-row filter card is optional. Use it only for cross-column, composite, or high-value filters that are not represented by a column filter. Never repeat a column filter in the card.
@@ -37,7 +46,7 @@ Each theme owns its navigation partials, theme CSS, JavaScript adapter, icons, a
 - Place `Column::action('Aksi')` first in `columns()` so PowerGrid renders the action column immediately after its automatically prepended checkbox column. Use the label `Aksi`, never `Aksi Massal` or another variation.
 - Group every row action in one borderless, icon-only trigger with `aria-label="Aksi"`; dropdown items retain clear text labels. Use Alpine (`x-data`, `@click`, and related state) instead of Bootstrap `data-bs-toggle="dropdown"`, and render the menu through `x-teleport="body"` to avoid clipping and table-overflow/z-index problems during Livewire DOM morphing.
 - Date and datetime columns use range filters. Apply `->params(['mode' => 'range'])` to the relevant `Filter::datepicker` or `Filter::datetimepicker`, then preserve and test inclusive from/to boundaries.
-- Global PowerGrid/Tabler styling and shared translations belong in the starter theme/runtime assets. Do not duplicate those fixes in individual tables.
+- Global PowerGrid styling belongs to each theme's own adapter and theme asset; shared translations remain theme-neutral. Do not put Tabler selectors in Dashcode assets, Dashcode selectors in Tabler assets, or duplicate theme fixes in individual tables.
 
 ## Form, modal, and feedback behavior
 

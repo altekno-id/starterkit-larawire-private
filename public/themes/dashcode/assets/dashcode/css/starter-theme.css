@@ -1815,6 +1815,7 @@ body.dashcode-auth {
     line-height: 1.35;
 }
 .dashcode-profile-summary-grid {
+    align-self: center;
     display: grid;
     flex: 1 1 auto;
     gap: .75rem;
@@ -2089,7 +2090,7 @@ body.dashcode-auth {
     }
 
     .dashcode-profile-identity { flex-basis: auto; }
-    .dashcode-profile-summary-grid { max-width: none; }
+    .dashcode-profile-summary-grid { align-self: stretch; max-width: none; }
     .dashcode-profile-summary-item:first-child { border-left: 0; padding-left: 0; }
 }
 

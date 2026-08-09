@@ -36,7 +36,7 @@
                     <div class="text-secondary text-truncate" title="{{ $login->email }}">{{ $login->email }}</div>
                     <div class="mt-2"><span class="badge bg-primary-lt">{{ $login->role?->name ?? 'Tanpa Role' }}</span></div>
                 </div>
-                <div class="col-12 col-xl-7 ms-xl-auto">
+                <div class="col-12 col-xl-7 ms-xl-auto align-self-center">
                     <div class="row g-3">
                         <div class="col-sm-4">
                             <div class="d-flex align-items-center gap-2">

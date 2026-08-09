@@ -12,7 +12,7 @@
     <template x-teleport="body">
         <ul class="dashcode-table-dropdown" :class="{ 'show': open }" x-show="open" x-cloak :style="`position: fixed; top: ${top}px; left: ${left}px; z-index: 1060;`" @click.outside="open = false">
         <li>
-            <button type="button" class="dashcode-table-dropdown-item" wire:click="$dispatch('starter-log-detail-request', { actionId: {{ $row->action_id }} })">Lihat Detail</button>
+            <button type="button" class="dashcode-table-dropdown-item" wire:click="$dispatch('starter-log-detail-request', { actionId: @js($row->action_id) })">Lihat Detail</button>
         </li>
     </ul>
     </template>

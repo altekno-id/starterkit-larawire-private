@@ -12,7 +12,7 @@
     <template x-teleport="body">
         <ul class="dropdown-menu" :class="{ 'show': open }" x-show="open" :style="`position: fixed; top: ${top}px; left: ${left}px; z-index: 1060; margin: 0; min-width: 140px;`" @click.outside="open = false">
         <li>
-            <button type="button" class="dropdown-item" wire:click="$dispatch('starter-log-detail-request', { actionId: {{ $row->action_id }} })">Lihat Detail</button>
+            <button type="button" class="dropdown-item" wire:click="$dispatch('starter-log-detail-request', { actionId: @js($row->action_id) })">Lihat Detail</button>
         </li>
     </ul>
     </template>

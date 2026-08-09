@@ -39,7 +39,10 @@ class ActivityLogRepository implements ActivityLogInterface
             ->selectRaw('COUNT(DISTINCT table_name) as tables_count')
             ->groupBy('action_id');
 
-        return ActivityLog::query()->fromSub($actions, 'starter_activity_log_actions');
+        $activity = new ActivityLog;
+        $activity->setTable('starter_activity_log_actions');
+
+        return $activity->newQuery()->fromSub($actions, 'starter_activity_log_actions');
     }
 
     public function paginateActionsForViewer(

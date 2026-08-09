@@ -3,6 +3,7 @@
 namespace Altekno\StarterKit\Livewire\Starter\UserManagement;
 
 use Altekno\StarterKit\Models\Starter\ClientLogin;
+use Altekno\StarterKit\Models\Starter\ClientRole;
 use Altekno\StarterKit\Services\Starter\AuthenticatedLoginService;
 use Altekno\StarterKit\Services\Starter\UserManagementUserService;
 use Illuminate\Database\Eloquent\Builder;
@@ -92,7 +93,10 @@ class UsersTable extends PowerGridComponent
             Filter::inputText('name', 'starter_client_logins.name')->operators(['contains']),
             Filter::inputText('username', 'starter_client_logins.username')->operators(['contains']),
             Filter::inputText('email', 'starter_client_logins.email')->operators(['contains']),
-            Filter::inputText('role_name', 'list_role.name')->operators(['contains']),
+            Filter::select('role_name', 'list_role.name')->dataSource(
+                $this->users->roles($this->login())
+                    ->map(fn (ClientRole $role): array => ['value' => $role->name, 'label' => $role->name]),
+            )->optionValue('value')->optionLabel('label'),
             Filter::select('status_label', 'starter_client_logins.status')->dataSource([
                 ['value' => 'active', 'label' => 'Aktif'],
                 ['value' => 'inactive', 'label' => 'Nonaktif'],

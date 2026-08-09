@@ -80,7 +80,10 @@ class RolesTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::inputText('name')->operators(['contains']),
+            Filter::select('name')->dataSource(
+                $this->roles->filterOptions($this->login(), $this->archiveStatus)
+                    ->map(fn (ClientRole $role): array => ['value' => $role->name, 'label' => $role->name]),
+            )->optionValue('value')->optionLabel('label'),
             Filter::inputText('code')->operators(['contains']),
             Filter::inputText('desc')->operators(['contains']),
             Filter::number('client_logins_count')->placeholder('Min', 'Max')

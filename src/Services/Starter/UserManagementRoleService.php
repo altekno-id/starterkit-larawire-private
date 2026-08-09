@@ -47,6 +47,14 @@ class UserManagementRoleService
         return $this->clientRoles->tableQueryForViewer($login, $archiveStatus);
     }
 
+    /** @return Collection<int, ClientRole> */
+    public function filterOptions(ClientLogin $login, string $archiveStatus = 'active'): Collection
+    {
+        return $this->tableQuery($login, $archiveStatus)
+            ->reorder('name')
+            ->get(['starter_client_roles.id', 'starter_client_roles.name']);
+    }
+
     /** @param list<int> $ids */
     public function archiveRoles(ClientLogin $login, array $ids): int
     {

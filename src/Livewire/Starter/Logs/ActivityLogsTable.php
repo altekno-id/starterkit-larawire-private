@@ -7,6 +7,7 @@ use Altekno\StarterKit\Models\Starter\ActivityLog;
 use Altekno\StarterKit\Models\Starter\ClientLogin;
 use Altekno\StarterKit\Services\Starter\AuthenticatedLoginService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
@@ -74,13 +75,26 @@ class ActivityLogsTable extends PowerGridComponent
 
     public function filters(): array
     {
+        $options = $this->activityLogs->filterOptionsForViewer($this->login());
+
         return [
             Filter::datetimepicker('created_at_label', 'created_at')->params(['mode' => 'range']),
             Filter::inputText('action_label')->operators(['contains']),
-            Filter::inputText('actor_name')->operators(['contains']),
-            Filter::inputText('actor_role')->operators(['contains']),
-            Filter::inputText('app_key')->operators(['contains']),
-            Filter::inputText('route_name')->operators(['contains']),
+            Filter::select('actor_name')->dataSource(
+                $options['actors']
+                    ->pluck('name')
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->map(fn (string $name): array => ['value' => $name, 'label' => $name]),
+            )->optionValue('value')->optionLabel('label'),
+            Filter::select('actor_role')->dataSource($this->selectOptions($options['roles']))
+                ->optionValue('value')->optionLabel('label'),
+            Filter::select('app_key')->dataSource($this->selectOptions($options['apps']))
+                ->optionValue('value')->optionLabel('label'),
+            Filter::select('route_name')->dataSource($this->selectOptions($options['routes']))
+                ->optionValue('value')->optionLabel('label'),
             Filter::inputText('ip_address')->operators(['starts_with']),
             Filter::number('changes_count')->placeholder('Min', 'Max'),
             Filter::number('tables_count')->placeholder('Min', 'Max'),
@@ -95,5 +109,10 @@ class ActivityLogsTable extends PowerGridComponent
     private function login(): ClientLogin
     {
         return $this->authenticatedLogins->logViewer();
+    }
+
+    private function selectOptions(Collection $values): Collection
+    {
+        return $values->map(fn (string $value): array => ['value' => $value, 'label' => $value]);
     }
 }

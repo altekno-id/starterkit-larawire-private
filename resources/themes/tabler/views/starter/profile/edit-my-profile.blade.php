@@ -27,7 +27,7 @@
 
     <section class="card mb-3" aria-label="Ringkasan akun">
         <div class="card-body">
-            <div class="row align-items-center g-3">
+            <div class="row align-items-start g-3">
                 <div class="col-auto">
                     <span class="avatar avatar-lg" style="background-image: url({{ $loginAvatarUrl }})"></span>
                 </div>
@@ -36,9 +36,9 @@
                     <div class="text-secondary text-truncate" title="{{ $login->email }}">{{ $login->email }}</div>
                     <div class="mt-2"><span class="badge bg-primary-lt">{{ $login->role?->name ?? 'Tanpa Role' }}</span></div>
                 </div>
-                <div class="col-12 col-xl-auto">
+                <div class="col-12 col-xl-7 ms-xl-auto">
                     <div class="row g-3">
-                        <div class="col-sm-4 col-xl-auto">
+                        <div class="col-sm-4">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="avatar avatar-sm bg-azure-lt text-azure">
                                     @include('starter.templates.layouts.icon', ['name' => 'shield-check', 'class' => 'm-0'])
@@ -49,7 +49,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-4 col-xl-auto">
+                        <div class="col-sm-4">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="avatar avatar-sm bg-primary-lt text-primary">
                                     @include('starter.templates.layouts.icon', ['name' => 'user-circle', 'class' => 'm-0'])
@@ -60,7 +60,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-4 col-xl-auto">
+                        <div class="col-sm-4">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="avatar avatar-sm bg-green-lt text-green">
                                     @include('starter.templates.layouts.icon', ['name' => 'history', 'class' => 'm-0'])

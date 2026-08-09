@@ -4,7 +4,7 @@
             <h2 class="mb-4">Keamanan Sistem</h2>
         @endif
 
-        <h3 class="card-title">Sesi dan Lock Screen</h3>
+        <h3 class="card-title starter-settings-section-title">Sesi dan Lock Screen</h3>
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <label class="starter-switch-row mb-4">
@@ -13,7 +13,7 @@
                         <span class="starter-switch-track" aria-hidden="true"></span>
                     </span>
                     <span class="starter-switch-label">
-                        <span class="d-block fw-semibold">Aktifkan Remember Me</span>
+                        <span class="starter-switch-title">Aktifkan Remember Me</span>
                         <span class="d-block small text-secondary">User dapat memilih tetap login pada perangkat yang dipercaya.</span>
                     </span>
                 </label>
@@ -24,7 +24,7 @@
                         <span class="starter-switch-track" aria-hidden="true"></span>
                     </span>
                     <span class="starter-switch-label">
-                        <span class="d-block fw-semibold">Aktifkan Lock Screen Otomatis</span>
+                        <span class="starter-switch-title">Aktifkan Lock Screen Otomatis</span>
                         <span class="d-block small text-secondary">Aplikasi dikunci tanpa mengakhiri sesi login.</span>
                     </span>
                 </label>
@@ -51,7 +51,7 @@
             </div>
         </div>
 
-        <h3 class="card-title mt-4">Proteksi Login</h3>
+        <h3 class="card-title starter-settings-section-title mt-4">Proteksi Login</h3>
         <div class="row g-4">
             <div class="col-md-6">
                 <label class="form-label" for="login-attempts">Maksimum percobaan login</label>

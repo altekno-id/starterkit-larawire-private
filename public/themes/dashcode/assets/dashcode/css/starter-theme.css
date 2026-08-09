@@ -1672,6 +1672,7 @@ body.dashcode-auth {
 }
 
 /* Native Dashcode switch used for boolean settings. */
+.starter-settings-section-title { margin-bottom: 1rem; }
 .starter-switch-row {
     align-items: flex-start;
     cursor: pointer;
@@ -1681,9 +1682,10 @@ body.dashcode-auth {
 .starter-switch-control {
     display: inline-flex;
     flex: 0 0 auto;
-    height: 1.5rem;
+    height: 1.25rem;
+    margin-top: .125rem;
     position: relative;
-    width: 2.875rem;
+    width: 2.5rem;
 }
 .starter-switch-input {
     height: 1px;
@@ -1694,33 +1696,40 @@ body.dashcode-auth {
 .starter-switch-track {
     background: var(--starter-slate-300);
     border-radius: 9999px;
-    height: 1.5rem;
+    height: 1.25rem;
     inset: 0;
     position: absolute;
     transition: background-color .15s ease;
-    width: 2.875rem;
+    width: 2.5rem;
 }
 .starter-switch-track::after {
     background: #fff;
     border: 1px solid var(--starter-slate-300);
     border-radius: 9999px;
     content: "";
-    height: 1.25rem;
+    height: 1rem;
     left: .125rem;
     position: absolute;
     top: .125rem;
     transition: transform .15s ease;
-    width: 1.25rem;
+    width: 1rem;
 }
 .starter-switch-input:checked + .starter-switch-track { background: var(--starter-primary); }
 .starter-switch-input:checked + .starter-switch-track::after {
     border-color: #fff;
-    transform: translateX(1.375rem);
+    transform: translateX(1.25rem);
 }
 .starter-switch-input:focus-visible + .starter-switch-track {
     box-shadow: 0 0 0 3px rgba(70, 105, 250, .2);
 }
 .starter-switch-label { min-width: 0; }
+.starter-switch-title {
+    color: var(--starter-slate-700);
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+}
 .starter-activity-stat {
     border: 0;
     box-shadow: none;

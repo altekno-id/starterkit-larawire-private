@@ -1346,7 +1346,7 @@ body.starter-is-navigating .starter-slot-area > [wire\:id],
     align-items: center;
     color: var(--starter-slate-500);
     display: inline-flex;
-    font-size: .8rem;
+    font-size: .75rem;
     gap: .65rem;
     white-space: nowrap;
 }

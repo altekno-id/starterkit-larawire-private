@@ -315,38 +315,42 @@
                                                     $moduleLandingMenus = $moduleGranted ? $module->menus : collect();
                                                 @endphp
 
-                                                <div class="form-check mb-0" wire:key="role-module-{{ $module->id }}">
-                                                    <input
-                                                        type="checkbox"
-                                                        class="form-check-input"
-                                                        id="module-{{ $module->id }}"
-                                                        value="{{ $module->id }}"
-                                                        wire:model.live="roleForm.module_ids"
-                                                        @checked($isSuperuserRole)
-                                                        @disabled($isSuperuserRole)
-                                                    >
-                                                    <label class="form-check-label" for="module-{{ $module->id }}">
-                                                        <span class="d-flex align-items-baseline gap-2">
-                                                            <span class="fw-semibold">{{ $module->name }}</span>
-                                                            <span class="small text-secondary font-monospace">{{ $module->code }}</span>
-                                                        </span>
-                                                        <span class="d-block small text-secondary">
-                                                            {{ filled($module->desc) ? $module->desc : 'Belum ada deskripsi.' }}
+                                                <div class="dashcode-role-module-option" wire:key="role-module-{{ $module->id }}">
+                                                    <label class="dashcode-role-choice-row" for="module-{{ $module->id }}">
+                                                        <input
+                                                            type="checkbox"
+                                                            class="dashcode-role-choice-input"
+                                                            id="module-{{ $module->id }}"
+                                                            value="{{ $module->id }}"
+                                                            wire:model.live="roleForm.module_ids"
+                                                            @checked($isSuperuserRole)
+                                                            @disabled($isSuperuserRole)
+                                                        >
+                                                        <span class="dashcode-role-choice-indicator dashcode-role-choice-checkbox" aria-hidden="true"></span>
+                                                        <span class="dashcode-role-choice-copy">
+                                                            <span class="dashcode-role-module-title">
+                                                                <span class="fw-semibold">{{ $module->name }}</span>
+                                                                <span class="small text-secondary font-monospace">{{ $module->code }}</span>
+                                                            </span>
+                                                            <span class="d-block small text-secondary">
+                                                                {{ filled($module->desc) ? $module->desc : 'Belum ada deskripsi.' }}
+                                                            </span>
                                                         </span>
                                                     </label>
 
                                                     @if ($moduleGranted && $appId)
-                                                        <div class="mt-2 vstack gap-1">
+                                                        <div class="dashcode-role-landing-options">
                                                             @forelse ($moduleLandingMenus as $menu)
-                                                                <label class="form-check mb-0 ps-4">
+                                                                <label class="dashcode-role-choice-row dashcode-role-landing-choice">
                                                                     <input
                                                                         type="radio"
-                                                                        class="form-check-input w-3 h-3 ms-n4"
+                                                                        class="dashcode-role-choice-input"
                                                                         value="{{ $menu->id }}"
                                                                         wire:model.defer="roleForm.landing_menu_ids.{{ $appId }}"
                                                                         @disabled($isSuperuserRole)
                                                                     >
-                                                                    <span class="form-check-label small">
+                                                                    <span class="dashcode-role-choice-indicator dashcode-role-choice-radio" aria-hidden="true"></span>
+                                                                    <span class="dashcode-role-choice-label">
                                                                         Jadikan <span class="fw-semibold">{{ $menu->label }}</span> sebagai halaman awal
                                                                     </span>
                                                                 </label>

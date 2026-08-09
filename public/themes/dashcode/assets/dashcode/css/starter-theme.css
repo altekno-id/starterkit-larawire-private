@@ -1150,6 +1150,82 @@ summary::-webkit-details-marker {
 }
 .form-check-label { color: var(--starter-slate-600); font-size: .875rem; }
 
+/* Role module choices follow Dashcode's native hidden-input checkbox/radio pattern. */
+.dashcode-role-module-option { min-width: 0; }
+.dashcode-role-choice-row {
+    align-items: flex-start;
+    color: var(--starter-slate-600);
+    cursor: pointer;
+    display: flex;
+    font-size: .875rem;
+    gap: .5rem;
+    line-height: 1.25rem;
+    min-width: 0;
+}
+.dashcode-role-choice-input {
+    height: 1px;
+    opacity: 0;
+    position: absolute;
+    width: 1px;
+}
+.dashcode-role-choice-indicator {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--starter-slate-400);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 1rem;
+    justify-content: center;
+    margin-top: .125rem;
+    position: relative;
+    width: 1rem;
+}
+.dashcode-role-choice-checkbox { border-radius: .25rem; }
+.dashcode-role-choice-radio { border-radius: 9999px; }
+.dashcode-role-choice-input:checked + .dashcode-role-choice-indicator {
+    background: var(--starter-primary);
+    border-color: var(--starter-primary);
+}
+.dashcode-role-choice-input:checked + .dashcode-role-choice-checkbox::after {
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    content: "";
+    height: .5rem;
+    transform: rotate(45deg) translate(-1px, -1px);
+    width: .25rem;
+}
+.dashcode-role-choice-input:checked + .dashcode-role-choice-radio::after {
+    background: #fff;
+    border-radius: 9999px;
+    content: "";
+    height: .375rem;
+    width: .375rem;
+}
+.dashcode-role-choice-input:focus-visible + .dashcode-role-choice-indicator {
+    box-shadow: 0 0 0 3px rgba(70, 105, 250, .2);
+}
+.dashcode-role-choice-input:disabled + .dashcode-role-choice-indicator,
+.dashcode-role-choice-input:disabled ~ .dashcode-role-choice-copy,
+.dashcode-role-choice-input:disabled ~ .dashcode-role-choice-label {
+    cursor: not-allowed;
+    opacity: .55;
+}
+.dashcode-role-choice-copy { min-width: 0; }
+.dashcode-role-module-title {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+.dashcode-role-landing-options {
+    display: grid;
+    gap: .35rem;
+    margin-top: .75rem;
+    padding-left: 1.5rem;
+}
+.dashcode-role-landing-choice { font-size: .8125rem; }
+.dashcode-role-choice-label { min-width: 0; }
+
 .alert {
     align-items: flex-start;
     border: 1px solid transparent;

@@ -4,7 +4,7 @@
 @php($windowStart = max(1, min($currentPage - 2, $lastPage - 4)))
 @php($windowEnd = min($lastPage, $windowStart + 4))
 
-@if ($paginator->hasPages())
+@if ($paginator->count() > 0)
     <nav class="starter-pg-pagination" aria-label="Navigasi halaman" wire:loading.class="opacity-50">
         <div class="starter-pg-pages">
             <button type="button" class="starter-pg-page" wire:click="previousPage('{{ $paginator->getPageName() }}')" wire:loading.attr="disabled" @disabled($paginator->onFirstPage()) aria-label="Halaman sebelumnya">&lsaquo;</button>

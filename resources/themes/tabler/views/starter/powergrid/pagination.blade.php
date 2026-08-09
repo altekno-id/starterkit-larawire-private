@@ -4,7 +4,7 @@
 @php($windowStart = max(1, min($currentPage - 2, $lastPage - 4)))
 @php($windowEnd = min($lastPage, $windowStart + 4))
 
-@if ($paginator->hasPages())
+@if ($paginator->count() > 0)
     <nav class="starter-pg-pagination" aria-label="Navigasi halaman">
         <ul class="pagination pagination-sm mb-0">
             <li class="page-item {{ $paginator->onFirstPage() ? 'disabled' : '' }}">

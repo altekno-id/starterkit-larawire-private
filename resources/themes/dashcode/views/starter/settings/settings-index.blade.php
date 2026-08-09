@@ -25,13 +25,13 @@
 @endphp
 
 <div class="dashcode-settings-page">
-    <div class="page-header mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between" aria-label="Header halaman">
+    <div class="page-header dashcode-settings-header mb-5 flex flex-col gap-3 md:flex-row md:items-center" aria-label="Header halaman">
         <div>
             <div class="page-pretitle">Administrasi Sistem</div>
             <h2 class="page-title">Pengaturan</h2>
             <div class="text-secondary">Kelola akses, akun user, dan identitas perusahaan dari satu tempat.</div>
         </div>
-        <div class="hidden items-center justify-end gap-2 text-right text-sm text-slate-500 md:ml-auto md:flex">
+        <div class="dashcode-settings-audit-note hidden items-center gap-2 text-sm text-slate-500 md:flex">
             @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm'])
             Perubahan konfigurasi sistem tercatat di audit log.
         </div>

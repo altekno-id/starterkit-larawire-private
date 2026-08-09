@@ -1598,7 +1598,14 @@ body.dashcode-auth {
 .starter-error-content h1 { color: var(--starter-slate-900); font-size: 2rem; font-weight: 700; }
 .starter-error-content p { color: var(--starter-slate-500); margin: .75rem auto 1.5rem; }
 
-/* Settings summary follows Dashcode's white statistic-card widgets. */
+/* Settings header and summary follow Dashcode's native page/widget patterns. */
+.dashcode-settings-header { width: 100%; }
+.dashcode-settings-audit-note {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    margin-left: auto !important;
+    text-align: right;
+}
 .starter-settings-stat {
     background: #fff;
     border: 0;

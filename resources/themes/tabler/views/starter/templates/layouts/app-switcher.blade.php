@@ -19,7 +19,7 @@
                 <div class="row g-0">
                     @forelse ($appOptions as $appOption)
                         <div class="col-4">
-                            <a href="{{ $appOption['url'] }}" class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable {{ $appOption['active'] ? 'bg-primary-lt text-primary' : '' }}" data-starter-app-link data-starter-app-name="{{ $appOption['name'] }}" data-starter-app-host="{{ parse_url($appOption['url'], PHP_URL_HOST) }}" data-starter-navigate title="{{ $appOption['name'] }}">
+                            <a href="{{ $appOption['url'] }}" class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable {{ $appOption['active'] ? 'bg-primary-lt text-primary' : '' }}" target="_blank" rel="noopener noreferrer" data-starter-app-link data-starter-app-name="{{ $appOption['name'] }}" data-starter-app-host="{{ parse_url($appOption['url'], PHP_URL_HOST) }}" title="Buka {{ $appOption['name'] }} di tab baru">
                                 @include('starter.templates.layouts.icon', ['name' => $appOption['icon'], 'class' => 'w-6 h-6 mx-auto mb-2'])
                                 <span class="h5 mb-0">{{ $appOption['name'] }}</span>
                             </a>

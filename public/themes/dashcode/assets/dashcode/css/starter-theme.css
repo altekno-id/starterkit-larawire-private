@@ -142,7 +142,9 @@ summary::-webkit-details-marker {
 .starter-brand {
     align-items: center;
     display: flex;
+    justify-content: center;
     min-width: 0;
+    width: 100%;
 }
 
 .starter-brand-image {
@@ -150,7 +152,7 @@ summary::-webkit-details-marker {
     height: 2rem;
     max-width: 11rem;
     object-fit: contain;
-    object-position: left center;
+    object-position: center;
     width: auto;
 }
 
@@ -170,6 +172,8 @@ summary::-webkit-details-marker {
 }
 .sidebarCloseIcon {
     display: none;
+    position: absolute;
+    right: 1rem;
 }
 
 .sidebar-menu-title {

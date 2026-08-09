@@ -19,7 +19,7 @@
         </div>
         <div class="starter-app-grid">
             @forelse ($appOptions as $appOption)
-                <a href="{{ $appOption['url'] }}" class="starter-app-option {{ $appOption['active'] ? 'bg-primary-lt text-primary' : '' }}" data-starter-app-link data-starter-app-name="{{ $appOption['name'] }}" data-starter-app-host="{{ parse_url($appOption['url'], PHP_URL_HOST) }}" data-starter-navigate title="{{ $appOption['name'] }}">
+                <a href="{{ $appOption['url'] }}" class="starter-app-option {{ $appOption['active'] ? 'bg-primary-lt text-primary' : '' }}" target="_blank" rel="noopener noreferrer" data-starter-app-link data-starter-app-name="{{ $appOption['name'] }}" data-starter-app-host="{{ parse_url($appOption['url'], PHP_URL_HOST) }}" title="Buka {{ $appOption['name'] }} di tab baru">
                     @include('starter.templates.layouts.icon', ['name' => $appOption['icon']])
                     <span>{{ $appOption['name'] }}</span>
                 </a>

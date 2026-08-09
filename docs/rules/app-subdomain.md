@@ -16,6 +16,7 @@ php artisan starter:make-app <subdomain> --name="App Name" --description="Short 
 
 - App migrations live in `database/migrations/apps/<subdomain>/`; tables use `{subdomain}_{module}_{entity}`. Generate the model and migration separately with an explicit migration path. The separation is source ownership only: `php artisan migrate` runs all pending App migrations.
 - Build root/auth/App URLs with named routes and `StarterNavigation`, never manual hosts or auth URLs. Navigation across origins/subdomains is full-page browser navigation, never `wire:navigate` or CORS.
+- Every App switcher link opens its App in a new browser tab with `target="_blank"` and `rel="noopener noreferrer"`; never intercept it with Livewire navigation.
 - `APP_URL` points to the root matching `APP_DOMAIN`; use a POST+CSRF logout form and a safe redirect. Test login, session, lock screen, and logout at root and App domains locally and in production.
 
 ## API gateway

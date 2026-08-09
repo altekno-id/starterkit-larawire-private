@@ -1614,13 +1614,13 @@ body.dashcode-auth {
 .starter-settings-stat {
     background: #fff;
     border: 0;
-    min-height: 6.25rem;
 }
 .starter-settings-stat .card-body {
     align-items: center;
     display: flex;
     flex-direction: row;
-    padding: 1rem;
+    gap: .75rem;
+    padding: 1rem 1rem .75rem;
 }
 .starter-settings-stat-icon {
     align-items: center;

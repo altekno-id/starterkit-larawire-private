@@ -39,7 +39,7 @@
 
     <div class="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="card starter-settings-stat starter-settings-stat-company">
-            <div class="card-body flex items-center gap-4 p-4">
+            <div class="card-body flex items-center gap-3 px-4 pb-3 pt-4">
                 <span class="starter-settings-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'building'])
                 </span>
@@ -50,7 +50,7 @@
             </div>
         </div>
         <div class="card starter-settings-stat starter-settings-stat-role">
-            <div class="card-body flex items-center gap-4 p-4">
+            <div class="card-body flex items-center gap-3 px-4 pb-3 pt-4">
                 <span class="starter-settings-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'shield-lock'])
                 </span>
@@ -61,7 +61,7 @@
             </div>
         </div>
         <div class="card starter-settings-stat starter-settings-stat-user">
-            <div class="card-body flex items-center gap-4 p-4">
+            <div class="card-body flex items-center gap-3 px-4 pb-3 pt-4">
                 <span class="starter-settings-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'users'])
                 </span>
@@ -72,7 +72,7 @@
             </div>
         </div>
         <div class="card starter-settings-stat starter-settings-stat-app">
-            <div class="card-body flex items-center gap-4 p-4">
+            <div class="card-body flex items-center gap-3 px-4 pb-3 pt-4">
                 <span class="starter-settings-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'apps'])
                 </span>

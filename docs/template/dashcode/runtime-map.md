@@ -12,6 +12,7 @@ sama dengan theme lain; struktur serta presentasinya tidak.
 | Card dan statistik | `card.html`, `basic-widgets.html` | card putih dan statistic widget Dashcode | settings dan log aktivitas | 1280x768, teks panjang |
 | Button | `buttons.html` | solid/outline/light Dashcode, icon kiri | seluruh starter | hover, focus, disabled, loading |
 | Form | `input-layout.html`, `select.html`, `file-input.html` | `form-label`, `form-control`, select dan helper Dashcode | user/role/profile/settings | valid, invalid, disabled |
+| Profil akun | `profile.html`, `settings.html`, `input-layout.html` | overview identitas, summary ringkas, menu pengaturan, form dua kolom dan action footer | `profile/edit-my-profile.blade.php` | detail, keamanan, foto default, responsive |
 | Checkbox/radio/switch | `checkbox.html`, `radio.html`, `switch.html` | control native Dashcode dengan label sejajar | role dan security | checked, unchecked, disabled |
 | Tabs/section navigation | `tab-accordion.html`, `settings.html` | tab/pill Dashcode | settings dan profil | active, responsive |
 | Accordion akses | `tab-accordion.html` | header, chevron dan panel Dashcode | `user-management/role-form.blade.php` | open/close satu dan semua app |

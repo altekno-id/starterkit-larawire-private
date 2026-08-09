@@ -1794,6 +1794,79 @@ body.dashcode-auth {
 }
 .dashcode-stacked-list-item + .dashcode-stacked-list-item { border-top: 1px solid var(--starter-slate-100); }
 .dashcode-stacked-list-flush { background: transparent; border: 0; border-radius: 0; }
+.dashcode-profile-overview .card-body { padding: 1.25rem 1.5rem; }
+.dashcode-profile-overview-layout {
+    align-items: center;
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+}
+.dashcode-profile-identity {
+    align-items: center;
+    display: flex;
+    flex: 0 1 20rem;
+    gap: 1rem;
+    min-width: 0;
+}
+.dashcode-profile-name {
+    color: var(--starter-slate-800);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+.dashcode-profile-summary-grid {
+    display: grid;
+    flex: 1 1 auto;
+    gap: .75rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 43rem;
+}
+.dashcode-profile-summary-item {
+    align-items: center;
+    border-left: 1px solid var(--starter-slate-200);
+    display: flex;
+    gap: .75rem;
+    min-width: 0;
+    padding: .25rem 0 .25rem 1rem;
+}
+.dashcode-profile-summary-icon {
+    align-items: center;
+    border-radius: 999px;
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 2.5rem;
+    justify-content: center;
+    width: 2.5rem;
+}
+.dashcode-profile-summary-icon .starter-icon { height: 1.15rem; width: 1.15rem; }
+.dashcode-profile-summary-icon-info { background: #e6f8fc; color: #06b6d4; }
+.dashcode-profile-summary-icon-primary { background: var(--starter-primary-soft); color: var(--starter-primary); }
+.dashcode-profile-summary-icon-success { background: var(--starter-success-soft); color: #16a36d; }
+.dashcode-profile-summary-label {
+    color: var(--starter-slate-500);
+    font-size: .75rem;
+    line-height: 1.35;
+}
+.dashcode-profile-summary-value {
+    color: var(--starter-slate-800);
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: .15rem;
+}
+.dashcode-profile-menu-card .card-body { padding: 1rem; }
+.dashcode-profile-menu-title {
+    color: var(--starter-slate-800);
+    font-size: .9375rem;
+    font-weight: 600;
+    margin: 0;
+}
+.dashcode-profile-menu-copy {
+    color: var(--starter-slate-500);
+    font-size: .75rem;
+    line-height: 1.5;
+    margin: .3rem 0 1rem;
+}
 .dashcode-profile-nav { display: grid; gap: .35rem; }
 .dashcode-profile-nav-item {
     border-radius: .375rem;
@@ -1805,6 +1878,82 @@ body.dashcode-auth {
 .dashcode-profile-nav-item:hover { background: var(--starter-slate-50); color: var(--starter-slate-800); }
 .dashcode-profile-nav-item.active { background: var(--starter-primary-soft); color: var(--starter-primary); }
 .dashcode-profile-nav-item.disabled { cursor: not-allowed; opacity: .55; }
+.dashcode-profile-form-header {
+    align-items: flex-start;
+    border-bottom: 1px solid var(--starter-slate-200);
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+}
+.dashcode-profile-form-title {
+    color: var(--starter-slate-900);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0;
+}
+.dashcode-profile-form-copy {
+    color: var(--starter-slate-500);
+    font-size: .8125rem;
+    line-height: 1.5;
+    margin: .25rem 0 0;
+}
+.dashcode-profile-form-icon {
+    align-items: center;
+    background: var(--starter-primary-soft);
+    border-radius: .5rem;
+    color: var(--starter-primary);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 2.5rem;
+    justify-content: center;
+    width: 2.5rem;
+}
+.dashcode-profile-photo-block {
+    align-items: center;
+    background: var(--starter-slate-50);
+    border: 1px solid var(--starter-slate-200);
+    border-radius: .5rem;
+    display: flex;
+    gap: 1.25rem;
+    padding: 1rem;
+}
+.dashcode-profile-photo-actions { min-width: 0; }
+.dashcode-profile-security-guide {
+    align-items: flex-start;
+    background: #f5f7ff;
+    border: 1px solid #dfe4ff;
+    border-radius: .5rem;
+    display: flex;
+    gap: .75rem;
+    padding: .875rem 1rem;
+}
+.dashcode-profile-security-guide-icon {
+    color: var(--starter-primary);
+    display: inline-flex;
+    flex: 0 0 auto;
+    margin-top: .1rem;
+}
+.dashcode-profile-security-guide-title {
+    color: var(--starter-slate-800);
+    font-size: .8125rem;
+    font-weight: 600;
+}
+.dashcode-profile-security-guide-copy {
+    color: var(--starter-slate-500);
+    font-size: .75rem;
+    line-height: 1.5;
+    margin-top: .15rem;
+}
+.dashcode-profile-actions {
+    align-items: center;
+    background: #fff;
+    border-top: 1px solid var(--starter-slate-200);
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 1.5rem;
+}
 .dashcode-access-accordion-item { border-bottom: 1px solid var(--starter-slate-200); }
 .dashcode-access-accordion-button {
     align-items: center;
@@ -1932,6 +2081,29 @@ body.dashcode-auth {
     }
 }
 
+@media (max-width: 991.98px) {
+    .dashcode-profile-overview-layout {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .dashcode-profile-identity { flex-basis: auto; }
+    .dashcode-profile-summary-grid { max-width: none; }
+    .dashcode-profile-summary-item:first-child { border-left: 0; padding-left: 0; }
+}
+
+@media (max-width: 767.98px) {
+    .dashcode-profile-summary-grid { grid-template-columns: 1fr; }
+    .dashcode-profile-summary-item,
+    .dashcode-profile-summary-item:first-child {
+        border-left: 0;
+        border-top: 1px solid var(--starter-slate-200);
+        padding: .75rem 0 0;
+    }
+    .dashcode-profile-summary-item:first-child { border-top: 0; padding-top: 0; }
+}
+
 @media (max-width: 575.98px) {
     .page-content { padding-top: 1rem; }
     .page-title { font-size: 1.25rem; }
@@ -1949,6 +2121,11 @@ body.dashcode-auth {
         top: 4.25rem;
         width: auto;
     }
+    .dashcode-profile-overview .card-body,
+    .dashcode-profile-form-header,
+    .dashcode-profile-actions { padding-left: 1rem; padding-right: 1rem; }
+    .dashcode-profile-photo-block { align-items: flex-start; flex-direction: column; }
+    .dashcode-profile-actions .btn { width: 100%; }
     .dashcode-landing .container-xl { padding-left: 1rem; padding-right: 1rem; }
     .dashcode-landing .py-6 { padding-bottom: 3rem; padding-top: 3rem; }
 }

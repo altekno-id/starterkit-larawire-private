@@ -1647,9 +1647,12 @@ body.dashcode-auth {
 }
 .starter-settings-stat-value {
     color: var(--starter-slate-900);
-    font-size: 1.125rem;
-    font-weight: 500;
-    line-height: 1.5rem;
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Native Dashcode switch used for boolean settings. */

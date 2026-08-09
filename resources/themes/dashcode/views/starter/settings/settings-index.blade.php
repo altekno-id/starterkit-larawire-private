@@ -54,7 +54,7 @@
                 <span class="starter-settings-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'shield-lock'])
                 </span>
-                <div>
+                <div class="overflow-hidden">
                     <div class="starter-settings-stat-label">Role</div>
                     <div class="starter-settings-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($roleCount) }} role terdaftar</div>
                 </div>
@@ -65,7 +65,7 @@
                 <span class="starter-settings-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'users'])
                 </span>
-                <div>
+                <div class="overflow-hidden">
                     <div class="starter-settings-stat-label">User</div>
                     <div class="starter-settings-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($userCount) }} akun dikelola</div>
                 </div>
@@ -76,7 +76,7 @@
                 <span class="starter-settings-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'apps'])
                 </span>
-                <div>
+                <div class="overflow-hidden">
                     <div class="starter-settings-stat-label">Total Aplikasi</div>
                     <div class="starter-settings-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($appCount) }} aplikasi tersedia</div>
                 </div>

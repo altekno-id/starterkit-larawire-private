@@ -1,7 +1,7 @@
 @php($position = $position ?? 'bottom')
 
 @if ($paginator->count() > 0)
-    <div class="starter-pg-pagination d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-2">
+    <div class="starter-pg-pagination d-flex flex-column flex-lg-row align-items-lg-center justify-content-end gap-2 text-end">
         @if ($recordCount === 'full')
             <small class="text-muted">Menampilkan <strong>{{ $paginator->firstItem() }}</strong> sampai <strong>{{ $paginator->lastItem() }}</strong> dari <strong>{{ $paginator->total() }}</strong> data</small>
         @elseif ($recordCount === 'short')

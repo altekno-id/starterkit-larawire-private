@@ -1027,13 +1027,16 @@ summary::-webkit-details-marker {
 
 .avatar,
 .starter-avatar {
+    align-items: center;
     background-color: var(--starter-slate-200);
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     border-radius: .375rem;
     display: inline-flex;
+    flex: 0 0 auto;
     height: 2.5rem;
+    justify-content: center;
     width: 2.5rem;
 }
 

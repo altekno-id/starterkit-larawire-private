@@ -76,6 +76,39 @@
     text-align: right;
 }
 
+.starter-client-logo-preview {
+    align-items: center;
+    background: var(--tblr-bg-surface-secondary);
+    border: 1px dashed var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+    display: flex;
+    height: 5rem;
+    justify-content: center;
+    overflow: hidden;
+    padding: .75rem;
+    width: 10rem;
+}
+
+.starter-client-logo-preview-image {
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+}
+
+.starter-client-logo-placeholder {
+    align-items: center;
+    background: var(--tblr-primary-lt);
+    border-radius: var(--tblr-border-radius);
+    color: var(--tblr-primary);
+    display: inline-flex;
+    font-size: .875rem;
+    font-weight: 600;
+    height: 3rem;
+    justify-content: center;
+    letter-spacing: .04em;
+    width: 3rem;
+}
+
 .navbar-vertical {
     --tblr-navbar-bg: #182433;
 }

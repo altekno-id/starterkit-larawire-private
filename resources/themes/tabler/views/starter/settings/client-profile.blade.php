@@ -27,7 +27,7 @@
                                 alt="Pratinjau logo {{ $clientForm['name'] ?: 'perusahaan' }}"
                             >
                         @else
-                            <span class="fw-semibold text-secondary">{{ $clientInitials }}</span>
+                            <span class="starter-client-logo-placeholder">{{ $clientInitials }}</span>
                         @endif
                     </div>
                 </div>

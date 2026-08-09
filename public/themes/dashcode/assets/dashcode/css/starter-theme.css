@@ -1382,6 +1382,15 @@ body.starter-is-navigating .starter-slot-area > [wire\:id],
     line-height: 1rem;
     white-space: nowrap;
 }
+.dashcode-data-table label.starter-pg-per-page,
+.dashcode-data-table .starter-pg-page-size {
+    font-size: .75rem;
+    line-height: 1rem;
+}
+.dashcode-data-table label.starter-pg-per-page {
+    text-transform: none;
+    width: auto;
+}
 .starter-pg-pages { align-items: center; display: flex; gap: .3rem; }
 .starter-pg-page {
     align-items: center;
@@ -1798,8 +1807,36 @@ body.dashcode-auth {
 }
 
 /* Starter-specific previews and empty states */
-.starter-client-logo-preview { align-items: center; background: var(--starter-slate-50); border: 1px dashed var(--starter-slate-300); border-radius: .375rem; display: flex; justify-content: center; min-height: 8rem; padding: 1rem; }
-.starter-client-logo-preview-image { max-height: 6rem; max-width: 100%; object-fit: contain; }
+.starter-client-logo-preview {
+    align-items: center;
+    background: var(--starter-slate-50);
+    border: 1px dashed var(--starter-slate-300);
+    border-radius: .375rem;
+    display: flex;
+    height: 5rem;
+    justify-content: center;
+    overflow: hidden;
+    padding: .75rem;
+    width: 10rem;
+}
+.starter-client-logo-preview-image {
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+}
+.starter-client-logo-placeholder {
+    align-items: center;
+    background: var(--starter-primary-soft);
+    border-radius: .375rem;
+    color: var(--starter-primary);
+    display: inline-flex;
+    font-size: .875rem;
+    font-weight: 600;
+    height: 3rem;
+    justify-content: center;
+    letter-spacing: .04em;
+    width: 3rem;
+}
 .empty { padding: 2rem; text-align: center; }
 .empty-icon,
 .empty-img { margin-bottom: 1rem; }

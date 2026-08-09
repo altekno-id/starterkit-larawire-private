@@ -44,17 +44,18 @@
         },
     }"
 >
-    <div class="page-header mb-5 flex flex-col items-start justify-between gap-4 md:flex-row" aria-label="Header halaman">
-            <div class="min-w-0">
+    <div class="page-header mb-3" aria-label="Header halaman">
+        <div class="row g-3 align-items-start">
+            <div class="col min-w-0">
                 <div class="page-pretitle">Pengaturan / Roles</div>
                 <h2 class="page-title">{{ $isCreating ? 'Tambah Role' : ($isSuperuserRole ? 'Detail Role' : 'Edit Role') }}</h2>
                 <div class="text-secondary mt-1">
                     {{ $isCreating ? 'Buat identitas role, pilih akses module, lalu tentukan halaman awal.' : 'Kelola identitas dan cakupan akses role pada halaman khusus ini.' }}
                 </div>
             </div>
-            <div class="self-start md:self-end">
+            <div class="col-12 col-md-auto align-self-md-end">
                 <div class="btn-list">
-                    <a href="{{ route('starter.settings', ['section' => 'roles']) }}" class="btn" data-starter-navigate>
+                    <a href="{{ route('starter.settings', ['section' => 'roles']) }}" class="btn btn-secondary" data-starter-navigate>
                         @include('starter.templates.layouts.icon', ['name' => 'arrow-left', 'class' => 'icon-sm me-1'])
                         Batal dan Kembali
                     </a>
@@ -66,12 +67,13 @@
                     @endif
                 </div>
             </div>
+        </div>
     </div>
 
     <form id="role-form" wire:submit="save">
-        <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-12" data-role-form-layout="split">
-            <div class="xl:col-span-5" data-role-identity-panel>
-                <div class="card xl:sticky xl:top-4">
+        <div class="row g-3 align-items-start" data-role-form-layout="split">
+            <div class="col-12 col-xl-5" data-role-identity-panel>
+                <div class="card position-xl-sticky" style="top: 1rem;">
                     <div class="card-header">
                         <div>
                             <h3 class="card-title">Identitas Role</h3>
@@ -231,7 +233,7 @@
                 </div>
             </div>
 
-            <div class="xl:col-span-7" data-role-access-panel>
+            <div class="col-12 col-xl-7" data-role-access-panel>
                 <div class="card position-xl-sticky" style="top: 1rem;">
                     <div class="card-header d-flex align-items-center">
                         <div class="flex-grow-1" style="min-width: 0;">

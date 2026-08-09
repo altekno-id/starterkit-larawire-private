@@ -31,13 +31,15 @@
             <h2 class="page-title">Pengaturan</h2>
             <div class="text-secondary">Kelola akses, akun user, dan identitas perusahaan dari satu tempat.</div>
         </div>
-        <div class="hidden items-center gap-2 text-sm text-slate-500 md:flex">
+        <div class="hidden items-center justify-end gap-2 text-right text-sm text-slate-500 md:ml-auto md:flex">
             @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm'])
             Perubahan konfigurasi sistem tercatat di audit log.
         </div>
     </div>
 
-    <div class="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="card dashcode-settings-summary mb-5">
+      <div class="card-body p-4">
+       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <div class="card starter-settings-stat starter-settings-stat-company">
             <div class="card-body flex items-center gap-4 p-4">
                 <span class="starter-settings-stat-icon" aria-hidden="true">
@@ -82,6 +84,8 @@
                 </div>
             </div>
         </div>
+       </div>
+      </div>
     </div>
 
     <div class="card dashcode-settings-panel">

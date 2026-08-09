@@ -6,6 +6,14 @@ use PowerComponents\LivewirePowerGrid\Themes\Tailwind;
 
 class DashcodePowerGridTheme extends Tailwind
 {
+    public function layout(): array
+    {
+        return array_replace(parent::layout(), [
+            'table' => 'starter.powergrid.table-base',
+            'pagination' => 'starter.powergrid.pagination',
+        ]);
+    }
+
     public function table(): array
     {
         return array_replace_recursive(parent::table(), [
@@ -34,6 +42,7 @@ class DashcodePowerGridTheme extends Tailwind
     public function footer(): array
     {
         return array_replace(parent::footer(), [
+            'view' => 'starter.powergrid.footer',
             'select' => 'starter-pg-control starter-pg-select starter-pg-page-size',
             'footer' => 'starter-pg-footer',
             'footer_with_pagination' => 'starter-pg-footer-inner flex w-full flex-col gap-4 md:flex-row md:items-center md:justify-between',

@@ -33,7 +33,7 @@
                 <div class="text-secondary">Kelola akses, akun user, dan identitas perusahaan dari satu tempat.</div>
             </div>
             <div class="col-auto ms-auto d-none d-md-block">
-                <div class="d-flex align-items-center gap-2 text-secondary small">
+                <div class="d-flex align-items-center justify-content-end gap-2 text-end text-secondary small">
                     @include('starter.templates.layouts.icon', ['name' => 'info-circle', 'class' => 'icon-sm'])
                     Perubahan konfigurasi sistem tercatat di audit log.
                 </div>

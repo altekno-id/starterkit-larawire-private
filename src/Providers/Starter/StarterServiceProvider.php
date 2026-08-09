@@ -64,6 +64,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
@@ -115,6 +116,7 @@ class StarterServiceProvider extends ServiceProvider
         $this->loadAppMigrations();
         $this->registerLivewireComponents();
         $this->configureApiDocumentation();
+        $this->configurePowerGridTranslations();
         View::addNamespace('errors', StarterTheme::viewPath('starter/errors'));
 
         Number::useLocale(str_replace('_', '-', (string) config('app.locale')));
@@ -255,6 +257,31 @@ class StarterServiceProvider extends ServiceProvider
         $config->set('livewire-powergrid.theme', StarterTheme::powerGridTheme());
         $config->set('livewire-powergrid.filter', 'inline');
         $config->set('livewire-powergrid.persist_driver', 'session');
+    }
+
+    private function configurePowerGridTranslations(): void
+    {
+        Lang::addLines([
+            'datatable.buttons.clear_all_filters' => 'Hapus semua',
+            'datatable.labels.action' => 'Aksi',
+            'datatable.labels.results_per_page' => 'Data per halaman',
+            'datatable.labels.clear_filter' => 'Hapus filter',
+            'datatable.labels.no_data' => 'Tidak ada data yang ditemukan',
+            'datatable.labels.all' => 'Semua',
+            'datatable.labels.selected' => 'Dipilih',
+            'datatable.labels.filtered' => 'Tersaring',
+            'datatable.placeholders.search' => 'Cari...',
+            'datatable.placeholders.select' => 'Pilih periode',
+            'datatable.pagination.showing' => 'Menampilkan',
+            'datatable.pagination.to' => 'sampai',
+            'datatable.pagination.of' => 'dari',
+            'datatable.pagination.results' => 'data',
+            'datatable.boolean_filter.all' => 'Semua',
+            'datatable.multi_select.select' => 'Pilih',
+            'datatable.multi_select.all' => 'Semua',
+            'datatable.select.select' => 'Pilih',
+            'datatable.select.all' => 'Semua',
+        ], (string) config('app.locale'), 'livewire-powergrid');
     }
 
     private function prepareApiDocumentation(): void

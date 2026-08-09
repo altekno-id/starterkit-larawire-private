@@ -6,6 +6,14 @@ use PowerComponents\LivewirePowerGrid\Themes\Bootstrap5;
 
 class TablerPowerGridTheme extends Bootstrap5
 {
+    public function layout(): array
+    {
+        return array_replace(parent::layout(), [
+            'table' => 'starter.powergrid.table-base',
+            'pagination' => 'starter.powergrid.pagination',
+        ]);
+    }
+
     public function table(): array
     {
         return array_replace_recursive(parent::table(), [
@@ -31,6 +39,7 @@ class TablerPowerGridTheme extends Bootstrap5
     public function footer(): array
     {
         return array_replace(parent::footer(), [
+            'view' => 'starter.powergrid.footer',
             'select' => 'form-select form-select-sm w-auto',
             'footer' => 'border-top px-3 py-2 w-100 d-flex flex-wrap gap-2 align-items-center justify-content-between',
         ]);

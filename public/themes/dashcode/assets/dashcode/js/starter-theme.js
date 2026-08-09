@@ -1,4 +1,32 @@
 window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
+    sidebarPreferenceKey: 'starter-dashcode-sidebar-collapsed',
+    syncSidebarType(root = document) {
+        const shell = root.querySelector?.('.app-wrapper') || document.querySelector('.app-wrapper');
+        const collapsed = shell?.classList.contains('starter-sidebar-collapsed') || false;
+
+        document.querySelectorAll('[data-starter-sidebar-toggle]').forEach((button) => {
+            button.setAttribute('aria-pressed', String(collapsed));
+            button.setAttribute('aria-label', collapsed ? 'Perluas menu samping' : 'Ciutkan menu samping');
+        });
+    },
+    restoreSidebarType() {
+        const shell = document.querySelector('.app-wrapper');
+        if (window.innerWidth < 1280 || shell?.classList.contains('horizontalMenu')) return;
+
+        const collapsed = window.localStorage.getItem(this.sidebarPreferenceKey) === '1';
+        shell?.classList.toggle('starter-sidebar-collapsed', collapsed);
+        this.syncSidebarType();
+    },
+    toggleSidebarType() {
+        if (window.innerWidth < 1280) return;
+
+        const shell = document.querySelector('.app-wrapper');
+        if (! shell || shell.classList.contains('horizontalMenu')) return;
+
+        const collapsed = shell.classList.toggle('starter-sidebar-collapsed');
+        window.localStorage.setItem(this.sidebarPreferenceKey, collapsed ? '1' : '0');
+        this.syncSidebarType();
+    },
     syncNavigationDetails(root = document) {
         root.querySelectorAll('[data-starter-navigation-details]').forEach((details) => {
             details.querySelector(':scope > summary')?.setAttribute('aria-expanded', String(details.open));
@@ -87,6 +115,7 @@ window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
         document.querySelectorAll('.modal.show, .modal.d-block').forEach((modal) => this.closeModal(modal));
     },
     prepare() {
+        this.restoreSidebarType();
         this.syncNavigationDetails();
         this.syncDisclosureDetails();
 
@@ -94,6 +123,12 @@ window.StarterThemeAdapter = Object.assign(window.StarterThemeAdapter || {}, {
 
         document.addEventListener('click', (event) => {
             const sidebarOpen = event.target.closest('[data-starter-sidebar-open]');
+
+            if (event.target.closest('[data-starter-sidebar-toggle]')) {
+                event.preventDefault();
+                this.toggleSidebarType();
+                return;
+            }
 
             if (sidebarOpen) {
                 event.preventDefault();

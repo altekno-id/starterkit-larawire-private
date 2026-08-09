@@ -6,6 +6,10 @@
             <img src="{{ $brandLogoDarkUrl }}" class="starter-brand-image black_logo" alt="{{ $brandLogoAlt }}" data-starter-brand-logo data-fallback-src="{{ $defaultBrandLogoDarkUrl }}" @if ($clientLogoUrl) data-company-logo="true" @endif>
             <img src="{{ $brandLogoUrl }}" class="starter-brand-image white_logo" alt="{{ $brandLogoAlt }}" data-starter-brand-logo data-fallback-src="{{ $defaultBrandLogoUrl }}" @if ($clientLogoUrl) data-company-logo="true" @endif>
         </a>
+        <button type="button" class="starter-sidebar-type" data-starter-sidebar-toggle aria-label="Ciutkan menu samping" aria-pressed="false">
+            <span class="starter-sidebar-dot starter-sidebar-dot-expanded" aria-hidden="true"></span>
+            <span class="starter-sidebar-dot starter-sidebar-dot-collapsed" aria-hidden="true"></span>
+        </button>
         <button type="button" class="sidebarCloseIcon starter-icon-button" data-starter-sidebar-close aria-label="Tutup navigasi">
             @include('starter.templates.layouts.icon', ['name' => 'circle-x'])
         </button>

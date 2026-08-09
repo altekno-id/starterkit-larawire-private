@@ -7,17 +7,23 @@
         <h3 class="card-title">Sesi dan Lock Screen</h3>
         <div class="row g-4 mb-4">
             <div class="col-md-6">
-                <label class="form-check form-switch mb-4">
-                    <input class="form-check-input" type="checkbox" wire:model.defer="securityForm.remember_me_enabled">
-                    <span class="form-check-label">
+                <label class="starter-switch-row mb-4">
+                    <span class="starter-switch-control">
+                        <input class="starter-switch-input" type="checkbox" wire:model.defer="securityForm.remember_me_enabled">
+                        <span class="starter-switch-track" aria-hidden="true"></span>
+                    </span>
+                    <span class="starter-switch-label">
                         <span class="d-block fw-semibold">Aktifkan Remember Me</span>
                         <span class="d-block small text-secondary">User dapat memilih tetap login pada perangkat yang dipercaya.</span>
                     </span>
                 </label>
 
-                <label class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" wire:model.defer="securityForm.lock_screen_enabled">
-                    <span class="form-check-label">
+                <label class="starter-switch-row">
+                    <span class="starter-switch-control">
+                        <input class="starter-switch-input" type="checkbox" wire:model.defer="securityForm.lock_screen_enabled">
+                        <span class="starter-switch-track" aria-hidden="true"></span>
+                    </span>
+                    <span class="starter-switch-label">
                         <span class="d-block fw-semibold">Aktifkan Lock Screen Otomatis</span>
                         <span class="d-block small text-secondary">Aplikasi dikunci tanpa mengakhiri sesi login.</span>
                     </span>

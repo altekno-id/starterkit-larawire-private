@@ -31,7 +31,7 @@
     </div>
 
     <div class="dashcode-pg-toolbar-filters">
-        <select class="starter-pg-control starter-pg-select dashcode-pg-archive-filter" wire:model.live="archiveStatus" aria-label="Status arsip user">
+        <select class="starter-pg-control starter-pg-select dashcode-native-select dashcode-pg-archive-filter" wire:model.live="archiveStatus" aria-label="Status arsip user">
             <option value="active">Data aktif</option>
             <option value="archived">Arsip</option>
             <option value="all">Semua data</option>

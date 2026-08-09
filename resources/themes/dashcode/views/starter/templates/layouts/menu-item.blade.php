@@ -11,7 +11,7 @@
         @if ($menu['hasChildren'])
             <details class="starter-sidebar-details starter-navigation-details" data-starter-navigation-details @if ($isExpanded) open @endif>
                 <summary class="navItem" role="button" aria-controls="{{ $menuId }}">
-                    <span class="flex items-center gap-3">
+                    <span class="starter-parent-menu-content">
                         @include('starter.templates.layouts.icon', ['name' => $icon, 'class' => 'nav-icon'])
                         <span>{{ $menu['label'] }}</span>
                     </span>
@@ -25,14 +25,14 @@
             </details>
         @elseif ($menu['url'] === '#')
             <span class="navItem is-disabled" aria-disabled="true">
-                <span class="flex items-center gap-3">
+                <span class="starter-parent-menu-content">
                     @include('starter.templates.layouts.icon', ['name' => $icon, 'class' => 'nav-icon'])
                     <span>{{ $menu['label'] }}</span>
                 </span>
             </span>
         @else
             <a href="{{ $menu['url'] }}" class="navItem {{ $isActive ? 'active' : '' }}" @if ($isActive) data-current="true" @endif data-starter-navigate data-starter-menu-url="{{ $menu['url'] }}">
-                <span class="flex items-center gap-3">
+                <span class="starter-parent-menu-content">
                     @include('starter.templates.layouts.icon', ['name' => $icon, 'class' => 'nav-icon'])
                     <span>{{ $menu['label'] }}</span>
                 </span>

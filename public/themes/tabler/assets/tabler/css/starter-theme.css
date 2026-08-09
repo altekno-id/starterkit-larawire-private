@@ -52,6 +52,28 @@
     min-width: 8rem;
 }
 
+.starter-pg-footer-top,
+.starter-pg-footer-bottom {
+    background: var(--tblr-bg-surface);
+    border-top: 1px solid var(--tblr-border-color);
+    padding: .75rem 1rem;
+    width: 100%;
+}
+
+.starter-pg-footer-top {
+    border-bottom: 1px solid var(--tblr-border-color);
+}
+
+.starter-pg-per-page .form-select {
+    min-width: 4.75rem;
+    width: auto;
+}
+
+.starter-pg-pagination {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .navbar-vertical {
     --tblr-navbar-bg: #182433;
 }

@@ -24,13 +24,13 @@
 @endphp
 
 <div class="dashcode-activity-page">
-    <div class="page-header mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div class="page-header dashcode-activity-header mb-5" aria-label="Header halaman">
         <div>
             <div class="page-pretitle">Sistem / Riwayat Data</div>
             <h2 class="page-title">Log Aktivitas</h2>
             <div class="text-secondary mt-1">Riwayat pembuatan, perubahan, dan penghapusan data dari seluruh app perusahaan.</div>
         </div>
-        <span class="badge bg-blue-lt text-blue inline-flex items-center gap-2 px-3 py-2 self-start md:self-auto">
+        <span class="badge bg-blue-lt text-blue dashcode-activity-readonly inline-flex items-center gap-2 px-3 py-2">
             @include('starter.templates.layouts.icon', ['name' => 'history', 'class' => 'icon-sm'])
             Data hanya dapat dilihat
         </span>
@@ -38,35 +38,35 @@
 
     <div class="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
         <div class="card starter-activity-stat starter-activity-stat-total">
-            <div class="card-body flex items-center gap-4 p-4">
-                <span class="starter-activity-stat-icon">
+            <div class="card-body flex items-center gap-3 px-4 pb-3 pt-4">
+                <span class="starter-activity-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'history'])
                 </span>
-                <div>
-                    <div class="text-secondary">Total Perubahan</div>
-                    <div class="h2 mb-0">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($totalChanges) }}</div>
+                <div class="overflow-hidden">
+                    <div class="starter-activity-stat-label">Total Perubahan</div>
+                    <div class="starter-activity-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($totalChanges) }}</div>
                 </div>
             </div>
         </div>
         <div class="card starter-activity-stat starter-activity-stat-today">
-            <div class="card-body flex items-center gap-4 p-4">
-                <span class="starter-activity-stat-icon">
+            <div class="card-body flex items-center gap-3 px-4 pb-3 pt-4">
+                <span class="starter-activity-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'table'])
                 </span>
-                <div>
-                    <div class="text-secondary">Perubahan Hari Ini</div>
-                    <div class="h2 mb-0">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($todayChanges) }}</div>
+                <div class="overflow-hidden">
+                    <div class="starter-activity-stat-label">Perubahan Hari Ini</div>
+                    <div class="starter-activity-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($todayChanges) }}</div>
                 </div>
             </div>
         </div>
         <div class="card starter-activity-stat starter-activity-stat-users">
-            <div class="card-body flex items-center gap-4 p-4">
-                <span class="starter-activity-stat-icon">
+            <div class="card-body flex items-center gap-3 px-4 pb-3 pt-4">
+                <span class="starter-activity-stat-icon" aria-hidden="true">
                     @include('starter.templates.layouts.icon', ['name' => 'users'])
                 </span>
-                <div>
-                    <div class="text-secondary">Pengguna Tercatat</div>
-                    <div class="h2 mb-0">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($activeActorCount) }}</div>
+                <div class="overflow-hidden">
+                    <div class="starter-activity-stat-label">Pengguna Tercatat</div>
+                    <div class="starter-activity-stat-value">{{ \Altekno\StarterKit\Support\Starter\StarterNumber::decimal($activeActorCount) }}</div>
                 </div>
             </div>
         </div>

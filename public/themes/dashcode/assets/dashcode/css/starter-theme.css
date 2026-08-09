@@ -1653,29 +1653,53 @@ body.dashcode-auth {
     font-weight: 500;
     line-height: 1.5rem;
 }
+.dashcode-activity-header {
+    align-items: flex-end;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    width: 100%;
+}
+.dashcode-activity-readonly {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
 .starter-activity-stat {
+    background: #fff;
     border: 0;
-    box-shadow: none;
-    min-height: 6.5rem;
 }
 .starter-activity-stat .card-body {
     align-items: center;
     display: flex;
     flex-direction: row;
+    gap: .75rem;
+    padding: 1rem 1rem .75rem;
 }
-.starter-activity-stat-total { background: #e5f9ff; }
-.starter-activity-stat-today { background: #ffede5; }
-.starter-activity-stat-users { background: #eae5ff; }
 .starter-activity-stat-icon {
     align-items: center;
+    border-radius: 9999px;
     display: inline-flex;
     flex: 0 0 auto;
+    height: 3rem;
     justify-content: center;
+    width: 3rem;
 }
-.starter-activity-stat-icon .starter-icon { height: 2.75rem; width: 2.75rem; }
-.starter-activity-stat-total .starter-activity-stat-icon { color: #0cb9e8; }
-.starter-activity-stat-today .starter-activity-stat-icon { color: #f9734f; }
-.starter-activity-stat-users .starter-activity-stat-icon { color: #6650d8; }
+.starter-activity-stat-icon .starter-icon { height: 1.75rem; width: 1.75rem; }
+.starter-activity-stat-total .starter-activity-stat-icon { background: #e5f9ff; color: #0cb9e8; }
+.starter-activity-stat-today .starter-activity-stat-icon { background: #ffede5; color: #f9734f; }
+.starter-activity-stat-users .starter-activity-stat-icon { background: #eae5ff; color: #6650d8; }
+.starter-activity-stat-label {
+    color: var(--starter-slate-700);
+    font-size: .875rem;
+    font-weight: 500;
+    margin-bottom: .2rem;
+}
+.starter-activity-stat-value {
+    color: var(--starter-slate-900);
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+}
 .dashcode-table-card,
 .dashcode-settings-panel {
     border-radius: .375rem;
@@ -2126,6 +2150,11 @@ body.dashcode-auth {
 }
 
 @media (max-width: 767.98px) {
+    .dashcode-activity-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .dashcode-activity-readonly { margin-left: 0; }
     .dashcode-profile-summary-grid { grid-template-columns: 1fr; }
     .dashcode-profile-summary-item,
     .dashcode-profile-summary-item:first-child {

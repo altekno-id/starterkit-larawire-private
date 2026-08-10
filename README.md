@@ -2,37 +2,37 @@
 
 # Starterkit Larawire Private
 
-> Built with open-source work from
+> Made possible by the open-source work of
 > [Laravel](https://laravel.com/),
 > [Laravel Livewire](https://livewire.laravel.com/),
 > [Laravel Lang](https://laravel-lang.com/),
 > [Livewire PowerGrid](https://livewire-powergrid.com/),
 > [Tabler](https://tabler.io/admin-template),
 > [Dashcode](https://codeshaper.net/), and
-> [Scramble](https://scramble.dedoc.co/). Thank you to every author and
-> contributor who builds and maintains these projects.
+> [Scramble](https://scramble.dedoc.co/). Thank you to all the authors and
+> contributors who build and maintain these projects.
 
 ## A. About
 
 ### What is Starterkit Larawire Private?
 
-Starterkit Larawire Private is a foundation for building private, internal
-company applications with **Laravel** and **Livewire**. It plays a similar role
-to Laravel's authentication starter kits, but includes more of the common
-building blocks needed by an internal business application.
+Starterkit Larawire Private is a foundation for building internal business
+applications with **Laravel** and **Livewire**. It is similar to Laravel's
+official authentication starter kits, but includes more of the common features
+needed by a private company application.
 
-After installation, you already have:
+After installing it, your Laravel project already has:
 
 - login with username or email, logout, lock screen, and account security;
-- user, role, module, and dynamic access management;
+- user, role, module, and dynamic authorization management;
 - multiple business Apps and subdomains inside one Laravel project;
 - code-first routes and menus that are synchronized to the database;
 - company settings and an activity log;
 - Tabler and Dashcode themes, each with vertical and horizontal layouts;
 - server-side tables powered by Livewire PowerGrid;
 - an optional API Gateway with Scramble documentation;
-- installation, production setup, update, asset publishing, and migration
-  commands; and
+- commands for installation, production setup, updates, asset publishing, and
+  migrations; and
 - AI-ready development rules for applications derived from this starterkit.
 
 This repository is **not a standalone Laravel application**. It is installed as
@@ -40,8 +40,8 @@ a Git submodule named `starterkit-larawire-private` inside a Laravel project.
 Your business features live in the Laravel project, while the reusable core
 lives in this submodule.
 
-This starterkit is designed for one company or client per installation. It is
-not a SaaS multi-tenant system.
+Each installation is designed for one company or client. This is not a
+multi-tenant SaaS system.
 
 ### Technologies used
 
@@ -49,27 +49,27 @@ not a SaaS multi-tenant system.
 |---|---|
 | Laravel | Application framework, routing, database, validation, and security. |
 | Livewire | Interactive pages and forms without building a separate SPA. |
-| Livewire PowerGrid | Server-side business tables, search, filters, sorting, and pagination. |
+| Livewire PowerGrid | Server-side data tables with search, filters, sorting, and pagination. |
 | Laravel Lang | Indonesian Laravel validation and framework translations. |
-| Tabler | First visual theme, with vertical and horizontal navigation. |
-| Dashcode | Second visual theme, with vertical and horizontal navigation. |
+| Tabler | A visual theme with vertical and horizontal navigation. |
+| Dashcode | An alternative visual theme with vertical and horizontal navigation. |
 | Scramble | Optional API documentation and OpenAPI output. |
 | Git submodule | Keeps the starterkit core versioned separately from the Laravel application. |
 
-The active theme changes presentation only. Data, features, authorization, and
-behavior stay the same, while each theme keeps its own native components and
-visual style.
+The selected theme only changes the presentation. Data, features,
+authorization, and behavior remain the same. Each theme still uses its own
+native components and visual style.
 
 ### The basic idea: App, subdomain, module, route, menu, and role
 
-One installation still uses **one Laravel project, one database, and one login
-system**. Apps divide that project into clear business areas.
+One installation uses **one Laravel project, one database, and one login
+system**. Apps divide the project into clear business areas.
 
 | Term | Beginner-friendly meaning |
 |---|---|
 | **App** | A major business area, such as Sales or HR. |
 | **Subdomain** | The address used to open an App, such as `sales.company.com`. |
-| **Module** | A group of related features and the main access boundary. |
+| **Module** | A group of related features and the primary authorization boundary. |
 | **Route** | The URL and action that opens a page. |
 | **Menu** | A navigation link that points to a route. |
 | **Role** | A collection of modules that a user is allowed to access. |
@@ -80,14 +80,14 @@ The access flow is:
 User -> Role -> Allowed modules -> Allowed routes
 ```
 
-Menus help users navigate, but menus do not provide security. Server-side route
-middleware checks access using the module assigned to the user's role.
+Menus help users navigate, but they do not grant access. Server-side route
+middleware checks whether the user's role contains the required module.
 
 ### Example: an internal ERP application
 
-Imagine that you want to build an internal ERP for Sales, HR, Warehouse, and
-Employees. You do not need four Laravel projects. You can keep everything in
-one project and separate the large business areas into Apps:
+Imagine that you want to build an internal ERP covering Sales, HR, Warehouse,
+and Employees. You do not need four Laravel projects. Everything can stay in
+one project, while the major business areas are separated into Apps:
 
 ```text
 Internal ERP                                  One Laravel project and database
@@ -103,13 +103,13 @@ Internal ERP                                  One Laravel project and database
     └── Stock Movement module
 ```
 
-Employees are modules inside the HR App because they belong to the same
-business area. If Employees later become a fully separate system area, you can
-create an `employee` App at `employee.company.com`.
+Employee management is a module inside the HR App because it belongs to the
+same business area. If it later becomes a completely separate system area, you
+can create an `employee` App at `employee.company.com`.
 
-All users sign in through `company.com`. A Sales user can receive only the
-Customer and Sales Order modules. An HR user can receive the Employee and
-Attendance modules. A manager can receive modules from more than one App.
+All users sign in through `company.com`. A Sales user may receive only the
+Customer and Sales Order modules. An HR user may receive the Employee and
+Attendance modules. A manager may receive modules from more than one App.
 
 Every domain and subdomain points to the **same `public` directory** of the
 same Laravel project.
@@ -122,8 +122,8 @@ Create a new App from the Laravel project root:
 php artisan starter:make-app sales --name="Sales"
 ```
 
-The command creates a working example and synchronizes it automatically. The
-most important files are:
+The command creates a working example and synchronizes it automatically. These
+are the files you will work with most often:
 
 ```text
 config/apps/sales.php
@@ -135,9 +135,9 @@ database/migrations/apps/sales/
 tests/Feature/Apps/Sales/
 ```
 
-You normally develop an App in this order:
+A typical App development flow is:
 
-1. Define the App, modules, menus, icons, and default pages in
+1. Define the App, modules, menus, icons, and landing pages in
    `config/apps/sales.php`.
 2. Define web routes in `routes/apps/sales.php` using the name pattern
    `<app>.<module>.<action>`.
@@ -155,29 +155,31 @@ config module code: sales_order
 route name:          sales.sales_order.index
 ```
 
-The second route-name segment must match the module code. A menu entry in the
-config points to that route name. During synchronization, the starterkit checks
-these relationships and stores the App, module, route, and menu registry in the
-database. Do not edit the starter registry tables manually.
+The second segment of the route name must match the module code. A menu entry
+in the config points to that route name. During synchronization, the
+starterkit validates these relationships and stores the App, module, route,
+and menu registry in the database. Never edit the starterkit registry tables
+manually.
 
 ### How dynamic role access works
 
-Application structure is defined in code, but access is managed dynamically
-from the **Settings -> Roles** page:
+The application structure is defined in code, but access is managed dynamically
+from the **Pengaturan -> Roles** page. The interface remains in Indonesian even
+when you read the English documentation.
 
 1. Create or edit a role.
 2. Select the modules the role may access.
-3. Select the first page for every App granted to that role.
-4. Optionally grant global access to Settings or Activity Log.
-5. Assign the role to a user from User Management.
+3. Select the landing page for every App available to that role.
+4. Optionally grant global access to Pengaturan or Log Aktivitas.
+5. Assign the role to a user from the Users page.
 
-No source-code change is needed when an administrator changes a user's role or
-module access. The new access is read from the database. However, when a
-developer adds or removes modules, routes, or menus in code, run
-`starter:sync` first so Role Management receives the latest structure.
+An administrator does not need to change source code when changing a user's
+role or module access; the application reads the new access from the database.
+When a developer adds or removes modules, routes, or menus in code, run
+`starter:sync` first so the Roles page receives the latest structure.
 
-The built-in Superuser is a protected system account with full access. Other
-users receive access only through their assigned role.
+The built-in Superuser is a protected system account with full access. Every
+other user receives access through their assigned role.
 
 ### Themes and navigation layouts
 
@@ -208,8 +210,8 @@ report.
 ```
 
 The rules guide authorization, validation, audit logging, migrations, UI,
-performance, and tests. These project-development rules do not prevent direct
-maintenance of the starterkit core itself.
+performance, and testing. These application-development rules do not apply to
+direct maintenance of the starterkit core itself.
 
 ## B. Installation
 
@@ -218,11 +220,11 @@ from inside the starterkit submodule.
 
 ### 1. First local installation
 
-Prepare these items first:
+Before you begin, prepare:
 
 1. a fresh Laravel project;
 2. a new or empty database and its connection in `.env`;
-3. the local root domain in `APP_URL`; and
+3. the local main domain in `APP_URL`; and
 4. Git and Composer.
 
 Example `.env` values:
@@ -245,20 +247,20 @@ git submodule add https://github.com/altekno-id/starterkit-larawire-private.git 
 php starterkit-larawire-private/installer/install.php --company="Company Name"
 ```
 
-The installer adds the other starterkit environment variables automatically,
-installs dependencies, prepares Laravel, runs migrations, publishes assets,
-creates the company, and creates the Superuser account.
+The installer automatically adds the remaining starterkit environment
+variables, installs dependencies, connects the starterkit to Laravel, runs
+migrations, publishes assets, and creates the company and Superuser account.
 
 During installation, you may enter the first App code, such as `sales`, or
 leave it empty and create Apps later with `starter:make-app`. If you create an
 App, make sure its local subdomain resolves to the same Laravel `public`
 directory as `APP_URL`.
 
-> **Database warning:** first installation runs `migrate:fresh`, which deletes
-> every table and row in the connected database. A fresh Laravel structure
-> continues after showing the warning. If application code already exists, the
-> installer lists its findings and asks for confirmation before changing
-> anything.
+> **Database warning:** the first installation runs `migrate:fresh`, which
+> deletes every table and row in the connected database. For a fresh Laravel
+> project, installation continues automatically after displaying this notice.
+> If application code already exists, the installer lists what it found and
+> asks for confirmation before making any changes.
 
 The login form accepts the Superuser username or email configured in `.env`.
 The generated development password is only for local use; set a strong
@@ -266,7 +268,7 @@ The generated development password is only for local use; set a strong
 
 ### 2. Reinstall locally
 
-Choose the case that matches your goal.
+Use the option that matches your situation.
 
 #### Use a new or empty database with the same installed project
 
@@ -276,10 +278,9 @@ Change the database connection in `.env`, then run:
 php artisan starter:setup --company="Company Name"
 ```
 
-This is the efficient option after switching from SQLite to MySQL or moving to
-another empty database. It runs migrations, creates the company and Superuser,
-then synchronizes the existing Apps. Do not run the installer again for this
-case.
+Use this after switching from SQLite to MySQL or moving to another empty
+database. It runs migrations, creates the company and Superuser, and then
+synchronizes the existing Apps. Do not rerun the installer for this case.
 
 #### Completely reset the current local database
 
@@ -300,9 +301,9 @@ landing pages, run:
 php artisan starter:sync
 ```
 
-This command applies pending migrations, publishes required assets, validates
-the App structure, and synchronizes App, module, route, and menu metadata. It
-does not reset the database or replace an existing Superuser password.
+This command runs pending migrations, publishes required assets, validates the
+App structure, and synchronizes App, module, route, and menu metadata. It does
+not reset the database or replace the existing Superuser password.
 
 The `starter:make-app` command already synchronizes the new App automatically.
 
@@ -316,9 +317,9 @@ composer install
 php artisan starter:sync
 ```
 
-Your Laravel repository will show the updated submodule pointer as a Git
-change. Review it, then commit and push it as part of the Laravel project so
-other environments use the same starterkit version.
+Git will show the updated submodule pointer as a change in your Laravel
+repository. Review it, then commit and push it with the Laravel project so all
+environments use the same starterkit version.
 
 ### 5. Quick production deployment
 
@@ -332,8 +333,8 @@ to the same Laravel `public` directory:
 | `hr.company.com` | `/home/user/erp/public` |
 | `api.company.com` (optional) | `/home/user/erp/public` |
 
-Set production database values and at least these environment values before
-setup:
+Configure the production database and at least the following environment
+values before running setup:
 
 ```env
 APP_ENV=production
@@ -356,7 +357,7 @@ composer install --no-dev --optimize-autoloader
 php artisan starter:setup --company="Company Name"
 ```
 
-Use `starter:setup` when the production database is new or empty. If you
+Run `starter:setup` when the production database is new or empty. If you
 restored an existing starterkit database, run `php artisan starter:sync`
 instead.
 
@@ -372,8 +373,9 @@ php artisan starter:sync
 storage link, and production cache. Separate `migrate`, `storage:link`, or
 `optimize` commands are not needed.
 
-Before updating production, make sure the worktree is clean and back up the
-database and uploaded files when the release contains risky migrations.
+Before updating production, make sure the Git worktree is clean. Back up the
+database and uploaded files when a release contains potentially destructive
+migrations.
 
 ## C. Optional API Gateway
 
@@ -398,9 +400,9 @@ Each App owns its API routes in:
 routes/apps/<app>.api.php
 ```
 
-For the Sales App, write paths relative to the App because the starterkit adds
-the domain and App prefix automatically. This example assumes that Laravel
-Sanctum has already been installed and configured by the application:
+For the Sales App, define paths relative to the App because the starterkit adds
+the domain and App prefix automatically. The following example assumes that
+Laravel Sanctum has already been installed and configured in the application:
 
 ```php
 Route::get('/orders', SalesOrderIndexController::class)
@@ -418,7 +420,7 @@ The shared gateway rules are:
 
 - point `api.company.com` to the same Laravel `public` directory;
 - keep API code in the owning App's `.api.php` file;
-- choose and configure the API authentication method required by the
+- choose and configure the API authentication method required by your
   application; the gateway does not issue API tokens by itself;
 - give every business endpoint explicit authentication and authorization;
 - use the built-in API middleware and rate limiting;

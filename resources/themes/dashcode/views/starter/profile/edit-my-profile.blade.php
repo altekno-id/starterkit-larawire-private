@@ -54,8 +54,8 @@
                             @include('starter.templates.layouts.icon', ['name' => 'user-circle', 'class' => 'm-0'])
                         </span>
                         <div class="min-w-0">
-                            <div class="dashcode-profile-summary-label">Metode login</div>
-                            <div class="dashcode-profile-summary-value text-truncate" title="Username: {{ $login->username }}">Username: {{ $login->username }}</div>
+                            <div class="dashcode-profile-summary-label">Username</div>
+                            <div class="dashcode-profile-summary-value text-truncate" title="{{ $login->username }}">{{ $login->username }}</div>
                         </div>
                     </div>
                     <div class="dashcode-profile-summary-item">

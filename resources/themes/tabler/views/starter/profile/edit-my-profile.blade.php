@@ -55,8 +55,8 @@
                                     @include('starter.templates.layouts.icon', ['name' => 'user-circle', 'class' => 'm-0'])
                                 </span>
                                 <div class="min-w-0">
-                                    <div class="text-secondary small">Metode login</div>
-                                    <div class="fw-medium text-truncate" title="Username: {{ $login->username }}">Username: {{ $login->username }}</div>
+                                    <div class="text-secondary small">Username</div>
+                                    <div class="fw-medium text-truncate" title="{{ $login->username }}">{{ $login->username }}</div>
                                 </div>
                             </div>
                         </div>

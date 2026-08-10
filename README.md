@@ -1,153 +1,234 @@
-> Starterkit ini dibangun dengan dukungan karya open-source dari
+[English](README.md) | [Bahasa Indonesia](README.id.md)
+
+# Starterkit Larawire Private
+
+> Built with open-source work from
 > [Laravel](https://laravel.com/),
 > [Laravel Livewire](https://livewire.laravel.com/),
 > [Laravel Lang](https://laravel-lang.com/),
 > [Livewire PowerGrid](https://livewire-powergrid.com/),
-> [Tabler](https://tabler.io/admin-template), dan
-> [Dashcode](https://codeshaper.net/). Terima kasih kepada seluruh author
-> dan contributor yang mengembangkan serta memelihara package tersebut.
+> [Tabler](https://tabler.io/admin-template),
+> [Dashcode](https://codeshaper.net/), and
+> [Scramble](https://scramble.dedoc.co/). Thank you to every author and
+> contributor who builds and maintains these projects.
 
-# Apa itu Starterkit Larawire Private?
+## A. About
 
-Starterkit Larawire Private adalah fondasi untuk membuat aplikasi internal
-berbasis **Laravel** dan **Livewire**. Fungsinya mirip Laravel Starter Kit Auth:
-developer mendapat autentikasi dan tampilan awal yang siap dipakai, lalu dapat
-langsung mengerjakan fitur bisnis.
+### What is Starterkit Larawire Private?
 
-Starterkit ini juga menyediakan:
+Starterkit Larawire Private is a foundation for building private, internal
+company applications with **Laravel** and **Livewire**. It plays a similar role
+to Laravel's authentication starter kits, but includes more of the common
+building blocks needed by an internal business application.
 
-- login, logout, lock screen, profil, dan pengaturan keamanan akun;
-- pengelolaan user, role, module, dan hak akses;
-- satu atau beberapa App/subdomain dalam satu project Laravel;
-- menu dan route yang disinkronkan dari kode;
-- audit log, konfigurasi perusahaan, dan gateway API opsional;
-- pilihan UI Tabler atau Dashcode, Livewire, dan tabel Livewire PowerGrid;
-- installer, setup production, update, migration, dan publish asset;
-- rules yang membantu agent AI mengembangkan aplikasi secara konsisten.
+After installation, you already have:
 
-Repository ini bukan aplikasi Laravel yang berdiri sendiri. Repository dipasang
-sebagai Git submodule bernama `starterkit-larawire-private` di dalam project
-Laravel.
+- login with username or email, logout, lock screen, and account security;
+- user, role, module, and dynamic access management;
+- multiple business Apps and subdomains inside one Laravel project;
+- code-first routes and menus that are synchronized to the database;
+- company settings and an activity log;
+- Tabler and Dashcode themes, each with vertical and horizontal layouts;
+- server-side tables powered by Livewire PowerGrid;
+- an optional API Gateway with Scramble documentation;
+- installation, production setup, update, asset publishing, and migration
+  commands; and
+- AI-ready development rules for applications derived from this starterkit.
 
-## Studi kasus sederhana: aplikasi ERP perusahaan
+This repository is **not a standalone Laravel application**. It is installed as
+a Git submodule named `starterkit-larawire-private` inside a Laravel project.
+Your business features live in the Laravel project, while the reusable core
+lives in this submodule.
 
-Misalnya Anda ingin membuat aplikasi ERP internal dengan area Sales, HR,
-Gudang, dan Karyawan. Semuanya tetap dibuat dalam **satu project Laravel**.
-Area bisnis yang besar dijadikan App, sedangkan fitur di dalamnya dijadikan
-module.
+This starterkit is designed for one company or client per installation. It is
+not a SaaS multi-tenant system.
 
-```text
-ERP perusahaan                                  Satu project dan satu database
-├── perusahaan.com                              Login dan pengaturan global
-├── sales.perusahaan.com                        App Sales
-│   ├── Module Customer
-│   └── Module Penjualan
-├── hr.perusahaan.com                           App HR
-│   ├── Module Karyawan
-│   └── Module Absensi
-└── gudang.perusahaan.com                       App Gudang
-    ├── Module Stok
-    └── Module Mutasi Barang
-```
+### Technologies used
 
-Karyawan ditempatkan sebagai module di dalam App HR karena masih satu area
-bisnis. Jika Karyawan harus menjadi area yang benar-benar terpisah, buat App
-`karyawan` dengan subdomain `karyawan.perusahaan.com`.
-
-Role Sales dapat diberi module milik App Sales saja, sedangkan role HR dapat
-diberi module Karyawan dan Absensi. Semua user tetap memakai akun dan halaman
-login yang sama.
-
-## Memahami App, module, route, menu, dan role
-
-Starterkit tetap memakai **satu project Laravel, satu database, dan satu sistem
-login**. App hanya membagi fitur berdasarkan area bisnis.
-
-Contoh:
-
-```text
-perusahaan.com          Login, profil, user, role, pengaturan, dan log
-sales.perusahaan.com    App Sales
-hr.perusahaan.com       App HR
-```
-
-| Istilah | Artinya |
+| Technology | Purpose |
 |---|---|
-| **App** | Area bisnis utama, misalnya Sales atau HR. |
-| **Subdomain** | Alamat App, misalnya `sales.perusahaan.com`. |
-| **Module** | Kelompok fitur sekaligus batas hak akses. |
-| **Route** | Alamat halaman atau aksi yang dapat dibuka. |
-| **Menu** | Link di sidebar yang menuju sebuah route. |
-| **Role** | Kumpulan module yang boleh diakses oleh user. |
+| Laravel | Application framework, routing, database, validation, and security. |
+| Livewire | Interactive pages and forms without building a separate SPA. |
+| Livewire PowerGrid | Server-side business tables, search, filters, sorting, and pagination. |
+| Laravel Lang | Indonesian Laravel validation and framework translations. |
+| Tabler | First visual theme, with vertical and horizontal navigation. |
+| Dashcode | Second visual theme, with vertical and horizontal navigation. |
+| Scramble | Optional API documentation and OpenAPI output. |
+| Git submodule | Keeps the starterkit core versioned separately from the Laravel application. |
 
-Alur hak aksesnya sederhana:
+The active theme changes presentation only. Data, features, authorization, and
+behavior stay the same, while each theme keeps its own native components and
+visual style.
+
+### The basic idea: App, subdomain, module, route, menu, and role
+
+One installation still uses **one Laravel project, one database, and one login
+system**. Apps divide that project into clear business areas.
+
+| Term | Beginner-friendly meaning |
+|---|---|
+| **App** | A major business area, such as Sales or HR. |
+| **Subdomain** | The address used to open an App, such as `sales.company.com`. |
+| **Module** | A group of related features and the main access boundary. |
+| **Route** | The URL and action that opens a page. |
+| **Menu** | A navigation link that points to a route. |
+| **Role** | A collection of modules that a user is allowed to access. |
+
+The access flow is:
 
 ```text
-User → Role → Module yang diizinkan → Route yang dapat dibuka
+User -> Role -> Allowed modules -> Allowed routes
 ```
 
-Menu hanya berfungsi sebagai navigasi. Keamanan tetap diperiksa oleh route dan
-server. Superuser dapat mengakses seluruh module.
+Menus help users navigate, but menus do not provide security. Server-side route
+middleware checks access using the module assigned to the user's role.
 
-### Hubungan file config dan route
+### Example: an internal ERP application
 
-Setiap App mempunyai dua file utama dengan nama yang sama:
+Imagine that you want to build an internal ERP for Sales, HR, Warehouse, and
+Employees. You do not need four Laravel projects. You can keep everything in
+one project and separate the large business areas into Apps:
 
 ```text
-config/apps/sales.php   Pengaturan App, module, menu, icon, dan landing page
-routes/apps/sales.php   Route halaman pada App Sales
+Internal ERP                                  One Laravel project and database
+├── company.com                               Login and global management
+├── sales.company.com                         Sales App
+│   ├── Customer module
+│   └── Sales Order module
+├── hr.company.com                            HR App
+│   ├── Employee module
+│   └── Attendance module
+└── warehouse.company.com                     Warehouse App
+    ├── Stock module
+    └── Stock Movement module
 ```
 
-Config menu memakai array PHP yang fungsinya mirip file JSON. Setiap menu
-menunjuk ke nama route pada file route App.
+Employees are modules inside the HR App because they belong to the same
+business area. If Employees later become a fully separate system area, you can
+create an `employee` App at `employee.company.com`.
 
-Nama route mengikuti pola:
+All users sign in through `company.com`. A Sales user can receive only the
+Customer and Sales Order modules. An HR user can receive the Employee and
+Attendance modules. A manager can receive modules from more than one App.
 
-```text
-<app>.<module>.<action>
-sales.prospect.index
-```
+Every domain and subdomain points to the **same `public` directory** of the
+same Laravel project.
 
-Pada contoh tersebut:
+### How an App works in the source code
 
-- `sales` adalah App;
-- `prospect` adalah module;
-- `index` adalah halaman atau aksi.
-
-Kode module pada config harus sama dengan bagian kedua nama route. Setelah
-config atau route berubah, `php artisan starter:sync` memvalidasi hubungan
-tersebut dan menyimpan metadata App, module, route, serta menu ke database.
-Jangan mengubah tabel metadata starterkit secara manual.
-
-## Instalasi local/development
-
-Yang perlu disiapkan:
-
-1. project Laravel fresh;
-2. database baru/kosong dan koneksinya;
-3. domain local pada `APP_URL`;
-4. Git dan Composer.
-
-Terminal harus berada di root project Laravel.
-
-### 1. Pastikan Laravel masih fresh
-
-Gunakan project Laravel yang baru dibuat. Installer boleh dipakai pada project
-yang sudah berisi code, tetapi akan meminta konfirmasi karena seluruh data
-database tetap dihapus.
-
-### 2. Pasang submodule
+Create a new App from the Laravel project root:
 
 ```bash
-git submodule add https://github.com/altekno-id/starterkit-larawire-private.git starterkit-larawire-private
+php artisan starter:make-app sales --name="Sales"
 ```
 
-### 3. Atur database dan APP_URL
+The command creates a working example and synchronizes it automatically. The
+most important files are:
 
-Contoh menggunakan MySQL untuk project ERP local:
+```text
+config/apps/sales.php
+routes/apps/sales.php
+routes/apps/sales.api.php
+app/Livewire/Apps/Sales/
+resources/views/apps/sales/
+database/migrations/apps/sales/
+tests/Feature/Apps/Sales/
+```
+
+You normally develop an App in this order:
+
+1. Define the App, modules, menus, icons, and default pages in
+   `config/apps/sales.php`.
+2. Define web routes in `routes/apps/sales.php` using the name pattern
+   `<app>.<module>.<action>`.
+3. Build Livewire classes in `app/Livewire/Apps/Sales/<Module>/`.
+4. Build Blade views in `resources/views/apps/sales/<module>/`.
+5. Put business migrations in `database/migrations/apps/sales/`.
+6. Add tests in `tests/Feature/Apps/Sales/`.
+7. Run `php artisan starter:sync` after changing App config, modules, menus, or
+   routes.
+
+For example:
+
+```text
+config module code: sales_order
+route name:          sales.sales_order.index
+```
+
+The second route-name segment must match the module code. A menu entry in the
+config points to that route name. During synchronization, the starterkit checks
+these relationships and stores the App, module, route, and menu registry in the
+database. Do not edit the starter registry tables manually.
+
+### How dynamic role access works
+
+Application structure is defined in code, but access is managed dynamically
+from the **Settings -> Roles** page:
+
+1. Create or edit a role.
+2. Select the modules the role may access.
+3. Select the first page for every App granted to that role.
+4. Optionally grant global access to Settings or Activity Log.
+5. Assign the role to a user from User Management.
+
+No source-code change is needed when an administrator changes a user's role or
+module access. The new access is read from the database. However, when a
+developer adds or removes modules, routes, or menus in code, run
+`starter:sync` first so Role Management receives the latest structure.
+
+The built-in Superuser is a protected system account with full access. Other
+users receive access only through their assigned role.
+
+### Themes and navigation layouts
+
+Choose the theme and layout in `.env`:
 
 ```env
-APP_URL=http://perusahaan.test
+STARTER_THEME=tabler
+STARTER_LAYOUT=vertical
+```
+
+Available themes are `tabler` and `dashcode`. Both support `vertical` and
+`horizontal` layouts. If configuration was previously cached, run:
+
+```bash
+php artisan optimize:clear
+```
+
+### Developing with an AI agent
+
+The installer connects the Laravel project's `AGENTS.md` to the starterkit
+rules. When requesting a business feature, tell the agent the App, module, menu
+shape, business flow, and relevant roles. For example:
+
+```text
+Create a Sales Order module in the sales App. Its menu contains Pipeline and
+Transactions. Sales users can manage records, while Managers can only view the
+report.
+```
+
+The rules guide authorization, validation, audit logging, migrations, UI,
+performance, and tests. These project-development rules do not prevent direct
+maintenance of the starterkit core itself.
+
+## B. Installation
+
+All commands in this section are run from the **Laravel project root**, not
+from inside the starterkit submodule.
+
+### 1. First local installation
+
+Prepare these items first:
+
+1. a fresh Laravel project;
+2. a new or empty database and its connection in `.env`;
+3. the local root domain in `APP_URL`; and
+4. Git and Composer.
+
+Example `.env` values:
+
+```env
+APP_URL=http://company.test
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -157,164 +238,77 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Pastikan database `erp_local` sudah dibuat. Variabel starterkit lainnya akan
-ditambahkan otomatis oleh installer.
-
-### 4. Jalankan installer
+Then install the submodule and run the installer:
 
 ```bash
-php starterkit-larawire-private/installer/install.php --company="Nama Perusahaan"
+git submodule add https://github.com/altekno-id/starterkit-larawire-private.git starterkit-larawire-private
+php starterkit-larawire-private/installer/install.php --company="Company Name"
 ```
 
-Installer memasang dependency, menghubungkan starterkit ke Laravel, menyiapkan
-environment, migration, asset, data perusahaan, dan akun Superuser.
+The installer adds the other starterkit environment variables automatically,
+installs dependencies, prepares Laravel, runs migrations, publishes assets,
+creates the company, and creates the Superuser account.
 
-> **Peringatan database:** installer menjalankan `migrate:fresh`. Seluruh tabel
-> dan data pada database yang terhubung akan dihapus. Laravel fresh dilanjutkan
-> otomatis setelah pemberitahuan. Laravel yang sudah memiliki kode aplikasi
-> akan meminta konfirmasi terlebih dahulu.
+During installation, you may enter the first App code, such as `sales`, or
+leave it empty and create Apps later with `starter:make-app`. If you create an
+App, make sure its local subdomain resolves to the same Laravel `public`
+directory as `APP_URL`.
 
-Saat installer meminta App pertama, masukkan kode subdomain seperti `sales`
-atau kosongkan jika App ingin dibuat nanti. Untuk mengikuti studi kasus ini dari
-awal, Anda dapat mengosongkannya lalu membuat semua App pada langkah berikutnya.
+> **Database warning:** first installation runs `migrate:fresh`, which deletes
+> every table and row in the connected database. A fresh Laravel structure
+> continues after showing the warning. If application code already exists, the
+> installer lists its findings and asks for confirmation before changing
+> anything.
 
-Login development awal mengikuti nilai berikut pada `.env`:
+The login form accepts the Superuser username or email configured in `.env`.
+The generated development password is only for local use; set a strong
+`STARTER_SUPERUSER_PASSWORD` before production.
 
-```env
-STARTER_SUPERUSER_USERNAME=superuser
-STARTER_SUPERUSER_EMAIL=developer@example.test
-STARTER_SUPERUSER_PASSWORD=superuser123
-```
+### 2. Reinstall locally
 
-Form login menerima username maupun email tersebut.
-Password default hanya boleh dipakai untuk local/development.
+Choose the case that matches your goal.
 
-### Pilih layout navigasi
+#### Use a new or empty database with the same installed project
 
-Installer otomatis menambahkan pilihan template dan layout berikut ke `.env`:
-
-```env
-STARTER_THEME=tabler
-STARTER_LAYOUT=vertical
-```
-
-Tema yang tersedia:
-
-```env
-STARTER_THEME=tabler
-# atau
-STARTER_THEME=dashcode
-```
-
-Kedua tema menyediakan layout `vertical` dan `horizontal`. Informasi, fitur,
-route, menu, dan hak akses tetap sama; yang berubah hanya struktur tampilan dan
-komponen visual sesuai template yang dipilih. Kesamaan fitur tidak berarti
-Dashcode dibuat menyerupai Tabler: tabel, form, tombol, dropdown, card, tab,
-modal, ikon, spacing, dan typography selalu mengikuti bundle vendor dari tema
-aktif. Contohnya, tabel Dashcode menggunakan pola `advance-table.html`, sedangkan
-tabel Tabler menggunakan komponen tabel Tabler sendiri.
-
-Installer juga membuat nama `SESSION_COOKIE` yang unik berdasarkan `APP_URL`.
-Cookie Laravel yang mungkin terbentuk sebelum instalasi tidak akan mengganggu
-sesi login bersama antara domain utama dan subdomain App.
-
-Gunakan `vertical` untuk menu di sisi kiri. Jika ingin menu horizontal yang
-sticky di bagian atas, cukup ubah satu nilai:
-
-```env
-STARTER_LAYOUT=horizontal
-```
-
-Nilai layout yang tersedia hanya `vertical` dan `horizontal`. Dashcode memakai
-mekanisme layout aslinya: `vertical` menampilkan sidebar, sedangkan `horizontal`
-menampilkan top menu. Starterkit menentukan mekanisme tersebut langsung dari
-`.env`, jadi Theme Customizer dan localStorage Dashcode tidak diperlukan.
-
-Jika config Laravel pernah di-cache, jalankan `php artisan optimize:clear`
-setelah mengubah `.env`.
-
-### Menambahkan template baru ke starterkit
-
-Bagian ini hanya untuk maintenance repository starterkit. Untuk menambahkan
-template seperti Vuexy, salin bundle template aslinya tanpa perubahan ke
-`docs/template/vuexy/`, lalu minta agent mengintegrasikannya sebagai theme
-starterkit.
-
-Agent harus membuat Blade, asset runtime, adapter JavaScript, adapter PowerGrid,
-serta layout `vertical` dan `horizontal` milik Vuexy berdasarkan komponen asli
-Vuexy—bukan menyalin presentation theme yang sudah ada. Setelah theme
-diregistrasi, project Laravel cukup memilihnya melalui:
-
-```env
-STARTER_THEME=vuexy
-STARTER_LAYOUT=horizontal
-```
-
-Tidak diperlukan environment tambahan khusus template atau layout.
-
-## Membuat App setelah instalasi
-
-Jika App pertama dikosongkan saat instalasi, buat App Sales, HR, dan Gudang:
+Change the database connection in `.env`, then run:
 
 ```bash
-php artisan starter:make-app sales --name="Sales"
-php artisan starter:make-app hr --name="HR"
-php artisan starter:make-app gudang --name="Gudang"
+php artisan starter:setup --company="Company Name"
 ```
 
-Jika installer sudah membuat App Sales, jangan membuatnya lagi; jalankan hanya
-command untuk App HR dan Gudang.
+This is the efficient option after switching from SQLite to MySQL or moving to
+another empty database. It runs migrations, creates the company and Superuser,
+then synchronizes the existing Apps. Do not run the installer again for this
+case.
 
-Kode App hanya boleh berisi huruf kecil, angka, dan tanda hubung. Kode `api`
-dicadangkan untuk gateway API. Command tersebut membuat dan langsung
-menyinkronkan App. Contoh file yang dibuat untuk App Sales:
+#### Completely reset the current local database
 
-```text
-config/apps/sales.php
-routes/apps/sales.php
-routes/apps/sales.api.php
-app/Livewire/Apps/Sales/
-resources/views/apps/sales/
-tests/Feature/Apps/Sales/
+```bash
+php starterkit-larawire-private/installer/install.php --reset --company="Company Name"
 ```
 
-Dengan `APP_URL=http://perusahaan.test`, alamat App menjadi
-`sales.perusahaan.test`, `hr.perusahaan.test`, dan `gudang.perusahaan.test`.
-Arahkan semuanya ke folder `public` project Laravel yang sama melalui aplikasi
-web server local yang digunakan.
+`--reset` is allowed only when `APP_ENV` is `local` or `development`. It asks
+for two confirmations, runs `migrate:fresh`, and rebuilds starter data while
+preserving your source files and uploads. Never use it in production.
 
-Setelah App dibuat:
+### 3. Synchronize local App structure
 
-1. Ganti module dan menu contoh pada `config/apps/sales.php`.
-2. Buat halaman dan route dengan pola nama `<app>.<module>.<action>`.
-3. Letakkan migration bisnis pada `database/migrations/apps/sales/`.
-4. Berikan module kepada role melalui Role Management dan pilih landing page
-   awal App.
-5. Arahkan subdomain ke folder `public` Laravel yang sama, lalu uji role yang
-   boleh dan tidak boleh mengakses App.
+After changing `config/apps/*.php`, `routes/apps/*.php`, modules, menus, or
+landing pages, run:
 
-## Mulai mengembangkan fitur dengan agent AI
-
-Installer membuat `AGENTS.md` di root Laravel. File tersebut mengarahkan agent
-AI ke rules starterkit agar authorization, validasi, audit, struktur kode,
-migration, UI, performa, dan testing mengikuti standar yang sama.
-
-Untuk meminta fitur, jelaskan App, module, menu, role, dan kebutuhan bisnisnya.
-Contoh:
-
-```text
-Buat module Penjualan pada App sales. Menu Penjualan memiliki submenu Pipeline
-dan Transaksi. Role Sales dapat mengelola data, sedangkan Manager hanya dapat
-melihat laporan.
+```bash
+php artisan starter:sync
 ```
 
-Agent akan memeriksa project, meminta konfirmasi pemahaman, lalu membuat
-spesifikasi di folder `issues/` sebelum mengubah kode aplikasi. Prosedur tersebut
-berlaku untuk fitur project Laravel, bukan maintenance repository starterkit.
+This command applies pending migrations, publishes required assets, validates
+the App structure, and synchronizes App, module, route, and menu metadata. It
+does not reset the database or replace an existing Superuser password.
 
-## Mengambil update starterkit
+The `starter:make-app` command already synchronizes the new App automatically.
 
-Jalankan dari root Laravel:
+### 4. Update the starterkit locally
+
+From the Laravel project root:
 
 ```bash
 git submodule update --init --remote starterkit-larawire-private
@@ -322,79 +316,51 @@ composer install
 php artisan starter:sync
 ```
 
-Update dan `starter:sync` tidak mereset database atau membuat ulang password
-Superuser.
+Your Laravel repository will show the updated submodule pointer as a Git
+change. Review it, then commit and push it as part of the Laravel project so
+other environments use the same starterkit version.
 
-## Menggunakan database baru atau kosong
+### 5. Quick production deployment
 
-Jika starterkit sudah terpasang lalu koneksi `.env` diganti ke database baru,
-jangan menjalankan installer ulang dan jangan menggunakan opsi reset.
+The root domain, every App subdomain, and the optional API subdomain must point
+to the same Laravel `public` directory:
 
-```bash
-php artisan starter:setup --company="Nama Perusahaan"
-```
-
-`starter:setup` menjalankan migration, membuat data perusahaan dan Superuser,
-kemudian menjalankan `starter:sync` secara otomatis.
-
-## Deployment production
-
-### Arahkan semua domain ke project Laravel yang sama
-
-Domain utama dan seluruh subdomain App **tidak memakai project atau folder yang
-berbeda**. Semuanya diarahkan ke folder `public` dari satu project Laravel.
-
-Contoh lokasi project di server:
-
-```text
-/home/user/erp/
-└── public/                  Document root untuk semua domain dan subdomain
-```
-
-Contoh pengarahannya:
-
-| Domain | Document root |
+| Address | Document root |
 |---|---|
-| `perusahaan.com` | `/home/user/erp/public` |
-| `sales.perusahaan.com` | `/home/user/erp/public` |
-| `hr.perusahaan.com` | `/home/user/erp/public` |
-| `gudang.perusahaan.com` | `/home/user/erp/public` |
-| `api.perusahaan.com` (jika API aktif) | `/home/user/erp/public` |
+| `company.com` | `/home/user/erp/public` |
+| `sales.company.com` | `/home/user/erp/public` |
+| `hr.company.com` | `/home/user/erp/public` |
+| `api.company.com` (optional) | `/home/user/erp/public` |
 
-Buat DNS setiap subdomain menuju server yang sama, lalu atur document root-nya
-melalui web server atau panel hosting. Anda juga dapat memakai wildcard DNS
-`*.perusahaan.com` jika didukung penyedia DNS dan hosting.
-
-Siapkan `.env` production sebelum menjalankan setup:
+Set production database values and at least these environment values before
+setup:
 
 ```env
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://perusahaan.com
-APP_DOMAIN=perusahaan.com
-SESSION_DOMAIN=.perusahaan.com
+APP_URL=https://company.com
+APP_DOMAIN=company.com
+SESSION_DOMAIN=.company.com
 SESSION_SECURE_COOKIE=true
+STARTER_SUPERUSER_PASSWORD=use-a-strong-password
 ```
 
-Isi juga koneksi database dan `STARTER_SUPERUSER_PASSWORD` dengan password yang
-kuat. Jangan commit `.env` production ke Git.
+Do not commit the production `.env` file.
 
-### Deployment pertama
-
-Clone repository Laravel beserta submodule, lalu pasang dependency:
+#### First production deployment
 
 ```bash
-git clone --recurse-submodules <repository-laravel> <folder-project>
-cd <folder-project>
+git clone --recurse-submodules <laravel-repository> <project-folder>
+cd <project-folder>
 composer install --no-dev --optimize-autoloader
-php artisan starter:setup --company="Nama Perusahaan"
+php artisan starter:setup --company="Company Name"
 ```
 
-Gunakan `starter:setup` satu kali jika database production masih baru/kosong.
-Command tersebut membuat data perusahaan dan akun Superuser. Jika database
-sudah berisi data starterkit hasil restore, gunakan `php artisan starter:sync`.
+Use `starter:setup` when the production database is new or empty. If you
+restored an existing starterkit database, run `php artisan starter:sync`
+instead.
 
-### Update production berkala
+#### Routine production update
 
 ```bash
 git pull --recurse-submodules
@@ -402,32 +368,73 @@ composer install --no-dev --optimize-autoloader
 php artisan starter:sync
 ```
 
-`starter:sync` menangani migration baru, asset, registry App, storage link, dan
-cache production. Tidak perlu menjalankan `migrate`, `storage:link`, atau
-`optimize` secara terpisah.
+`starter:sync` handles pending migrations, asset publishing, App registry, the
+storage link, and production cache. Separate `migrate`, `storage:link`, or
+`optimize` commands are not needed.
 
-## Gateway API opsional
+Before updating production, make sure the worktree is clean and back up the
+database and uploaded files when the release contains risky migrations.
 
-Lewati bagian ini jika aplikasi tidak membutuhkan API. API tidak aktif secara
-default. Untuk mengaktifkannya:
+## C. Optional API Gateway
+
+Skip this section if the application does not need an API. The gateway is
+disabled by default and registers no API endpoints or documentation while
+disabled.
+
+### Enable the gateway
+
+Set this value in `.env`:
 
 ```env
 STARTER_API_ENABLED=true
 ```
 
-Route API setiap App berada di `routes/apps/<app>.api.php` dan tersedia melalui:
+If configuration was cached, run `php artisan optimize:clear` locally or
+`php artisan starter:sync` during deployment.
+
+Each App owns its API routes in:
 
 ```text
-api.<APP_DOMAIN>/<app>
+routes/apps/<app>.api.php
 ```
 
-Subdomain `api` diarahkan ke folder `public` Laravel yang sama seperti domain
-utama dan subdomain App.
+For the Sales App, write paths relative to the App because the starterkit adds
+the domain and App prefix automatically. This example assumes that Laravel
+Sanctum has already been installed and configured by the application:
 
-## Hal penting
+```php
+Route::get('/orders', SalesOrderIndexController::class)
+    ->middleware('auth:sanctum')
+    ->name('orders.index');
+```
 
-- Satu instalasi mewakili satu perusahaan/client, bukan SaaS multi-tenant.
-- Seluruh App berbagi login, database, user, role, dan pengaturan global.
-- Hak akses diberikan melalui module; menu hanya navigasi.
-- Fitur bisnis berada di project Laravel, bukan di submodule starterkit.
-- Jangan commit `.env`, password, credential database, atau isi `vendor`.
+The endpoint becomes:
+
+```text
+https://api.company.com/sales/orders
+```
+
+The shared gateway rules are:
+
+- point `api.company.com` to the same Laravel `public` directory;
+- keep API code in the owning App's `.api.php` file;
+- choose and configure the API authentication method required by the
+  application; the gateway does not issue API tokens by itself;
+- give every business endpoint explicit authentication and authorization;
+- use the built-in API middleware and rate limiting;
+- do not add API routes to web menus or role-module synchronization;
+- keep CORS closed unless a specific trusted frontend requires it; and
+- never use wildcard origins for authenticated endpoints.
+
+Scramble serves the API documentation at `https://api.company.com/` and the
+OpenAPI document at `https://api.company.com/openapi.json`. In production, the
+documentation is restricted to an authenticated Superuser.
+
+## Important reminders
+
+- One installation represents one company/client, not multiple SaaS tenants.
+- All Apps share the same login, database, users, roles, and global settings.
+- Modules grant access; menus provide navigation only.
+- Business features belong to the Laravel project, not the starterkit
+  submodule.
+- Never commit `.env`, passwords, database credentials, tokens, or `vendor`.
